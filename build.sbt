@@ -1,0 +1,33 @@
+name := "singleton-ops"
+
+scalaVersion := "2.11.8"
+scalacOptions ++= Seq(
+  "-deprecation",
+  "-encoding", "UTF-8",
+  "-feature",
+  "-language:existentials",
+  "-language:experimental.macros",
+  "-language:higherKinds",
+  "-language:implicitConversions",
+  "-unchecked",
+  "-Xfatal-warnings",
+  "-Xlint",
+  "-Yno-adapted-args",
+  "-Ywarn-numeric-widen",
+  "-Ywarn-value-discard"
+)
+
+libraryDependencies ++= Seq(
+  "org.scala-lang" % "scala-compiler" % scalaVersion.value,
+  "org.typelevel" %% "macro-compat" % "1.1.1",
+  compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
+  "com.chuusai" %% "shapeless" % "2.3.1",
+  "org.scalacheck" %% "scalacheck" % "1.13.1" % "test"
+)
+
+initialCommands += """
+  import singleton.ops._
+  import shapeless.{ Witness => W }
+"""
+
+reformatOnCompileSettings
