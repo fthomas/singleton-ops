@@ -36,6 +36,9 @@ class MacroUtils(val c: whitebox.Context) {
     value.asInstanceOf[A]
   }
 
-  def eval[A](expr: c.Expr[A]): A =
+  def evalTyped[A](expr: c.Expr[A]): A =
     c.eval(c.Expr[A](c.untypecheck(expr.tree)))
+
+  def mkBinaryTypeClass(tpeSym: TypeSymbol): (Type, Type, Type) => Tree =
+    (a, b, c) => q"new $tpeSym[$a, $b] { type Out = $c }"
 }

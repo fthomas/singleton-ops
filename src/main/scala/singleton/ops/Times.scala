@@ -23,10 +23,9 @@ object Times {
     def materialize[C, A: c.WeakTypeTag, B: c.WeakTypeTag](
         nc: c.Expr[Numeric[C]]
     ): Tree = {
-      val numeric = eval(nc)
+      val numeric = evalTyped(nc)
       materializeHelper(numeric.times)(weakTypeOf[A], weakTypeOf[B]) {
-        (a, b, ab) =>
-          q"new _root_.singleton.ops.Times[$a, $b] { type Out = $ab }"
+        mkBinaryTypeClass(symbolOf[Times[_, _]])
       }
     }
   }
