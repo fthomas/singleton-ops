@@ -23,7 +23,7 @@ object Plus {
     def materialize[C, A: c.WeakTypeTag, B: c.WeakTypeTag](
         nc: c.Expr[Numeric[C]]
     ): Tree = {
-      val numeric = c.eval(c.Expr[Numeric[C]](c.untypecheck(nc.tree)))
+      val numeric = eval(nc)
       materializeHelper(numeric.plus)(weakTypeOf[A], weakTypeOf[B]) {
         (a, b, ab) =>
           q"new _root_.singleton.ops.Plus[$a, $b] { type Out = $ab }"

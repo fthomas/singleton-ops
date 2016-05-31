@@ -27,7 +27,6 @@ libraryDependencies ++= Seq(
 
 initialCommands += """
   import singleton.ops._
-  import shapeless.{ Witness => W }
 """
 
 reformatOnCompileSettings

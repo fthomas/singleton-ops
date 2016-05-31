@@ -19,17 +19,23 @@ class MacroUtils(val c: whitebox.Context) {
     c.internal.constantType(Constant(a))
 
   def extractSingletonValue[A](tpe: Type): A = {
-    def abort(tpeInfo: String) =
-      c.abort(c.enclosingPosition, s"Cannot extract value from $tpeInfo")
+    def abort(tpe: Type) =
+      c.abort(c.enclosingPosition,
+              s"Cannot extract value from ${tpe.typeSymbol.fullName}")
 
-    tpe match {
-      case ConstantType(Constant(a)) => a.asInstanceOf[A]
+    val value = tpe match {
+      case ConstantType(Constant(a)) => a
       case TypeRef(_, sym, _) =>
         sym.info match {
-          case ConstantType(Constant(a)) => a.asInstanceOf[A]
-          case _ => abort(sym.info.toString)
+          case ConstantType(Constant(a)) => a
+          case otherTpe => abort(otherTpe)
         }
-      case _ => abort(tpe.toString)
+      case otherTpe => abort(otherTpe)
     }
+
+    value.asInstanceOf[A]
   }
+
+  def eval[A](expr: c.Expr[A]): A =
+    c.eval(c.Expr[A](c.untypecheck(expr.tree)))
 }
