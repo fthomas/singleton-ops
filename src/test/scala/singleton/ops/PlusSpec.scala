@@ -26,4 +26,11 @@ class PlusSpec extends Properties("Plus") {
     val p2 = Plus[W.`1.0`.T, p1.Out]
     sameType[p2.Out, W.`6.0`.T]
   }
+
+  property("(1 + 2) + (3 + 4) == 10") = secure {
+    val p1 = Plus[W.`1`.T, W.`2`.T]
+    val p2 = Plus[W.`3`.T, W.`4`.T]
+    val p3 = Plus[p1.Out, p2.Out]
+    sameType[p3.Out, W.`10`.T]
+  }
 }

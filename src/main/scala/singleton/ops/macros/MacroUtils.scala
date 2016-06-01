@@ -33,6 +33,20 @@ trait MacroUtils {
   def evalTyped[T](expr: c.Expr[T]): T =
     c.eval(c.Expr[T](c.untypecheck(expr.tree)))
 
+  def materializeUnaryOp[Op[_], A](
+      implicit ev1: c.WeakTypeTag[Op[_]],
+      ev2: c.WeakTypeTag[A]
+  ): MaterializeUnaryOpAux =
+    new MaterializeUnaryOpAux(symbolOf[Op[_]], weakTypeOf[A])
+
+  final class MaterializeUnaryOpAux(opSym: TypeSymbol, aTpe: Type) {
+    def apply[T](f: T => T): Tree = {
+      val aValue = extractSingletonValue[T](aTpe)
+      val outTpe = constantTypeOf(f(aValue))
+      q"new $opSym[$aTpe] { type Out = $outTpe }"
+    }
+  }
+
   def materializeBinaryOp[Op[_, _], A, B](
       implicit ev1: c.WeakTypeTag[Op[_, _]],
       ev2: c.WeakTypeTag[A],
@@ -46,7 +60,6 @@ trait MacroUtils {
       val aValue = extractSingletonValue[T](aTpe)
       val bValue = extractSingletonValue[T](bTpe)
       val outTpe = constantTypeOf(f(aValue, bValue))
-
       q"new $opSym[$aTpe, $bTpe] { type Out = $outTpe }"
     }
   }
