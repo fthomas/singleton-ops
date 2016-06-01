@@ -13,15 +13,15 @@ object Plus {
 
   def apply[A, B](implicit ev: Plus[A, B]): Aux[A, B, ev.Out] = ev
 
-  implicit def materializePlus[C, A <: C, B <: C](
-      implicit nc: Numeric[C]
-  ): Plus[A, B] = macro PlusMacro.materialize[C, A, B]
+  implicit def materializePlus[T, A <: T, B <: T](
+      implicit nt: Numeric[T]
+  ): Plus[A, B] = macro PlusMacro.materialize[T, A, B]
 
   @bundle
   final class PlusMacro(val c: whitebox.Context) extends MacroUtils {
-    def materialize[C, A: c.WeakTypeTag, B: c.WeakTypeTag](
-        nc: c.Expr[Numeric[C]]
+    def materialize[T, A: c.WeakTypeTag, B: c.WeakTypeTag](
+        nt: c.Expr[Numeric[T]]
     ): c.Tree =
-      materializeBinaryOp[Plus, A, B].apply(evalTyped(nc).plus)
+      materializeBinaryOp[Plus, A, B].apply(evalTyped(nt).plus)
   }
 }
