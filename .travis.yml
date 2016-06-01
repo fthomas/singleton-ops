@@ -3,3 +3,11 @@ scala:
  - 2.11.8
 jdk:
  - oraclejdk8
+cache:
+  directories:
+   - "$HOME/.ivy2/cache"
+   - "$HOME/.sbt/boot/"
+script:
+ - sbt ++$TRAVIS_SCALA_VERSION validate
+after_success:
+ - bash <(curl -s https://codecov.io/bash)
