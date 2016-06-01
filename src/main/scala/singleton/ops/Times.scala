@@ -2,6 +2,7 @@ package singleton.ops
 
 import macrocompat.bundle
 import scala.reflect.macros.whitebox
+import singleton.ops.macros.MacroUtils
 
 trait Times[A, B] {
   type Out

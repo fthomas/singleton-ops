@@ -1,6 +1,7 @@
-package singleton.ops
+package singleton.ops.macros
 
 import macrocompat.bundle
+
 import scala.reflect.macros.whitebox
 
 @bundle

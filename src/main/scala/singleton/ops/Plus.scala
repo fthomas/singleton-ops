@@ -2,6 +2,7 @@ package singleton.ops
 
 import macrocompat.bundle
 import scala.reflect.macros.whitebox
+import singleton.ops.macros.MacroUtils
 
 trait Plus[A, B] {
   type Out
