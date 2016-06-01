@@ -10,23 +10,17 @@ trait Plus[A, B] {
 object Plus {
   type Aux[A, B, Out0] = Plus[A, B] { type Out = Out0 }
 
-  def apply[A, B](implicit p: Plus[A, B]): Aux[A, B, p.Out] = p
+  def apply[A, B](implicit ev: Plus[A, B]): Aux[A, B, ev.Out] = ev
 
   implicit def materializePlus[C, A <: C, B <: C](
       implicit nc: Numeric[C]
   ): Plus[A, B] = macro PlusMacro.materialize[C, A, B]
 
   @bundle
-  class PlusMacro(override val c: whitebox.Context) extends MacroUtils(c) {
-    import c.universe._
-
+  final class PlusMacro(val c: whitebox.Context) extends MacroUtils {
     def materialize[C, A: c.WeakTypeTag, B: c.WeakTypeTag](
         nc: c.Expr[Numeric[C]]
-    ): Tree = {
-      val numeric = evalTyped(nc)
-      materializeHelper(numeric.plus)(weakTypeOf[A], weakTypeOf[B]) {
-        mkBinaryTypeClass(symbolOf[Plus[_, _]])
-      }
-    }
+    ): c.Tree =
+      materializeBinaryOp[Plus, A, B].apply(evalTyped(nc).plus)
   }
 }

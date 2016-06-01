@@ -10,23 +10,17 @@ trait Times[A, B] {
 object Times {
   type Aux[A, B, Out0] = Times[A, B] { type Out = Out0 }
 
-  def apply[A, B](implicit p: Times[A, B]): Aux[A, B, p.Out] = p
+  def apply[A, B](implicit ev: Times[A, B]): Aux[A, B, ev.Out] = ev
 
   implicit def materializeTimes[C, A <: C, B <: C](
       implicit nc: Numeric[C]
   ): Times[A, B] = macro TimesMacro.materialize[C, A, B]
 
   @bundle
-  class TimesMacro(override val c: whitebox.Context) extends MacroUtils(c) {
-    import c.universe._
-
+  final class TimesMacro(val c: whitebox.Context) extends MacroUtils {
     def materialize[C, A: c.WeakTypeTag, B: c.WeakTypeTag](
         nc: c.Expr[Numeric[C]]
-    ): Tree = {
-      val numeric = evalTyped(nc)
-      materializeHelper(numeric.times)(weakTypeOf[A], weakTypeOf[B]) {
-        mkBinaryTypeClass(symbolOf[Times[_, _]])
-      }
-    }
+    ): c.Tree =
+      materializeBinaryOp[Times, A, B].apply(evalTyped(nc).times)
   }
 }

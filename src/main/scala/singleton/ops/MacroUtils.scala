@@ -4,16 +4,10 @@ import macrocompat.bundle
 import scala.reflect.macros.whitebox
 
 @bundle
-class MacroUtils(val c: whitebox.Context) {
-  import c.universe._
+trait MacroUtils {
+  val c: whitebox.Context
 
-  def materializeHelper[C](f: (C, C) => C)(aTpe: Type, bTpe: Type)(
-      mkRefinedTree: (Type, Type, Type) => Tree): Tree = {
-    val aValue = extractSingletonValue[C](aTpe)
-    val bValue = extractSingletonValue[C](bTpe)
-    val abTpe = constantTypeOf(f(aValue, bValue))
-    mkRefinedTree(aTpe, bTpe, abTpe)
-  }
+  import c.universe._
 
   def constantTypeOf[A](a: A): Type =
     c.internal.constantType(Constant(a))
@@ -39,6 +33,20 @@ class MacroUtils(val c: whitebox.Context) {
   def evalTyped[A](expr: c.Expr[A]): A =
     c.eval(c.Expr[A](c.untypecheck(expr.tree)))
 
-  def mkBinaryTypeClass(tpeSym: TypeSymbol): (Type, Type, Type) => Tree =
-    (a, b, c) => q"new $tpeSym[$a, $b] { type Out = $c }"
+  def materializeBinaryOp[F[_, _], A, B](
+      implicit ev1: c.WeakTypeTag[F[_, _]],
+      ev2: c.WeakTypeTag[A],
+      ev3: c.WeakTypeTag[B]
+  ): MaterializeBinaryOpAux =
+    new MaterializeBinaryOpAux(symbolOf[F[_, _]], weakTypeOf[A], weakTypeOf[B])
+
+  final class MaterializeBinaryOpAux(opSym: TypeSymbol, aTpe: Type, bTpe: Type) {
+    def apply[T](f: (T, T) => T): Tree = {
+      val aValue = extractSingletonValue[T](aTpe)
+      val bValue = extractSingletonValue[T](bTpe)
+      val abTpe = constantTypeOf(f(aValue, bValue))
+
+      q"new $opSym[$aTpe, $bTpe] { type Out = $abTpe }"
+    }
+  }
 }
