@@ -3,7 +3,8 @@
 [![codecov](https://codecov.io/gh/fthomas/singleton-ops/branch/master/graph/badge.svg)](https://codecov.io/gh/fthomas/singleton-ops)
 
 This is a proof of concept library that provides operations for primitive
-and `String` singleton types.
+and `String` singleton types. The following example adds the singleton types
+`Double(3.6)` and `Double(4.9)` and yields the type `Double(8.5)` as result:
 
 ```scala
 scala> val p = Plus[W.`3.6`.T, W.`4.9`.T]
