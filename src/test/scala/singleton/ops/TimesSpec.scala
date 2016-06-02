@@ -19,4 +19,8 @@ class TimesSpec extends Properties("Times") {
   property("Int * 0 = ???") = wellTyped {
     illTyped(""" Times[Int, W.`0`.T] """)
   }
+
+  property("(1 with Int) * 0 = ???") = wellTyped {
+    illTyped(""" Times[W.`1`.T with Int, W.`0`.T] """)
+  }
 }
