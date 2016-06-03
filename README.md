@@ -21,3 +21,11 @@ scala> 8.6: p.Out
        8.6: p.Out
        ^
 ```
+
+```scala
+scala> def concat(s1: String, s2: String)(implicit c: Concat[s1.type, s2.type]) = c.value
+concat: (s1: String, s2: String)(implicit c: singleton.ops.Concat[s1.type,s2.type])c.Out
+
+scala> concat("abc", "xyz")
+res5: String("abcxyz") = abcxyz
+```
