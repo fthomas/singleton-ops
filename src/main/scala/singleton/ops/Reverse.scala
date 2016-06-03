@@ -4,9 +4,7 @@ import macrocompat.bundle
 import scala.reflect.macros.whitebox
 import singleton.ops.macros.MacroUtils
 
-trait Reverse[A] {
-  type Out
-}
+trait Reverse[A] extends Op
 
 object Reverse {
   type Aux[A, Out0] = Reverse[A] { type Out = Out0 }

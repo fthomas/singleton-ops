@@ -4,9 +4,7 @@ import macrocompat.bundle
 import scala.reflect.macros.whitebox
 import singleton.ops.macros.MacroUtils
 
-trait Plus[A, B] {
-  type Out
-}
+trait Plus[A, B] extends Op
 
 object Plus {
   type Aux[A, B, Out0] = Plus[A, B] { type Out = Out0 }

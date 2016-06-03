@@ -4,9 +4,7 @@ import macrocompat.bundle
 import scala.reflect.macros.whitebox
 import singleton.ops.macros.MacroUtils
 
-trait Times[A, B] {
-  type Out
-}
+trait Times[A, B] extends Op
 
 object Times {
   type Aux[A, B, Out0] = Times[A, B] { type Out = Out0 }

@@ -4,9 +4,7 @@ import macrocompat.bundle
 import scala.reflect.macros.whitebox
 import singleton.ops.macros.MacroUtils
 
-trait Concat[A, B] {
-  type Out
-}
+trait Concat[A, B] extends Op
 
 object Concat {
   type Aux[A, B, Out0] = Concat[A, B] { type Out = Out0 }

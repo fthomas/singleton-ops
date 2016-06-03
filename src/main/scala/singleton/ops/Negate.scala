@@ -4,9 +4,7 @@ import macrocompat.bundle
 import scala.reflect.macros.whitebox
 import singleton.ops.macros.MacroUtils
 
-trait Negate[A] {
-  type Out
-}
+trait Negate[A] extends Op
 
 object Negate {
   type Aux[A, Out0] = Negate[A] { type Out = Out0 }

@@ -42,8 +42,13 @@ trait MacroUtils {
   final class MaterializeUnaryOpAux(opSym: TypeSymbol, aTpe: Type) {
     def apply[T](f: T => T): Tree = {
       val aValue = extractSingletonValue[T](aTpe)
-      val outTpe = constantTypeOf(f(aValue))
-      q"new $opSym[$aTpe] { type Out = $outTpe }"
+      val (outTpe, outTree) = outTypeAndTree(f(aValue))
+      q"""
+        new $opSym[$aTpe] {
+          type Out = $outTpe
+          val value: $outTpe = $outTree
+        }
+      """
     }
   }
 
@@ -59,8 +64,16 @@ trait MacroUtils {
     def apply[T](f: (T, T) => T): Tree = {
       val aValue = extractSingletonValue[T](aTpe)
       val bValue = extractSingletonValue[T](bTpe)
-      val outTpe = constantTypeOf(f(aValue, bValue))
-      q"new $opSym[$aTpe, $bTpe] { type Out = $outTpe }"
+      val (outTpe, outTree) = outTypeAndTree(f(aValue, bValue))
+      q"""
+        new $opSym[$aTpe, $bTpe] {
+          type Out = $outTpe
+          val value: $outTpe = $outTree
+        }
+      """
     }
   }
+
+  def outTypeAndTree[T](t: T): (Type, Tree) =
+    constantTypeOf(t) -> Literal(Constant(t))
 }
