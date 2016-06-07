@@ -8,7 +8,7 @@ to the type-level and allows for example to add `Double`s at the type-level.
 
 ## Examples
 
-The following adds the singleton types `Double(3.6)` and `Double(4.9)`
+* The following adds the singleton types `Double(3.6)` and `Double(4.9)`
 and yields the type `Double(8.5)` as result:
 ```scala
 scala> val p = Plus[W.`3.6`.T, W.`4.9`.T]
@@ -28,7 +28,13 @@ scala> 8.6: p.Out
 Note that `W` is a shortcut for [`shapeless.Witness`][singleton-types] which provides
 syntax for [literal-based singleton types][sip-23].
 
-This `concat` method concatenates two `String`s both at the value- and
+* Adding large numbers doesn't slay the compiler:
+```scala
+scala> Times[W.`32000L`.T, W.`6400000L`.T]
+res1: singleton.ops.Times[Long(32000L),Long(6400000L)]{type Out = Long(204800000000L)} = $anon$1@44bdc7a4
+```
+
+* This `concat` method concatenates two `String`s both at the value- and
 type-level (the result type depends on the arguments):
 ```scala
 scala> def concat(s1: String, s2: String)(implicit c: Concat[s1.type, s2.type]) = c.value
@@ -36,6 +42,15 @@ concat: (s1: String, s2: String)(implicit c: singleton.ops.Concat[s1.type,s2.typ
 
 scala> concat("abc", "xyz")
 res1: String("abcxyz") = abcxyz
+```
+
+* We can compose operations:
+```scala
+scala> def concatReverse[A](s1: String, s2: String)(implicit c: Concat.Aux[s1.type, s2.type, A], r: Reverse[A]) = r.value
+concatReverse: [A](s1: String, s2: String)(implicit c: singleton.ops.Concat.Aux[s1.type,s2.type,A], implicit r: singleton.ops.Reverse[A])r.Out
+
+scala> concatReverse("123", "abc")
+res2: String("cba321") = cba321
 ```
 
 [singleton-types]: https://github.com/milessabin/shapeless/wiki/Feature-overview:-shapeless-2.0.0#singleton-typed-literals
