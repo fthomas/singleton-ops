@@ -28,7 +28,7 @@ scala> 8.6: p.Out
 Note that `W` is a shortcut for [`shapeless.Witness`][singleton-types] which provides
 syntax for [literal-based singleton types][sip-23].
 
-* Adding large numbers doesn't slay the compiler:
+* Working with large numbers doesn't slay the compiler:
 ```scala
 scala> Times[W.`32000L`.T, W.`6400000L`.T]
 res1: singleton.ops.Times[Long(32000L),Long(6400000L)]{type Out = Long(204800000000L)} = $anon$1@44bdc7a4
