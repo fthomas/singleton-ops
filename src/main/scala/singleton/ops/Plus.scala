@@ -17,6 +17,6 @@ object Plus extends Op2Companion[Plus] {
     def materialize[T, A: c.WeakTypeTag, B: c.WeakTypeTag](
         nt: c.Expr[Numeric[T]]
     ): c.Tree =
-      materializeBinaryOp[Plus, A, B].apply(evalTyped(nt).plus)
+      materializeOp2[Plus, A, B].usingFunction(evalTyped(nt).plus)
   }
 }

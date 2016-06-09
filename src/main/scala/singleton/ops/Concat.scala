@@ -14,6 +14,6 @@ object Concat extends Op2Companion[Concat] {
   @bundle
   final class ConcatMacro(val c: whitebox.Context) extends Macros {
     def materialize[A: c.WeakTypeTag, B: c.WeakTypeTag]: c.Tree =
-      materializeBinaryOp[Concat, A, B].apply[String](_ + _)
+      materializeOp2[Concat, A, B].usingFunction[String](_ + _)
   }
 }

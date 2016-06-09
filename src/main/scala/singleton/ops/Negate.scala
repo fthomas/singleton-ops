@@ -17,6 +17,6 @@ object Negate extends Op1Companion[Negate] {
     def materialize[T, A: c.WeakTypeTag](
         nt: c.Expr[Numeric[T]]
     ): c.Tree =
-      materializeUnaryOp[Negate, A].apply(evalTyped(nt).negate)
+      materializeOp1[Negate, A].usingFunction(evalTyped(nt).negate)
   }
 }

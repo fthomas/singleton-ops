@@ -17,6 +17,6 @@ object Times extends Op2Companion[Times] {
     def materialize[T, A: c.WeakTypeTag, B: c.WeakTypeTag](
         nt: c.Expr[Numeric[T]]
     ): c.Tree =
-      materializeBinaryOp[Times, A, B].apply(evalTyped(nt).times)
+      materializeOp2[Times, A, B].usingFunction(evalTyped(nt).times)
   }
 }
