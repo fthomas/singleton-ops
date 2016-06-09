@@ -6,10 +6,7 @@ import singleton.ops.macros.MacroUtils
 
 trait Plus[A, B] extends Op
 
-object Plus {
-  type Aux[A, B, Out0] = Plus[A, B] { type Out = Out0 }
-
-  def apply[A, B](implicit ev: Plus[A, B]): Aux[A, B, ev.Out] = ev
+object Plus extends Op2Companion[Plus] {
 
   implicit def materializePlus[T, A <: T, B <: T](
       implicit nt: Numeric[T]

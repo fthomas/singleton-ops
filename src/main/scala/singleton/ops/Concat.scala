@@ -6,10 +6,7 @@ import singleton.ops.macros.MacroUtils
 
 trait Concat[A, B] extends Op
 
-object Concat {
-  type Aux[A, B, Out0] = Concat[A, B] { type Out = Out0 }
-
-  def apply[A, B](implicit ev: Concat[A, B]): Aux[A, B, ev.Out] = ev
+object Concat extends Op2Companion[Concat] {
 
   implicit def materializeConcat[A <: String, B <: String]: Concat[A, B] = macro ConcatMacro
     .materialize[A, B]

@@ -6,10 +6,7 @@ import singleton.ops.macros.MacroUtils
 
 trait Reverse[A] extends Op
 
-object Reverse {
-  type Aux[A, Out0] = Reverse[A] { type Out = Out0 }
-
-  def apply[A](implicit ev: Reverse[A]): Aux[A, ev.Out] = ev
+object Reverse extends Op1Companion[Reverse] {
 
   implicit def materializeReverse[A <: String]: Reverse[A] = macro ReverseMacro
     .materialize[A]

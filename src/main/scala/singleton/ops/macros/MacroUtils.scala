@@ -12,6 +12,9 @@ trait MacroUtils {
   def constantTypeOf[T](t: T): Type =
     c.internal.constantType(Constant(t))
 
+  def constantTypeAndValueOf[T](t: T): (Type, Tree) =
+    (constantTypeOf(t), Literal(Constant(t)))
+
   def extractSingletonValue[T](tpe: Type): T = {
     def abort(tpe: Type) =
       c.abort(c.enclosingPosition,
@@ -42,7 +45,7 @@ trait MacroUtils {
   final class MaterializeUnaryOpAux(opSym: TypeSymbol, aTpe: Type) {
     def apply[T](f: T => T): Tree = {
       val aValue = extractSingletonValue[T](aTpe)
-      val (outTpe, outTree) = outTypeAndTree(f(aValue))
+      val (outTpe, outTree) = constantTypeAndValueOf(f(aValue))
       q"""
         new $opSym[$aTpe] {
           type Out = $outTpe
@@ -64,7 +67,7 @@ trait MacroUtils {
     def apply[T](f: (T, T) => T): Tree = {
       val aValue = extractSingletonValue[T](aTpe)
       val bValue = extractSingletonValue[T](bTpe)
-      val (outTpe, outTree) = outTypeAndTree(f(aValue, bValue))
+      val (outTpe, outTree) = constantTypeAndValueOf(f(aValue, bValue))
       q"""
         new $opSym[$aTpe, $bTpe] {
           type Out = $outTpe
@@ -73,7 +76,4 @@ trait MacroUtils {
       """
     }
   }
-
-  def outTypeAndTree[T](t: T): (Type, Tree) =
-    constantTypeOf(t) -> Literal(Constant(t))
 }

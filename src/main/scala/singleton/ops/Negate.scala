@@ -6,10 +6,7 @@ import singleton.ops.macros.MacroUtils
 
 trait Negate[A] extends Op
 
-object Negate {
-  type Aux[A, Out0] = Negate[A] { type Out = Out0 }
-
-  def apply[A](implicit ev: Negate[A]): Aux[A, ev.Out] = ev
+object Negate extends Op1Companion[Negate] {
 
   implicit def materializeNegate[T, A <: T](
       implicit nt: Numeric[T]

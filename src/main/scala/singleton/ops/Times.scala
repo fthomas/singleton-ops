@@ -6,10 +6,7 @@ import singleton.ops.macros.MacroUtils
 
 trait Times[A, B] extends Op
 
-object Times {
-  type Aux[A, B, Out0] = Times[A, B] { type Out = Out0 }
-
-  def apply[A, B](implicit ev: Times[A, B]): Aux[A, B, ev.Out] = ev
+object Times extends Op2Companion[Times] {
 
   implicit def materializeTimes[T, A <: T, B <: T](
       implicit nt: Numeric[T]
