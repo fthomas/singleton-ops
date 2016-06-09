@@ -2,7 +2,7 @@ package singleton.ops
 
 import macrocompat.bundle
 import scala.reflect.macros.whitebox
-import singleton.ops.macros.MacroUtils
+import singleton.ops.impl._
 
 trait Reverse[A] extends Op
 
@@ -12,7 +12,7 @@ object Reverse extends Op1Companion[Reverse] {
     .materialize[A]
 
   @bundle
-  final class ReverseMacro(val c: whitebox.Context) extends MacroUtils {
+  final class ReverseMacro(val c: whitebox.Context) extends Macros {
     def materialize[A: c.WeakTypeTag]: c.Tree =
       materializeUnaryOp[Reverse, A].apply[String](_.reverse)
   }

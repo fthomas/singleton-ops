@@ -1,10 +1,11 @@
-package singleton.ops.macros
+package singleton.ops.impl
 
 import macrocompat.bundle
+
 import scala.reflect.macros.whitebox
 
 @bundle
-trait MacroUtils {
+trait Macros {
   val c: whitebox.Context
 
   import c.universe._
@@ -36,11 +37,11 @@ trait MacroUtils {
   def evalTyped[T](expr: c.Expr[T]): T =
     c.eval(c.Expr[T](c.untypecheck(expr.tree)))
 
-  def materializeUnaryOp[Op[_], A](
-      implicit ev1: c.WeakTypeTag[Op[_]],
+  def materializeUnaryOp[F[_], A](
+      implicit ev1: c.WeakTypeTag[F[_]],
       ev2: c.WeakTypeTag[A]
   ): MaterializeUnaryOpAux =
-    new MaterializeUnaryOpAux(symbolOf[Op[_]], weakTypeOf[A])
+    new MaterializeUnaryOpAux(symbolOf[F[_]], weakTypeOf[A])
 
   final class MaterializeUnaryOpAux(opSym: TypeSymbol, aTpe: Type) {
     def apply[T](f: T => T): Tree = {
@@ -55,13 +56,12 @@ trait MacroUtils {
     }
   }
 
-  def materializeBinaryOp[Op[_, _], A, B](
-      implicit ev1: c.WeakTypeTag[Op[_, _]],
+  def materializeBinaryOp[F[_, _], A, B](
+      implicit ev1: c.WeakTypeTag[F[_, _]],
       ev2: c.WeakTypeTag[A],
       ev3: c.WeakTypeTag[B]
   ): MaterializeBinaryOpAux =
-    new MaterializeBinaryOpAux(
-        symbolOf[Op[_, _]], weakTypeOf[A], weakTypeOf[B])
+    new MaterializeBinaryOpAux(symbolOf[F[_, _]], weakTypeOf[A], weakTypeOf[B])
 
   final class MaterializeBinaryOpAux(opSym: TypeSymbol, aTpe: Type, bTpe: Type) {
     def apply[T](f: (T, T) => T): Tree = {

@@ -1,4 +1,4 @@
-package singleton.ops
+package singleton.ops.impl
 
 trait Op2Companion[F[_, _] <: Op] {
   type Aux[A, B, Out0] = F[A, B] { type Out = Out0 }

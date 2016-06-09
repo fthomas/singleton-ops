@@ -2,7 +2,7 @@ package singleton.ops
 
 import macrocompat.bundle
 import scala.reflect.macros.whitebox
-import singleton.ops.macros.MacroUtils
+import singleton.ops.impl._
 
 trait Plus[A, B] extends Op
 
@@ -13,7 +13,7 @@ object Plus extends Op2Companion[Plus] {
   ): Plus[A, B] = macro PlusMacro.materialize[T, A, B]
 
   @bundle
-  final class PlusMacro(val c: whitebox.Context) extends MacroUtils {
+  final class PlusMacro(val c: whitebox.Context) extends Macros {
     def materialize[T, A: c.WeakTypeTag, B: c.WeakTypeTag](
         nt: c.Expr[Numeric[T]]
     ): c.Tree =

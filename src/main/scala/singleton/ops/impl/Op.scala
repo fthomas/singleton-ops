@@ -1,4 +1,4 @@
-package singleton.ops
+package singleton.ops.impl
 
 trait Op {
   type Out
