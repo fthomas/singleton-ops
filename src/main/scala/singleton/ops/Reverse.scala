@@ -14,6 +14,6 @@ object Reverse extends Op1Companion[Reverse] {
   @bundle
   final class ReverseMacro(val c: whitebox.Context) extends Macros {
     def materialize[A: c.WeakTypeTag]: c.Tree =
-      materializeOp1[Reverse, A].usingFunction[String](_.reverse)
+      materializeOp1[Reverse, A].usingFunction((_: String).reverse)
   }
 }

@@ -45,7 +45,7 @@ trait Macros {
     new MaterializeOp1Aux(symbolOf[F[_]], weakTypeOf[A])
 
   final class MaterializeOp1Aux(opSym: TypeSymbol, aTpe: Type) {
-    def usingFunction[T](f: T => T): Tree =
+    def usingFunction[T, R](f: T => R): Tree =
       mkOp1Tree(computeOutValue(f))
 
     private def computeOutValue[T, R](f: T => R): R =
