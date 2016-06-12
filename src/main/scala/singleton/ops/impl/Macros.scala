@@ -51,15 +51,8 @@ trait Macros {
     private def computeOutValue[T, R](f: T => R): R =
       f(extractSingletonValue[T](aTpe))
 
-    private def mkOp1Tree[T](outValue: T): Tree = {
-      val (outTpe, outTree) = constantTypeAndValueOf(outValue)
-      q"""
-        new $opSym[$aTpe] {
-          type Out = $outTpe
-          val value: $outTpe = $outTree
-        }
-      """
-    }
+    private def mkOp1Tree[T](outValue: T): Tree =
+      mkOpTree(tq"$opSym[$aTpe]", outValue)
   }
 
   def materializeOp2[F[_, _], A, B](
@@ -70,7 +63,7 @@ trait Macros {
     new MaterializeOp2Aux(symbolOf[F[_, _]], weakTypeOf[A], weakTypeOf[B])
 
   final class MaterializeOp2Aux(opSym: TypeSymbol, aTpe: Type, bTpe: Type) {
-    def usingFunction[T](f: (T, T) => T): Tree =
+    def usingFunction[T, R](f: (T, T) => R): Tree =
       mkOp2Tree(computeOutValue(f))
 
     def usingPredicate[T](f: (T, T) => Boolean): Tree = {
@@ -88,14 +81,17 @@ trait Macros {
       f(aValue, bValue)
     }
 
-    private def mkOp2Tree[T](outValue: T): Tree = {
-      val (outTpe, outTree) = constantTypeAndValueOf(outValue)
-      q"""
-        new $opSym[$aTpe, $bTpe] {
-          type Out = $outTpe
-          val value: $outTpe = $outTree
-        }
-      """
-    }
+    private def mkOp2Tree[T](outValue: T): Tree =
+      mkOpTree(tq"$opSym[$aTpe, $bTpe]", outValue)
+  }
+
+  def mkOpTree[T](appliedTpe: Tree, outValue: T): Tree = {
+    val (outTpe, outTree) = constantTypeAndValueOf(outValue)
+    q"""
+      new $appliedTpe {
+        type Out = $outTpe
+        val value: $outTpe = $outTree
+      }
+    """
   }
 }
