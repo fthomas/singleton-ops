@@ -4,7 +4,9 @@ import macrocompat.bundle
 import scala.reflect.macros.whitebox
 import singleton.ops.impl._
 
-trait ToDouble[A] extends Op
+trait ToDouble[A] extends Op {
+  override type Out <: Double
+}
 
 object ToDouble extends Op1Companion[ToDouble] {
 

@@ -63,7 +63,7 @@ trait Macros {
     new MaterializeOp2Aux(symbolOf[F[_, _]], weakTypeOf[A], weakTypeOf[B])
 
   final class MaterializeOp2Aux(opSym: TypeSymbol, aTpe: Type, bTpe: Type) {
-    def usingFunction[T, R](f: (T, T) => R): Tree =
+    def usingFunction[T1, T2, R](f: (T1, T2) => R): Tree =
       mkOp2Tree(computeOutValue(f))
 
     def usingPredicate[T](f: (T, T) => Boolean): Tree = {
@@ -75,9 +75,9 @@ trait Macros {
       }
     }
 
-    private def computeOutValue[T, R](f: (T, T) => R): R = {
-      val aValue = extractSingletonValue[T](aTpe)
-      val bValue = extractSingletonValue[T](bTpe)
+    private def computeOutValue[T1, T2, R](f: (T1, T2) => R): R = {
+      val aValue = extractSingletonValue[T1](aTpe)
+      val bValue = extractSingletonValue[T2](bTpe)
       f(aValue, bValue)
     }
 
