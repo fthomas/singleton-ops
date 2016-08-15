@@ -8,13 +8,13 @@ trait Substring[A, B] extends Op
 
 object Substring extends Op2Companion[Substring] {
 
-  implicit def materializeConcat[A <: String, B <: Int]: Substring[A, B] = macro SubstringMacro
-    .materialize[A, B]
+  implicit def materializeConcat[A <: String, B <: Int]: Substring[A, B] =
+    macro SubstringMacro.materialize[A, B]
 
   @bundle
   final class SubstringMacro(val c: whitebox.Context) extends Macros {
     def materialize[A: c.WeakTypeTag, B: c.WeakTypeTag]: c.Tree =
       materializeOp2[Substring, A, B].usingFunction(
-          (_: String).substring(_: Int))
+        (_: String).substring(_: Int))
   }
 }
