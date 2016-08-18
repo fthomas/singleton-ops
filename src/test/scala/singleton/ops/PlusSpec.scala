@@ -6,8 +6,8 @@ import singleton.ops.TestUtils._
 
 class PlusSpec extends Properties("Plus") {
   property("1 + 2 == 3") = secure {
-    val p1 = Plus[W.`1`.T, W.`2`.T]
-    sameType[p1.Out, W.`3`.T]
+    val p1 = Plus[1, 2]
+    sameType[p1.Out, 3]
   }
 
   property("0.2 + 0.2 == 0.4") = secure {
