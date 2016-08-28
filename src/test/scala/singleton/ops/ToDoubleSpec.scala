@@ -6,8 +6,8 @@ import singleton.ops.TestUtils._
 
 class ToDoubleSpec extends Properties("ToDouble") {
   property("3.toDouble") = secure {
-    val t1 = ToDouble[W.`3`.T]
-    sameType[t1.Out, W.`3.0`.T] && t1.value == 3.0
+    val t1 = ToDouble[3]
+    sameType[t1.Out, 3.0] && t1.value == 3.0
   }
 
   property("ToDouble.value <: Double") = wellTyped {

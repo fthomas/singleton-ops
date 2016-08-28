@@ -6,13 +6,13 @@ import singleton.ops.TestUtils._
 
 class ReverseSpec extends Properties("Reverse") {
   property("abc.reverse == cba") = secure {
-    val r1 = Reverse[W.`"abc"`.T]
-    sameType[r1.Out, W.`"cba"`.T]
+    val r1 = Reverse["abc"]
+    sameType[r1.Out, "cba"]
   }
 
   property("abc.reverse.reverse == abc") = secure {
-    val r1 = Reverse[W.`"abc"`.T]
+    val r1 = Reverse["abc"]
     val r2 = Reverse[r1.Out]
-    sameType[r2.Out, W.`"abc"`.T]
+    sameType[r2.Out, "abc"]
   }
 }

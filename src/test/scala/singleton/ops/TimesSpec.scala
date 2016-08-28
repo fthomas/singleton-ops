@@ -7,20 +7,20 @@ import singleton.ops.TestUtils._
 
 class TimesSpec extends Properties("Times") {
   property("2 * 3 == 6") = secure {
-    val t1 = Times[W.`2`.T, W.`3`.T]
-    sameType[t1.Out, W.`6`.T]
+    val t1 = Times[2, 3]
+    sameType[t1.Out, 6]
   }
 
   property("1.5 * 2.0 == 3.0") = secure {
-    val t1 = Times[W.`1.5`.T, W.`2.0`.T]
-    sameType[t1.Out, W.`3.0`.T]
+    val t1 = Times[1.5, 2.0]
+    sameType[t1.Out, 3.0]
   }
 
   property("Int * 0 = ???") = wellTyped {
-    illTyped(""" Times[Int, W.`0`.T] """)
+    illTyped(""" Times[Int, 0] """)
   }
 
   property("(1 with Int) * 0 = ???") = wellTyped {
-    illTyped(""" Times[W.`1`.T with Int, W.`0`.T] """)
+    illTyped(""" Times[1 with Int, 0] """)
   }
 }

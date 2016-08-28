@@ -7,25 +7,25 @@ import singleton.ops.TestUtils._
 
 class NegateSpec extends Properties("Negate") {
   property("~2 == -2") = secure {
-    val n1 = Negate[W.`2`.T]
-    sameType[n1.Out, W.`-2`.T]
+    val n1 = Negate[2]
+    sameType[n1.Out, -2]
   }
 
   property("~1.5 == -1.5") = secure {
-    val n1 = Negate[W.`1.5`.T]
-    sameType[n1.Out, W.`-1.5`.T]
+    val n1 = Negate[1.5]
+    sameType[n1.Out, -1.5]
   }
 
   property("~(~5L) == 5L") = wellTyped {
     illTyped("""
-      val n1 = Negate[W.`5L`.T]
+      val n1 = Negate[5L]
       val n2 = Negate[n1.Out]
-      sameType[n2.Out, W.`5L`.T]
+      sameType[n2.Out, 5L]
     """)
   }
 
   property("Negate[1].value <: Int") = wellTyped {
-    val n1 = Negate[W.`1`.T]
+    val n1 = Negate[1]
     def foo(i: Int) = ()
     foo(n1.value)
   }

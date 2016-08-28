@@ -6,7 +6,7 @@ import singleton.ops.TestUtils._
 
 class ConcatSpec extends Properties("Concat") {
   property("ab + cd == abcd") = secure {
-    val c1 = Concat[W.`"ab"`.T, W.`"cd"`.T]
-    sameType[c1.Out, W.`"abcd"`.T]
+    val c1 = Concat["ab", "cd"]
+    sameType[c1.Out, "abcd"]
   }
 }

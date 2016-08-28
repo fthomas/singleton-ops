@@ -7,10 +7,10 @@ import singleton.ops.TestUtils._
 
 class LessThanSpec extends Properties("LessThan") {
   property("3.5F < 3.6F") = secure {
-    LessThan[W.`3.5F`.T, W.`3.6F`.T].value
+    LessThan[3.5F, 3.6F].value
   }
 
   property("!(5 < 4)") = wellTyped {
-    illTyped(""" LessThan[W.`5`.T, W.`4`.T] """)
+    illTyped(""" LessThan[5, 4] """)
   }
 }
