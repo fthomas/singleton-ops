@@ -62,11 +62,19 @@ trait Macros {
   ): MaterializeOp2Aux =
     new MaterializeOp2Aux(symbolOf[F[_, _]], weakTypeOf[A], weakTypeOf[B])
 
+  def materializeOp2I[F[_, _, _], T, A, B](
+                                     implicit ev1: c.WeakTypeTag[F[_, _, _]],
+                                     ev2 : c.WeakTypeTag[T],
+                                     ev3 : c.WeakTypeTag[A],
+                                     ev4 : c.WeakTypeTag[B]
+                                   ): MaterializeOp2AuxI =
+    new MaterializeOp2AuxI(symbolOf[F[_, _, _]], weakTypeOf[T], weakTypeOf[A], weakTypeOf[B])
+
   final class MaterializeOp2Aux(opSym: TypeSymbol, aTpe: Type, bTpe: Type) {
     def usingFunction[T1, T2, R](f: (T1, T2) => R): Tree =
       mkOp2Tree(computeOutValue(f))
 
-    def usingPredicate[T](f: (T, T) => Boolean): Tree = {
+    def usingPredicate[T1](f: (T1, T1) => Boolean): Tree = {
       val outValue = computeOutValue(f)
       if (outValue) {
         mkOp2Tree(outValue)
@@ -81,8 +89,31 @@ trait Macros {
       f(aValue, bValue)
     }
 
-    private def mkOp2Tree[T](outValue: T): Tree =
+    private def mkOp2Tree[T1](outValue: T1): Tree =
       mkOpTree(tq"$opSym[$aTpe, $bTpe]", outValue)
+  }
+
+  final class MaterializeOp2AuxI(opSym: TypeSymbol, tTpe: Type, aTpe: Type, bTpe: Type) {
+    def usingFunction[T1, T2, R](f: (T1, T2) => R): Tree =
+      mkOp2Tree(computeOutValue(f))
+
+    def usingPredicate[T](f: (T, T) => Boolean): Tree = {
+      val outValue = computeOutValue(f)
+      if (outValue) {
+        mkOp2Tree(outValue)
+      } else {
+        abort(s"Cannot prove ${opSym.name}[${show(tTpe)}, ${show(aTpe)}, ${show(bTpe)}]")
+      }
+    }
+
+    private def computeOutValue[T1, T2, R](f: (T1, T2) => R): R = {
+      val aValue = extractSingletonValue[T1](aTpe)
+      val bValue = extractSingletonValue[T2](bTpe)
+      f(aValue, bValue)
+    }
+
+    private def mkOp2Tree[T](outValue: T): Tree =
+      mkOpTree(tq"$opSym[$tTpe, $aTpe, $bTpe]", outValue)
   }
 
   def mkOpTree[T](appliedTpe: Tree, outValue: T): Tree = {

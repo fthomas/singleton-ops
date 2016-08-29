@@ -18,7 +18,7 @@ class Matrix[R <: Int, C <: Int, E <: Element] {
 }
 
 class SquareMatrix[RC <: Int, E <: Element] extends Matrix[RC, RC, E] {
-  def promoteBy[DeltaRC <: Int](implicit ev: PlusI[RC, DeltaRC]) : SquareMatrix[ev.Out, E] = new SquareMatrix[ev.Out, E]
+  def promoteBy[DeltaRC <: Int](implicit ev: Plus[Int, RC, DeltaRC]) : SquareMatrix[ev.Out, E] = new SquareMatrix[ev.Out, E]
 }
 
 class RVector[C <: Int, E <: Element] extends Matrix[1, C, E] {
