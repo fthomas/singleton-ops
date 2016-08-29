@@ -17,11 +17,9 @@ scala> val p = Plus[3.6, 4.9]
 p: singleton.ops.Plus[3.6,4.9]{type Out = Double(8.5)} = $anon$1@72b03361
 
 scala> 8.5 : p.Out
-8.5 : p.Out
 res0: p.Out = 8.5
 
 scala> 8.6 : p.Out
-8.6 : p.Out
 <console>:16: error: type mismatch;
  found   : Double(8.6)
  required: p.Out
@@ -34,7 +32,6 @@ Note that the types are [literal-based singleton types][sip-23].
 * Working with large numbers doesn't slay the compiler:
 ```scala
 scala> Times[32000L, 6400000L]
-Times[32000L, 6400000L]
 res2: singleton.ops.Times[32000L,6400000L]{type Out = Long(204800000000L)} = $anon$1@33a50777
 ```
 
