@@ -13,8 +13,8 @@ to the type-level and allows for example to add `Double`s at the type-level.
 * The following adds the singleton types `Double(3.6)` and `Double(4.9)`
 and yields the type `Double(8.5)` as result:
 ```scala
-scala> val p = Plus[3.6, 4.9]
-p: singleton.ops.Plus[3.6,4.9]{type Out = Double(8.5)} = $anon$1@72b03361
+scala> val p = Plus[Double, 3.6, 4.9]
+p: singleton.ops.Plus[Double,3.6,4.9]{type Out = Double(8.5)} = $anon$1@72b03361
 
 scala> 8.5 : p.Out
 res0: p.Out = 8.5
@@ -31,8 +31,8 @@ Note that the types are [literal-based singleton types][sip-23].
 
 * Working with large numbers doesn't slay the compiler:
 ```scala
-scala> Times[32000L, 6400000L]
-res2: singleton.ops.Times[32000L,6400000L]{type Out = Long(204800000000L)} = $anon$1@33a50777
+scala> Times[Long, 32000L, 6400000L]
+res2: singleton.ops.Times[Long,32000L,6400000L]{type Out = Long(204800000000L)} = $anon$1@33a50777
 ```
 
 * This `concat` method concatenates two `String`s both at the value- and

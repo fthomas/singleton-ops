@@ -3,7 +3,7 @@ package singleton.ops.impl
 import macrocompat.bundle
 import scala.reflect.macros.whitebox
 
-@bundle
+@ bundle
 trait Macros {
   val c: whitebox.Context
 
@@ -74,19 +74,22 @@ trait Macros {
   }
 
   def materializeOp2[F[_, _], A, B](
-     implicit ev1: c.WeakTypeTag[F[_, _]],
-     ev2: c.WeakTypeTag[A],
-     ev3: c.WeakTypeTag[B]
+      implicit ev1: c.WeakTypeTag[F[_, _]],
+      ev2: c.WeakTypeTag[A],
+      ev3: c.WeakTypeTag[B]
   ): MaterializeOp2Aux =
     new MaterializeOp2Aux(symbolOf[F[_, _]], weakTypeOf[A], weakTypeOf[B])
 
   def materializeOp2Gen[F[_, _, _], T, A, B](
-     implicit ev1: c.WeakTypeTag[F[_, _, _]],
-     ev2 : c.WeakTypeTag[T],
-     ev3 : c.WeakTypeTag[A],
-     ev4 : c.WeakTypeTag[B]
+      implicit ev1: c.WeakTypeTag[F[_, _, _]],
+      ev2: c.WeakTypeTag[T],
+      ev3: c.WeakTypeTag[A],
+      ev4: c.WeakTypeTag[B]
   ): MaterializeOp2AuxGen =
-    new MaterializeOp2AuxGen(symbolOf[F[_, _, _]], weakTypeOf[T], weakTypeOf[A], weakTypeOf[B])
+    new MaterializeOp2AuxGen(symbolOf[F[_, _, _]],
+                             weakTypeOf[T],
+                             weakTypeOf[A],
+                             weakTypeOf[B])
 
   final class MaterializeOp2Aux(opSym: TypeSymbol, aTpe: Type, bTpe: Type) {
     def usingFunction[T1, T2, R](f: (T1, T2) => R): Tree =
@@ -111,7 +114,10 @@ trait Macros {
       mkOpTree(tq"$opSym[$aTpe, $bTpe]", outValue)
   }
 
-  final class MaterializeOp2AuxGen(opSym: TypeSymbol, tTpe: Type, aTpe: Type, bTpe: Type) {
+  final class MaterializeOp2AuxGen(opSym: TypeSymbol,
+                                   tTpe: Type,
+                                   aTpe: Type,
+                                   bTpe: Type) {
     def usingFunction[T1, T2, R](f: (T1, T2) => R): Tree =
       mkOp2Tree(computeOutValue(f))
 
@@ -120,7 +126,8 @@ trait Macros {
       if (outValue) {
         mkOp2Tree(outValue)
       } else {
-        abort(s"Cannot prove ${opSym.name}[${show(tTpe)}, ${show(aTpe)}, ${show(bTpe)}]")
+        abort(
+          s"Cannot prove ${opSym.name}[${show(tTpe)}, ${show(aTpe)}, ${show(bTpe)}]")
       }
     }
 
