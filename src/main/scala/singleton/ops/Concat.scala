@@ -4,7 +4,9 @@ import macrocompat.bundle
 import scala.reflect.macros.whitebox
 import singleton.ops.impl._
 
-trait Concat[A, B] extends Op
+trait Concat[A, B] extends Op {
+  override type Out <: String
+}
 
 object Concat extends Op2Companion[Concat] {
 

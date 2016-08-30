@@ -4,7 +4,9 @@ import macrocompat.bundle
 import scala.reflect.macros.whitebox
 import singleton.ops.impl._
 
-trait Reverse[A] extends Op
+trait Reverse[A] extends Op {
+  override type Out <: String
+}
 
 object Reverse extends Op1Companion[Reverse] {
 

@@ -44,6 +44,13 @@ trait Macros {
   ): MaterializeOp1Aux =
     new MaterializeOp1Aux(symbolOf[F[_]], weakTypeOf[A])
 
+  def materializeOp1Gen[F[_, _], T, A](
+      implicit ev1: c.WeakTypeTag[F[_, _]],
+      ev2: c.WeakTypeTag[T],
+      ev3: c.WeakTypeTag[A]
+  ): MaterializeOp1AuxGen =
+    new MaterializeOp1AuxGen(symbolOf[F[_, _]], weakTypeOf[T], weakTypeOf[A])
+
   final class MaterializeOp1Aux(opSym: TypeSymbol, aTpe: Type) {
     def usingFunction[T, R](f: T => R): Tree =
       mkOp1Tree(computeOutValue(f))
@@ -55,20 +62,31 @@ trait Macros {
       mkOpTree(tq"$opSym[$aTpe]", outValue)
   }
 
+  final class MaterializeOp1AuxGen(opSym: TypeSymbol, tTpe: Type, aTpe: Type) {
+    def usingFunction[T1, R](f: T1 => R): Tree =
+      mkOp1Tree(computeOutValue(f))
+
+    private def computeOutValue[T1, R](f: T1 => R): R =
+      f(extractSingletonValue[T1](aTpe))
+
+    private def mkOp1Tree[T1](outValue: T1): Tree =
+      mkOpTree(tq"$opSym[$tTpe, $aTpe]", outValue)
+  }
+
   def materializeOp2[F[_, _], A, B](
-      implicit ev1: c.WeakTypeTag[F[_, _]],
-      ev2: c.WeakTypeTag[A],
-      ev3: c.WeakTypeTag[B]
+     implicit ev1: c.WeakTypeTag[F[_, _]],
+     ev2: c.WeakTypeTag[A],
+     ev3: c.WeakTypeTag[B]
   ): MaterializeOp2Aux =
     new MaterializeOp2Aux(symbolOf[F[_, _]], weakTypeOf[A], weakTypeOf[B])
 
-  def materializeOp2I[F[_, _, _], T, A, B](
-                                     implicit ev1: c.WeakTypeTag[F[_, _, _]],
-                                     ev2 : c.WeakTypeTag[T],
-                                     ev3 : c.WeakTypeTag[A],
-                                     ev4 : c.WeakTypeTag[B]
-                                   ): MaterializeOp2AuxI =
-    new MaterializeOp2AuxI(symbolOf[F[_, _, _]], weakTypeOf[T], weakTypeOf[A], weakTypeOf[B])
+  def materializeOp2Gen[F[_, _, _], T, A, B](
+     implicit ev1: c.WeakTypeTag[F[_, _, _]],
+     ev2 : c.WeakTypeTag[T],
+     ev3 : c.WeakTypeTag[A],
+     ev4 : c.WeakTypeTag[B]
+  ): MaterializeOp2AuxGen =
+    new MaterializeOp2AuxGen(symbolOf[F[_, _, _]], weakTypeOf[T], weakTypeOf[A], weakTypeOf[B])
 
   final class MaterializeOp2Aux(opSym: TypeSymbol, aTpe: Type, bTpe: Type) {
     def usingFunction[T1, T2, R](f: (T1, T2) => R): Tree =
@@ -93,7 +111,7 @@ trait Macros {
       mkOpTree(tq"$opSym[$aTpe, $bTpe]", outValue)
   }
 
-  final class MaterializeOp2AuxI(opSym: TypeSymbol, tTpe: Type, aTpe: Type, bTpe: Type) {
+  final class MaterializeOp2AuxGen(opSym: TypeSymbol, tTpe: Type, aTpe: Type, bTpe: Type) {
     def usingFunction[T1, T2, R](f: (T1, T2) => R): Tree =
       mkOp2Tree(computeOutValue(f))
 

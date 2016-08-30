@@ -8,7 +8,7 @@ trait Plus[T, A, B] extends Op {
   override type Out <: T
 }
 
-object Plus extends Op2CompanionI[Plus] {
+object Plus extends Op2CompanionGen[Plus] {
   implicit def materializePlusI[T, A <: T, B <: T](
     implicit nt: Numeric[T]
   ): Plus[T, A, B] = macro PlusIMacro.materialize[T, A, B]
@@ -18,6 +18,6 @@ object Plus extends Op2CompanionI[Plus] {
     def materialize[T : c.WeakTypeTag, A: c.WeakTypeTag, B: c.WeakTypeTag](
       nt: c.Expr[Numeric[T]]
     ): c.Tree =
-      materializeOp2I[Plus, T, A, B].usingFunction(evalTyped(nt).plus)
+      materializeOp2Gen[Plus, T, A, B].usingFunction(evalTyped(nt).plus)
   }
 }

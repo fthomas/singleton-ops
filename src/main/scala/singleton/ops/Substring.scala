@@ -4,7 +4,9 @@ import macrocompat.bundle
 import scala.reflect.macros.whitebox
 import singleton.ops.impl._
 
-trait Substring[A, B] extends Op
+trait Substring[A, B] extends Op {
+  override type Out <: String
+}
 
 object Substring extends Op2Companion[Substring] {
 
