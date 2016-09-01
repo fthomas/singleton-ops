@@ -3,7 +3,7 @@ package singleton.ops.impl
 import macrocompat.bundle
 import scala.reflect.macros.whitebox
 
-@ bundle
+@bundle
 trait Macros {
   val c: whitebox.Context
 
@@ -90,6 +90,18 @@ trait Macros {
                              weakTypeOf[T],
                              weakTypeOf[A],
                              weakTypeOf[B])
+
+  def materializeOp2GenMinus[F[_, _, _], T, A <: T with Singleton, B <: T with Singleton](
+                                              implicit ev1: c.WeakTypeTag[F[_, _, _]],
+                                              ev2: c.WeakTypeTag[T],
+                                              ev3: c.WeakTypeTag[A],
+                                              ev4: c.WeakTypeTag[B]
+                                            ): MaterializeOp2AuxGen =
+    new MaterializeOp2AuxGen(symbolOf[F[_, _, _]],
+      weakTypeOf[T],
+      weakTypeOf[A],
+      weakTypeOf[B])
+
 
   final class MaterializeOp2Aux(opSym: TypeSymbol, aTpe: Type, bTpe: Type) {
     def usingFunction[T1, T2, R](f: (T1, T2) => R): Tree =

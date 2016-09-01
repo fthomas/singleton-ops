@@ -13,7 +13,7 @@ object Plus extends Op2CompanionGen[Plus] {
       implicit nt: Numeric[T]
   ): Plus[T, A, B] = macro PlusMacro.materialize[T, A, B]
 
-  @ bundle
+  @bundle
   final class PlusMacro(val c: whitebox.Context) extends Macros {
     def materialize[T: c.WeakTypeTag, A: c.WeakTypeTag, B: c.WeakTypeTag](
         nt: c.Expr[Numeric[T]]

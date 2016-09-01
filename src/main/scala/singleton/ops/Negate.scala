@@ -14,7 +14,7 @@ object Negate extends Op1CompanionGen[Negate] {
       implicit nt: Numeric[T]
   ): Negate[T, A] = macro NegateMacro.materialize[T, A]
 
-  @ bundle
+  @bundle
   final class NegateMacro(val c: whitebox.Context) extends Macros {
     def materialize[T: c.WeakTypeTag, A: c.WeakTypeTag](
         nt: c.Expr[Numeric[T]]

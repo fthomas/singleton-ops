@@ -14,7 +14,7 @@ object ToDouble extends Op1Companion[ToDouble] {
       implicit nt: Numeric[T]
   ): ToDouble[A] = macro ToDoubleMacro.materialize[T, A]
 
-  @ bundle
+  @bundle
   final class ToDoubleMacro(val c: whitebox.Context) extends Macros {
     def materialize[T, A: c.WeakTypeTag](
         nt: c.Expr[Numeric[T]]

@@ -13,7 +13,7 @@ object Concat extends Op2Companion[Concat] {
   implicit def materializeConcat[A <: String, B <: String]: Concat[A, B] =
     macro ConcatMacro.materialize[A, B]
 
-  @ bundle
+  @bundle
   final class ConcatMacro(val c: whitebox.Context) extends Macros {
     def materialize[A: c.WeakTypeTag, B: c.WeakTypeTag]: c.Tree =
       materializeOp2[Concat, A, B].usingFunction((_: String) + (_: String))
