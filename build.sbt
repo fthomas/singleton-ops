@@ -1,6 +1,8 @@
 name := "singleton-ops"
 
 scalaVersion := "2.11.8"
+scalaOrganization := "org.typelevel"
+
 scalacOptions ++= Seq(
   "-deprecation",
   "-encoding",
