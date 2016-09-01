@@ -32,8 +32,8 @@ trait Macros {
       case otherTpe => {
         //extractionFailed(tpe)
         //Patch
-        println("Failed extraction(returning 1)")
-        showRaw(tpe)
+        println("Failed extraction for " + tpe + " , see folowing tpe:")
+        println(showRaw(tpe))
         1.asInstanceOf[T]
       }
     }
