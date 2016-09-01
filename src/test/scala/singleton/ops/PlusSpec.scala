@@ -4,6 +4,13 @@ import org.scalacheck.Prop._
 import org.scalacheck.Properties
 import singleton.ops.TestUtils._
 
+object MyFailedTest {
+  val one : 1 = 1
+  def add[A <: Int with Singleton, B <: Int with Singleton](a: A, b: B)(implicit p : Plus[Int, A, B]) : p.Out {} = p.value
+  val works = add(1, 1)
+  val doesNotWork = add(one, one)
+}
+
 class PlusSpec extends Properties("Plus") {
   property("1 + 2 == 3") = secure {
     val p1 = Plus[Int, 1, 2]

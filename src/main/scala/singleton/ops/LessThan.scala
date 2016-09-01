@@ -14,7 +14,7 @@ object LessThan extends Op2Companion[LessThan] {
       implicit ot: Ordering[T]
   ): LessThan[A, B] = macro LessThanMacro.materialize[T, A, B]
 
-  @bundle
+  @ bundle
   final class LessThanMacro(val c: whitebox.Context) extends Macros {
     def materialize[T, A: c.WeakTypeTag, B: c.WeakTypeTag](
         ot: c.Expr[Ordering[T]]
