@@ -8,7 +8,7 @@ trait Plus[T, A, B] extends Op {
   override type Out <: T
 }
 
-object Plus extends Op2CompanionGen[Plus] {
+object Plus {
   implicit def materializePlus[T, A <: T, B <: T](
       implicit nt: Numeric[T]
   ): Plus[T, A, B] = macro PlusMacro.materialize[T, A, B]
