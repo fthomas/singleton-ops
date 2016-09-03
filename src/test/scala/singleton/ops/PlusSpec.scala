@@ -1,36 +1,50 @@
 package singleton.ops
 
-//object Implicits {
-//  def add[A <: Int with Singleton, B <: Int with Singleton](a: A, b: B)(implicit p : Plus[Int, A, B]) : p.Out {} = p.value
-//  implicit class SingletonIntTypeClass[A <: Int with Singleton](a : A) {
-//    def @+[B <: Int with Singleton](b : B)(implicit p : Plus[Int, A, B]) : p.Out {} = p.value
-//  }
-//  implicit class fsImpl[L <: Int with Singleton](f : FixedSizeVector[L]) {
-//    def concat[L2 <: Int with Singleton](that : FixedSizeVector[L2]) = FixedSizeVector(f.length @+ that.length)
-//  }
-//}
-//import Implicits._
-case class FixedSizeVector[L <: Int with Singleton](length : L) {
-  //def concat[L2 <: Int with Singleton](that : FixedSizeVector[L2]) = FixedSizeVector(length @+ that.length)
-//  def concat[L2 <: Int with Singleton](that : FixedSizeVector[L2])(implicit p : Plus[Int, L, L2]) = FixedSizeVector(p.value)
-  def + (that : FixedSizeVector[L]) = FixedSizeVector(length)
+import org.scalacheck.Prop._
+import org.scalacheck.Properties
+import shapeless.test.illTyped
+import singleton.ops.TestUtils._
+
+class PlusSpec extends Properties("Plus") {
+  property("1 + 2 == 3") = secure {
+    val p1 = Plus[1, 2]
+    sameType[p1.Out, 3]
+  }
+
+  property("0.2 + 0.2 == 0.4") = secure {
+    val p1 = Plus[0.2, 0.2]
+    sameType[p1.Out, 0.4]
+  }
+
+  property("(1 + 2) + 3 == 6") = secure {
+    val p1 = Plus[1, 2]
+    val p2 = Plus[p1.Out, 3]
+    sameType[p2.Out, 6]
+  }
+
+  property("1.0 + (2.0 + 3.0) == 6.0") = secure {
+    val p1 = Plus[2.0, 3.0]
+    val p2 = Plus[1.0, p1.Out]
+    sameType[p2.Out, 6.0]
+  }
+
+  property("(1 + 2) + (3 + 4) == 10") = secure {
+    val p1 = Plus[1, 2]
+    val p2 = Plus[3, 4]
+    val p3 = Plus[p1.Out, p2.Out]
+    sameType[p3.Out, 10]
+  }
+
+  property("W(1) + W(2) == 3") = secure {
+    val w1 = W(1)
+    val w2 = W(2)
+    val p1 = Plus[w1.T, w2.T]
+    sameType[p1.Out, 3]
+  }
+
 }
 
-
-object MyFailedTest {
-  val one : 1 = 1
-  val two : 2 = 2
-  def add[A <: Int with Singleton, B <: Int with Singleton](a: A, b: B)(implicit p : Plus[Int, A, B]) : p.Out {} = p.value
-//  def add3[A <: Int with Singleton, B <: Int with Singleton, C <: Int with Singleton, X <: Int with Singleton](a: A, b: B, c: C)
-//          (implicit p: Plus.Aux[Int, A, B, X], p2: Plus[Int, X, C]) : p2.Out {} = p2.value
-
-//  def add3[A <: Int with Singleton, B <: Int with Singleton, C <: Int with Singleton, X](a: A, b: B, c: C)
-//      (implicit p: Plus[Int, A, B], p2: Plus[Int, X, C]) : p2.Out {} = p2.value
-//  val works : 3 = add3(1, 1, 1)
-  val works2 : 2 = add(one, one)
-  val works3 : 3 = add(two, one)
-  val works4 : 5 = add(two, add(two, one))
-
-  //val aa : 2 = add(CC(1).bad.value, CC(1).bad.value)
-  //val a : FixedSizeVector[2] = FixedSizeVector(1) concat FixedSizeVector(1)
+//Checks upper bound of Plus.Out is well defined
+case class Foo[A <: Int]() {
+  def foo[B <: Int](implicit ev: Plus[A, B]) = Foo[ev.Out]
 }

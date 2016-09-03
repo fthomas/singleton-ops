@@ -13,26 +13,27 @@ to the type-level and allows for example to add `Double`s at the type-level.
 * The following adds the singleton types `Double(3.6)` and `Double(4.9)`
 and yields the type `Double(8.5)` as result:
 ```scala
-scala> val p = Plus[Double, 3.6, 4.9]
-p: singleton.ops.Plus[Double,3.6,4.9]{type Out = Double(8.5)} = $anon$1@72b03361
+scala> val p = Plus[W.`3.6`.T, W.`4.9`.T]
+p: singleton.ops.Plus[Double(3.6),Double(4.9)]{type Out = Double(8.5)} = $anon$1@4e24b316
 
-scala> 8.5 : p.Out
+scala> 8.5: p.Out
 res0: p.Out = 8.5
 
-scala> 8.6 : p.Out
+scala> 8.6: p.Out
 <console>:16: error: type mismatch;
  found   : Double(8.6)
  required: p.Out
     (which expands to)  Double(8.5)
-       8.6 : p.Out
+       8.6: p.Out
        ^
 ```
-Note that the types are [literal-based singleton types][sip-23].
+Note that `W` is a shortcut for [`shapeless.Witness`][singleton-types] which provides
+syntax for [literal-based singleton types][sip-23].
 
 * Working with large numbers doesn't slay the compiler:
 ```scala
-scala> Times[Long, 32000L, 6400000L]
-res2: singleton.ops.Times[Long,32000L,6400000L]{type Out = Long(204800000000L)} = $anon$1@33a50777
+scala> Times[W.`32000L`.T, W.`6400000L`.T]
+res1: singleton.ops.Times[Long(32000L),Long(6400000L)]{type Out = Long(204800000000L)} = $anon$1@44bdc7a4
 ```
 
 * This `concat` method concatenates two `String`s both at the value- and
