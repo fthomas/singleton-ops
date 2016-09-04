@@ -4,43 +4,44 @@ import macrocompat.bundle
 import scala.reflect.macros.whitebox
 import singleton.ops.impl._
 
-trait I[A] extends Op {
-  type Upper = Int
+
+trait Opy[Upper] extends Serializable {
+  type Out <: Upper with Singleton
+  val value : Out {}
 }
 
-object I {
-  implicit def materialize[A <: Int](a: A) : I[A] = new I[A] {
-    type Out = A
-    val value: Out = a
+
+trait Sum[T, A <: T with Singleton, B <: T with Singleton] extends Opy[T]
+
+object Sum {
+  def apply[T, A <: T with Singleton, B <: T with Singleton]
+  (implicit sum: Sum[T, A, B]): Aux[T, A, B, sum.Out] = sum
+
+  def apply[A <: Int with Singleton, B <: Int with Singleton]
+  (implicit sum: Sum[Int, A, B], di1 : DummyImplicit) : Aux[Int, A, B, sum.Out] = sum
+
+  def apply[A <: Double with Singleton, B <: Double with Singleton]
+  (implicit sum: Sum[Double, A, B], di1 : DummyImplicit, di2 : DummyImplicit) : Aux[Double, A, B, sum.Out] = sum
+
+  type Aux[T, A <: T with Singleton, B <: T with Singleton, C <: T with Singleton] = Sum[T, A, B] { type Out = C }
+
+  implicit def macroCall[T, A <: T with Singleton, B <: T with Singleton]
+  (implicit nt: Numeric[T]):
+  Sum[T, A, B] = macro Macro.impl[Sum[_,_,_],T, A, B]
+
+  @bundle
+  final class Macro(val c: whitebox.Context) extends Macros {
+    def impl[
+    F <: Serializable : c.WeakTypeTag,
+    T : c.WeakTypeTag,
+    A <: T with Singleton : c.WeakTypeTag,
+    B <: T with Singleton : c.WeakTypeTag]
+    (nt: c.Expr[Numeric[T]]):
+    c.Tree = materializeOp3[F, T, A, B].usingFunction(evalTyped(nt).plus)
   }
 }
 
-//abstract class Mushi[A <: Op](val a : A) extends Op {
-//  type Upper = a.Upper
-//}
-//
-//object Mushi {
-//  implicit def materialize[A <: Op](a: A) : Mushi[A] = new Mushi[A](a) {
-//    type Out = a.Out
-//    val value: Out = a.value
-//  }
-//}
-import shapeless._
 
-trait Id[T, A <: T with Singleton] { type Out <: T with Singleton }
-
-object Id {
-  def apply[A <: Int with Singleton](implicit id: Id[Int,A]): Aux[Int, A, id.Out] = id
-  def apply[A <: Double with Singleton](implicit id: Id[Double, A], di : DummyImplicit): Aux[Double, A, id.Out] = id
-
-  type Aux[T, A <: T with Singleton, B <: T with Singleton] = Id[T,A] { type Out = B }
-
-  implicit def id[T, B <: T with Singleton]: Aux[T, B, B] = new Id[T, B] { type Out = B }
-}
-
-object Test {
-  val a = Id[1.0]
-}
 
 //abstract class Plus[A <: Op, B <: Op](val a: A, b: B) extends Op {
 //  type Upper = a.Upper
