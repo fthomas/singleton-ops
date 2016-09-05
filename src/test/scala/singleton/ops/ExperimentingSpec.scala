@@ -1,5 +1,26 @@
 package singleton.ops
 
+
+object NewDemo {
+  import infixops._
+  def demo[L <: Int with Singleton](implicit p : Sum2[@@[1], @@[1]]) : p.Out = p.value
+  val a = demo
+  println("NewDemo " + a.toString)
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 object Demo {
   val a = Sum[1,2]
   val av : a.Out = 3

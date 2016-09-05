@@ -119,14 +119,19 @@ trait Macros {
   ///////////////////////////////////////////////////////////////////////////////////////////
   // Three operands
   ///////////////////////////////////////////////////////////////////////////////////////////
-  def materializeOp3[F, T, A, B]
-  (implicit ev0: c.WeakTypeTag[F],
-   ev1: c.WeakTypeTag[T],
-   ev2: c.WeakTypeTag[A],
-   ev3: c.WeakTypeTag[B]): MaterializeOp3Aux =
-    new MaterializeOp3Aux(symbolOf[F], weakTypeOf[T], weakTypeOf[A], weakTypeOf[B])
+  def materializeOp3[F, T, A, B](implicit ev0: c.WeakTypeTag[F],
+                                 ev1: c.WeakTypeTag[T],
+                                 ev2: c.WeakTypeTag[A],
+                                 ev3: c.WeakTypeTag[B]): MaterializeOp3Aux =
+    new MaterializeOp3Aux(symbolOf[F],
+                          weakTypeOf[T],
+                          weakTypeOf[A],
+                          weakTypeOf[B])
 
-  final class MaterializeOp3Aux(opSym: TypeSymbol, tTpe: Type, aTpe: Type, bTpe: Type) {
+  final class MaterializeOp3Aux(opSym: TypeSymbol,
+                                tTpe: Type,
+                                aTpe: Type,
+                                bTpe: Type) {
     def usingFunction[T1, T2, R](f: (T1, T2) => R): Tree =
       mkOp2Tree(computeOutValue(f))
 
@@ -140,7 +145,6 @@ trait Macros {
       mkOpTree(tq"$opSym[$tTpe, $aTpe, $bTpe]", outValue)
   }
   ///////////////////////////////////////////////////////////////////////////////////////////
-
 
   def mkOpTree[T](appliedTpe: Tree, outValue: T): Tree = {
     val (outTpe, outTree) = constantTypeAndValueOf(outValue)
