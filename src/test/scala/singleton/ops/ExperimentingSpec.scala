@@ -1,34 +1,37 @@
 package singleton.ops
 
 import infixops._
+import singleton.ops.impl.SingletonTypeValueMacro
 
-object NewDemo {
-  def demo[L <: Int with Singleton](implicit p : @@[L]) = mambo[p.Out]()
-  def mambo[L <: Int with Singleton](){}
-  val b = demo[8]
-  println("NewDemo " + b.toString)
+//object NewDemo {
+//  def demo[L <: Int with Singleton](implicit p : @@[L]) = mambo[p.Out]()
+//  def mambo[L <: Int with Singleton](){}
+//  val b = demo[8]
+//  println("NewDemo " + b.toString)
+//}
+
+
+
+//class FixedSizeVector[L <: Int with Singleton]() {
+//  def concat[L2 <: Int with Singleton](that : FixedSizeVector[L2])(implicit l : @@[L] + @@[L2]) = new FixedSizeVector[l.Out]
+//  def + (that : FixedSizeVector[L]) = new FixedSizeVector[L]
+//}
+//
+//object FixedSizeVector {
+//  def apply[L <: Int with Singleton](implicit check : LessThan[0, L]) = new FixedSizeVector[L]
+//}
+//
+//object TestVector {
+//  val v1 = FixedSizeVector[5]
+//  val v2 = FixedSizeVector[2]
+//  val v3 : FixedSizeVector[12] = v1 concat v2 concat v1
+////  val v4 = FixedSizeVector[-1]
+//}
+
+
+object TestMacro {
+  val a = SingletonTypeValueMacro.call[1.0]
 }
-
-
-
-class FixedSizeVector[L <: Int with Singleton]() {
-  def concat[L2 <: Int with Singleton](that : FixedSizeVector[L2])(implicit l : @@[L] + @@[L2]) = new FixedSizeVector[l.Out]
-  def + (that : FixedSizeVector[L]) = new FixedSizeVector[L]
-}
-
-object FixedSizeVector {
-  def apply[L <: Int with Singleton](implicit check : LessThan[0, L]) = new FixedSizeVector[L]
-}
-
-object TestVector {
-  val v1 = FixedSizeVector[5]
-  val v2 = FixedSizeVector[2]
-  val v3 : FixedSizeVector[12] = v1 concat v2 concat v1
-//  val v4 = FixedSizeVector[-1]
-}
-
-
-
 
 
 

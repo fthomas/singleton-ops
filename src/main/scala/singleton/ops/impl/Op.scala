@@ -31,7 +31,7 @@ trait SingletonTypeExprDouble extends SingletonTypeExprBase[Double]
 trait SingletonTypeExprString extends SingletonTypeExprBase[String]
 
 
-trait SingletonTypeValue[S <: Singleton] extends SingletonTypeExpr
+trait SingletonTypeValue[S] extends SingletonTypeExpr
 
 sealed trait SingletonTypeValueInt[S <: Int with Singleton] extends SingletonTypeValue[S] with SingletonTypeExprInt {type Out = S}
 sealed trait SingletonTypeValueLong[S <: Long with Singleton] extends SingletonTypeValue[S] with SingletonTypeExprLong {type Out = S}
@@ -39,23 +39,52 @@ sealed trait SingletonTypeValueDouble[S <: Double with Singleton] extends Single
 sealed trait SingletonTypeValueString[S <: String with Singleton] extends SingletonTypeValue[S] with SingletonTypeExprString {type Out = S}
 
 
-object SingletonTypeValue {
-  implicit def implInt[S <: Int with Singleton]
-  (implicit v: ValueOf[S]) : SingletonTypeValueInt[S] =
-    new SingletonTypeValueInt[S] {val value : Out = valueOf[S]}
+//trait Splitter[S] {
+//  type BaseType
+//  type Out <: BaseType with Singleton
+//  val value : Out {}
+//}
 
-  implicit def implLong[S <: Long with Singleton]
-  (implicit v: ValueOf[S], di : DummyImplicit) : SingletonTypeValueLong[S] =
-    new SingletonTypeValueLong[S] {val value : Out = valueOf[S]}
+//object Splitter {
+//  def apply[S](implicit ret : Splitter[S]) : Aux[S, ret.BaseType, ret.Out] = ret
+//  type Aux[S, Ret_BaseType, Ret_Out <: Ret_BaseType with Singleton] = Splitter[S] {type BaseType = Ret_BaseType; type Out = Ret_Out}
+//  implicit def impl[S](implicit m : SplitterMacro[S]) : Aux[S, m.BaseType, m.Out] = m
+//}
 
-  implicit def implDouble[S <: Double with Singleton]
-  (implicit v: ValueOf[S], di : DummyImplicit, di2 : DummyImplicit) : SingletonTypeValueDouble[S] =
-    new SingletonTypeValueDouble[S] {val value : Out = valueOf[S]}
+@bundle
+object SingletonTypeValueMacro {
+  implicit def call[S]: SingletonTypeValue[S] =
+  macro Macro.impl[S]
 
-  implicit def implString[S <: String with Singleton]
-  (implicit v: ValueOf[S], di : DummyImplicit, di2 : DummyImplicit, di3 : DummyImplicit) : SingletonTypeValueString[S] =
-    new SingletonTypeValueString[S] {val value : Out = valueOf[S]}
+  final class Macro(val c: whitebox.Context) extends Macros {
+    def impl[S: c.WeakTypeTag]: c.Tree = materializeSplitter[SingletonTypeValue[_], S].usingFunction
+  }
 }
+
+
+//
+//object SingletonTypeValue {
+//  def apply[S](implicit ret : SingletonTypeValue[S]) : Aux[S, ret.BaseType, ret.Out] = ret
+//  type Aux[S, Ret_BaseType, Ret_Out <: Ret_BaseType with Singleton] = SingletonTypeValue[S] {type BaseType = Ret_BaseType; type Out = Ret_Out}
+//  implicit def implInt[S <: Int with Singleton]
+//  (implicit v: ValueOf[S]) : SingletonTypeValue[S] =
+//    new SingletonTypeValue[S] {type BaseType = Int; type Out = S; val value : Out = valueOf[S]}
+//
+//    implicit def implInt2[S <: Int with Singleton]
+//    (implicit v: ValueOf[S], di : DummyImplicit) : SingletonTypeValueInt[S] =
+//      new SingletonTypeValueInt[S] {val value : Out = valueOf[S]}
+////  implicit def implLong[S <: Long with Singleton]
+////  (implicit v: ValueOf[S], di : DummyImplicit) : SingletonTypeValueLong[S] =
+////    new SingletonTypeValueLong[S] {val value : Out = valueOf[S]}
+////
+////  implicit def implDouble[S <: Double with Singleton]
+////  (implicit v: ValueOf[S], di : DummyImplicit, di2 : DummyImplicit) : SingletonTypeValueDouble[S] =
+////    new SingletonTypeValueDouble[S] {val value : Out = valueOf[S]}
+////
+////  implicit def implString[S <: String with Singleton]
+////  (implicit v: ValueOf[S], di : DummyImplicit, di2 : DummyImplicit, di3 : DummyImplicit) : SingletonTypeValueString[S] =
+////    new SingletonTypeValueString[S] {val value : Out = valueOf[S]}
+//}
 
 
 

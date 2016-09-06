@@ -145,8 +145,8 @@ trait Macros {
       f(aValue, bValue)
     }
 
-    private def mkOp2Tree[T](outValue: T): Tree =
-      mkOpTree(tq"$opSym[$t1Tpe, $s1Tpe, $t2Tpe, $s2Tpe]", outValue)
+    private def mkOp2Tree[T](outValue: T): Tree ={
+      mkOpTree(tq"$opSym[$t1Tpe, $s1Tpe, $t2Tpe, $s2Tpe]", outValue)}
   }
   ///////////////////////////////////////////////////////////////////////////////////////////
 
@@ -159,4 +159,50 @@ trait Macros {
       }
     """
   }
+
+
+  ///////////////////////////////////////////////////////////////////////////////////////////
+  // Three operands
+  ///////////////////////////////////////////////////////////////////////////////////////////
+  def materializeSplitter[F, S]
+  (implicit ev0: c.WeakTypeTag[F],
+   ev1: c.WeakTypeTag[S]): MaterializeSplitterAux =
+  new MaterializeSplitterAux(symbolOf[F],
+    weakTypeOf[S])
+
+  final class MaterializeSplitterAux(opSym: TypeSymbol,
+                                     sTpe: Type) {
+    def usingFunction[T]: Tree =
+      mkOp2Tree(computeOutValue[T])
+
+    def computeOutValue[T]: T = {
+      val aValue = extractSingletonValue[T](sTpe)
+      aValue
+    }
+
+    private def mkOp2Tree[T](outValue: T): Tree ={
+      mkOpTree[T](tq"$opSym[$sTpe]", outValue)}
+
+    def mkOpTree[T](appliedTpe: Tree, outValue: T): Tree = {
+      val baseTpe = outValue match {
+        case _ : Int => tq"Int"
+        case _ : Long => tq"Long"
+        case _ : Double => tq"Double"
+        case _ : String => tq"String"
+        case _ =>
+          abort("Unsupported type for value " + outValue)
+      }
+      val (outTpe, outTree) = constantTypeAndValueOf(outValue)
+      val tree = q"""
+        new $appliedTpe {
+          type BaseType = $baseTpe
+          type Out = $outTpe
+          val value: $outTpe = $outTree
+        }
+      """
+      print(showCode(tree))
+      tree
+    }
+  }
+  ///////////////////////////////////////////////////////////////////////////////////////////
 }
