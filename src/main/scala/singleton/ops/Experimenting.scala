@@ -94,6 +94,9 @@ object Sum2Int {//extends SingletonTypeFunc2Static("+") {
   }
 }
 
+trait InfixOps[BaseType] {
+
+}
 object infixops {
   type +[P1 <: SingletonTypeExpr, P2 <: SingletonTypeExpr] = Sum2Int[P1, P2]
   type @@[S <: Int with Singleton] = SingletonTypeValueInt[S]
