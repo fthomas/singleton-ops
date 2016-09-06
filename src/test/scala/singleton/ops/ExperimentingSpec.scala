@@ -3,12 +3,12 @@ package singleton.ops
 import infixops._
 import singleton.ops.impl.SingletonTypeValueMacro
 
-//object NewDemo {
-//  def demo[L <: Int with Singleton](implicit p : @@[L]) = mambo[p.Out]()
-//  def mambo[L <: Int with Singleton](){}
-//  val b = demo[8]
-//  println("NewDemo " + b.toString)
-//}
+object NewDemo {
+  def demo[L <: Int with Singleton](implicit p : @@[L]) = mambo[p.Out]()
+  def mambo[L <: Int with Singleton](){}
+  val b = demo[8]
+  println("NewDemo " + b.toString)
+}
 
 
 
@@ -30,7 +30,7 @@ import singleton.ops.impl.SingletonTypeValueMacro
 
 
 object TestMacro {
-  val a = SingletonTypeValueMacro.call[1.0]
+//  val a = SingletonTypeValueMacro.call[1.0]
 }
 
 

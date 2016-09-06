@@ -53,7 +53,7 @@ sealed trait SingletonTypeValueString[S <: String with Singleton] extends Single
 
 @bundle
 object SingletonTypeValueMacro {
-  implicit def call[S]: SingletonTypeValue[S] =
+  implicit def call[S]: SingletonTypeValue[S] {type BaseType = Int} =
   macro Macro.impl[S]
 
   final class Macro(val c: whitebox.Context) extends Macros {

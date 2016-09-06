@@ -200,8 +200,15 @@ trait Macros {
           val value: $outTpe = $outTree
         }
       """
+      val tree1 = q"""
+        new $appliedTpe {
+          type BaseType = Int
+          type Out = 1
+          val value: 1 = 1
+        }
+      """
       print(showCode(tree))
-      tree
+      tree1
     }
   }
   ///////////////////////////////////////////////////////////////////////////////////////////
