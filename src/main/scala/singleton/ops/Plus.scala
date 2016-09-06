@@ -5,7 +5,7 @@ import scala.reflect.macros.whitebox
 import singleton.ops.impl._
 
 trait Plus[A, B] extends Op {
-  type Out
+  type Out <: Int
 }
 
 object Plus extends Op2Companion[Plus] {

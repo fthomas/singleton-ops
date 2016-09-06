@@ -119,30 +119,34 @@ trait Macros {
   ///////////////////////////////////////////////////////////////////////////////////////////
   // Three operands
   ///////////////////////////////////////////////////////////////////////////////////////////
-  def materializeOp3[F, T, A, B](implicit ev0: c.WeakTypeTag[F],
-                                 ev1: c.WeakTypeTag[T],
-                                 ev2: c.WeakTypeTag[A],
-                                 ev3: c.WeakTypeTag[B]): MaterializeOp3Aux =
+  def materializeOp3[F, T1, S1, T2, S2]
+  (implicit ev0: c.WeakTypeTag[F],
+   ev1: c.WeakTypeTag[T1],
+   ev2: c.WeakTypeTag[S1],
+   ev3: c.WeakTypeTag[T2],
+   ev4: c.WeakTypeTag[S2]): MaterializeOp3Aux =
     new MaterializeOp3Aux(symbolOf[F],
-                          weakTypeOf[T],
-                          weakTypeOf[A],
-                          weakTypeOf[B])
+                          weakTypeOf[T1],
+                          weakTypeOf[S1],
+                          weakTypeOf[T2],
+                          weakTypeOf[S2])
 
   final class MaterializeOp3Aux(opSym: TypeSymbol,
-                                tTpe: Type,
-                                aTpe: Type,
-                                bTpe: Type) {
+                                t1Tpe: Type,
+                                s1Tpe: Type,
+                                t2Tpe: Type,
+                                s2Tpe: Type) {
     def usingFunction[T1, T2, R](f: (T1, T2) => R): Tree =
       mkOp2Tree(computeOutValue(f))
 
     private def computeOutValue[T1, T2, R](f: (T1, T2) => R): R = {
-      val aValue = extractSingletonValue[T1](aTpe)
-      val bValue = extractSingletonValue[T2](bTpe)
+      val aValue = extractSingletonValue[T1](s1Tpe)
+      val bValue = extractSingletonValue[T2](s2Tpe)
       f(aValue, bValue)
     }
 
     private def mkOp2Tree[T](outValue: T): Tree =
-      mkOpTree(tq"$opSym[$tTpe, $aTpe, $bTpe]", outValue)
+      mkOpTree(tq"$opSym[$t1Tpe, $s1Tpe, $t2Tpe, $s2Tpe]", outValue)
   }
   ///////////////////////////////////////////////////////////////////////////////////////////
 
