@@ -1,17 +1,19 @@
 package singleton.ops
 
-import infixops._
-import singleton.ops.impl.SingletonTypeValueMacro
 
 object NewDemo {
-  def demo[L <: Int with Singleton](implicit p : @@[L]) = mambo[p.Out]()
+  import infixops._
   def mambo[L <: Int with Singleton](){}
-  val b = demo[8]
+  def demo[L <: Int with Singleton](implicit p : @@[L]) = mambo[p.Out]()
+  def demo2[L <: Int with Singleton](implicit p : @@[L] + @@[L]) = mambo[p.Out]()
+  def demo3[L <: Int with Singleton](implicit p : @@[L]) : p.Out {} = p.value
+  val a = demo[8]
+  val b : 8 = demo3[8]
   println("NewDemo " + b.toString)
 }
 
 
-
+//
 //class FixedSizeVector[L <: Int with Singleton]() {
 //  def concat[L2 <: Int with Singleton](that : FixedSizeVector[L2])(implicit l : @@[L] + @@[L2]) = new FixedSizeVector[l.Out]
 //  def + (that : FixedSizeVector[L]) = new FixedSizeVector[L]
@@ -24,7 +26,7 @@ object NewDemo {
 //object TestVector {
 //  val v1 = FixedSizeVector[5]
 //  val v2 = FixedSizeVector[2]
-//  val v3 : FixedSizeVector[12] = v1 concat v2 concat v1
+//  val v3 : FixedSizeVector[7] = v1 concat v2 //concat v1
 ////  val v4 = FixedSizeVector[-1]
 //}
 

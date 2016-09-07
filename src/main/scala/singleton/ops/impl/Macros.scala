@@ -119,23 +119,30 @@ trait Macros {
   ///////////////////////////////////////////////////////////////////////////////////////////
   // Three operands
   ///////////////////////////////////////////////////////////////////////////////////////////
-  def materializeOp3[F, T1, S1, T2, S2]
-  (implicit ev0: c.WeakTypeTag[F],
-   ev1: c.WeakTypeTag[T1],
-   ev2: c.WeakTypeTag[S1],
-   ev3: c.WeakTypeTag[T2],
-   ev4: c.WeakTypeTag[S2]): MaterializeOp3Aux =
-    new MaterializeOp3Aux(symbolOf[F],
-                          weakTypeOf[T1],
-                          weakTypeOf[S1],
-                          weakTypeOf[T2],
-                          weakTypeOf[S2])
+  def materializeOp3[F, B, T1, S1, T2, S2](
+      implicit ev0: c.WeakTypeTag[F],
+      ev1: c.WeakTypeTag[B],
+      ev2: c.WeakTypeTag[T1],
+      ev3: c.WeakTypeTag[S1],
+      ev4: c.WeakTypeTag[T2],
+      ev5: c.WeakTypeTag[S2]): MaterializeOp3Aux =
+    new MaterializeOp3Aux(
+      symbolOf[F],
+      weakTypeOf[B],
+      weakTypeOf[T1],
+      weakTypeOf[S1],
+      weakTypeOf[T2],
+      weakTypeOf[S2]
+    )
 
-  final class MaterializeOp3Aux(opSym: TypeSymbol,
-                                t1Tpe: Type,
-                                s1Tpe: Type,
-                                t2Tpe: Type,
-                                s2Tpe: Type) {
+  final class MaterializeOp3Aux(
+      opSym: TypeSymbol,
+      bTpe: Type,
+      t1Tpe: Type,
+      s1Tpe: Type,
+      t2Tpe: Type,
+      s2Tpe: Type
+  ) {
     def usingFunction[T1, T2, R](f: (T1, T2) => R): Tree =
       mkOp2Tree(computeOutValue(f))
 
@@ -145,8 +152,20 @@ trait Macros {
       f(aValue, bValue)
     }
 
-    private def mkOp2Tree[T](outValue: T): Tree ={
-      mkOpTree(tq"$opSym[$t1Tpe, $s1Tpe, $t2Tpe, $s2Tpe]", outValue)}
+    private def mkOp2Tree[T](outValue: T): Tree = {
+      mkOpTree(tq"$opSym[$bTpe, $t1Tpe, $s1Tpe, $t2Tpe, $s2Tpe]", outValue)
+    }
+
+    def mkOpTree[T](appliedTpe: Tree, outValue: T): Tree = {
+      val (outTpe, outTree) = constantTypeAndValueOf(outValue)
+      q"""
+      new $appliedTpe {
+        type BaseType = $bTpe
+        type Out = $outTpe
+        val value: $outTpe = $outTree
+      }
+    """
+    }
   }
   ///////////////////////////////////////////////////////////////////////////////////////////
 
@@ -160,18 +179,15 @@ trait Macros {
     """
   }
 
-
   ///////////////////////////////////////////////////////////////////////////////////////////
   // Three operands
   ///////////////////////////////////////////////////////////////////////////////////////////
-  def materializeSplitter[F, S]
-  (implicit ev0: c.WeakTypeTag[F],
-   ev1: c.WeakTypeTag[S]): MaterializeSplitterAux =
-  new MaterializeSplitterAux(symbolOf[F],
-    weakTypeOf[S])
+  def materializeSplitter[F, S](
+      implicit ev0: c.WeakTypeTag[F],
+      ev1: c.WeakTypeTag[S]): MaterializeSplitterAux =
+    new MaterializeSplitterAux(symbolOf[F], weakTypeOf[S])
 
-  final class MaterializeSplitterAux(opSym: TypeSymbol,
-                                     sTpe: Type) {
+  final class MaterializeSplitterAux(opSym: TypeSymbol, sTpe: Type) {
     def usingFunction[T]: Tree =
       mkOp2Tree(computeOutValue[T])
 
@@ -180,15 +196,16 @@ trait Macros {
       aValue
     }
 
-    private def mkOp2Tree[T](outValue: T): Tree ={
-      mkOpTree[T](tq"$opSym[$sTpe]", outValue)}
+    private def mkOp2Tree[T](outValue: T): Tree = {
+      mkOpTree[T](tq"$opSym[$sTpe]", outValue)
+    }
 
     def mkOpTree[T](appliedTpe: Tree, outValue: T): Tree = {
       val baseTpe = outValue match {
-        case _ : Int => tq"Int"
-        case _ : Long => tq"Long"
-        case _ : Double => tq"Double"
-        case _ : String => tq"String"
+        case _: Int => tq"Int"
+        case _: Long => tq"Long"
+        case _: Double => tq"Double"
+        case _: String => tq"String"
         case _ =>
           abort("Unsupported type for value " + outValue)
       }
@@ -200,15 +217,15 @@ trait Macros {
           val value: $outTpe = $outTree
         }
       """
-      val tree1 = q"""
-        new $appliedTpe {
-          type BaseType = Int
-          type Out = 1
-          val value: 1 = 1
-        }
-      """
-      print(showCode(tree))
-      tree1
+//      val tree1 = q"""
+//        new $appliedTpe {
+//          type BaseType = Int
+//          type Out = 1
+//          val value: 1 = 1
+//        }
+//      """
+//      print(showCode(tree))
+      tree
     }
   }
   ///////////////////////////////////////////////////////////////////////////////////////////
