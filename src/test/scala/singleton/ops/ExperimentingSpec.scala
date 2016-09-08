@@ -4,10 +4,10 @@ package singleton.ops
 object NewDemo {
   import infixops._
   def mambo[L <: Int with Singleton](){}
-  def demo[L <: Int with Singleton](implicit p : @@[L]) = mambo[p.Out]()
-  def demo2[L <: Int with Singleton](implicit p : @@[L] + @@[L]) = mambo[p.Out]()
-  def demo3[L <: Int with Singleton](implicit p : @@[L]) : p.Out {} = p.value
-  val a = demo[8]
+//  def demo[L <: Int with Singleton](implicit p : @@[L]) = mambo[p.Out]()
+//  def demo2[L <: Int with Singleton](implicit p : @@[L] + @@[L]) = mambo[p.Out]()
+  def demo3[L <: Int with Singleton](implicit p : @@[@@[L]]) : p.Out {} = p.value
+//  val a = demo[8]
   val b : 8 = demo3[8]
   println("NewDemo " + b.toString)
 }

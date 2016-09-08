@@ -18,31 +18,16 @@ sealed trait SingletonTypeFunc2[
     extends SingletonTypeExpr
 
 sealed trait Sum2[P1 <: SingletonTypeExpr, P2 <: SingletonTypeExpr]
-    extends SingletonTypeFunc2[P1, P2] {
-  type Out <: Int with Singleton
-}
+    extends SingletonTypeFunc2[P1, P2] //{type Out <: Int with Singleton}
 sealed trait Sum2Int[P1 <: SingletonTypeExpr, P2 <: SingletonTypeExpr]
     extends Sum2[P1, P2]
     with SingletonTypeExprInt {}
-sealed trait Sum2Long[P1 <: SingletonTypeExpr, P2 <: SingletonTypeExpr]
-    extends Sum2[P1, P2]
-    with SingletonTypeExprLong {}
-sealed trait Sum2Double[P1 <: SingletonTypeExpr, P2 <: SingletonTypeExpr]
-    extends Sum2[P1, P2]
-    with SingletonTypeExprDouble
-
-trait Extractor[P <: SingletonTypeExpr] {
-  type BaseType
-  type Out
-}
-
-object Extractor {
-  type Aux[P <: SingletonTypeExpr, Ret_BaseType, Ret_Out] =
-    Extractor[P] { type BaseType = Ret_BaseType; type Out = Ret_Out }
-  implicit def impl[P <: SingletonTypeExpr, Ret_BaseType, Ret_Out](
-      implicit p: P): Aux[P, p.BaseType, p.Out] =
-    new Extractor[P] { type BaseType = p.BaseType; type Out = p.Out }
-}
+//sealed trait Sum2Long[P1 <: SingletonTypeExpr, P2 <: SingletonTypeExpr]
+//    extends Sum2[P1, P2]
+//    with SingletonTypeExprLong {}
+//sealed trait Sum2Double[P1 <: SingletonTypeExpr, P2 <: SingletonTypeExpr]
+//    extends Sum2[P1, P2]
+//    with SingletonTypeExprDouble
 
 object Sum2 { //extends SingletonTypeFunc2Static("+") {
   type AuxIntInt[
@@ -98,6 +83,7 @@ object Sum2 { //extends SingletonTypeFunc2Static("+") {
 //    }
   }
 }
+
 
 object infixops {
   type +[P1 <: SingletonTypeExpr, P2 <: SingletonTypeExpr] = Sum2[P1, P2]

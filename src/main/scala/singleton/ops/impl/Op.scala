@@ -1,6 +1,7 @@
 package singleton.ops.impl
 
 import macrocompat.bundle
+
 import scala.reflect.macros.whitebox
 import singleton.ops.impl._
 
@@ -24,12 +25,26 @@ trait SingletonTypeExpr extends Serializable {
 
 trait SingletonTypeExprBase[B] extends SingletonTypeExpr { type BaseType = B }
 
-trait SingletonTypeExprInt extends SingletonTypeExprBase[Int]
-trait SingletonTypeExprLong extends SingletonTypeExprBase[Long]
-trait SingletonTypeExprDouble extends SingletonTypeExprBase[Double]
-trait SingletonTypeExprString extends SingletonTypeExprBase[String]
+trait SingletonTypeExprInt extends SingletonTypeExprBase[Int] {type Out <: Int with Singleton}
+trait SingletonTypeExprLong extends SingletonTypeExprBase[Long] {type Out <: Long with Singleton}
+trait SingletonTypeExprDouble extends SingletonTypeExprBase[Double]{type Out <: Double with Singleton}
+trait SingletonTypeExprString extends SingletonTypeExprBase[String] {type Out <: String with Singleton}
 
-trait SingletonTypeValue[S] extends SingletonTypeExpr { type Out <: S }
+trait Extractor[P <: SingletonTypeExpr] {
+  type BaseType
+  type Out
+}
+
+object Extractor {
+  type Aux[P <: SingletonTypeExpr, Ret_BaseType, Ret_Out] =
+  Extractor[P] { type BaseType = Ret_BaseType; type Out = Ret_Out }
+
+  implicit def impl[P <: SingletonTypeExpr, Ret_BaseType, Ret_Out]
+  (implicit p: P): Aux[P, p.BaseType, p.Out] =
+    new Extractor[P] { type BaseType = p.BaseType; type Out = p.Out }
+}
+
+trait SingletonTypeValue[S] extends SingletonTypeExpr// { type Out <: S }
 
 sealed trait SingletonTypeValueInt[S <: Int with Singleton]
     extends SingletonTypeValue[S]
@@ -70,16 +85,18 @@ trait Splitter[S] {
 //}
 
 object SingletonTypeValue {
-  def apply[S](
-      implicit ret: SingletonTypeValue[S]): Aux[S, ret.BaseType, ret.Out] = ret
+  def apply[S](implicit ret: SingletonTypeValue[S]): Aux[S, ret.BaseType, ret.Out] = ret
 
   type Aux[S, Ret_BaseType, Ret_Out] = SingletonTypeValue[S] {
     type BaseType = Ret_BaseType; type Out = Ret_Out
   }
 
-  implicit def implInt[S <: Int with Singleton](
-      implicit v: ValueOf[S]): SingletonTypeValueInt[S] =
+  implicit def implInt[S <: Int with Singleton]
+  (implicit v: ValueOf[S]): SingletonTypeValueInt[S] =
     new SingletonTypeValueInt[S] { val value: Out = valueOf[S] }
+
+  implicit def implExprInt[S <: SingletonTypeExprInt]
+  (implicit e: Extractor[S]): SingletonTypeValue[e.Out] = SingletonTypeValue[e.Out]
 
   implicit def implLong[S <: Long with Singleton](
       implicit v: ValueOf[S],
