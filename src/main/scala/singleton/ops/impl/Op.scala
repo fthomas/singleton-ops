@@ -44,17 +44,19 @@ object Extractor {
     new Extractor[P] { type BaseType = p.BaseType; type Out = p.Out }
 }
 
-trait SingletonTypeValue[+S] extends SingletonTypeExpr// { type Out <: S }
+trait SingletonTypeValue[S] extends SingletonTypeExpr// { type Out <: S }
 
 sealed trait SingletonTypeValueInt[S <: Int with Singleton]
     extends SingletonTypeValue[S]
     with SingletonTypeExprInt {
   type Out = S
 }
-object SingletonTypeValueInt {
-  implicit def impl[S <: Int with Singleton](implicit v : ValueOf[S]) : SingletonTypeValueInt[S] =
-    new SingletonTypeValueInt[S] {val value : Out = valueOf[S]}
-}
+
+trait SingletonTypeValueExpr[S <: SingletonTypeExpr] extends SingletonTypeValue[S]
+//object SingletonTypeValueInt {
+//  implicit def impl[S <: Int with Singleton](implicit v : ValueOf[S]) : SingletonTypeValueInt[S] =
+//    new SingletonTypeValueInt[S] {val value : Out = valueOf[S]}
+//}
 
 sealed trait SingletonTypeValueLong[S <: Long with Singleton]
     extends SingletonTypeValue[S]
@@ -96,14 +98,14 @@ object SingletonTypeValue {
     type BaseType = Ret_BaseType; type Out = Ret_Out
   }
 
-  type AuxInt[P <: SingletonTypeValueInt[S], S <: Int with Singleton] = SingletonTypeValue[P] {
+  type AuxInt[P <: SingletonTypeValueInt[S], S <: Int with Singleton] = SingletonTypeValueExpr[P] {
     type BaseType = Int; type Out = S
   }
 
 
   implicit def implExprInt[P <: SingletonTypeValueInt[S], B, S <: Int with Singleton]
   (implicit p : Extractor.Aux[P, B, S], v : ValueOf[S]): AuxInt[P,S] =
-    new SingletonTypeValue[P] {type BaseType = Int; type Out = S; val value: Out = valueOf[S]}
+    new SingletonTypeValueExpr[P] {type BaseType = Int; type Out = S; val value: Out = valueOf[S]}
 
   implicit def implInt[S <: Int with Singleton]
   (implicit v: ValueOf[S]): SingletonTypeValueInt[S] =
