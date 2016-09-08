@@ -86,6 +86,7 @@ object Sum2 { //extends SingletonTypeFunc2Static("+") {
 
 
 object infixops {
+//  type !![P] = Conver
   type +[P1 <: SingletonTypeExpr, P2 <: SingletonTypeExpr] = Sum2[P1, P2]
   type @@[S] = SingletonTypeValue[S]
 }
