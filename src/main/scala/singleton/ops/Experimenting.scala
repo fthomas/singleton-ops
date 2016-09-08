@@ -18,16 +18,16 @@ sealed trait SingletonTypeFunc2[
     extends SingletonTypeExpr
 
 sealed trait Sum2[P1 <: SingletonTypeExpr, P2 <: SingletonTypeExpr]
-    extends SingletonTypeFunc2[P1, P2] //{type Out <: Int with Singleton}
+    extends SingletonTypeFunc2[P1, P2]
 sealed trait Sum2Int[P1 <: SingletonTypeExpr, P2 <: SingletonTypeExpr]
     extends Sum2[P1, P2]
     with SingletonTypeExprInt {}
-//sealed trait Sum2Long[P1 <: SingletonTypeExpr, P2 <: SingletonTypeExpr]
-//    extends Sum2[P1, P2]
-//    with SingletonTypeExprLong {}
-//sealed trait Sum2Double[P1 <: SingletonTypeExpr, P2 <: SingletonTypeExpr]
-//    extends Sum2[P1, P2]
-//    with SingletonTypeExprDouble
+sealed trait Sum2Long[P1 <: SingletonTypeExpr, P2 <: SingletonTypeExpr]
+    extends Sum2[P1, P2]
+    with SingletonTypeExprLong {}
+sealed trait Sum2Double[P1 <: SingletonTypeExpr, P2 <: SingletonTypeExpr]
+    extends Sum2[P1, P2]
+    with SingletonTypeExprDouble
 
 object Sum2 { //extends SingletonTypeFunc2Static("+") {
   type AuxIntInt[
@@ -84,11 +84,11 @@ object Sum2 { //extends SingletonTypeFunc2Static("+") {
   }
 }
 
-
 object infixops {
 //  type !![P] = Conver
   type +[P1 <: SingletonTypeExpr, P2 <: SingletonTypeExpr] = Sum2[P1, P2]
   type @@[S] = SingletonTypeValue[S]
+  type Ret[P <: SingletonTypeExpr, B] = SingletonTypeExprReturn[P, B]
 }
 
 import infixops._

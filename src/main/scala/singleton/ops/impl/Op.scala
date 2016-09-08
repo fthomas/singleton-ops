@@ -44,13 +44,18 @@ object Extractor {
     new Extractor[P] { type BaseType = p.BaseType; type Out = p.Out }
 }
 
-trait SingletonTypeValue[S <: Singleton] extends SingletonTypeExpr { type Out <: S }
+trait SingletonTypeValue[+S] extends SingletonTypeExpr// { type Out <: S }
 
 sealed trait SingletonTypeValueInt[S <: Int with Singleton]
     extends SingletonTypeValue[S]
     with SingletonTypeExprInt {
   type Out = S
 }
+object SingletonTypeValueInt {
+  implicit def impl[S <: Int with Singleton](implicit v : ValueOf[S]) : SingletonTypeValueInt[S] =
+    new SingletonTypeValueInt[S] {val value : Out = valueOf[S]}
+}
+
 sealed trait SingletonTypeValueLong[S <: Long with Singleton]
     extends SingletonTypeValue[S]
     with SingletonTypeExprLong {
@@ -91,6 +96,15 @@ object SingletonTypeValue {
     type BaseType = Ret_BaseType; type Out = Ret_Out
   }
 
+  type AuxInt[P <: SingletonTypeValueInt[S], S <: Int with Singleton] = SingletonTypeValue[P] {
+    type BaseType = Int; type Out = S
+  }
+
+
+  implicit def implExprInt[P <: SingletonTypeValueInt[S], B, S <: Int with Singleton]
+  (implicit p : Extractor.Aux[P, B, S], v : ValueOf[S]): AuxInt[P,S] =
+    new SingletonTypeValue[P] {type BaseType = Int; type Out = S; val value: Out = valueOf[S]}
+
   implicit def implInt[S <: Int with Singleton]
   (implicit v: ValueOf[S]): SingletonTypeValueInt[S] =
     new SingletonTypeValueInt[S] { val value: Out = valueOf[S] }
@@ -113,6 +127,20 @@ object SingletonTypeValue {
       di3: DummyImplicit): SingletonTypeValueString[S] =
     new SingletonTypeValueString[S] { val value: Out = valueOf[S] }
 }
+
+trait SingletonTypeExprReturn[P <: SingletonTypeExpr, B] {
+  type Out <: B with Singleton
+  val value : Out {}
+}
+
+object SingletonTypeExprReturn {
+  //type Aux[P <: SingletonTypeExpr, E_Base, E_Out <: E_Base with Singleton] = SingletonTypeExprReturn[P, E_Base] {type Out = E_Out}
+  implicit def impl[P <: SingletonTypeExpr, B <: Int](implicit p: Extractor[P]) : SingletonTypeExprReturn[P, Int] = new SingletonTypeExprReturn[P, Int] {
+    type Out = 1
+    val value : Out = 1
+  }
+}
+
 
 trait Op {
   type Out
