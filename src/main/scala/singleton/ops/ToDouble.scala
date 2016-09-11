@@ -1,8 +1,9 @@
 package singleton.ops
 
 import macrocompat.bundle
+
 import scala.reflect.macros.whitebox
-import singleton.ops.impl._
+import singleton.ops.impl.{GeneralMacros, _}
 
 trait ToDouble[A] extends Op {
   override type Out <: Double
@@ -15,7 +16,7 @@ object ToDouble extends Op1Companion[ToDouble] {
   ): ToDouble[A] = macro ToDoubleMacro.materialize[T, A]
 
   @bundle
-  final class ToDoubleMacro(val c: whitebox.Context) extends Macros {
+  final class ToDoubleMacro(val c: whitebox.Context) extends GeneralMacros {
     def materialize[T, A: c.WeakTypeTag](
         nt: c.Expr[Numeric[T]]
     ): c.Tree =

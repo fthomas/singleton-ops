@@ -1,8 +1,9 @@
 package singleton.ops
 
 import macrocompat.bundle
+
 import scala.reflect.macros.whitebox
-import singleton.ops.impl._
+import singleton.ops.impl.{GeneralMacros, _}
 
 trait Negate[A] extends Op
 
@@ -13,7 +14,7 @@ object Negate extends Op1Companion[Negate] {
   ): Negate[A] = macro NegateMacro.materialize[T, A]
 
   @bundle
-  final class NegateMacro(val c: whitebox.Context) extends Macros {
+  final class NegateMacro(val c: whitebox.Context) extends GeneralMacros {
     def materialize[T, A: c.WeakTypeTag](
         nt: c.Expr[Numeric[T]]
     ): c.Tree =

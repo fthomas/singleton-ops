@@ -1,9 +1,9 @@
 package singleton.ops.impl
-
 import macrocompat.bundle
 import scala.reflect.macros.whitebox
+
 @bundle
-trait Macros {
+trait GeneralMacros {
   val c: whitebox.Context
 
   import c.universe._

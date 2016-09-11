@@ -1,6 +1,7 @@
 package singleton.ops.impl
 
 import macrocompat.bundle
+
 import scala.reflect.macros.whitebox
 import singleton.ops.impl._
 
@@ -35,6 +36,19 @@ trait SingletonTypeExprDouble extends SingletonTypeExprBase[Double] {type OutDou
 trait SingletonTypeExprString extends SingletonTypeExprBase[String] {type OutString = Out}
 
 
+trait Extractor[P <: SingletonTypeExpr] {
+  type BaseType
+  type Out <: BaseType with Singleton
+}
+
+object Extractor {
+  type Aux[P <: SingletonTypeExpr, Ret_BaseType, Ret_Out <: Ret_BaseType with Singleton] =
+  Extractor[P] {type BaseType = Ret_BaseType; type Out = Ret_Out}
+  implicit def impl[P <: SingletonTypeExpr, Ret_BaseType, Ret_Out](implicit p : P) : Aux[P, p.BaseType, p.Out] =
+    new Extractor[P] {type BaseType = p.BaseType; type Out = p.Out}
+}
+
+
 trait SingletonTypeValue[S <: Singleton] extends SingletonTypeExpr
 
 sealed trait SingletonTypeValueInt[S <: Int with Singleton] extends SingletonTypeValue[S] with SingletonTypeExprInt {type Out = S}
@@ -62,6 +76,8 @@ object SingletonTypeValue {
 }
 
 
+trait SingletonTypeFunc1[P1 <: SingletonTypeExpr] extends SingletonTypeExpr
+trait SingletonTypeFunc2[P1 <: SingletonTypeExpr, P2 <: SingletonTypeExpr] extends SingletonTypeExpr
 
 trait Op {
   type Out
@@ -70,43 +86,3 @@ trait Op {
 
 trait Op1[B, T1, S1 <: T1 with Singleton] extends SingletonTypeExprBase[B]
 trait Op2[B, T1, S1 <: T1 with Singleton, T2, S2 <: T2 with Singleton] extends SingletonTypeExprBase[B]
-
-trait SumMacro[B, T1, S1 <: T1 with Singleton, T2, S2 <: T2 with Singleton] extends Op2[B,T1,S1,T2,S2]
-
-@bundle
-object SumMacro {
-  implicit def call[B, T1, S1 <: T1 with Singleton, T2, S2 <: T2 with Singleton]
-  (implicit nt1: Numeric[T1], nt2: Numeric[T2]): SumMacro[B,T1,S1,T2,S2] =
-    macro Macro.impl[B,T1,S1,T2,S2]
-
-  final class Macro(val c: whitebox.Context) extends Macros {
-    def impl[
-      B: c.WeakTypeTag,
-      T1: c.WeakTypeTag,
-      S1 <: T1 with Singleton: c.WeakTypeTag,
-      T2: c.WeakTypeTag,
-      S2 <: T2 with Singleton: c.WeakTypeTag
-    ](nt1: c.Expr[Numeric[T1]], nt2: c.Expr[Numeric[T2]]): c.Tree =
-      materializeOp2Gen[SumMacro[_,_, _, _, _], B,T1,S1,T2,S2]
-        .usingFunction(evalTyped(nt1).plus)
-  }
-}
-
-trait ToLongMacro[B, T1, S1 <: T1 with Singleton] extends Op1[B,T1,S1]
-
-@bundle
-object ToLongMacro {
-  implicit def call[B, T1, S1 <: T1 with Singleton]
-  (implicit nt1: Numeric[T1]): ToLongMacro[B,T1,S1] =
-  macro Macro.impl[B,T1,S1]
-
-  final class Macro(val c: whitebox.Context) extends Macros {
-    def impl[
-    B: c.WeakTypeTag,
-    T1: c.WeakTypeTag,
-    S1 <: T1 with Singleton: c.WeakTypeTag
-    ](nt1: c.Expr[Numeric[T1]]): c.Tree =
-      materializeOp1Gen[ToLongMacro[_,_, _], B,T1,S1]
-        .usingFunction(evalTyped(nt1).toLong)
-  }
-}

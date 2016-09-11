@@ -1,7 +1,5 @@
 package singleton.ops
 
-import infixops._
-
 object NewDemo {
   //////////////////////////////
   def demo[L <: Int with Singleton](implicit p : @@[L]) = mambo[p.OutInt]()

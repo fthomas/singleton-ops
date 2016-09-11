@@ -1,8 +1,9 @@
 package singleton.ops
 
 import macrocompat.bundle
+
 import scala.reflect.macros.whitebox
-import singleton.ops.impl._
+import singleton.ops.impl.{GeneralMacros, _}
 
 trait LessThan[A, B] extends Op
 
@@ -13,7 +14,7 @@ object LessThan extends Op2Companion[LessThan] {
   ): LessThan[A, B] = macro LessThanMacro.materialize[T, A, B]
 
   @bundle
-  final class LessThanMacro(val c: whitebox.Context) extends Macros {
+  final class LessThanMacro(val c: whitebox.Context) extends GeneralMacros {
     def materialize[T, A: c.WeakTypeTag, B: c.WeakTypeTag](
         ot: c.Expr[Ordering[T]]
     ): c.Tree =
