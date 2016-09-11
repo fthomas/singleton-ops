@@ -2,7 +2,7 @@ package singleton.ops
 
 object NewDemo {
   //////////////////////////////
-  def demo[L <: Int with Singleton](implicit p : @@[L]) = mambo[p.OutInt]()
+  def demo[L <: Int with Singleton](implicit p : @@[@@[L]]) = mambo[p.OutInt]()
   def mambo[L <: Int with Singleton](){}
   val b = demo[8]
   //////////////////////////////
@@ -14,7 +14,7 @@ object NewDemo {
   //////////////////////////////
 
   //////////////////////////////
-  def demoSumLongInt[L1 <: Long with Singleton, L2 <: Int with Singleton](implicit p : @@[L1] + @@[L2]) : p.Out = p.value
+  def demoSumLongInt[L1 <: Long with Singleton, L2 <: Int with Singleton](implicit p : L1 + L2) : p.Out = p.value
   val bSumLongInt : 16L = demoSumLongInt[8L, 8]
   //////////////////////////////
 
