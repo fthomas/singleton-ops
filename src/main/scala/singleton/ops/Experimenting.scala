@@ -16,9 +16,9 @@ abstract class SingletonTypeFunc2Static(funcName : String) {
 sealed trait SingletonTypeFunc2[P1 <: SingletonTypeExpr, P2 <: SingletonTypeExpr] extends SingletonTypeExpr
 
 sealed trait Sum2[P1 <: SingletonTypeExpr, P2 <: SingletonTypeExpr] extends SingletonTypeFunc2[P1, P2]
-sealed trait Sum2Int[P1 <: SingletonTypeExpr, P2 <: SingletonTypeExpr] extends Sum2[P1, P2] with SingletonTypeExprInt
-sealed trait Sum2Long[P1 <: SingletonTypeExpr, P2 <: SingletonTypeExpr] extends Sum2[P1, P2] with SingletonTypeExprLong
-sealed trait Sum2Double[P1 <: SingletonTypeExpr, P2 <: SingletonTypeExpr] extends Sum2[P1, P2] with SingletonTypeExprDouble
+//sealed trait Sum2Int[P1 <: SingletonTypeExpr, P2 <: SingletonTypeExpr] extends Sum2[P1, P2] with SingletonTypeExprInt
+//sealed trait Sum2Long[P1 <: SingletonTypeExpr, P2 <: SingletonTypeExpr] extends Sum2[P1, P2] with SingletonTypeExprLong
+//sealed trait Sum2Double[P1 <: SingletonTypeExpr, P2 <: SingletonTypeExpr] extends Sum2[P1, P2] with SingletonTypeExprDouble
 
 trait Extractor[P <: SingletonTypeExpr] {
   type BaseType
@@ -33,26 +33,7 @@ object Extractor {
 }
 
 
-object Sum2Int {//extends SingletonTypeFunc2Static("+") {
-//  def apply[P1 <: SingletonTypeExpr, P2 <: SingletonTypeExpr]
-//  (implicit ret: Sum2[P1, P2]): Aux[P1, P2, ret.Out] = ret
-//
-//  private def implInt[P1 <: SingletonTypeExpr, P2 <: SingletonTypeExpr](p1: P1, p2: P2) : Sum2Int[P1, P2] = new Sum2Int[P1, P2] {
-//    type Out = 1
-//    val value : Out {} = 1
-//  }
-//
-//  private def implLong[P1 <: SingletonTypeExpr, P2 <: SingletonTypeExpr](p1: P1, p2: P2) : Sum2Long[P1, P2] = new Sum2Long[P1, P2] {
-//    type Out = 2L
-//    val value : Out {} = 2L
-//  }
-//
-//  private def implDouble[P1 <: SingletonTypeExpr, P2 <: SingletonTypeExpr](p1: P1, p2: P2) : Sum2Double[P1, P2] = new Sum2Double[P1, P2] {
-//    type Out = 3.0
-//    val value : Out {} = 3.0
-//  }
-//
-
+object Sum2 {//extends SingletonTypeFunc2Static("+") {
   type Aux[
     P1 <: SingletonTypeExpr,
     P2 <: SingletonTypeExpr,
@@ -62,41 +43,66 @@ object Sum2Int {//extends SingletonTypeFunc2Static("+") {
     P2_Out <: P2_BaseType with Singleton,
     Ret_BaseType,
     Ret_Out <: Ret_BaseType with Singleton
-  ] = Sum2Int[P1, P2] {
+  ] = Sum2[P1, P2] {
     type BaseType = Ret_BaseType
     type Out = Ret_Out
   }
 
-  implicit def impl[
+  implicit def implIntInt[
     P1 <: SingletonTypeExpr,
     P2 <: SingletonTypeExpr,
-    P1_BaseType,
+    P1_BaseType <: Int,
     P1_Out <: P1_BaseType with Singleton,
-    P2_BaseType,
+    P2_BaseType <: Int,
     P2_Out <: P2_BaseType with Singleton,
     Ret_BaseType,
     Ret_Out <: Ret_BaseType with Singleton
-  ](implicit p1 : P1, p2: P2, p1_ret : Extractor.Aux[P1,P1_BaseType,P1_Out], p2_ret : Extractor.Aux[P2,P2_BaseType,P2_Out], op : SumMacroInt[P1_BaseType, P1_Out, P2_BaseType, P2_Out]) :
-    Aux[P1, P2, P1_BaseType, P1_Out, P2_BaseType, P2_Out, op.BaseType, op.Out] = {
-    new Sum2Int[P1, P2] {
+  ](implicit p1 : P1, p2: P2, p1_ret : Extractor.Aux[P1,P1_BaseType,P1_Out], p2_ret : Extractor.Aux[P2,P2_BaseType,P2_Out], op : SumMacro[Int, P1_BaseType, P1_Out, P2_BaseType, P2_Out]) :
+    Aux[P1, P2, P1_BaseType, P1_Out, P2_BaseType, P2_Out, op.BaseType, op.Out] with SingletonTypeExprInt = {
+    new Sum2[P1, P2] with SingletonTypeExprInt {
       type Out = op.Out
       val value : Out {} = op.value
     }
-//    (p1, p2) match {
-//      case (_ : SingletonTypeExprInt, _ : SingletonTypeExprInt) => implInt[P1, P2](p1, p2)
-//      case (_ : SingletonTypeExprLong, _ : SingletonTypeExprLong) => implLong[P1, P2](p1, p2)
-//      case (_ : SingletonTypeExprInt, _ : SingletonTypeExprLong) => implLong[P1, P2](p1, p2)
-//      case (_ : SingletonTypeExprLong, _ : SingletonTypeExprInt) => implLong[P1, P2](p1, p2)
-//      case (_ : SingletonTypeExprDouble, _ : SingletonTypeExprDouble) => implDouble[P1, P2](p1, p2)
-//      case _ =>
-//        throw paramMismatchException(p1,p2)
-//    }
+  }
+
+  implicit def implLongLong[
+  P1 <: SingletonTypeExpr,
+  P2 <: SingletonTypeExpr,
+  P1_BaseType <: Long,
+  P1_Out <: P1_BaseType with Singleton,
+  P2_BaseType <: Long,
+  P2_Out <: P2_BaseType with Singleton,
+  Ret_BaseType,
+  Ret_Out <: Ret_BaseType with Singleton
+  ](implicit p1 : P1, p2: P2, p1_ret : Extractor.Aux[P1,P1_BaseType,P1_Out], p2_ret : Extractor.Aux[P2,P2_BaseType,P2_Out], op : SumMacro[Long, P1_BaseType, P1_Out, P2_BaseType, P2_Out]) :
+  Aux[P1, P2, P1_BaseType, P1_Out, P2_BaseType, P2_Out, op.BaseType, op.Out] with SingletonTypeExprLong = {
+    new Sum2[P1, P2] with SingletonTypeExprLong {
+      type Out = op.Out
+      val value : Out {} = op.value
+    }
+  }
+
+  implicit def implLongInt[
+  P1 <: SingletonTypeExpr,
+  P2 <: SingletonTypeExpr,
+  P1_BaseType <: Long,
+  P1_Out <: P1_BaseType with Singleton,
+  P2_BaseType <: Int,
+  P2_Out <: P2_BaseType with Singleton,
+  Ret_BaseType,
+  Ret_Out <: Ret_BaseType with Singleton
+  ](implicit p1 : P1, p2: P2, p1_ret : Extractor.Aux[P1,P1_BaseType,P1_Out], p2_ret : Extractor.Aux[P2,P2_BaseType,P2_Out], op : SumMacro[Long, P1_BaseType, P1_Out, P2_BaseType, P2_Out]) :
+  Aux[P1, P2, P1_BaseType, P1_Out, P2_BaseType, P2_Out, op.BaseType, op.Out] with SingletonTypeExprLong = {
+    new Sum2[P1, P2] with SingletonTypeExprLong {
+      type Out = op.Out
+      val value : Out {} = op.value
+    }
   }
 }
 
 object infixops {
-  type +[P1 <: SingletonTypeExpr, P2 <: SingletonTypeExpr] = Sum2Int[P1, P2]
-  type @@[S <: Int with Singleton] = SingletonTypeValueInt[S]
+  type +[P1 <: SingletonTypeExpr, P2 <: SingletonTypeExpr] = Sum2[P1, P2]
+  type @@[S <: Singleton] = SingletonTypeValue[S]
 }
 
 import infixops._

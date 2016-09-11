@@ -3,16 +3,30 @@ package singleton.ops
 import infixops._
 
 object NewDemo {
-  def demo[L <: Int with Singleton](implicit p : @@[L]) = mambo[p.Out]()
+  //////////////////////////////
+  def demo[L <: Int with Singleton](implicit p : @@[L]) = mambo[p.OutInt]()
   def mambo[L <: Int with Singleton](){}
   val b = demo[8]
+  //////////////////////////////
+
+  //////////////////////////////
+  def demoLong[L <: Long with Singleton](implicit p : @@[L]) = mamboLong[p.OutLong]()
+  def mamboLong[L <: Long with Singleton](){}
+  val bLong = demoLong[8L]
+  //////////////////////////////
+
+  //////////////////////////////
+  def demoSumLongInt[L1 <: Long with Singleton, L2 <: Int with Singleton](implicit p : @@[L1] + @@[L2]) : p.Out = p.value
+  val bSumLongInt : 16L = demoSumLongInt[8L, 8]
+  //////////////////////////////
+
   println("NewDemo " + b.toString)
 }
 
 
 
 class FixedSizeVector[L <: Int with Singleton]() {
-  def concat[L2 <: Int with Singleton](that : FixedSizeVector[L2])(implicit l : @@[L] + @@[L2]) = new FixedSizeVector[l.Out]
+  def concat[L2 <: Int with Singleton](that : FixedSizeVector[L2])(implicit l : @@[L] + @@[L2]) = new FixedSizeVector[l.OutInt]
   def + (that : FixedSizeVector[L]) = new FixedSizeVector[L]
 }
 

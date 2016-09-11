@@ -7,6 +7,10 @@ import singleton.ops.impl._
 trait SingletonTypeExpr extends Serializable {
   type BaseType
   type Out <: BaseType with Singleton
+  type OutInt <: Int with Singleton
+  type OutLong <: Long with Singleton
+  type OutDouble <: Double with Singleton
+  type OutString <: String with Singleton
   val value : Out {}
   //For debugging only
   def outTypeName : String = {
@@ -25,10 +29,10 @@ trait SingletonTypeExpr extends Serializable {
 
 trait SingletonTypeExprBase[B] extends SingletonTypeExpr {type BaseType = B}
 
-trait SingletonTypeExprInt extends SingletonTypeExprBase[Int]
-trait SingletonTypeExprLong extends SingletonTypeExprBase[Long]
-trait SingletonTypeExprDouble extends SingletonTypeExprBase[Double]
-trait SingletonTypeExprString extends SingletonTypeExprBase[String]
+trait SingletonTypeExprInt extends SingletonTypeExprBase[Int] {type OutInt = Out}
+trait SingletonTypeExprLong extends SingletonTypeExprBase[Long] {type OutLong = Out}
+trait SingletonTypeExprDouble extends SingletonTypeExprBase[Double] {type OutDouble = Out}
+trait SingletonTypeExprString extends SingletonTypeExprBase[String] {type OutString = Out}
 
 
 trait SingletonTypeValue[S <: Singleton] extends SingletonTypeExpr
@@ -64,28 +68,27 @@ trait Op {
   val value: Out {}
 }
 
-trait Op2[T1, S1 <: T1 with Singleton, T2, S2 <: T2 with Singleton] extends SingletonTypeExpr
-trait Op2Int[T1, S1 <: T1 with Singleton, T2, S2 <: T2 with Singleton] extends Op2[T1,S1,T2,S2] with SingletonTypeExprInt
-trait Op2Long[T1, S1 <: T1 with Singleton, T2, S2 <: T2 with Singleton] extends Op2[T1,S1,T2,S2] with SingletonTypeExprLong
-trait Op2Double[T1, S1 <: T1 with Singleton, T2, S2 <: T2 with Singleton] extends Op2[T1,S1,T2,S2] with SingletonTypeExprDouble
-trait Op2String[T1, S1 <: T1 with Singleton, T2, S2 <: T2 with Singleton] extends Op2[T1,S1,T2,S2] with SingletonTypeExprString
+trait Op2[B, T1, S1 <: T1 with Singleton, T2, S2 <: T2 with Singleton] extends SingletonTypeExpr {
+  type BaseType = B
+}
 
-trait SumMacroInt[T1, S1 <: T1 with Singleton, T2, S2 <: T2 with Singleton] extends Op2Int[T1,S1,T2,S2]
+trait SumMacro[B, T1, S1 <: T1 with Singleton, T2, S2 <: T2 with Singleton] extends Op2[B,T1,S1,T2,S2]
 
 @bundle
-object SumMacroInt {
-  implicit def call[T1, S1 <: T1 with Singleton, T2, S2 <: T2 with Singleton]
-  (implicit nt1: Numeric[T1], nt2: Numeric[T2]): SumMacroInt[T1,S1,T2,S2] =
-    macro Macro.impl[T1,S1,T2,S2]
+object SumMacro {
+  implicit def call[B, T1, S1 <: T1 with Singleton, T2, S2 <: T2 with Singleton]
+  (implicit nt1: Numeric[T1], nt2: Numeric[T2]): SumMacro[B,T1,S1,T2,S2] =
+    macro Macro.impl[B,T1,S1,T2,S2]
 
   final class Macro(val c: whitebox.Context) extends Macros {
     def impl[
+      B: c.WeakTypeTag,
       T1: c.WeakTypeTag,
       S1 <: T1 with Singleton: c.WeakTypeTag,
       T2: c.WeakTypeTag,
       S2 <: T2 with Singleton: c.WeakTypeTag
     ](nt1: c.Expr[Numeric[T1]], nt2: c.Expr[Numeric[T2]]): c.Tree =
-      materializeOp3[SumMacroInt[_, _, _, _], T1,S1,T2,S2]
+      materializeOp3[SumMacro[_,_, _, _, _], B,T1,S1,T2,S2]
         .usingFunction(evalTyped(nt1).plus)
   }
 }

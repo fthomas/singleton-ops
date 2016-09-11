@@ -119,19 +119,22 @@ trait Macros {
   ///////////////////////////////////////////////////////////////////////////////////////////
   // Three operands
   ///////////////////////////////////////////////////////////////////////////////////////////
-  def materializeOp3[F, T1, S1, T2, S2]
+  def materializeOp3[F, B, T1, S1, T2, S2]
   (implicit ev0: c.WeakTypeTag[F],
-   ev1: c.WeakTypeTag[T1],
-   ev2: c.WeakTypeTag[S1],
-   ev3: c.WeakTypeTag[T2],
-   ev4: c.WeakTypeTag[S2]): MaterializeOp3Aux =
+   evb: c.WeakTypeTag[B],
+   evt1: c.WeakTypeTag[T1],
+   evs1: c.WeakTypeTag[S1],
+   evt2: c.WeakTypeTag[T2],
+   evs2: c.WeakTypeTag[S2]): MaterializeOp3Aux =
     new MaterializeOp3Aux(symbolOf[F],
+                          weakTypeOf[B],
                           weakTypeOf[T1],
                           weakTypeOf[S1],
                           weakTypeOf[T2],
                           weakTypeOf[S2])
 
   final class MaterializeOp3Aux(opSym: TypeSymbol,
+                                bTpe: Type,
                                 t1Tpe: Type,
                                 s1Tpe: Type,
                                 t2Tpe: Type,
@@ -146,7 +149,7 @@ trait Macros {
     }
 
     private def mkOp2Tree[T](outValue: T): Tree =
-      mkOpTree(tq"$opSym[$t1Tpe, $s1Tpe, $t2Tpe, $s2Tpe]", outValue)
+      mkOpTree(tq"$opSym[$bTpe, $t1Tpe, $s1Tpe, $t2Tpe, $s2Tpe]", outValue)
   }
   ///////////////////////////////////////////////////////////////////////////////////////////
 
