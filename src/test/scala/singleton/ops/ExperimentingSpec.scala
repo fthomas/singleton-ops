@@ -24,7 +24,7 @@ object NewDemo {
 
 
 class FixedSizeVector[L <: Int with Singleton]() {
-  def concat[L2 <: Int with Singleton](that : FixedSizeVector[L2])(implicit l : @@[L] + @@[L2]) = new FixedSizeVector[l.OutInt]
+  def concat[L2 <: Int with Singleton](that : FixedSizeVector[L2])(implicit l : L + L2) = new FixedSizeVector[l.OutInt]
   def + (that : FixedSizeVector[L]) = new FixedSizeVector[L]
 }
 
