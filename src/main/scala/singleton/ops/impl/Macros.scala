@@ -117,28 +117,62 @@ trait Macros {
   }
 
   ///////////////////////////////////////////////////////////////////////////////////////////
-  // Three operands
+  // One operand (Generic)
   ///////////////////////////////////////////////////////////////////////////////////////////
-  def materializeOp3[F, B, T1, S1, T2, S2]
-  (implicit ev0: c.WeakTypeTag[F],
-   evb: c.WeakTypeTag[B],
-   evt1: c.WeakTypeTag[T1],
-   evs1: c.WeakTypeTag[S1],
-   evt2: c.WeakTypeTag[T2],
-   evs2: c.WeakTypeTag[S2]): MaterializeOp3Aux =
-    new MaterializeOp3Aux(symbolOf[F],
-                          weakTypeOf[B],
-                          weakTypeOf[T1],
-                          weakTypeOf[S1],
-                          weakTypeOf[T2],
-                          weakTypeOf[S2])
+  def materializeOp1Gen[F, B, T1, S1](
+      implicit ev0: c.WeakTypeTag[F],
+      evb: c.WeakTypeTag[B],
+      evt1: c.WeakTypeTag[T1],
+      evs1: c.WeakTypeTag[S1]): MaterializeOp1AuxGen =
+    new MaterializeOp1AuxGen(
+      symbolOf[F],
+      weakTypeOf[B],
+      weakTypeOf[T1],
+      weakTypeOf[S1]
+    )
 
-  final class MaterializeOp3Aux(opSym: TypeSymbol,
-                                bTpe: Type,
-                                t1Tpe: Type,
-                                s1Tpe: Type,
-                                t2Tpe: Type,
-                                s2Tpe: Type) {
+  final class MaterializeOp1AuxGen(opSym: TypeSymbol,
+                                   bTpe: Type,
+                                   t1Tpe: Type,
+                                   s1Tpe: Type) {
+    def usingFunction[T1, R](f: T1 => R): Tree =
+      mkOp1Tree(computeOutValue(f))
+
+    private def computeOutValue[T1, R](f: T1 => R): R = {
+      val aValue = extractSingletonValue[T1](s1Tpe)
+      f(aValue)
+    }
+
+    private def mkOp1Tree[T](outValue: T): Tree =
+      mkOpTree(tq"$opSym[$bTpe, $t1Tpe, $s1Tpe]", outValue)
+  }
+  ///////////////////////////////////////////////////////////////////////////////////////////
+
+  ///////////////////////////////////////////////////////////////////////////////////////////
+  // Two operands (Generic)
+  ///////////////////////////////////////////////////////////////////////////////////////////
+  def materializeOp2Gen[F, B, T1, S1, T2, S2](
+      implicit ev0: c.WeakTypeTag[F],
+      evb: c.WeakTypeTag[B],
+      evt1: c.WeakTypeTag[T1],
+      evs1: c.WeakTypeTag[S1],
+      evt2: c.WeakTypeTag[T2],
+      evs2: c.WeakTypeTag[S2]): MaterializeOp2AuxGen =
+    new MaterializeOp2AuxGen(
+      symbolOf[F],
+      weakTypeOf[B],
+      weakTypeOf[T1],
+      weakTypeOf[S1],
+      weakTypeOf[T2],
+      weakTypeOf[S2]
+    )
+
+  final class MaterializeOp2AuxGen(opSym: TypeSymbol,
+                                   bTpe: Type,
+                                   t1Tpe: Type,
+                                   s1Tpe: Type,
+                                   t2Tpe: Type,
+                                   s2Tpe: Type) {
     def usingFunction[T1, T2, R](f: (T1, T2) => R): Tree =
       mkOp2Tree(computeOutValue(f))
 

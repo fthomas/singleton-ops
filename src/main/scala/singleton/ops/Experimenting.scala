@@ -13,12 +13,10 @@ abstract class SingletonTypeFunc2Static(funcName : String) {
 }
 
 
+sealed trait SingletonTypeFunc1[P1 <: SingletonTypeExpr] extends SingletonTypeExpr
 sealed trait SingletonTypeFunc2[P1 <: SingletonTypeExpr, P2 <: SingletonTypeExpr] extends SingletonTypeExpr
 
 sealed trait Sum2[P1 <: SingletonTypeExpr, P2 <: SingletonTypeExpr] extends SingletonTypeFunc2[P1, P2]
-//sealed trait Sum2Int[P1 <: SingletonTypeExpr, P2 <: SingletonTypeExpr] extends Sum2[P1, P2] with SingletonTypeExprInt
-//sealed trait Sum2Long[P1 <: SingletonTypeExpr, P2 <: SingletonTypeExpr] extends Sum2[P1, P2] with SingletonTypeExprLong
-//sealed trait Sum2Double[P1 <: SingletonTypeExpr, P2 <: SingletonTypeExpr] extends Sum2[P1, P2] with SingletonTypeExprDouble
 
 trait Extractor[P <: SingletonTypeExpr] {
   type BaseType
@@ -52,6 +50,8 @@ object Sum2 {//extends SingletonTypeFunc2Static("+") {
     P1_Out <: P1_BaseType with Singleton,
     P2_BaseType,
     P2_Out <: P2_BaseType with Singleton,
+    PM_BaseType,
+    PM_Out <: PM_BaseType with Singleton,
     Ret_BaseType,
     Ret_Out <: Ret_BaseType with Singleton
   ] = Sum2[P1, P2] {
@@ -69,7 +69,7 @@ object Sum2 {//extends SingletonTypeFunc2Static("+") {
     Ret_BaseType,
     Ret_Out <: Ret_BaseType with Singleton
   ](implicit p1 : P1, p2: P2, p1_ret : Extractor.Aux[P1,P1_BaseType,P1_Out], p2_ret : Extractor.Aux[P2,P2_BaseType,P2_Out], op : SumMacro[Int, P1_BaseType, P1_Out, P2_BaseType, P2_Out]) :
-    Aux[P1, P2, P1_BaseType, P1_Out, P2_BaseType, P2_Out, op.BaseType, op.Out] with SingletonTypeExprInt = Sum2[P1,P2](p1,p2,op)
+    Aux[P1, P2, P1_BaseType, P1_Out, P2_BaseType, P2_Out, Int, 0, op.BaseType, op.Out] with SingletonTypeExprInt = Sum2[P1,P2](p1,p2,op)
 
   implicit def implLongLong[
     P1 <: SingletonTypeExpr,
@@ -81,20 +81,55 @@ object Sum2 {//extends SingletonTypeFunc2Static("+") {
     Ret_BaseType,
     Ret_Out <: Ret_BaseType with Singleton
   ](implicit p1 : P1, p2: P2, p1_ret : Extractor.Aux[P1,P1_BaseType,P1_Out], p2_ret : Extractor.Aux[P2,P2_BaseType,P2_Out], op : SumMacro[Long, P1_BaseType, P1_Out, P2_BaseType, P2_Out]) :
-    Aux[P1, P2, P1_BaseType, P1_Out, P2_BaseType, P2_Out, op.BaseType, op.Out] with SingletonTypeExprLong = Sum2[P1,P2](p1,p2,op)
+    Aux[P1, P2, P1_BaseType, P1_Out, P2_BaseType, P2_Out, Long, 0L, op.BaseType, op.Out] with SingletonTypeExprLong = Sum2[P1,P2](p1,p2,op)
 
   implicit def implLongInt[
+    P1 <: SingletonTypeExpr,
+    P2 <: SingletonTypeExpr,
+    P1_BaseType <: Long,
+    P1_Out <: P1_BaseType with Singleton,
+    P2_BaseType <: Int,
+    P2_Out <: P2_BaseType with Singleton,
+    PM_BaseType,
+    PM_Out <: PM_BaseType with Singleton,
+    Ret_BaseType,
+    Ret_Out <: Ret_BaseType with Singleton
+  ](implicit p1 : P1, p2: P2, p1_ret : Extractor.Aux[P1,P1_BaseType,P1_Out], p2_ret : Extractor.Aux[P2,P2_BaseType,P2_Out], mod : ToLongMacro[Long, P2_BaseType, P2_Out], op : SumMacro[Long, P1_BaseType, P1_Out, PM_BaseType, PM_Out]) :
+    Aux[P1, P2, P1_BaseType, P1_Out, P2_BaseType, P2_Out, mod.BaseType, mod.Out, op.BaseType, op.Out] with SingletonTypeExprLong = Sum2[P1,P2](p1,p2,op)
+}
+
+
+sealed trait ToLong[P1 <: SingletonTypeExpr] extends SingletonTypeFunc1[P1]
+
+object ToLong {
+  def apply[P1 <: SingletonTypeExpr](p1: P1, op : SingletonTypeExprBase[Long]) =
+    new ToLong[P1] with SingletonTypeExprLong {
+      type Out = op.Out
+      val value : Out {} = op.value
+    }
+
+  type Aux[
+    P1 <: SingletonTypeExpr,
+    P1_BaseType,
+    P1_Out <: P1_BaseType with Singleton,
+    Ret_BaseType,
+    Ret_Out <: Ret_BaseType with Singleton
+  ] = ToLong[P1] {
+    type BaseType = Ret_BaseType
+    type Out = Ret_Out
+  }
+
+  implicit def implInt[
   P1 <: SingletonTypeExpr,
-  P2 <: SingletonTypeExpr,
-  P1_BaseType <: Long,
+  P1_BaseType <: Int,
   P1_Out <: P1_BaseType with Singleton,
-  P2_BaseType <: Int,
-  P2_Out <: P2_BaseType with Singleton,
   Ret_BaseType,
   Ret_Out <: Ret_BaseType with Singleton
-  ](implicit p1 : P1, p2: P2, p1_ret : Extractor.Aux[P1,P1_BaseType,P1_Out], p2_ret : Extractor.Aux[P2,P2_BaseType,P2_Out], op : SumMacro[Long, P1_BaseType, P1_Out, P2_BaseType, P2_Out]) :
-  Aux[P1, P2, P1_BaseType, P1_Out, P2_BaseType, P2_Out, op.BaseType, op.Out] with SingletonTypeExprLong = Sum2[P1,P2](p1,p2,op)
+  ](implicit p1 : P1, p1_ret : Extractor.Aux[P1,P1_BaseType,P1_Out], op : ToLongMacro[Long, P1_BaseType, P1_Out]) :
+  Aux[P1, P1_BaseType, P1_Out, op.BaseType, op.Out] with SingletonTypeExprLong = ToLong[P1](p1,op)
 }
+
+
 
 object infixops {
   type +[P1 <: SingletonTypeExpr, P2 <: SingletonTypeExpr] = Sum2[P1, P2]
