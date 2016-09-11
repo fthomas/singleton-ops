@@ -22,3 +22,23 @@ object ToDouble extends Op1Companion[ToDouble] {
       materializeOp1[ToDouble, A].usingFunction(evalTyped(nt).toDouble)
   }
 }
+
+
+trait ToLong[A] extends Op {
+  override type Out <: Long
+}
+
+object ToLong extends Op1Companion[ToLong] {
+
+  implicit def materializeToDouble[T, A <: T](
+                                               implicit nt: Numeric[T]
+                                             ): ToDouble[A] = macro ToLongMacro.materialize[T, A]
+
+  @bundle
+  final class ToLongMacro(val c: whitebox.Context) extends Macros {
+    def materialize[T, A: c.WeakTypeTag](
+                                          nt: c.Expr[Numeric[T]]
+                                        ): c.Tree =
+      materializeOp1[ToDouble, A].usingFunction(evalTyped(nt).toDouble)
+  }
+}

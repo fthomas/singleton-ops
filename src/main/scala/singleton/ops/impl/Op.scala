@@ -68,9 +68,7 @@ trait Op {
   val value: Out {}
 }
 
-trait Op2[B, T1, S1 <: T1 with Singleton, T2, S2 <: T2 with Singleton] extends SingletonTypeExpr {
-  type BaseType = B
-}
+trait Op2[B, T1, S1 <: T1 with Singleton, T2, S2 <: T2 with Singleton] extends SingletonTypeExprBase[B]
 
 trait SumMacro[B, T1, S1 <: T1 with Singleton, T2, S2 <: T2 with Singleton] extends Op2[B,T1,S1,T2,S2]
 

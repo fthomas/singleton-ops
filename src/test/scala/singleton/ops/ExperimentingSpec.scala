@@ -16,8 +16,8 @@ object NewDemo {
   //////////////////////////////
 
   //////////////////////////////
-  def demoSumLongInt[L1 <: Long with Singleton, L2 <: Int with Singleton](implicit p : @@[L1] + @@[L2]) : p.Out = p.value
-  val bSumLongInt : 16L = demoSumLongInt[8L, 8]
+//  def demoSumLongInt[L1 <: Long with Singleton, L2 <: Int with Singleton](implicit p : @@[L1] + @@[L2]) : p.Out = p.value
+//  val bSumLongInt : 16L = demoSumLongInt[8L, 8]
   //////////////////////////////
 
   println("NewDemo " + b.toString)
