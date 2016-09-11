@@ -29,14 +29,14 @@ class FixedSizeVector[L <: Int with Singleton]() {
 }
 
 object FixedSizeVector {
-  def apply[L <: Int with Singleton](implicit check : LessThan[0, L]) = new FixedSizeVector[L]
+  def apply[L <: Int with Singleton](implicit check : Require[0 < L]) = new FixedSizeVector[L]
 }
 
 object TestVector {
   val v1 = FixedSizeVector[5]
   val v2 = FixedSizeVector[2]
   val v3 : FixedSizeVector[12] = v1 concat v2 concat v1
-//  val v4 = FixedSizeVector[-1]
+//  val v4 = FixedSizeVector[-1] Will leed to error
 }
 
 

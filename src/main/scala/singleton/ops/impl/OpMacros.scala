@@ -35,8 +35,6 @@ object SumMacro {
 }
 
 /*******************************************************************************************************/
-
-
 /********************************************************************************************************
   * ToLong
   *******************************************************************************************************/
@@ -58,9 +56,8 @@ object ToLongMacro {
         .usingFunction(evalTyped(nt1).toLong)
   }
 }
+
 /*******************************************************************************************************/
-
-
 /********************************************************************************************************
   * ToInt
   *******************************************************************************************************/
@@ -69,14 +66,14 @@ trait ToIntMacro[B, T1, S1 <: T1 with Singleton] extends Op1[B, T1, S1]
 @bundle
 object ToIntMacro {
   implicit def call[B, T1, S1 <: T1 with Singleton](
-                                                     implicit nt1: Numeric[T1]): ToIntMacro[B, T1, S1] =
-  macro Macro.impl[B, T1, S1]
+      implicit nt1: Numeric[T1]): ToIntMacro[B, T1, S1] =
+    macro Macro.impl[B, T1, S1]
 
   final class Macro(val c: whitebox.Context) extends GeneralMacros {
     def impl[
-    B: c.WeakTypeTag,
-    T1: c.WeakTypeTag,
-    S1 <: T1 with Singleton: c.WeakTypeTag
+        B: c.WeakTypeTag,
+        T1: c.WeakTypeTag,
+        S1 <: T1 with Singleton: c.WeakTypeTag
     ](nt1: c.Expr[Numeric[T1]]): c.Tree =
       materializeOp1Gen[ToIntMacro[_, _, _], B, T1, S1]
         .usingFunction(evalTyped(nt1).toInt)
