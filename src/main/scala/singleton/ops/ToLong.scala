@@ -6,7 +6,7 @@ sealed trait ToLong[P1 <: SingletonTypeExpr] extends SingletonTypeFunc1[P1]
 
 object ToLong {
   def apply[P1 <: SingletonTypeExpr](p1: P1, op: SingletonTypeExprBase[Long]) =
-    new ToLong[P1] with SingletonTypeExprLong {
+    new ToLong[P1] with SingletonTypeExprBase[Long] {
       type Out = op.Out
       val value: Out {} = op.value
     }
@@ -29,13 +29,13 @@ object ToLong {
       Ret_BaseType,
       Ret_Out <: Ret_BaseType with Singleton
   ](implicit p1: P1,
-    p1_ret: Extractor.Aux[P1, P1_BaseType, P1_Out],
+    p1_ret: Repeater.Aux[P1, P1_BaseType, P1_Out],
     op: ToLongMacro[Long, P1_BaseType, P1_Out]): Aux[
     P1,
     P1_BaseType,
     P1_Out,
     op.BaseType,
-    op.Out] with SingletonTypeExprLong = ToLong[P1](p1, op)
+    op.Out] with SingletonTypeExprBase[Long] = ToLong[P1](p1, op)
 
   implicit def implLong[
       P1 <: SingletonTypeExpr,
@@ -44,11 +44,11 @@ object ToLong {
       Ret_BaseType,
       Ret_Out <: Ret_BaseType with Singleton
   ](implicit p1: P1,
-    p1_ret: Extractor.Aux[P1, P1_BaseType, P1_Out],
+    p1_ret: Repeater.Aux[P1, P1_BaseType, P1_Out],
     op: ToLongMacro[Long, P1_BaseType, P1_Out]): Aux[
     P1,
     P1_BaseType,
     P1_Out,
     op.BaseType,
-    op.Out] with SingletonTypeExprLong = ToLong[P1](p1, op)
+    op.Out] with SingletonTypeExprBase[Long] = ToLong[P1](p1, op)
 }

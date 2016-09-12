@@ -2,13 +2,13 @@ package singleton.ops
 
 object NewDemo {
   //////////////////////////////
-  def demo[L <: Int with Singleton](implicit p : @@[@@[L]]) = mambo[p.OutInt]()
+  def demo[L <: Int with Singleton](implicit p : @@[@@[L+L]]) = mambo[p.OutInt]()
   def mambo[L <: Int with Singleton](){}
   val b = demo[8]
   //////////////////////////////
 
   //////////////////////////////
-  def demoLong[L <: Long with Singleton](implicit p : @@[L]) = mamboLong[p.OutLong]()
+  def demoLong[L <: Long with Singleton](implicit p : @@[@@[L]]) = mamboLong[p.OutLong]()
   def mamboLong[L <: Long with Singleton](){}
   val bLong = demoLong[8L]
   //////////////////////////////
@@ -29,14 +29,14 @@ class FixedSizeVector[L <: Int with Singleton]() {
 }
 
 object FixedSizeVector {
-  def apply[L <: Int with Singleton](implicit check : Require[0 < L]) = new FixedSizeVector[L]
+  def apply[L <: Int with Singleton] = new FixedSizeVector[L] //(implicit check : LessThan[0, L])
 }
 
 object TestVector {
   val v1 = FixedSizeVector[5]
   val v2 = FixedSizeVector[2]
-  val v3 : FixedSizeVector[12] = v1 concat v2 concat v1
-//  val v4 = FixedSizeVector[-1] Will leed to error
+  val v3 : FixedSizeVector[40] = v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1
+//  val v4 = FixedSizeVector[-1] Will lead to error
 }
 
 
