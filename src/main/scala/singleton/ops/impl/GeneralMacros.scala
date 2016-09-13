@@ -151,14 +151,16 @@ trait GeneralMacros {
   ///////////////////////////////////////////////////////////////////////////////////////////
   // Two operands (Generic)
   ///////////////////////////////////////////////////////////////////////////////////////////
-  def materializeOp2Gen[F, T1, S1, T2, S2](
+  def materializeOp2Gen[F, N, T1, S1, T2, S2](
       implicit ev0: c.WeakTypeTag[F],
+      evn: c.WeakTypeTag[N],
       evt1: c.WeakTypeTag[T1],
       evs1: c.WeakTypeTag[S1],
       evt2: c.WeakTypeTag[T2],
       evs2: c.WeakTypeTag[S2]): MaterializeOp2AuxGen =
     new MaterializeOp2AuxGen(
       symbolOf[F],
+      weakTypeOf[N],
       weakTypeOf[T1],
       weakTypeOf[S1],
       weakTypeOf[T2],
@@ -166,11 +168,13 @@ trait GeneralMacros {
     )
 
   final class MaterializeOp2AuxGen(opSym: TypeSymbol,
+                                   nTpe: Type,
                                    t1Tpe: Type,
                                    s1Tpe: Type,
                                    t2Tpe: Type,
                                    s2Tpe: Type) {
-    def usingFuncName[T1, T2](funcName: String): Tree = {
+    def usingFuncName[N, T1, T2] : Tree = {
+      val funcName = extractSingletonValue[N](nTpe).asInstanceOf[String]
       val aValue = extractSingletonValue[T1](s1Tpe)
       val bValue = extractSingletonValue[T2](s2Tpe)
 
@@ -182,7 +186,7 @@ trait GeneralMacros {
         case ("Plus", a : Long,  b : Long) => (constantTypeAndValueOf[Long](a + b), tq"Long")
         case _ => abort(s"Unsupported $funcName[$aValue, $bValue]",true)
       }
-      val appliedTpe = tq"$opSym[$t1Tpe, $s1Tpe, $t2Tpe, $s2Tpe]"
+      val appliedTpe = tq"$opSym[$nTpe, $t1Tpe, $s1Tpe, $t2Tpe, $s2Tpe]"
       q"""
         new $appliedTpe {
           type BaseType = $baseTpe

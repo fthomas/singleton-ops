@@ -7,23 +7,26 @@ import scala.reflect.macros.whitebox
 /********************************************************************************************************
   * Sum
   *******************************************************************************************************/
-trait SumMacro[T1, S1 <: T1 with Singleton, T2, S2 <: T2 with Singleton]
-    extends Op2[T1, S1, T2, S2]
+//trait SumMacro[T1, S1 <: T1 with Singleton, T2, S2 <: T2 with Singleton]
+//    extends Op2[T1, S1, T2, S2]
+trait Op2Macro[N <: String with Singleton, T1, S1 <: T1 with Singleton, T2, S2 <: T2 with Singleton]
+  extends SingletonTypeExpr
 
 @bundle
-object SumMacro {
-  implicit def call[T1, S1 <: T1 with Singleton, T2, S2 <: T2 with Singleton]:
-  SumMacro[T1, S1, T2, S2] = macro Macro.impl[T1, S1, T2, S2]
+object Op2Macro {
+  implicit def call[N <: String with Singleton, T1, S1 <: T1 with Singleton, T2, S2 <: T2 with Singleton]:
+  Op2Macro[N, T1, S1, T2, S2] = macro Macro.impl[N, T1, S1, T2, S2]
 
   final class Macro(val c: whitebox.Context) extends GeneralMacros {
     def impl[
+        N <: String with Singleton: c.WeakTypeTag,
         T1: c.WeakTypeTag,
         S1 <: T1 with Singleton: c.WeakTypeTag,
         T2: c.WeakTypeTag,
         S2 <: T2 with Singleton: c.WeakTypeTag
     ] : c.Tree =
-      materializeOp2Gen[SumMacro[_, _, _, _], T1, S1, T2, S2]
-          .usingFuncName("Plus")
+      materializeOp2Gen[Op2Macro[_, _, _, _, _], N, T1, S1, T2, S2]
+          .usingFuncName
   }
 }
 

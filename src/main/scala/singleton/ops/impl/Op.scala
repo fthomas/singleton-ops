@@ -130,5 +130,3 @@ trait Op {
 }
 
 trait Op1[B, T1, S1 <: T1 with Singleton] extends SingletonTypeExprBase[B]
-trait Op2[T1, S1 <: T1 with Singleton, T2, S2 <: T2 with Singleton]
-    extends SingletonTypeExpr
