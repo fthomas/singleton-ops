@@ -12,6 +12,7 @@ trait SingletonTypeExpr extends Serializable {
   type OutLong <: Long with Singleton
   type OutDouble <: Double with Singleton
   type OutString <: String with Singleton
+  type OutBoolean <: Boolean with Singleton
   val value: Out {}
 }
 
@@ -69,6 +70,13 @@ object SingletonTypeValue {
   } = new SingletonTypeValue[S] {
     type BaseType = String; type Out = S; type OutString = S; val value: Out = valueOf[S]
   }
+
+  implicit def implBoolean[S <: Boolean with Singleton]
+  (implicit v: ValueOf[S], di1: DummyImplicit, di2: DummyImplicit, di3: DummyImplicit): SingletonTypeValue[S] {
+    type BaseType = Boolean; type Out = S; type OutBoolean = S
+  } = new SingletonTypeValue[S] {
+    type BaseType = Boolean; type Out = S; type OutBoolean = S; val value: Out = valueOf[S]
+  }
 }
 
 
@@ -101,6 +109,13 @@ object Return {
     type BaseType = Ret_BaseType; type Out = Ret_Out; type OutString = Ret_Out
   } = new Return[P1] {
     type BaseType = Ret_BaseType; type Out = Ret_Out; type OutString = Ret_Out; val value: Out = op.value
+  }
+
+  implicit def implExprBoolean[P1 <: SingletonTypeExpr, Ret_BaseType <: Boolean, Ret_Out <: Ret_BaseType with Singleton]
+  (implicit op: Repeater.Aux[P1, Ret_BaseType, Ret_Out]): Return[P1] {
+    type BaseType = Ret_BaseType; type Out = Ret_Out; type OutBoolean = Ret_Out
+  } = new Return[P1] {
+    type BaseType = Ret_BaseType; type Out = Ret_Out; type OutBoolean = Ret_Out; val value: Out = op.value
   }
 }
 
@@ -175,11 +190,3 @@ object SingletonTypeFunc2 {
     }
 }
 
-
-
-trait Op {
-  type Out
-  val value: Out {}
-}
-
-trait Op1[B, T1, S1 <: T1 with Singleton] extends SingletonTypeExprBase[B]

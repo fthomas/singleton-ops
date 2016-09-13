@@ -19,7 +19,15 @@ object NewDemo {
   //////////////////////////////
 
   def demoString[P1 <: String with Singleton](implicit op : Reverse[P1]) : op.Out{} = op.value
-  val r1 : "cba" = demoString["abc"]
+  val bString : "cba" = demoString["abc"]
+
+  def demoBoolean[P1 <: Int with Singleton](implicit op : P1 < 0) : op.Out{} = op.value
+  val bBoolean1 : true = demoBoolean[-5]
+  val bBoolean2 : false = demoBoolean[5]
+  val bBoolean3 : false = demoBoolean[0]
+
+  def demoRequire[P1 <: Int with Singleton](implicit op : Require[P1 < 0]) : op.Out{} = op.value
+  demoRequire[-1]
 
   println("NewDemo " + b.toString)
 }
