@@ -1,34 +1,56 @@
 package singleton.ops
 
-
 object NewDemo {
-  import infixops._
+  //////////////////////////////
+  def demo[L <: Int with Singleton](implicit p : @@[@@[L+L]]) = mambo[p.OutInt]()
   def mambo[L <: Int with Singleton](){}
-  //def demo[L <: Int with Singleton](implicit p : Ret[@@[L], Int]) = mambo[p.Out]()
-  //def demo2[L <: Int with Singleton](implicit p : Ret[@@[L] + @@[L] + @@[L],Int]) = mambo[p.Out]()
-  def demo3[L <: Int with Singleton](implicit p : @@[@@[L]]) : p.Out {} = p.value
-  //val a = demo[8]
-  val b : 8 = demo3[8]
+  val b = demo[8]
+  //////////////////////////////
+
+  //////////////////////////////
+  def demoLong[L <: Long with Singleton](implicit p : @@[@@[L]]) = mamboLong[p.OutLong]()
+  def mamboLong[L <: Long with Singleton](){}
+  val bLong = demoLong[8L]
+  //////////////////////////////
+
+  //////////////////////////////
+  def demoSumLongInt[L1 <: Long with Singleton, L2 <: Int with Singleton](implicit p : L1 + L2) : p.Out = p.value
+  val bSumLongInt : 16L = demoSumLongInt[8L, 8]
+  //////////////////////////////
+
+  def demoString[P1 <: String with Singleton](implicit op : Reverse[P1]) : op.Out{} = op.value
+  val bString : "cba" = demoString["abc"]
+
+  def demoBoolean[P1 <: Int with Singleton](implicit op : P1 < 0) : op.Out{} = op.value
+  val bBoolean1 : true = demoBoolean[-5]
+  val bBoolean2 : false = demoBoolean[5]
+  val bBoolean3 : false = demoBoolean[0]
+
+  def demoRequire[P1 <: Int with Singleton](implicit op : Require[P1 < 0]) : op.Out{} = op.value
+  demoRequire[-1]
+
   println("NewDemo " + b.toString)
 }
 
 
-//
-//class FixedSizeVector[L <: Int with Singleton]() {
-//  def concat[L2 <: Int with Singleton](that : FixedSizeVector[L2])(implicit l : @@[L] + @@[L2]) = new FixedSizeVector[l.Out]
-//  def + (that : FixedSizeVector[L]) = new FixedSizeVector[L]
-//}
-//
-//object FixedSizeVector {
-//  def apply[L <: Int with Singleton](implicit check : LessThan[0, L]) = new FixedSizeVector[L]
-//}
-//
-//object TestVector {
-//  val v1 = FixedSizeVector[5]
-//  val v2 = FixedSizeVector[2]
-//  val v3 : FixedSizeVector[7] = v1 concat v2 //concat v1
-////  val v4 = FixedSizeVector[-1]
-//}
+
+class FixedSizeVector[L <: Int with Singleton]() {
+  def concat[L2 <: Int with Singleton](that : FixedSizeVector[L2])(implicit l : L + L2) = new FixedSizeVector[l.OutInt]
+  def + (that : FixedSizeVector[L]) = new FixedSizeVector[L]
+}
+
+object FixedSizeVector {
+  def apply[L <: Int with Singleton] = new FixedSizeVector[L] //(implicit check : LessThan[0, L])
+}
+
+object TestVector {
+  val v1 = FixedSizeVector[5]
+  val v2 = FixedSizeVector[2]
+  val v3 : FixedSizeVector[40] = v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1
+//  val v4 = FixedSizeVector[-1] Will lead to error
+}
+
+
 
 
 

@@ -1,18 +1,17 @@
-//package singleton.ops
-//
-//import org.scalacheck.Prop._
-//import org.scalacheck.Properties
-//import singleton.ops.TestUtils._
-//
-//class ReverseSpec extends Properties("Reverse") {
-//  property("abc.reverse == cba") = secure {
-//    val r1 = Reverse["abc"]
-//    sameType[r1.Out, "cba"]
-//  }
-//
-//  property("abc.reverse.reverse == abc") = secure {
-//    val r1 = Reverse["abc"]
-//    val r2 = Reverse[r1.Out]
-//    sameType[r2.Out, "abc"]
-//  }
-//}
+package singleton.ops
+
+import org.scalacheck.Prop._
+import org.scalacheck.Properties
+import singleton.ops.TestUtils._
+
+class ReverseSpec extends Properties("Reverse") {
+  property("abc.reverse == cba") = wellTyped {
+    def reverse[P1 <: String with Singleton](implicit op : Reverse[P1]) : op.Out{} = op.value
+    val r : "cba" = reverse["abc"]
+  }
+
+  property("abc.reverse.reverse == abc") = wellTyped {
+    def reverse[P1 <: String with Singleton](implicit op : Reverse[Reverse[P1]]) : op.Out{} = op.value
+    val r : "abc" = reverse["abc"]
+  }
+}

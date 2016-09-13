@@ -1,28 +1,18 @@
-//package singleton.ops
-//
-//import org.scalacheck.Prop._
-//import org.scalacheck.Properties
-//import shapeless.test.illTyped
-//import singleton.ops.TestUtils._
-//
-//class TimesSpec extends Properties("Times") {
-//  property("2 * 3 == 6") = secure {
-//    val t1 = Times[2, 3]
-//    sameType[t1.Out, 6]
-//  }
-//
-//  property("1.5 * 2.0 == 3.0") = secure {
-//    val t1 = Times[1.5, 2.0]
-//    sameType[t1.Out, 3.0]
-//  }
-//
-//  //TODO: Macro prints warnings. Shouldn't in this case
-//  property("Int * 0 = ???") = wellTyped {
-//    illTyped(""" Times[Int, 0] """)
-//  }
-//
-//  //TODO: Why is this illtyped?
-////  property("(1 with Int) * 0 = ???") = wellTyped {
-////    illTyped(""" Times[1 with Int, 0] """)
-////  }
-//}
+package singleton.ops
+
+import org.scalacheck.Prop._
+import org.scalacheck.Properties
+import shapeless.test.illTyped
+import singleton.ops.TestUtils._
+
+class TimesSpec extends Properties("Times") {
+  property("2 * 3 == 6") = wellTyped {
+    def times[P1 <: Int with Singleton, P2 <: Int with Singleton](implicit op : P1 * P2) : op.Out{} = op.value
+    val r : 6 = times[2, 3]
+  }
+
+  property("1.5 * 2.0 == 3.0") = wellTyped {
+    def times[P1 <: Double with Singleton, P2 <: Double with Singleton](implicit op : P1 * P2) : op.Out{} = op.value
+    val r : 3.0 = times[1.5, 2.0]
+  }
+}
