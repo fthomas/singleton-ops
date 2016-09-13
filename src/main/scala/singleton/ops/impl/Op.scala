@@ -1,8 +1,6 @@
 package singleton.ops.impl
 
 import macrocompat.bundle
-import singleton.ops.ToLong
-import singleton.ops.ToInt
 
 import scala.reflect.macros.whitebox
 import singleton.ops.impl._
@@ -119,6 +117,37 @@ object Return {
 }
 
 
+trait SingletonTypeFunc1[N <: String with Singleton, P1 <: SingletonTypeExpr] extends SingletonTypeExpr
+object SingletonTypeFunc1 {
+  type Aux[
+  N <: String with Singleton,
+  P1 <: SingletonTypeExpr,
+  Ret_BaseType,
+  Ret_Out <: Ret_BaseType with Singleton
+  ] = SingletonTypeFunc1[N, P1] {
+    type BaseType = Ret_BaseType
+    type Out = Ret_Out
+  }
+
+  implicit def impl[
+  N <: String with Singleton,
+  P1 <: SingletonTypeExpr,
+  P1_BaseType,
+  P1_Out <: P1_BaseType with Singleton,
+  Ret_BaseType,
+  Ret_Out <: Ret_BaseType with Singleton
+  ](implicit
+    p1_ret: Repeater.Aux[P1, P1_BaseType, P1_Out],
+    op: Op1Macro[N,P1_BaseType, P1_Out])
+  : Aux[N, P1, op.BaseType, op.Out] with SingletonTypeExpr =
+    new SingletonTypeFunc1[N, P1] {
+      type BaseType = op.BaseType
+      type Out = op.Out
+      val value: Out {} = op.value
+    }
+}
+
+
 
 trait SingletonTypeFunc2[N <: String with Singleton, P1 <: SingletonTypeExpr, P2 <: SingletonTypeExpr]
   extends SingletonTypeExpr
@@ -159,7 +188,6 @@ object SingletonTypeFunc2 {
 }
 
 
-trait SingletonTypeFunc1[P1 <: SingletonTypeExpr] extends SingletonTypeExpr
 
 trait Op {
   type Out

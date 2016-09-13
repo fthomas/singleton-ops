@@ -119,32 +119,42 @@ trait GeneralMacros {
   ///////////////////////////////////////////////////////////////////////////////////////////
   // One operand (Generic)
   ///////////////////////////////////////////////////////////////////////////////////////////
-  def materializeOp1Gen[F, B, T1, S1](
-      implicit ev0: c.WeakTypeTag[F],
-      evb: c.WeakTypeTag[B],
-      evt1: c.WeakTypeTag[T1],
-      evs1: c.WeakTypeTag[S1]): MaterializeOp1AuxGen =
-    new MaterializeOp1AuxGen(
-      symbolOf[F],
-      weakTypeOf[B],
-      weakTypeOf[T1],
-      weakTypeOf[S1]
-    )
+  def materializeOp1Gen[F, N, T1, S1](
+    implicit ev0: c.WeakTypeTag[F],
+    evn: c.WeakTypeTag[N],
+    evt1: c.WeakTypeTag[T1],
+    evs1: c.WeakTypeTag[S1]): MaterializeOp1AuxGen =
+  new MaterializeOp1AuxGen(
+    symbolOf[F],
+    weakTypeOf[N],
+    weakTypeOf[T1],
+    weakTypeOf[S1])
 
   final class MaterializeOp1AuxGen(opSym: TypeSymbol,
-                                   bTpe: Type,
+                                   nTpe: Type,
                                    t1Tpe: Type,
                                    s1Tpe: Type) {
-    def usingFunction[T1, R](f: T1 => R): Tree =
-      mkOp1Tree(computeOutValue(f))
-
-    private def computeOutValue[T1, R](f: T1 => R): R = {
+    def usingFuncName[N, T1, T2] : Tree = {
+      val funcName = extractSingletonValue[N](nTpe).asInstanceOf[String]
       val aValue = extractSingletonValue[T1](s1Tpe)
-      f(aValue)
-    }
 
-    private def mkOp1Tree[T](outValue: T): Tree =
-      mkOpTree(tq"$opSym[$bTpe, $t1Tpe, $s1Tpe]", outValue)
+      import scala.math._
+      val ((outTpe, outTree), baseTpe) = (funcName, aValue) match {
+        case ("ToInt",  a : Int)    => (constantTypeAndValueOf[Int](a.toInt), tq"Int")
+        case ("ToInt",  a : Long)   => (constantTypeAndValueOf[Int](a.toInt), tq"Int")
+        case ("ToLong", a : Int)    => (constantTypeAndValueOf[Long](a.toLong), tq"Long")
+        case ("ToLong", a : Long)   => (constantTypeAndValueOf[Long](a.toLong), tq"Long")
+        case _ => abort(s"Unsupported $funcName[$aValue]",true)
+      }
+      val appliedTpe = tq"$opSym[$nTpe, $t1Tpe, $s1Tpe]"
+      q"""
+        new $appliedTpe {
+          type BaseType = $baseTpe
+          type Out = $outTpe
+          val value: $outTpe = $outTree
+        }
+      """
+    }
   }
   ///////////////////////////////////////////////////////////////////////////////////////////
 
