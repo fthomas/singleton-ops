@@ -120,9 +120,46 @@ object Return {
 
 
 
+trait SingletonTypeFunc2[N <: String with Singleton, P1 <: SingletonTypeExpr, P2 <: SingletonTypeExpr]
+  extends SingletonTypeExpr
+
+
+object SingletonTypeFunc2 {
+  type Aux[
+  N <: String with Singleton,
+  P1 <: SingletonTypeExpr,
+  P2 <: SingletonTypeExpr,
+  Ret_BaseType,
+  Ret_Out <: Ret_BaseType with Singleton
+  ] = SingletonTypeFunc2[N, P1, P2] {
+    type BaseType = Ret_BaseType
+    type Out = Ret_Out
+  }
+
+  implicit def impl[
+  N <: String with Singleton,
+  P1 <: SingletonTypeExpr,
+  P2 <: SingletonTypeExpr,
+  P1_BaseType,
+  P1_Out <: P1_BaseType with Singleton,
+  P2_BaseType,
+  P2_Out <: P2_BaseType with Singleton,
+  Ret_BaseType,
+  Ret_Out <: Ret_BaseType with Singleton
+  ](implicit
+    p1_ret: Repeater.Aux[P1, P1_BaseType, P1_Out],
+    p2_ret: Repeater.Aux[P2, P2_BaseType, P2_Out],
+    op: Op2Macro[N,P1_BaseType, P1_Out, P2_BaseType, P2_Out])
+  : Aux[N, P1, P2, op.BaseType, op.Out] with SingletonTypeExpr =
+    new SingletonTypeFunc2[N, P1, P2] {
+      type BaseType = op.BaseType
+      type Out = op.Out
+      val value: Out {} = op.value
+    }
+}
+
+
 trait SingletonTypeFunc1[P1 <: SingletonTypeExpr] extends SingletonTypeExpr
-trait SingletonTypeFunc2[P1 <: SingletonTypeExpr, P2 <: SingletonTypeExpr]
-    extends SingletonTypeExpr
 
 trait Op {
   type Out

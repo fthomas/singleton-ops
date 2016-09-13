@@ -180,10 +180,10 @@ trait GeneralMacros {
 
       import scala.math._
       val ((outTpe, outTree), baseTpe) = (funcName, aValue, bValue) match {
-        case ("Plus", a : Int,   b : Int)  => (constantTypeAndValueOf[Int](a + b), tq"Int")
-        case ("Plus", a : Long,  b : Int)  => (constantTypeAndValueOf[Long](a + b), tq"Long")
-        case ("Plus", a : Int,   b : Long) => (constantTypeAndValueOf[Long](a + b), tq"Long")
-        case ("Plus", a : Long,  b : Long) => (constantTypeAndValueOf[Long](a + b), tq"Long")
+        case ("+", a : Int,   b : Int)  => (constantTypeAndValueOf[Int](a + b), tq"Int")
+        case ("+", a : Long,  b : Int)  => (constantTypeAndValueOf[Long](a + b), tq"Long")
+        case ("+", a : Int,   b : Long) => (constantTypeAndValueOf[Long](a + b), tq"Long")
+        case ("+", a : Long,  b : Long) => (constantTypeAndValueOf[Long](a + b), tq"Long")
         case _ => abort(s"Unsupported $funcName[$aValue, $bValue]",true)
       }
       val appliedTpe = tq"$opSym[$nTpe, $t1Tpe, $s1Tpe, $t2Tpe, $s2Tpe]"
