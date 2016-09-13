@@ -13,18 +13,6 @@ trait SingletonTypeExpr extends Serializable {
   type OutDouble <: Double with Singleton
   type OutString <: String with Singleton
   val value: Out {}
-  //For debugging only
-  def outTypeName: String = {
-    if (value.isInstanceOf[Int]) "Int"
-    else "Unknown"
-  }
-//  match {
-//    case (p.isInstanceOf[Int]) => "Int"
-//    case (_ : Long with Singleton) => "Long"
-//    case (_ : Double with Singleton) => "Double"
-//    case (_ : String with Singleton) => "String"
-//    case _ => "Unknown"
-//  }
 }
 
 trait SingletonTypeExprBase[B] extends SingletonTypeExpr { type BaseType = B }

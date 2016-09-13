@@ -140,10 +140,19 @@ trait GeneralMacros {
 
       import scala.math._
       val ((outTpe, outTree), baseTpe) = (funcName, aValue) match {
-        case ("ToInt",  a : Int)    => (constantTypeAndValueOf[Int](a.toInt), tq"Int")
-        case ("ToInt",  a : Long)   => (constantTypeAndValueOf[Int](a.toInt), tq"Int")
-        case ("ToLong", a : Int)    => (constantTypeAndValueOf[Long](a.toLong), tq"Long")
-        case ("ToLong", a : Long)   => (constantTypeAndValueOf[Long](a.toLong), tq"Long")
+        case ("ToInt",    a : Int)      => (constantTypeAndValueOf[Int](a.toInt), tq"Int")
+        case ("ToInt",    a : Long)     => (constantTypeAndValueOf[Int](a.toInt), tq"Int")
+        case ("ToInt",    a : Double)   => (constantTypeAndValueOf[Int](a.toInt), tq"Int")
+        case ("ToLong",   a : Int)      => (constantTypeAndValueOf[Long](a.toLong), tq"Long")
+        case ("ToLong",   a : Long)     => (constantTypeAndValueOf[Long](a.toLong), tq"Long")
+        case ("ToLong",   a : Double)   => (constantTypeAndValueOf[Long](a.toLong), tq"Long")
+        case ("ToDouble", a : Int)      => (constantTypeAndValueOf[Double](a.toDouble), tq"Double")
+        case ("ToDouble", a : Long)     => (constantTypeAndValueOf[Double](a.toDouble), tq"Double")
+        case ("ToDouble", a : Double)   => (constantTypeAndValueOf[Double](a.toDouble), tq"Double")
+        case ("Negate",   a : Int)      => (constantTypeAndValueOf[Int](-a), tq"Int")
+        case ("Negate",   a : Long)     => (constantTypeAndValueOf[Long](-a), tq"Long")
+        case ("Negate",   a : Double)   => (constantTypeAndValueOf[Double](-a), tq"Double")
+        case ("Reverse",  a : String)   => (constantTypeAndValueOf[String](a.reverse), tq"String")
         case _ => abort(s"Unsupported $funcName[$aValue]",true)
       }
       val appliedTpe = tq"$opSym[$nTpe, $t1Tpe, $s1Tpe]"
@@ -190,10 +199,29 @@ trait GeneralMacros {
 
       import scala.math._
       val ((outTpe, outTree), baseTpe) = (funcName, aValue, bValue) match {
-        case ("+", a : Int,   b : Int)  => (constantTypeAndValueOf[Int](a + b), tq"Int")
-        case ("+", a : Long,  b : Int)  => (constantTypeAndValueOf[Long](a + b), tq"Long")
-        case ("+", a : Int,   b : Long) => (constantTypeAndValueOf[Long](a + b), tq"Long")
-        case ("+", a : Long,  b : Long) => (constantTypeAndValueOf[Long](a + b), tq"Long")
+        case ("+",            a : Int,     b : Int)     => (constantTypeAndValueOf[Int](a + b), tq"Int")
+        case ("+",            a : Long,    b : Int)     => (constantTypeAndValueOf[Long](a + b), tq"Long")
+        case ("+",            a : Int,     b : Long)    => (constantTypeAndValueOf[Long](a + b), tq"Long")
+        case ("+",            a : Long,    b : Long)    => (constantTypeAndValueOf[Long](a + b), tq"Long")
+        case ("+",            a : Double,  b : Int)     => (constantTypeAndValueOf[Double](a + b), tq"Double")
+        case ("+",            a : Double,  b : Long)    => (constantTypeAndValueOf[Double](a + b), tq"Double")
+        case ("+",            a : Double,  b : Double)  => (constantTypeAndValueOf[Double](a + b), tq"Double")
+        case ("-",            a : Int,     b : Int)     => (constantTypeAndValueOf[Int](a - b), tq"Int")
+        case ("-",            a : Long,    b : Int)     => (constantTypeAndValueOf[Long](a - b), tq"Long")
+        case ("-",            a : Int,     b : Long)    => (constantTypeAndValueOf[Long](a - b), tq"Long")
+        case ("-",            a : Long,    b : Long)    => (constantTypeAndValueOf[Long](a - b), tq"Long")
+        case ("-",            a : Double,  b : Int)     => (constantTypeAndValueOf[Double](a - b), tq"Double")
+        case ("-",            a : Double,  b : Long)    => (constantTypeAndValueOf[Double](a - b), tq"Double")
+        case ("-",            a : Double,  b : Double)  => (constantTypeAndValueOf[Double](a - b), tq"Double")
+        case ("+",            a : String,  b : String)  => (constantTypeAndValueOf[String](a + b), tq"String")
+        case ("*",            a : Int,     b : Int)     => (constantTypeAndValueOf[Int](a * b), tq"Int")
+        case ("*",            a : Long,    b : Int)     => (constantTypeAndValueOf[Long](a * b), tq"Long")
+        case ("*",            a : Int,     b : Long)    => (constantTypeAndValueOf[Long](a * b), tq"Long")
+        case ("*",            a : Long,    b : Long)    => (constantTypeAndValueOf[Long](a * b), tq"Long")
+        case ("*",            a : Double,  b : Int)     => (constantTypeAndValueOf[Double](a * b), tq"Double")
+        case ("*",            a : Double,  b : Long)    => (constantTypeAndValueOf[Double](a * b), tq"Double")
+        case ("*",            a : Double,  b : Double)  => (constantTypeAndValueOf[Double](a * b), tq"Double")
+        case ("Substring",    a : String,  b : Int)     => (constantTypeAndValueOf[String](a.substring(b)), tq"String")
         case _ => abort(s"Unsupported $funcName[$aValue, $bValue]",true)
       }
       val appliedTpe = tq"$opSym[$nTpe, $t1Tpe, $s1Tpe, $t2Tpe, $s2Tpe]"

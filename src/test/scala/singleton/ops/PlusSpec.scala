@@ -43,8 +43,3 @@ class PlusSpec extends Properties("Plus") {
 //  }
 
 }
-
-//Checks upper bound of Plus.Out is well defined
-//case class Foo[A <: Int with Singleton]() {
-//  def foo[B <: Int with Singleton](implicit ev: Plus[A, B]) = Foo[ev.Out]
-//}

@@ -18,6 +18,9 @@ object NewDemo {
   val bSumLongInt : 16L = demoSumLongInt[8L, 8]
   //////////////////////////////
 
+  def demoString[P1 <: String with Singleton](implicit op : Reverse[P1]) : op.Out{} = op.value
+  val r1 : "cba" = demoString["abc"]
+
   println("NewDemo " + b.toString)
 }
 
