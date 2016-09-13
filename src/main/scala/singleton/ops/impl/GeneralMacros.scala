@@ -69,53 +69,6 @@ trait GeneralMacros {
   def evalTyped[T](expr: c.Expr[T]): T =
     c.eval(c.Expr[T](c.untypecheck(expr.tree)))
 
-  def materializeOp1[F[_], A](
-      implicit ev1: c.WeakTypeTag[F[_]],
-      ev2: c.WeakTypeTag[A]
-  ): MaterializeOp1Aux =
-    new MaterializeOp1Aux(symbolOf[F[_]], weakTypeOf[A])
-
-  final class MaterializeOp1Aux(opSym: TypeSymbol, aTpe: Type) {
-    def usingFunction[T, R](f: T => R): Tree =
-      mkOp1Tree(computeOutValue(f))
-
-    private def computeOutValue[T, R](f: T => R): R =
-      f(extractSingletonValue[T](aTpe))
-
-    private def mkOp1Tree[T](outValue: T): Tree =
-      mkOpTree(tq"$opSym[$aTpe]", outValue)
-  }
-
-  def materializeOp2[F[_, _], A, B](
-      implicit ev1: c.WeakTypeTag[F[_, _]],
-      ev2: c.WeakTypeTag[A],
-      ev3: c.WeakTypeTag[B]
-  ): MaterializeOp2Aux =
-    new MaterializeOp2Aux(symbolOf[F[_, _]], weakTypeOf[A], weakTypeOf[B])
-
-  final class MaterializeOp2Aux(opSym: TypeSymbol, aTpe: Type, bTpe: Type) {
-    def usingFunction[T1, T2, R](f: (T1, T2) => R): Tree =
-      mkOp2Tree(computeOutValue(f))
-
-    def usingPredicate[T](f: (T, T) => Boolean): Tree = {
-      val outValue = computeOutValue(f)
-      if (outValue) {
-        mkOp2Tree(outValue)
-      } else {
-        abort(s"Cannot prove ${opSym.name}[${show(aTpe)}, ${show(bTpe)}]")
-      }
-    }
-
-    private def computeOutValue[T1, T2, R](f: (T1, T2) => R): R = {
-      val aValue = extractSingletonValue[T1](aTpe)
-      val bValue = extractSingletonValue[T2](bTpe)
-      f(aValue, bValue)
-    }
-
-    private def mkOp2Tree[T](outValue: T): Tree =
-      mkOpTree(tq"$opSym[$aTpe, $bTpe]", outValue)
-  }
-
   ///////////////////////////////////////////////////////////////////////////////////////////
   // One operand (Generic)
   ///////////////////////////////////////////////////////////////////////////////////////////
@@ -152,6 +105,9 @@ trait GeneralMacros {
         case ("Negate",   a : Int)      => (constantTypeAndValueOf[Int](-a), tq"Int")
         case ("Negate",   a : Long)     => (constantTypeAndValueOf[Long](-a), tq"Long")
         case ("Negate",   a : Double)   => (constantTypeAndValueOf[Double](-a), tq"Double")
+        case ("Abs",      a : Int)      => (constantTypeAndValueOf[Int](abs(a)), tq"Int")
+        case ("Abs",      a : Long)     => (constantTypeAndValueOf[Long](abs(a)), tq"Long")
+        case ("Abs",      a : Double)   => (constantTypeAndValueOf[Double](abs(a)), tq"Double")
         case ("Reverse",  a : String)   => (constantTypeAndValueOf[String](a.reverse), tq"String")
         case ("!",        a : Boolean)  => (constantTypeAndValueOf[Boolean](!a), tq"Boolean")
         case ("Require",  a : Boolean)  =>
@@ -227,7 +183,6 @@ trait GeneralMacros {
         case ("-",            a : Double,  b : Double)  => (constantTypeAndValueOf[Double](a - b), tq"Double")
 
         case ("*",            a : Int,     b : Int)     => (constantTypeAndValueOf[Int](a * b), tq"Int")
-        case ("*",            a : Int,     b : Long)    => (constantTypeAndValueOf[Long](a * b), tq"Long")
         case ("*",            a : Int,     b : Double)  => (constantTypeAndValueOf[Double](a * b), tq"Double")
         case ("*",            a : Long,    b : Int)     => (constantTypeAndValueOf[Long](a * b), tq"Long")
         case ("*",            a : Long,    b : Long)    => (constantTypeAndValueOf[Long](a * b), tq"Long")
@@ -309,6 +264,14 @@ trait GeneralMacros {
         case ("&&",           a : Boolean, b : Boolean) => (constantTypeAndValueOf[Boolean](a && b), tq"Boolean")
         case ("||",           a : Boolean, b : Boolean) => (constantTypeAndValueOf[Boolean](a || b), tq"Boolean")
 
+        case ("Min",          a : Int,     b : Int)     => (constantTypeAndValueOf[Int](min(a,b)), tq"Int")
+        case ("Min",          a : Long,    b : Long)    => (constantTypeAndValueOf[Long](min(a,b)), tq"Long")
+        case ("Min",          a : Double,  b : Double)  => (constantTypeAndValueOf[Double](min(a,b)), tq"Double")
+
+        case ("Max",          a : Int,     b : Int)     => (constantTypeAndValueOf[Int](max(a,b)), tq"Int")
+        case ("Max",          a : Long,    b : Long)    => (constantTypeAndValueOf[Long](max(a,b)), tq"Long")
+        case ("Max",          a : Double,  b : Double)  => (constantTypeAndValueOf[Double](max(a,b)), tq"Double")
+          
         case ("Substring",    a : String,  b : Int)     => (constantTypeAndValueOf[String](a.substring(b)), tq"String")
 
         case _ => abort(s"Unsupported $funcName[$aValue, $bValue]",true)
@@ -325,13 +288,4 @@ trait GeneralMacros {
   }
   ///////////////////////////////////////////////////////////////////////////////////////////
 
-  def mkOpTree[T](appliedTpe: Tree, outValue: T): Tree = {
-    val (outTpe, outTree) = constantTypeAndValueOf(outValue)
-    q"""
-      new $appliedTpe {
-        type Out = $outTpe
-        val value: $outTpe = $outTree
-      }
-    """
-  }
 }
