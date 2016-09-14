@@ -8,23 +8,19 @@ import scala.reflect.macros.whitebox
 /********************************************************************************************************
   * Single argument type function macro
   *******************************************************************************************************/
-trait Op1Macro[N <: String with Singleton, T1, S1 <: T1 with Singleton]
-    extends SingletonTypeExpr
+trait Op1Macro[N <: String with Singleton, S1] extends SingletonTypeExpr
 
-@ bundle
+@bundle
 object Op1Macro {
-  implicit def call[N <: String with Singleton, T1, S1 <: T1 with Singleton]: Op1Macro[
-    N,
-    T1,
-    S1] = macro Macro.impl[N, T1, S1]
+  implicit def call[N <: String with Singleton, S1]: Op1Macro[N, S1] =
+    macro Macro.impl[N, S1]
 
   final class Macro(val c: whitebox.Context) extends GeneralMacros {
     def impl[
         N <: String with Singleton: c.WeakTypeTag,
-        T1: c.WeakTypeTag,
-        S1 <: T1 with Singleton: c.WeakTypeTag
+        S1: c.WeakTypeTag
     ]: c.Tree =
-      materializeOp1Gen[Op1Macro[_, _, _], N, T1, S1].usingFuncName
+      materializeOp1Gen[Op1Macro[_, _], N, S1].usingFuncName
   }
 }
 
@@ -32,31 +28,20 @@ object Op1Macro {
 /********************************************************************************************************
   * Two arguments type function macro
   *******************************************************************************************************/
-trait Op2Macro[N <: String with Singleton,
-               T1,
-               S1 <: T1 with Singleton,
-               T2,
-               S2 <: T2 with Singleton]
-    extends SingletonTypeExpr
+trait Op2Macro[N <: String with Singleton, S1, S2] extends SingletonTypeExpr
 
-@ bundle
+@bundle
 object Op2Macro {
-  implicit def call[N <: String with Singleton,
-                    T1,
-                    S1 <: T1 with Singleton,
-                    T2,
-                    S2 <: T2 with Singleton]: Op2Macro[N, T1, S1, T2, S2] =
-    macro Macro.impl[N, T1, S1, T2, S2]
+  implicit def call[N <: String with Singleton, S1, S2]: Op2Macro[N, S1, S2] =
+    macro Macro.impl[N, S1, S2]
 
   final class Macro(val c: whitebox.Context) extends GeneralMacros {
     def impl[
         N <: String with Singleton: c.WeakTypeTag,
-        T1: c.WeakTypeTag,
-        S1 <: T1 with Singleton: c.WeakTypeTag,
-        T2: c.WeakTypeTag,
-        S2 <: T2 with Singleton: c.WeakTypeTag
+        S1: c.WeakTypeTag,
+        S2: c.WeakTypeTag
     ]: c.Tree =
-      materializeOp2Gen[Op2Macro[_, _, _, _, _], N, T1, S1, T2, S2].usingFuncName
+      materializeOp2Gen[Op2Macro[_, _, _], N, S1, S2].usingFuncName
   }
 }
 
@@ -65,7 +50,7 @@ trait ToNatMacro[T1, S1 <: T1 with Singleton] {
   val value: Nat
 }
 
-@ bundle
+@bundle
 object ToNatMacro {
   implicit def call[T1, S1 <: T1 with Singleton]: ToNatMacro[T1, S1] =
     macro Macro.impl[T1, S1]

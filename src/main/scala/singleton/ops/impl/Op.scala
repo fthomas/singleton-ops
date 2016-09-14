@@ -46,42 +46,11 @@ object SingletonTypeValue {
       type BaseType = op.BaseType; type Out = op.Out; val value: Out = op.value
     }
 
-//  implicit def implNat[N <: shapeless.Nat](
-//      implicit fromNat : FromNatMacro[N]): SingletonTypeValue[N] {
-//    type BaseType = Int; type Out = fromNat.Out
-//  } =
-//    new SingletonTypeValue[N] {
-//      type BaseType = Int; type Out = fromNat.Out; val value: Out = fromNat.value
-//    }
-
-  implicit def implInt[S <: Int with Singleton](implicit v: ValueOf[S]): SingletonTypeValue[S] {
-    type BaseType = Int; type Out = S; type OutInt = S
+  implicit def impl[S <: Singleton]
+  (implicit id: Op1Macro["Id", S]): SingletonTypeValue[S] {
+    type BaseType = id.BaseType; type Out = id.Out
   } = new SingletonTypeValue[S] {
-    type BaseType = Int; type Out = S; type OutInt = S; val value: Out = valueOf[S]
-  }
-
-  implicit def implLong[S <: Long with Singleton](implicit v: ValueOf[S]): SingletonTypeValue[S] {
-    type BaseType = Long; type Out = S; type OutLong = S
-  } = new SingletonTypeValue[S] {
-    type BaseType = Long; type Out = S; type OutLong = S; val value: Out = valueOf[S]
-  }
-
-  implicit def implDouble[S <: Double with Singleton](implicit v: ValueOf[S]): SingletonTypeValue[S] {
-    type BaseType = Double; type Out = S; type OutDouble = S
-  } = new SingletonTypeValue[S] {
-    type BaseType = Double; type Out = S; type OutDouble = S; val value: Out = valueOf[S]
-  }
-
-  implicit def implString[S <: String with Singleton](implicit v: ValueOf[S]): SingletonTypeValue[S] {
-    type BaseType = String; type Out = S; type OutString = S
-  } = new SingletonTypeValue[S] {
-    type BaseType = String; type Out = S; type OutString = S; val value: Out = valueOf[S]
-  }
-
-  implicit def implBoolean[S <: Boolean with Singleton](implicit v: ValueOf[S]): SingletonTypeValue[S] {
-    type BaseType = Boolean; type Out = S; type OutBoolean = S
-  } = new SingletonTypeValue[S] {
-    type BaseType = Boolean; type Out = S; type OutBoolean = S; val value: Out = valueOf[S]
+    type BaseType = id.BaseType; type Out = id.Out; val value: Out = id.value
   }
 }
 
@@ -160,7 +129,7 @@ object SingletonTypeFunc1 {
       Ret_BaseType,
       Ret_Out <: Ret_BaseType with Singleton
   ](implicit p1_ret: Repeater.Aux[P1, P1_BaseType, P1_Out],
-    op: Op1Macro[N, P1_BaseType, P1_Out])
+    op: Op1Macro[N, P1_Out])
     : Aux[N, P1, op.BaseType, op.Out] with SingletonTypeExpr =
     new SingletonTypeFunc1[N, P1] {
       type BaseType = op.BaseType
@@ -198,7 +167,7 @@ object SingletonTypeFunc2 {
       Ret_Out <: Ret_BaseType with Singleton
   ](implicit p1_ret: Repeater.Aux[P1, P1_BaseType, P1_Out],
     p2_ret: Repeater.Aux[P2, P2_BaseType, P2_Out],
-    op: Op2Macro[N, P1_BaseType, P1_Out, P2_BaseType, P2_Out])
+    op: Op2Macro[N, P1_Out, P2_Out])
     : Aux[N, P1, P2, op.BaseType, op.Out] with SingletonTypeExpr =
     new SingletonTypeFunc2[N, P1, P2] {
       type BaseType = op.BaseType
