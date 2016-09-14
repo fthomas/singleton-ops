@@ -1,23 +1,24 @@
 package singleton.ops
 
-import impl._
-
 import shapeless._
+import singleton.ops.impl._
 
-//trait FromNat[N <: Nat] extends SingletonTypeExprBase[Int]
-//
-//object FromNat {
-//  def apply[N <: Nat](implicit fromNat: FromNat[N]): FromNat[N] = fromNat
-//
-//  implicit val fromNat0 : FromNat[_0] {type OutInt = 0; type Out = 0} = new FromNat[_0] {
-//    type OutInt = 0
-//    type Out = 0
-//    val value : Out = 0
-//  }
-//  implicit def fromNatSucc[N <: Nat](implicit fromNat : FromNat[N] + 1) : FromNat[Succ[N]]
-//    {type OutInt = fromNat.OutInt; type Out = fromNat.OutInt} = new FromNat[Succ[N]] {
-//    type OutInt = fromNat.OutInt
-//    type Out = fromNat.OutInt
-//    val value : Out = fromNat.value.asInstanceOf[Out]
-//  }
-//}
+trait ToNat[P1 <: SingletonTypeExpr] extends Nat //Serializable {type Out <: Nat}
+
+object ToNat {
+  type Aux[
+  P1 <: SingletonTypeExpr,
+  Ret_Out <: Nat
+  ] = ToNat[P1] {
+    type N = Ret_Out
+  }
+
+  implicit def impl[
+  P1 <: SingletonTypeExpr,
+  P1_BaseType <: Int,
+  P1_Out <: P1_BaseType with Singleton,
+  Ret_Out <: Nat
+  ](implicit p1_ret: Repeater.Aux[P1, P1_BaseType, P1_Out],
+    op: ToNatMacro[P1_Out])
+  : Aux[P1, op.N] = new ToNat[P1] { type N = op.N }
+}

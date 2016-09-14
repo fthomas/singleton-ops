@@ -46,21 +46,18 @@ object Op2Macro {
 }
 
 /*******************************************************************************************************/
-trait ToNatMacro[T1, S1 <: T1 with Singleton] {
-  val value: Nat
-}
+trait ToNatMacro[S1] extends Nat
 
 @bundle
 object ToNatMacro {
-  implicit def call[T1, S1 <: T1 with Singleton]: ToNatMacro[T1, S1] =
-    macro Macro.impl[T1, S1]
+  implicit def call[S1]: ToNatMacro[S1] =
+    macro Macro.impl[S1]
 
   final class Macro(val c: whitebox.Context) extends GeneralMacros {
     def impl[
-        T1: c.WeakTypeTag,
-        S1 <: T1 with Singleton: c.WeakTypeTag
+        S1: c.WeakTypeTag
     ]: c.Tree =
-      materializeToNat[ToNatMacro[_, _], T1, S1].usingFuncName
+      materializeToNat[ToNatMacro[_], S1].usingFuncName
   }
 }
 

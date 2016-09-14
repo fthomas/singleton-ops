@@ -35,9 +35,14 @@ object NewDemo {
   import shapeless._
   //////////////////////////////
   val n = Nat(5)
-  def demoNat[L <: Nat](implicit p : @@[L]) = p
-  val bNat = demoNat[n.N]
+  def demoNatToSingletonInt[L <: Nat](implicit p : @@[L]) : p.Out {} = p.value
+  val bSing5 : 5 = demoNatToSingletonInt[n.N]
+//  def demoSigNatSig[L <: Int with Singleton](implicit op : @@[ToNat[@@[L]]]) : op.Out = op.value
+//  val bSingNatSing5 : 5 = demoSigNatSig[5]
+//  demoNatToSingletonInt[bNat5.Out]
+//  shapeless.nat.toInt[bNat5.Out]
   //////////////////////////////
+
 //  val one : 1 = 1
 //  demo[ToInt[n.N]]
 //  val a = impl.ToNatMacro.call[Int, 5].value

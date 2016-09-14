@@ -1,6 +1,7 @@
 package singleton.ops.impl
 
 import macrocompat.bundle
+import shapeless.Nat
 
 import scala.reflect.macros.whitebox
 import singleton.ops.impl._
@@ -110,6 +111,7 @@ object Return {
 
 trait SingletonTypeFunc1[N <: String with Singleton, P1 <: SingletonTypeExpr]
     extends SingletonTypeExpr
+
 object SingletonTypeFunc1 {
   type Aux[
       N <: String with Singleton,
@@ -197,3 +199,4 @@ object SingletonTypeFunc2 {
       val value: Out {} = op.value
     }
 }
+
