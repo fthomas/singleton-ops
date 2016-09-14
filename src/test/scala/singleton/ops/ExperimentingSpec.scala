@@ -35,8 +35,8 @@ object NewDemo {
   import shapeless._
   //////////////////////////////
   val n = Nat(5)
-//  def demoNat[L <: Nat](implicit p : @@[L]) = p
-//  val bNat = demoNat[n.N]
+  def demoNat[L <: Nat](implicit p : @@[L]) = p
+  val bNat = demoNat[n.N]
   //////////////////////////////
 //  val one : 1 = 1
 //  demo[ToInt[n.N]]

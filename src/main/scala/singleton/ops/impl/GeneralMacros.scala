@@ -47,8 +47,7 @@ trait GeneralMacros {
         case SingleType(pre, sym) =>
           unapply(sym.info asSeenFrom (pre, sym.owner))
         case ConstantType(c) => Some(c)
-        case _ =>
-          None
+        case _ => None
       }
     }
   }
@@ -65,8 +64,11 @@ trait GeneralMacros {
     c.internal.constantType(Constant(t))
 
   def constantTypeAndValueOf[T](t: T)(
-      implicit ev: c.WeakTypeTag[T]): (Type, Type, Tree) =
-    (weakTypeOf[T], constantTypeOf(t), Literal(Constant(t)))
+      implicit ev: c.WeakTypeTag[T]): (Type, TypeName, Type, Tree) ={
+    val weakType = weakTypeOf[T]
+    val outTypeName = TypeName("Out" + weakType.toString)
+    (weakType, outTypeName, constantTypeOf(t), Literal(Constant(t)))
+  }
 
   def extractSingletonValue[T](tpe: Type): T = {
     def extractionFailed(tpe: Type, usePrint : Boolean) = {
@@ -76,7 +78,6 @@ trait GeneralMacros {
     }
 
     val value = tpe match {
-      //case TypeRef(SingleType(_))
       case Const(Constant(t)) => t
       case _ => extractionFailed(tpe, false)
     }
@@ -102,7 +103,7 @@ trait GeneralMacros {
       val aValue = extractSingletonValue[T1](s1Tpe)
 
       import scala.math._
-      val (baseTpe, outTpe, outTree) = (funcName, aValue) match {
+      val (baseTpe, outTypeName, outTpe, outTree) = (funcName, aValue) match {
         case ("Id", a: Int) => constantTypeAndValueOf(a)
         case ("Id", a: Long) => constantTypeAndValueOf(a)
         case ("Id", a: Double) => constantTypeAndValueOf(a)
@@ -137,6 +138,7 @@ trait GeneralMacros {
         new $appliedTpe {
           type BaseType = $baseTpe
           type Out = $outTpe
+          type $outTypeName = $outTpe
           val value: $outTpe = $outTree
         }
       """
@@ -169,7 +171,7 @@ trait GeneralMacros {
       val bValue = extractSingletonValue[T2](s2Tpe)
 
       import scala.math._
-      val (baseTpe, outTpe, outTree) = (funcName, aValue, bValue) match {
+      val (baseTpe, outTypeName, outTpe, outTree) = (funcName, aValue, bValue) match {
         case ("+", a: Int, b: Int) => constantTypeAndValueOf(a + b)
         case ("+", a: Int, b: Long) => constantTypeAndValueOf(a + b)
         case ("+", a: Int, b: Double) => constantTypeAndValueOf(a + b)
@@ -291,6 +293,7 @@ trait GeneralMacros {
         new $appliedTpe {
           type BaseType = $baseTpe
           type Out = $outTpe
+          type $outTypeName = $outTpe
           val value: $outTpe = $outTree
         }
       """

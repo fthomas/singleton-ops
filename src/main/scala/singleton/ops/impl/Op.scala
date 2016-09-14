@@ -46,7 +46,7 @@ object SingletonTypeValue {
       type BaseType = op.BaseType; type Out = op.Out; val value: Out = op.value
     }
 
-  implicit def impl[S <: Singleton]
+  implicit def impl[S]
   (implicit id: Op1Macro["Id", S]): SingletonTypeValue[S] {
     type BaseType = id.BaseType; type Out = id.Out
   } = new SingletonTypeValue[S] {
@@ -57,55 +57,55 @@ object SingletonTypeValue {
 trait Return[S <: SingletonTypeExpr] extends SingletonTypeExpr
 
 object Return {
-  implicit def implExprInt[P1 <: SingletonTypeExpr,
-                           Ret_BaseType <: Int,
-                           Ret_Out <: Ret_BaseType with Singleton](
-      implicit op: Repeater.Aux[P1, Ret_BaseType, Ret_Out]): Return[P1] {
-    type BaseType = Ret_BaseType; type Out = Ret_Out; type OutInt = Ret_Out
-  } = new Return[P1] {
-    type BaseType = Ret_BaseType; type Out = Ret_Out; type OutInt = Ret_Out;
-    val value: Out = op.value
-  }
-
-  implicit def implExprLong[P1 <: SingletonTypeExpr,
-                            Ret_BaseType <: Long,
-                            Ret_Out <: Ret_BaseType with Singleton](
-      implicit op: Repeater.Aux[P1, Ret_BaseType, Ret_Out]): Return[P1] {
-    type BaseType = Ret_BaseType; type Out = Ret_Out; type OutLong = Ret_Out
-  } = new Return[P1] {
-    type BaseType = Ret_BaseType; type Out = Ret_Out; type OutLong = Ret_Out;
-    val value: Out = op.value
-  }
-
-  implicit def implExprDouble[P1 <: SingletonTypeExpr,
-                              Ret_BaseType <: Double,
-                              Ret_Out <: Ret_BaseType with Singleton](
-      implicit op: Repeater.Aux[P1, Ret_BaseType, Ret_Out]): Return[P1] {
-    type BaseType = Ret_BaseType; type Out = Ret_Out; type OutDouble = Ret_Out
-  } = new Return[P1] {
-    type BaseType = Ret_BaseType; type Out = Ret_Out; type OutDouble = Ret_Out;
-    val value: Out = op.value
-  }
-
-  implicit def implExprString[P1 <: SingletonTypeExpr,
-                              Ret_BaseType <: String,
-                              Ret_Out <: Ret_BaseType with Singleton](
-      implicit op: Repeater.Aux[P1, Ret_BaseType, Ret_Out]): Return[P1] {
-    type BaseType = Ret_BaseType; type Out = Ret_Out; type OutString = Ret_Out
-  } = new Return[P1] {
-    type BaseType = Ret_BaseType; type Out = Ret_Out; type OutString = Ret_Out;
-    val value: Out = op.value
-  }
-
-  implicit def implExprBoolean[P1 <: SingletonTypeExpr,
-                               Ret_BaseType <: Boolean,
-                               Ret_Out <: Ret_BaseType with Singleton](
-      implicit op: Repeater.Aux[P1, Ret_BaseType, Ret_Out]): Return[P1] {
-    type BaseType = Ret_BaseType; type Out = Ret_Out; type OutBoolean = Ret_Out
-  } = new Return[P1] {
-    type BaseType = Ret_BaseType; type Out = Ret_Out; type OutBoolean = Ret_Out;
-    val value: Out = op.value
-  }
+//  implicit def implExprInt[P1 <: SingletonTypeExpr,
+//                           Ret_BaseType <: Int,
+//                           Ret_Out <: Ret_BaseType with Singleton](
+//      implicit op: Repeater.Aux[P1, Ret_BaseType, Ret_Out]): Return[P1] {
+//    type BaseType = Ret_BaseType; type Out = Ret_Out; type OutInt = Ret_Out
+//  } = new Return[P1] {
+//    type BaseType = Ret_BaseType; type Out = Ret_Out; type OutInt = Ret_Out;
+//    val value: Out = op.value
+//  }
+//
+//  implicit def implExprLong[P1 <: SingletonTypeExpr,
+//                            Ret_BaseType <: Long,
+//                            Ret_Out <: Ret_BaseType with Singleton](
+//      implicit op: Repeater.Aux[P1, Ret_BaseType, Ret_Out]): Return[P1] {
+//    type BaseType = Ret_BaseType; type Out = Ret_Out; type OutLong = Ret_Out
+//  } = new Return[P1] {
+//    type BaseType = Ret_BaseType; type Out = Ret_Out; type OutLong = Ret_Out;
+//    val value: Out = op.value
+//  }
+//
+//  implicit def implExprDouble[P1 <: SingletonTypeExpr,
+//                              Ret_BaseType <: Double,
+//                              Ret_Out <: Ret_BaseType with Singleton](
+//      implicit op: Repeater.Aux[P1, Ret_BaseType, Ret_Out]): Return[P1] {
+//    type BaseType = Ret_BaseType; type Out = Ret_Out; type OutDouble = Ret_Out
+//  } = new Return[P1] {
+//    type BaseType = Ret_BaseType; type Out = Ret_Out; type OutDouble = Ret_Out;
+//    val value: Out = op.value
+//  }
+//
+//  implicit def implExprString[P1 <: SingletonTypeExpr,
+//                              Ret_BaseType <: String,
+//                              Ret_Out <: Ret_BaseType with Singleton](
+//      implicit op: Repeater.Aux[P1, Ret_BaseType, Ret_Out]): Return[P1] {
+//    type BaseType = Ret_BaseType; type Out = Ret_Out; type OutString = Ret_Out
+//  } = new Return[P1] {
+//    type BaseType = Ret_BaseType; type Out = Ret_Out; type OutString = Ret_Out;
+//    val value: Out = op.value
+//  }
+//
+//  implicit def implExprBoolean[P1 <: SingletonTypeExpr,
+//                               Ret_BaseType <: Boolean,
+//                               Ret_Out <: Ret_BaseType with Singleton](
+//      implicit op: Repeater.Aux[P1, Ret_BaseType, Ret_Out]): Return[P1] {
+//    type BaseType = Ret_BaseType; type Out = Ret_Out; type OutBoolean = Ret_Out
+//  } = new Return[P1] {
+//    type BaseType = Ret_BaseType; type Out = Ret_Out; type OutBoolean = Ret_Out;
+//    val value: Out = op.value
+//  }
 }
 
 trait SingletonTypeFunc1[N <: String with Singleton, P1 <: SingletonTypeExpr]
@@ -130,10 +130,21 @@ object SingletonTypeFunc1 {
       Ret_Out <: Ret_BaseType with Singleton
   ](implicit p1_ret: Repeater.Aux[P1, P1_BaseType, P1_Out],
     op: Op1Macro[N, P1_Out])
-    : Aux[N, P1, op.BaseType, op.Out] with SingletonTypeExpr =
+    : Aux[N, P1, op.BaseType, op.Out] {
+    type OutInt = op.OutInt
+    type OutLong = op.OutLong
+    type OutDouble = op.OutDouble
+    type OutString = op.OutString
+    type OutBoolean = op.OutBoolean
+  }=
     new SingletonTypeFunc1[N, P1] {
       type BaseType = op.BaseType
       type Out = op.Out
+      type OutInt = op.OutInt
+      type OutLong = op.OutLong
+      type OutDouble = op.OutDouble
+      type OutString = op.OutString
+      type OutBoolean = op.OutBoolean
       val value: Out {} = op.value
     }
 }
@@ -168,10 +179,21 @@ object SingletonTypeFunc2 {
   ](implicit p1_ret: Repeater.Aux[P1, P1_BaseType, P1_Out],
     p2_ret: Repeater.Aux[P2, P2_BaseType, P2_Out],
     op: Op2Macro[N, P1_Out, P2_Out])
-    : Aux[N, P1, P2, op.BaseType, op.Out] with SingletonTypeExpr =
+    : Aux[N, P1, P2, op.BaseType, op.Out] {
+      type OutInt = op.OutInt
+      type OutLong = op.OutLong
+      type OutDouble = op.OutDouble
+      type OutString = op.OutString
+      type OutBoolean = op.OutBoolean
+     }  =
     new SingletonTypeFunc2[N, P1, P2] {
       type BaseType = op.BaseType
       type Out = op.Out
+      type OutInt = op.OutInt
+      type OutLong = op.OutLong
+      type OutDouble = op.OutDouble
+      type OutString = op.OutString
+      type OutBoolean = op.OutBoolean
       val value: Out {} = op.value
     }
 }
