@@ -1,5 +1,6 @@
 package singleton.ops.impl
 import macrocompat.bundle
+
 import scala.reflect.macros.whitebox
 
 @bundle
@@ -288,4 +289,170 @@ trait GeneralMacros {
   }
   ///////////////////////////////////////////////////////////////////////////////////////////
 
+
+  ///////////////////////////////////////////////////////////////////////////////////////////
+  // ToNat Interface
+  ///////////////////////////////////////////////////////////////////////////////////////////
+  def materializeToNat[F, T1, S1](
+                                       implicit ev0: c.WeakTypeTag[F],
+                                       evt1: c.WeakTypeTag[T1],
+                                       evs1: c.WeakTypeTag[S1]): MaterializeToNatAux =
+    new MaterializeToNatAux(
+      symbolOf[F],
+      weakTypeOf[T1],
+      weakTypeOf[S1])
+
+  final class MaterializeToNatAux(opSym: TypeSymbol,
+                                  t1Tpe: Type,
+                                  s1Tpe: Type) {
+    def usingFuncName[T1] : Tree = {
+      val aValue = extractSingletonValue[T1](s1Tpe)
+
+      val natTree : Tree = aValue match {
+        case a : Int =>
+          if (a >= 0)
+            mkNatValue(a)
+          else
+            abort(s"Unsupported negative integer to convert to Nat", true)
+        case _ =>
+          abort(s"Unsupported value type to convert to Nat", true)
+      }
+      val appliedTpe = tq"$opSym[$t1Tpe, $s1Tpe]"
+      q"""
+        new $appliedTpe {
+          val value: Nat = $natTree
+        }
+      """
+
+    }
+
+    import shapeless._
+    import scala.annotation.tailrec
+    def mkNatTpt(i: Int): Tree = {
+      val succSym = typeOf[Succ[_]].typeConstructor.typeSymbol
+      val _0Sym = typeOf[_0].typeSymbol
+
+      @tailrec
+      def loop(i: Int, acc: Tree): Tree = {
+        if(i == 0) acc
+        else loop(i-1, AppliedTypeTree(Ident(succSym), List(acc)))
+      }
+
+      loop(i, Ident(_0Sym))
+    }
+
+    def mkNatTpe(i: Int): Type = {
+      val succTpe = typeOf[Succ[_]].typeConstructor
+      val _0Tpe = typeOf[_0]
+
+      @tailrec
+      def loop(i: Int, acc: Type): Type = {
+        if(i == 0) acc
+        else loop(i-1, appliedType(succTpe, acc))
+      }
+
+      loop(i, _0Tpe)
+    }
+
+    def mkNatValue(i: Int): Tree =
+      q""" new ${mkNatTpt(i)} """
+  }
+  ///////////////////////////////////////////////////////////////////////////////////////////
+
+  ///////////////////////////////////////////////////////////////////////////////////////////
+  // ToNat Interface
+  ///////////////////////////////////////////////////////////////////////////////////////////
+  def materializeFromNat[F, N](
+                                   implicit ev0: c.WeakTypeTag[F],
+                                   evn: c.WeakTypeTag[N]): MaterializeFromNatAux =
+  new MaterializeFromNatAux(
+    symbolOf[F],
+    weakTypeOf[N])
+
+  final class MaterializeFromNatAux(opSym: TypeSymbol,
+                                    nTpe: Type) {
+
+    import shapeless._
+    object Const {
+      def unapply(tp: Type): Option[Int] = {
+//        print(showRaw(tp))
+        tp match {
+          case tp @ ExistentialType(_, _) => unapply(tp.underlying)
+          case TypeBounds(lo, hi) => unapply(hi)
+//          case ClassInfoType(parents,scope,sym) => unapply(parents.head)
+//          case RefinedType(parents, _) =>
+//            parents.iterator map unapply collectFirst { case Some(x) => x }
+          case NullaryMethodType(tpe) => unapply(tpe)
+          case TypeRef(_, sym, args) if sym == symbolOf[Succ[_]] => Some(unapply(args.head).get + 1)
+          case TypeRef(_, sym, _) if sym == symbolOf[_0] => Some(0)
+          case TypeRef(_, sym, _) if sym.isAliasType => unapply(tp.dealias)
+          case TypeRef(pre, sym, Nil) =>
+            unapply(sym.info asSeenFrom (pre, sym.owner))
+          case SingleType(pre, sym) =>
+            unapply(sym.info asSeenFrom (pre, sym.owner))
+//          case ConstantType(c) => Some(c)
+          case _ => None
+        }
+      }
+    }
+
+    def extractNatValue(tpe: Type): Int = {
+      def extractionFailed(tpe: Type) = {
+        val msg = s"Cannot extract Nat value from $tpe\n" + "showRaw==> " + showRaw(
+          tpe)
+        abort(msg, true)
+      }
+
+      val value = tpe match {
+        case Const(t : Int) => t
+        case _ => extractionFailed(tpe); 0
+      }
+
+      value.asInstanceOf[Int]
+    }
+
+    def usingFuncName[T1] : Tree = {
+      val nValue = extractNatValue(nTpe)
+      val (outTpe, outTree) = constantTypeAndValueOf[Int](nValue)
+
+      val appliedTpe = tq"$opSym[$nTpe]"
+      q"""
+        new $appliedTpe {
+          type Out = $outTpe
+          val value: $outTpe = $outTree
+        }
+      """
+    }
+
+    import scala.annotation.tailrec
+    def mkNatTpt(i: Int): Tree = {
+      val succSym = typeOf[Succ[_]].typeConstructor.typeSymbol
+      val _0Sym = typeOf[_0].typeSymbol
+
+      @tailrec
+      def loop(i: Int, acc: Tree): Tree = {
+        if(i == 0) acc
+        else loop(i-1, AppliedTypeTree(Ident(succSym), List(acc)))
+      }
+
+      loop(i, Ident(_0Sym))
+    }
+
+    def mkNatTpe(i: Int): Type = {
+      val succTpe = typeOf[Succ[_]].typeConstructor
+      val _0Tpe = typeOf[_0]
+
+      @tailrec
+      def loop(i: Int, acc: Type): Type = {
+        if(i == 0) acc
+        else loop(i-1, appliedType(succTpe, acc))
+      }
+
+      loop(i, _0Tpe)
+    }
+
+    def mkNatValue(i: Int): Tree =
+      q""" new ${mkNatTpt(i)} """
+  }
+  ///////////////////////////////////////////////////////////////////////////////////////////
 }

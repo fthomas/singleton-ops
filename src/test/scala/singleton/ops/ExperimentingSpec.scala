@@ -1,5 +1,8 @@
 package singleton.ops
 
+import shapeless.ops._
+import nat._
+
 object NewDemo {
   //////////////////////////////
   def demo[L <: Int with Singleton](implicit p : @@[@@[L+L]]) = mambo[p.OutInt]()
@@ -29,7 +32,15 @@ object NewDemo {
   def demoRequire[P1 <: Int with Singleton](implicit op : Require[P1 < 0]) : op.Out{} = op.value
   demoRequire[-1]
 
-  println("NewDemo " + b.toString)
+  import shapeless._
+//  val one : 1 = 1
+  val n = Nat(5)
+//  demo[ToInt[n.N]]
+  val a = impl.ToNatMacro.call[Int, 5].value
+  //val a : 5 = FromNat[n.N].value
+  val c : 5 = impl.FromNatMacro.call[n.N].value
+
+//  println("NewDemo " + a.value)
 }
 
 
