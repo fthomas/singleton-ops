@@ -35,14 +35,14 @@ object NewDemo {
   import shapeless._
   //////////////////////////////
   val n = Nat(5)
-  def demoNat[L <: Nat](implicit p : @@[L]) = p
-  val bNat = demoNat[n.N]
+//  def demoNat[L <: Nat](implicit p : @@[L]) = p
+//  val bNat = demoNat[n.N]
   //////////////////////////////
 //  val one : 1 = 1
 //  demo[ToInt[n.N]]
-  val a = impl.ToNatMacro.call[Int, 5].value
+//  val a = impl.ToNatMacro.call[Int, 5].value
   //val a : 5 = FromNat[n.N].value
-  val c : 5 = impl.FromNatMacro.call[n.N].value
+//  val c : 5 = impl.FromNatMacro.call[n.N].value
 
 //  println("NewDemo " + a.value)
 }

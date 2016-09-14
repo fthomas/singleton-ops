@@ -46,13 +46,13 @@ object SingletonTypeValue {
       type BaseType = op.BaseType; type Out = op.Out; val value: Out = op.value
     }
 
-  implicit def implNat[N <: shapeless.Nat](
-      implicit fromNat : FromNatMacro[N]): SingletonTypeValue[N] {
-    type BaseType = Int; type Out = fromNat.Out
-  } =
-    new SingletonTypeValue[N] {
-      type BaseType = Int; type Out = fromNat.Out; val value: Out = fromNat.value
-    }
+//  implicit def implNat[N <: shapeless.Nat](
+//      implicit fromNat : FromNatMacro[N]): SingletonTypeValue[N] {
+//    type BaseType = Int; type Out = fromNat.Out
+//  } =
+//    new SingletonTypeValue[N] {
+//      type BaseType = Int; type Out = fromNat.Out; val value: Out = fromNat.value
+//    }
 
   implicit def implInt[S <: Int with Singleton](implicit v: ValueOf[S]): SingletonTypeValue[S] {
     type BaseType = Int; type Out = S; type OutInt = S

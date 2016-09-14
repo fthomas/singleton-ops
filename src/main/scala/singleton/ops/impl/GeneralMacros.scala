@@ -28,6 +28,13 @@ trait GeneralMacros {
       case RefinedType(parents, _) =>
         parents.iterator map unapply collectFirst { case Some(x) => x }
       case NullaryMethodType(tpe) => unapply(tpe)
+      case TypeRef(_, sym, args) if sym == symbolOf[shapeless.Succ[_]] =>
+        val next = unapply(args.head)
+        next match {
+          case Some(Constant(t : Int)) => Some(Constant(t+1))
+          case _ => None
+        }
+      case TypeRef(_, sym, _) if sym == symbolOf[shapeless._0] => Some(Constant(0))
       case TypeRef(_, sym, _) if sym.isAliasType => unapply(tp.dealias)
       case TypeRef(pre, sym, Nil) =>
         unapply(sym.info asSeenFrom (pre, sym.owner))
@@ -49,8 +56,8 @@ trait GeneralMacros {
   def constantTypeOf[T](t: T): Type =
     c.internal.constantType(Constant(t))
 
-  def constantTypeAndValueOf[T](t: T): (Type, Tree) =
-    (constantTypeOf(t), Literal(Constant(t)))
+  def constantTypeAndValueOf[T](t: T)(implicit ev : c.WeakTypeTag[T]): (Type, Type, Tree) =
+    (weakTypeOf[T], constantTypeOf(t), Literal(Constant(t)))
 
   def extractSingletonValue[T](tpe: Type): T = {
     def extractionFailed(tpe: Type) = {
@@ -93,29 +100,29 @@ trait GeneralMacros {
       val aValue = extractSingletonValue[T1](s1Tpe)
 
       import scala.math._
-      val ((outTpe, outTree), baseTpe) = (funcName, aValue) match {
-        case ("ToInt",    a : Int)      => (constantTypeAndValueOf[Int](a.toInt), tq"Int")
-        case ("ToInt",    a : Long)     => (constantTypeAndValueOf[Int](a.toInt), tq"Int")
-        case ("ToInt",    a : Double)   => (constantTypeAndValueOf[Int](a.toInt), tq"Int")
-        case ("ToLong",   a : Int)      => (constantTypeAndValueOf[Long](a.toLong), tq"Long")
-        case ("ToLong",   a : Long)     => (constantTypeAndValueOf[Long](a.toLong), tq"Long")
-        case ("ToLong",   a : Double)   => (constantTypeAndValueOf[Long](a.toLong), tq"Long")
-        case ("ToDouble", a : Int)      => (constantTypeAndValueOf[Double](a.toDouble), tq"Double")
-        case ("ToDouble", a : Long)     => (constantTypeAndValueOf[Double](a.toDouble), tq"Double")
-        case ("ToDouble", a : Double)   => (constantTypeAndValueOf[Double](a.toDouble), tq"Double")
-        case ("Negate",   a : Int)      => (constantTypeAndValueOf[Int](-a), tq"Int")
-        case ("Negate",   a : Long)     => (constantTypeAndValueOf[Long](-a), tq"Long")
-        case ("Negate",   a : Double)   => (constantTypeAndValueOf[Double](-a), tq"Double")
-        case ("Abs",      a : Int)      => (constantTypeAndValueOf[Int](abs(a)), tq"Int")
-        case ("Abs",      a : Long)     => (constantTypeAndValueOf[Long](abs(a)), tq"Long")
-        case ("Abs",      a : Double)   => (constantTypeAndValueOf[Double](abs(a)), tq"Double")
-        case ("Reverse",  a : String)   => (constantTypeAndValueOf[String](a.reverse), tq"String")
-        case ("!",        a : Boolean)  => (constantTypeAndValueOf[Boolean](!a), tq"Boolean")
+      val (baseTpe, outTpe, outTree) = (funcName, aValue) match {
+        case ("ToInt",    a : Int)      => constantTypeAndValueOf(a.toInt)
+        case ("ToInt",    a : Long)     => constantTypeAndValueOf(a.toInt)
+        case ("ToInt",    a : Double)   => constantTypeAndValueOf(a.toInt)
+        case ("ToLong",   a : Int)      => constantTypeAndValueOf(a.toLong)
+        case ("ToLong",   a : Long)     => constantTypeAndValueOf(a.toLong)
+        case ("ToLong",   a : Double)   => constantTypeAndValueOf(a.toLong)
+        case ("ToDouble", a : Int)      => constantTypeAndValueOf(a.toDouble)
+        case ("ToDouble", a : Long)     => constantTypeAndValueOf(a.toDouble)
+        case ("ToDouble", a : Double)   => constantTypeAndValueOf(a.toDouble)
+        case ("Negate",   a : Int)      => constantTypeAndValueOf(-a)
+        case ("Negate",   a : Long)     => constantTypeAndValueOf(-a)
+        case ("Negate",   a : Double)   => constantTypeAndValueOf(-a)
+        case ("Abs",      a : Int)      => constantTypeAndValueOf(abs(a))
+        case ("Abs",      a : Long)     => constantTypeAndValueOf(abs(a))
+        case ("Abs",      a : Double)   => constantTypeAndValueOf(abs(a))
+        case ("Reverse",  a : String)   => constantTypeAndValueOf(a.reverse)
+        case ("!",        a : Boolean)  => constantTypeAndValueOf(!a)
         case ("Require",  a : Boolean)  =>
           if (!a)
             abort(s"Cannot prove requirement Require[...]", true)
           else
-            (constantTypeAndValueOf[Boolean](a), tq"Boolean")
+            constantTypeAndValueOf(a)
         case _ => abort(s"Unsupported $funcName[$aValue]",true)
       }
       val appliedTpe = tq"$opSym[$nTpe, $t1Tpe, $s1Tpe]"
@@ -161,119 +168,119 @@ trait GeneralMacros {
       val bValue = extractSingletonValue[T2](s2Tpe)
 
       import scala.math._
-      val ((outTpe, outTree), baseTpe) = (funcName, aValue, bValue) match {
-        case ("+",            a : Int,     b : Int)     => (constantTypeAndValueOf[Int](a + b), tq"Int")
-        case ("+",            a : Int,     b : Long)    => (constantTypeAndValueOf[Long](a + b), tq"Long")
-        case ("+",            a : Int,     b : Double)  => (constantTypeAndValueOf[Double](a + b), tq"Double")
-        case ("+",            a : Long,    b : Int)     => (constantTypeAndValueOf[Long](a + b), tq"Long")
-        case ("+",            a : Long,    b : Long)    => (constantTypeAndValueOf[Long](a + b), tq"Long")
-        case ("+",            a : Long,    b : Double)  => (constantTypeAndValueOf[Double](a + b), tq"Double")
-        case ("+",            a : Double,  b : Int)     => (constantTypeAndValueOf[Double](a + b), tq"Double")
-        case ("+",            a : Double,  b : Long)    => (constantTypeAndValueOf[Double](a + b), tq"Double")
-        case ("+",            a : Double,  b : Double)  => (constantTypeAndValueOf[Double](a + b), tq"Double")
-        case ("+",            a : String,  b : String)  => (constantTypeAndValueOf[String](a + b), tq"String")
+      val (baseTpe, outTpe, outTree) = (funcName, aValue, bValue) match {
+        case ("+",            a : Int,     b : Int)     => constantTypeAndValueOf(a + b)
+        case ("+",            a : Int,     b : Long)    => constantTypeAndValueOf(a + b)
+        case ("+",            a : Int,     b : Double)  => constantTypeAndValueOf(a + b)
+        case ("+",            a : Long,    b : Int)     => constantTypeAndValueOf(a + b)
+        case ("+",            a : Long,    b : Long)    => constantTypeAndValueOf(a + b)
+        case ("+",            a : Long,    b : Double)  => constantTypeAndValueOf(a + b)
+        case ("+",            a : Double,  b : Int)     => constantTypeAndValueOf(a + b)
+        case ("+",            a : Double,  b : Long)    => constantTypeAndValueOf(a + b)
+        case ("+",            a : Double,  b : Double)  => constantTypeAndValueOf(a + b)
+        case ("+",            a : String,  b : String)  => constantTypeAndValueOf(a + b)
 
-        case ("-",            a : Int,     b : Int)     => (constantTypeAndValueOf[Int](a - b), tq"Int")
-        case ("-",            a : Int,     b : Long)    => (constantTypeAndValueOf[Long](a - b), tq"Long")
-        case ("-",            a : Int,     b : Double)  => (constantTypeAndValueOf[Double](a - b), tq"Double")
-        case ("-",            a : Long,    b : Int)     => (constantTypeAndValueOf[Long](a - b), tq"Long")
-        case ("-",            a : Long,    b : Long)    => (constantTypeAndValueOf[Long](a - b), tq"Long")
-        case ("-",            a : Long,    b : Double)  => (constantTypeAndValueOf[Double](a - b), tq"Double")
-        case ("-",            a : Double,  b : Int)     => (constantTypeAndValueOf[Double](a - b), tq"Double")
-        case ("-",            a : Double,  b : Long)    => (constantTypeAndValueOf[Double](a - b), tq"Double")
-        case ("-",            a : Double,  b : Double)  => (constantTypeAndValueOf[Double](a - b), tq"Double")
+        case ("-",            a : Int,     b : Int)     => constantTypeAndValueOf(a - b)
+        case ("-",            a : Int,     b : Long)    => constantTypeAndValueOf(a - b)
+        case ("-",            a : Int,     b : Double)  => constantTypeAndValueOf(a - b)
+        case ("-",            a : Long,    b : Int)     => constantTypeAndValueOf(a - b)
+        case ("-",            a : Long,    b : Long)    => constantTypeAndValueOf(a - b)
+        case ("-",            a : Long,    b : Double)  => constantTypeAndValueOf(a - b)
+        case ("-",            a : Double,  b : Int)     => constantTypeAndValueOf(a - b)
+        case ("-",            a : Double,  b : Long)    => constantTypeAndValueOf(a - b)
+        case ("-",            a : Double,  b : Double)  => constantTypeAndValueOf(a - b)
 
-        case ("*",            a : Int,     b : Int)     => (constantTypeAndValueOf[Int](a * b), tq"Int")
-        case ("*",            a : Int,     b : Double)  => (constantTypeAndValueOf[Double](a * b), tq"Double")
-        case ("*",            a : Long,    b : Int)     => (constantTypeAndValueOf[Long](a * b), tq"Long")
-        case ("*",            a : Long,    b : Long)    => (constantTypeAndValueOf[Long](a * b), tq"Long")
-        case ("*",            a : Long,    b : Double)  => (constantTypeAndValueOf[Double](a * b), tq"Double")
-        case ("*",            a : Double,  b : Int)     => (constantTypeAndValueOf[Double](a * b), tq"Double")
-        case ("*",            a : Double,  b : Long)    => (constantTypeAndValueOf[Double](a * b), tq"Double")
-        case ("*",            a : Double,  b : Double)  => (constantTypeAndValueOf[Double](a * b), tq"Double")
+        case ("*",            a : Int,     b : Int)     => constantTypeAndValueOf(a * b)
+        case ("*",            a : Int,     b : Double)  => constantTypeAndValueOf(a * b)
+        case ("*",            a : Long,    b : Int)     => constantTypeAndValueOf(a * b)
+        case ("*",            a : Long,    b : Long)    => constantTypeAndValueOf(a * b)
+        case ("*",            a : Long,    b : Double)  => constantTypeAndValueOf(a * b)
+        case ("*",            a : Double,  b : Int)     => constantTypeAndValueOf(a * b)
+        case ("*",            a : Double,  b : Long)    => constantTypeAndValueOf(a * b)
+        case ("*",            a : Double,  b : Double)  => constantTypeAndValueOf(a * b)
 
-        case ("/",            a : Int,     b : Int)     => (constantTypeAndValueOf[Int](a / b), tq"Int")
-        case ("/",            a : Int,     b : Long)    => (constantTypeAndValueOf[Long](a / b), tq"Long")
-        case ("/",            a : Int,     b : Double)  => (constantTypeAndValueOf[Double](a / b), tq"Double")
-        case ("/",            a : Long,    b : Int)     => (constantTypeAndValueOf[Long](a / b), tq"Long")
-        case ("/",            a : Long,    b : Long)    => (constantTypeAndValueOf[Long](a / b), tq"Long")
-        case ("/",            a : Long,    b : Double)  => (constantTypeAndValueOf[Double](a / b), tq"Double")
-        case ("/",            a : Double,  b : Int)     => (constantTypeAndValueOf[Double](a / b), tq"Double")
-        case ("/",            a : Double,  b : Long)    => (constantTypeAndValueOf[Double](a / b), tq"Double")
-        case ("/",            a : Double,  b : Double)  => (constantTypeAndValueOf[Double](a / b), tq"Double")
+        case ("/",            a : Int,     b : Int)     => constantTypeAndValueOf(a / b)
+        case ("/",            a : Int,     b : Long)    => constantTypeAndValueOf(a / b)
+        case ("/",            a : Int,     b : Double)  => constantTypeAndValueOf(a / b)
+        case ("/",            a : Long,    b : Int)     => constantTypeAndValueOf(a / b)
+        case ("/",            a : Long,    b : Long)    => constantTypeAndValueOf(a / b)
+        case ("/",            a : Long,    b : Double)  => constantTypeAndValueOf(a / b)
+        case ("/",            a : Double,  b : Int)     => constantTypeAndValueOf(a / b)
+        case ("/",            a : Double,  b : Long)    => constantTypeAndValueOf(a / b)
+        case ("/",            a : Double,  b : Double)  => constantTypeAndValueOf(a / b)
 
-        case ("<",            a : Int,     b : Int)     => (constantTypeAndValueOf[Boolean](a < b), tq"Boolean")
-        case ("<",            a : Int,     b : Long)    => (constantTypeAndValueOf[Boolean](a < b), tq"Boolean")
-        case ("<",            a : Int,     b : Double)  => (constantTypeAndValueOf[Boolean](a < b), tq"Boolean")
-        case ("<",            a : Long,    b : Int)     => (constantTypeAndValueOf[Boolean](a < b), tq"Boolean")
-        case ("<",            a : Long,    b : Long)    => (constantTypeAndValueOf[Boolean](a < b), tq"Boolean")
-        case ("<",            a : Long,    b : Double)  => (constantTypeAndValueOf[Boolean](a < b), tq"Boolean")
-        case ("<",            a : Double,  b : Int)     => (constantTypeAndValueOf[Boolean](a < b), tq"Boolean")
-        case ("<",            a : Double,  b : Long)    => (constantTypeAndValueOf[Boolean](a < b), tq"Boolean")
-        case ("<",            a : Double,  b : Double)  => (constantTypeAndValueOf[Boolean](a < b), tq"Boolean")
+        case ("<",            a : Int,     b : Int)     => constantTypeAndValueOf(a < b)
+        case ("<",            a : Int,     b : Long)    => constantTypeAndValueOf(a < b)
+        case ("<",            a : Int,     b : Double)  => constantTypeAndValueOf(a < b)
+        case ("<",            a : Long,    b : Int)     => constantTypeAndValueOf(a < b)
+        case ("<",            a : Long,    b : Long)    => constantTypeAndValueOf(a < b)
+        case ("<",            a : Long,    b : Double)  => constantTypeAndValueOf(a < b)
+        case ("<",            a : Double,  b : Int)     => constantTypeAndValueOf(a < b)
+        case ("<",            a : Double,  b : Long)    => constantTypeAndValueOf(a < b)
+        case ("<",            a : Double,  b : Double)  => constantTypeAndValueOf(a < b)
 
-        case ("==",           a : Int,     b : Int)    => (constantTypeAndValueOf[Boolean](a == b), tq"Boolean")
-        case ("==",           a : Int,     b : Long)   => (constantTypeAndValueOf[Boolean](a == b), tq"Boolean")
-        case ("==",           a : Int,     b : Double) => (constantTypeAndValueOf[Boolean](a == b), tq"Boolean")
-        case ("==",           a : Long,    b : Int)    => (constantTypeAndValueOf[Boolean](a == b), tq"Boolean")
-        case ("==",           a : Long,    b : Long)   => (constantTypeAndValueOf[Boolean](a == b), tq"Boolean")
-        case ("==",           a : Long,    b : Double) => (constantTypeAndValueOf[Boolean](a == b), tq"Boolean")
-        case ("==",           a : Double,  b : Int)    => (constantTypeAndValueOf[Boolean](a == b), tq"Boolean")
-        case ("==",           a : Double,  b : Long)   => (constantTypeAndValueOf[Boolean](a == b), tq"Boolean")
-        case ("==",           a : Double,  b : Double) => (constantTypeAndValueOf[Boolean](a == b), tq"Boolean")
+        case ("==",           a : Int,     b : Int)    => constantTypeAndValueOf(a == b)
+        case ("==",           a : Int,     b : Long)   => constantTypeAndValueOf(a == b)
+        case ("==",           a : Int,     b : Double) => constantTypeAndValueOf(a == b)
+        case ("==",           a : Long,    b : Int)    => constantTypeAndValueOf(a == b)
+        case ("==",           a : Long,    b : Long)   => constantTypeAndValueOf(a == b)
+        case ("==",           a : Long,    b : Double) => constantTypeAndValueOf(a == b)
+        case ("==",           a : Double,  b : Int)    => constantTypeAndValueOf(a == b)
+        case ("==",           a : Double,  b : Long)   => constantTypeAndValueOf(a == b)
+        case ("==",           a : Double,  b : Double) => constantTypeAndValueOf(a == b)
 
-        case ("!=",           a : Int,     b : Int)    => (constantTypeAndValueOf[Boolean](a != b), tq"Boolean")
-        case ("!=",           a : Int,     b : Long)   => (constantTypeAndValueOf[Boolean](a != b), tq"Boolean")
-        case ("!=",           a : Int,     b : Double) => (constantTypeAndValueOf[Boolean](a != b), tq"Boolean")
-        case ("!=",           a : Long,    b : Int)    => (constantTypeAndValueOf[Boolean](a != b), tq"Boolean")
-        case ("!=",           a : Long,    b : Long)   => (constantTypeAndValueOf[Boolean](a != b), tq"Boolean")
-        case ("!=",           a : Long,    b : Double) => (constantTypeAndValueOf[Boolean](a != b), tq"Boolean")
-        case ("!=",           a : Double,  b : Int)    => (constantTypeAndValueOf[Boolean](a != b), tq"Boolean")
-        case ("!=",           a : Double,  b : Long)   => (constantTypeAndValueOf[Boolean](a != b), tq"Boolean")
-        case ("!=",           a : Double,  b : Double) => (constantTypeAndValueOf[Boolean](a != b), tq"Boolean")
+        case ("!=",           a : Int,     b : Int)    => constantTypeAndValueOf(a != b)
+        case ("!=",           a : Int,     b : Long)   => constantTypeAndValueOf(a != b)
+        case ("!=",           a : Int,     b : Double) => constantTypeAndValueOf(a != b)
+        case ("!=",           a : Long,    b : Int)    => constantTypeAndValueOf(a != b)
+        case ("!=",           a : Long,    b : Long)   => constantTypeAndValueOf(a != b)
+        case ("!=",           a : Long,    b : Double) => constantTypeAndValueOf(a != b)
+        case ("!=",           a : Double,  b : Int)    => constantTypeAndValueOf(a != b)
+        case ("!=",           a : Double,  b : Long)   => constantTypeAndValueOf(a != b)
+        case ("!=",           a : Double,  b : Double) => constantTypeAndValueOf(a != b)
 
-        case (">",            a : Int,     b : Int)     => (constantTypeAndValueOf[Boolean](a > b), tq"Boolean")
-        case (">",            a : Int,     b : Long)    => (constantTypeAndValueOf[Boolean](a > b), tq"Boolean")
-        case (">",            a : Int,     b : Double)  => (constantTypeAndValueOf[Boolean](a > b), tq"Boolean")
-        case (">",            a : Long,    b : Int)     => (constantTypeAndValueOf[Boolean](a > b), tq"Boolean")
-        case (">",            a : Long,    b : Long)    => (constantTypeAndValueOf[Boolean](a > b), tq"Boolean")
-        case (">",            a : Long,    b : Double)  => (constantTypeAndValueOf[Boolean](a > b), tq"Boolean")
-        case (">",            a : Double,  b : Int)     => (constantTypeAndValueOf[Boolean](a > b), tq"Boolean")
-        case (">",            a : Double,  b : Long)    => (constantTypeAndValueOf[Boolean](a > b), tq"Boolean")
-        case (">",            a : Double,  b : Double)  => (constantTypeAndValueOf[Boolean](a > b), tq"Boolean")
+        case (">",            a : Int,     b : Int)     => constantTypeAndValueOf(a > b)
+        case (">",            a : Int,     b : Long)    => constantTypeAndValueOf(a > b)
+        case (">",            a : Int,     b : Double)  => constantTypeAndValueOf(a > b)
+        case (">",            a : Long,    b : Int)     => constantTypeAndValueOf(a > b)
+        case (">",            a : Long,    b : Long)    => constantTypeAndValueOf(a > b)
+        case (">",            a : Long,    b : Double)  => constantTypeAndValueOf(a > b)
+        case (">",            a : Double,  b : Int)     => constantTypeAndValueOf(a > b)
+        case (">",            a : Double,  b : Long)    => constantTypeAndValueOf(a > b)
+        case (">",            a : Double,  b : Double)  => constantTypeAndValueOf(a > b)
 
-        case ("<=",           a : Int,     b : Int)     => (constantTypeAndValueOf[Boolean](a <= b), tq"Boolean")
-        case ("<=",           a : Int,     b : Long)    => (constantTypeAndValueOf[Boolean](a <= b), tq"Boolean")
-        case ("<=",           a : Int,     b : Double)  => (constantTypeAndValueOf[Boolean](a <= b), tq"Boolean")
-        case ("<=",           a : Long,    b : Int)     => (constantTypeAndValueOf[Boolean](a <= b), tq"Boolean")
-        case ("<=",           a : Long,    b : Long)    => (constantTypeAndValueOf[Boolean](a <= b), tq"Boolean")
-        case ("<=",           a : Long,    b : Double)  => (constantTypeAndValueOf[Boolean](a <= b), tq"Boolean")
-        case ("<=",           a : Double,  b : Int)     => (constantTypeAndValueOf[Boolean](a <= b), tq"Boolean")
-        case ("<=",           a : Double,  b : Long)    => (constantTypeAndValueOf[Boolean](a <= b), tq"Boolean")
-        case ("<=",           a : Double,  b : Double)  => (constantTypeAndValueOf[Boolean](a <= b), tq"Boolean")
+        case ("<=",           a : Int,     b : Int)     => constantTypeAndValueOf(a <= b)
+        case ("<=",           a : Int,     b : Long)    => constantTypeAndValueOf(a <= b)
+        case ("<=",           a : Int,     b : Double)  => constantTypeAndValueOf(a <= b)
+        case ("<=",           a : Long,    b : Int)     => constantTypeAndValueOf(a <= b)
+        case ("<=",           a : Long,    b : Long)    => constantTypeAndValueOf(a <= b)
+        case ("<=",           a : Long,    b : Double)  => constantTypeAndValueOf(a <= b)
+        case ("<=",           a : Double,  b : Int)     => constantTypeAndValueOf(a <= b)
+        case ("<=",           a : Double,  b : Long)    => constantTypeAndValueOf(a <= b)
+        case ("<=",           a : Double,  b : Double)  => constantTypeAndValueOf(a <= b)
 
-        case (">=",           a : Int,     b : Int)     => (constantTypeAndValueOf[Boolean](a >= b), tq"Boolean")
-        case (">=",           a : Int,     b : Long)    => (constantTypeAndValueOf[Boolean](a >= b), tq"Boolean")
-        case (">=",           a : Int,     b : Double)  => (constantTypeAndValueOf[Boolean](a >= b), tq"Boolean")
-        case (">=",           a : Long,    b : Int)     => (constantTypeAndValueOf[Boolean](a >= b), tq"Boolean")
-        case (">=",           a : Long,    b : Long)    => (constantTypeAndValueOf[Boolean](a >= b), tq"Boolean")
-        case (">=",           a : Long,    b : Double)  => (constantTypeAndValueOf[Boolean](a >= b), tq"Boolean")
-        case (">=",           a : Double,  b : Int)     => (constantTypeAndValueOf[Boolean](a >= b), tq"Boolean")
-        case (">=",           a : Double,  b : Long)    => (constantTypeAndValueOf[Boolean](a >= b), tq"Boolean")
-        case (">=",           a : Double,  b : Double)  => (constantTypeAndValueOf[Boolean](a >= b), tq"Boolean")
+        case (">=",           a : Int,     b : Int)     => constantTypeAndValueOf(a >= b)
+        case (">=",           a : Int,     b : Long)    => constantTypeAndValueOf(a >= b)
+        case (">=",           a : Int,     b : Double)  => constantTypeAndValueOf(a >= b)
+        case (">=",           a : Long,    b : Int)     => constantTypeAndValueOf(a >= b)
+        case (">=",           a : Long,    b : Long)    => constantTypeAndValueOf(a >= b)
+        case (">=",           a : Long,    b : Double)  => constantTypeAndValueOf(a >= b)
+        case (">=",           a : Double,  b : Int)     => constantTypeAndValueOf(a >= b)
+        case (">=",           a : Double,  b : Long)    => constantTypeAndValueOf(a >= b)
+        case (">=",           a : Double,  b : Double)  => constantTypeAndValueOf(a >= b)
 
-        case ("&&",           a : Boolean, b : Boolean) => (constantTypeAndValueOf[Boolean](a && b), tq"Boolean")
-        case ("||",           a : Boolean, b : Boolean) => (constantTypeAndValueOf[Boolean](a || b), tq"Boolean")
+        case ("&&",           a : Boolean, b : Boolean) => constantTypeAndValueOf(a && b)
+        case ("||",           a : Boolean, b : Boolean) => constantTypeAndValueOf(a || b)
 
-        case ("Min",          a : Int,     b : Int)     => (constantTypeAndValueOf[Int](min(a,b)), tq"Int")
-        case ("Min",          a : Long,    b : Long)    => (constantTypeAndValueOf[Long](min(a,b)), tq"Long")
-        case ("Min",          a : Double,  b : Double)  => (constantTypeAndValueOf[Double](min(a,b)), tq"Double")
+        case ("Min",          a : Int,     b : Int)     => constantTypeAndValueOf(min(a,b))
+        case ("Min",          a : Long,    b : Long)    => constantTypeAndValueOf(min(a,b))
+        case ("Min",          a : Double,  b : Double)  => constantTypeAndValueOf(min(a,b))
 
-        case ("Max",          a : Int,     b : Int)     => (constantTypeAndValueOf[Int](max(a,b)), tq"Int")
-        case ("Max",          a : Long,    b : Long)    => (constantTypeAndValueOf[Long](max(a,b)), tq"Long")
-        case ("Max",          a : Double,  b : Double)  => (constantTypeAndValueOf[Double](max(a,b)), tq"Double")
+        case ("Max",          a : Int,     b : Int)     => constantTypeAndValueOf(max(a,b))
+        case ("Max",          a : Long,    b : Long)    => constantTypeAndValueOf(max(a,b))
+        case ("Max",          a : Double,  b : Double)  => constantTypeAndValueOf(max(a,b))
           
-        case ("Substring",    a : String,  b : Int)     => (constantTypeAndValueOf[String](a.substring(b)), tq"String")
+        case ("Substring",    a : String,  b : Int)     => constantTypeAndValueOf(a.substring(b))
 
         case _ => abort(s"Unsupported $funcName[$aValue, $bValue]",true)
       }
@@ -359,100 +366,100 @@ trait GeneralMacros {
   }
   ///////////////////////////////////////////////////////////////////////////////////////////
 
-  ///////////////////////////////////////////////////////////////////////////////////////////
-  // ToNat Interface
-  ///////////////////////////////////////////////////////////////////////////////////////////
-  def materializeFromNat[F, N](
-                                   implicit ev0: c.WeakTypeTag[F],
-                                   evn: c.WeakTypeTag[N]): MaterializeFromNatAux =
-  new MaterializeFromNatAux(
-    symbolOf[F],
-    weakTypeOf[N])
-
-  final class MaterializeFromNatAux(opSym: TypeSymbol,
-                                    nTpe: Type) {
-
-    import shapeless._
-    object Const {
-      def unapply(tp: Type): Option[Int] = {
-//        print(showRaw(tp))
-        tp match {
-          case tp @ ExistentialType(_, _) => unapply(tp.underlying)
-          case TypeBounds(lo, hi) => unapply(hi)
-//          case ClassInfoType(parents,scope,sym) => unapply(parents.head)
-//          case RefinedType(parents, _) =>
-//            parents.iterator map unapply collectFirst { case Some(x) => x }
-          case NullaryMethodType(tpe) => unapply(tpe)
-          case TypeRef(_, sym, args) if sym == symbolOf[Succ[_]] => Some(unapply(args.head).get + 1)
-          case TypeRef(_, sym, _) if sym == symbolOf[_0] => Some(0)
-          case TypeRef(_, sym, _) if sym.isAliasType => unapply(tp.dealias)
-          case TypeRef(pre, sym, Nil) =>
-            unapply(sym.info asSeenFrom (pre, sym.owner))
-          case SingleType(pre, sym) =>
-            unapply(sym.info asSeenFrom (pre, sym.owner))
-//          case ConstantType(c) => Some(c)
-          case _ => None
-        }
-      }
-    }
-
-    def extractNatValue(tpe: Type): Int = {
-      def extractionFailed(tpe: Type) = {
-        val msg = s"Cannot extract Nat value from $tpe\n" + "showRaw==> " + showRaw(
-          tpe)
-        abort(msg, true)
-      }
-
-      val value = tpe match {
-        case Const(t : Int) => t
-        case _ => extractionFailed(tpe); 0
-      }
-
-      value.asInstanceOf[Int]
-    }
-
-    def usingFuncName[T1] : Tree = {
-      val nValue = extractNatValue(nTpe)
-      val (outTpe, outTree) = constantTypeAndValueOf[Int](nValue)
-
-      val appliedTpe = tq"$opSym[$nTpe]"
-      q"""
-        new $appliedTpe {
-          type Out = $outTpe
-          val value: $outTpe = $outTree
-        }
-      """
-    }
-
-    import scala.annotation.tailrec
-    def mkNatTpt(i: Int): Tree = {
-      val succSym = typeOf[Succ[_]].typeConstructor.typeSymbol
-      val _0Sym = typeOf[_0].typeSymbol
-
-      @tailrec
-      def loop(i: Int, acc: Tree): Tree = {
-        if(i == 0) acc
-        else loop(i-1, AppliedTypeTree(Ident(succSym), List(acc)))
-      }
-
-      loop(i, Ident(_0Sym))
-    }
-
-    def mkNatTpe(i: Int): Type = {
-      val succTpe = typeOf[Succ[_]].typeConstructor
-      val _0Tpe = typeOf[_0]
-
-      @tailrec
-      def loop(i: Int, acc: Type): Type = {
-        if(i == 0) acc
-        else loop(i-1, appliedType(succTpe, acc))
-      }
-
-      loop(i, _0Tpe)
-    }
-
-    def mkNatValue(i: Int): Tree =
-      q""" new ${mkNatTpt(i)} """
-  }
-  ///////////////////////////////////////////////////////////////////////////////////////////
+//  ///////////////////////////////////////////////////////////////////////////////////////////
+//  // ToNat Interface
+//  ///////////////////////////////////////////////////////////////////////////////////////////
+//  def materializeFromNat[F, N](
+//                                   implicit ev0: c.WeakTypeTag[F],
+//                                   evn: c.WeakTypeTag[N]): MaterializeFromNatAux =
+//  new MaterializeFromNatAux(
+//    symbolOf[F],
+//    weakTypeOf[N])
+//
+//  final class MaterializeFromNatAux(opSym: TypeSymbol,
+//                                    nTpe: Type) {
+//
+//    import shapeless._
+//    object Const {
+//      def unapply(tp: Type): Option[Int] = {
+////        print(showRaw(tp))
+//        tp match {
+//          case tp @ ExistentialType(_, _) => unapply(tp.underlying)
+//          case TypeBounds(lo, hi) => unapply(hi)
+////          case ClassInfoType(parents,scope,sym) => unapply(parents.head)
+////          case RefinedType(parents, _) =>
+////            parents.iterator map unapply collectFirst { case Some(x) => x }
+//          case NullaryMethodType(tpe) => unapply(tpe)
+//          case TypeRef(_, sym, args) if sym == symbolOf[Succ[_]] => Some(unapply(args.head).get + 1)
+//          case TypeRef(_, sym, _) if sym == symbolOf[_0] => Some(0)
+//          case TypeRef(_, sym, _) if sym.isAliasType => unapply(tp.dealias)
+//          case TypeRef(pre, sym, Nil) =>
+//            unapply(sym.info asSeenFrom (pre, sym.owner))
+//          case SingleType(pre, sym) =>
+//            unapply(sym.info asSeenFrom (pre, sym.owner))
+////          case ConstantType(c) => Some(c)
+//          case _ => None
+//        }
+//      }
+//    }
+//
+//    def extractNatValue(tpe: Type): Int = {
+//      def extractionFailed(tpe: Type) = {
+//        val msg = s"Cannot extract Nat value from $tpe\n" + "showRaw==> " + showRaw(
+//          tpe)
+//        abort(msg, true)
+//      }
+//
+//      val value = tpe match {
+//        case Const(t : Int) => t
+//        case _ => extractionFailed(tpe); 0
+//      }
+//
+//      value.asInstanceOf[Int]
+//    }
+//
+//    def usingFuncName[T1] : Tree = {
+//      val nValue = extractSingletonValue(nTpe)
+//      val (bbb, outTpe, outTree) = constantTypeAndValueOf(nValue)
+//
+//      val appliedTpe = tq"$opSym[$nTpe]"
+//      q"""
+//        new $appliedTpe {
+//          type Out = $outTpe
+//          val value: $outTpe = $outTree
+//        }
+//      """
+//    }
+//
+//    import scala.annotation.tailrec
+//    def mkNatTpt(i: Int): Tree = {
+//      val succSym = typeOf[Succ[_]].typeConstructor.typeSymbol
+//      val _0Sym = typeOf[_0].typeSymbol
+//
+//      @tailrec
+//      def loop(i: Int, acc: Tree): Tree = {
+//        if(i == 0) acc
+//        else loop(i-1, AppliedTypeTree(Ident(succSym), List(acc)))
+//      }
+//
+//      loop(i, Ident(_0Sym))
+//    }
+//
+//    def mkNatTpe(i: Int): Type = {
+//      val succTpe = typeOf[Succ[_]].typeConstructor
+//      val _0Tpe = typeOf[_0]
+//
+//      @tailrec
+//      def loop(i: Int, acc: Type): Type = {
+//        if(i == 0) acc
+//        else loop(i-1, appliedType(succTpe, acc))
+//      }
+//
+//      loop(i, _0Tpe)
+//    }
+//
+//    def mkNatValue(i: Int): Tree =
+//      q""" new ${mkNatTpt(i)} """
+//  }
+//  ///////////////////////////////////////////////////////////////////////////////////////////
 }

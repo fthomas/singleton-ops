@@ -79,19 +79,19 @@ object ToNatMacro {
   }
 }
 
-
-trait FromNatMacro[N <: Nat] {
-  type Out <: Int with Singleton
-  val value : Out {}
-}
-
-@ bundle
-object FromNatMacro {
-  implicit def call[N <: Nat]: FromNatMacro[N] =
-  macro Macro.impl[N]
-
-  final class Macro(val c: whitebox.Context) extends GeneralMacros {
-    def impl[N <: Nat : c.WeakTypeTag]: c.Tree =
-      materializeFromNat[FromNatMacro[_], N].usingFuncName
-  }
-}
+//
+//trait FromNatMacro[N <: Nat] {
+//  type Out <: Int with Singleton
+//  val value : Out {}
+//}
+//
+//@ bundle
+//object FromNatMacro {
+//  implicit def call[N <: Nat]: FromNatMacro[N] =
+//  macro Macro.impl[N]
+//
+//  final class Macro(val c: whitebox.Context) extends GeneralMacros {
+//    def impl[N <: Nat : c.WeakTypeTag]: c.Tree =
+//      materializeFromNat[FromNatMacro[_], N].usingFuncName
+//  }
+//}
