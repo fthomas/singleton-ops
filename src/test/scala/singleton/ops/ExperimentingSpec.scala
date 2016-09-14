@@ -33,8 +33,12 @@ object NewDemo {
   demoRequire[-1]
 
   import shapeless._
-//  val one : 1 = 1
+  //////////////////////////////
   val n = Nat(5)
+  def demoNat[L <: Nat](implicit p : @@[L]) = p
+  val bNat = demoNat[n.N]
+  //////////////////////////////
+//  val one : 1 = 1
 //  demo[ToInt[n.N]]
   val a = impl.ToNatMacro.call[Int, 5].value
   //val a : 5 = FromNat[n.N].value
