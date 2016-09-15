@@ -4,13 +4,50 @@
 [![Build Status](https://travis-ci.org/fthomas/singleton-ops.svg?branch=master)](https://travis-ci.org/fthomas/singleton-ops)
 [![codecov](https://codecov.io/gh/fthomas/singleton-ops/branch/master/graph/badge.svg)](https://codecov.io/gh/fthomas/singleton-ops)
 
-This library provides type-level operations for the following types (assumes [Typelevel Scala][typelevel-scala] with [SIP-23][sip-23]):
+This library provides type-level operations for [Typelevel Scala][typelevel-scala] with [SIP-23][sip-23].
+
+####Supported types:
 * `Int` 
 * `Long`
 * `Double`
 * `String`
 * `Boolean`
 * `Nat` (from the Shapeless library)
+
+####Supported arithmetic operations:
+* `type +[P1, P2]`          
+* `type -[P1, P2]`          
+* `type *[P1, P2]`          
+* `type /[P1, P2]`          
+* `type Abs[P1]`            
+* `type Negate[P1]`         
+
+####Supported logical operations:
+* `type ![P1]`              
+* `type <[P1, P2]`          
+* `type <=[P1, P2]`         
+* `type >=[P1, P2]`         
+* `type >[P1, P2]`          
+* `type ==[P1, P2]`         
+* `type !=[P1, P2]`         
+* `type &&[P1, P2]`         
+* `type ||[P1, P2]`         
+* `type Min[P1, P2]`        
+* `type Max[P1, P2]`        
+
+####Supported explicit conversion operations:
+* `type ToNat[P1]`          
+* `type ToInt[P1]`          
+* `type ToLong[P1]`         
+* `type ToDouble[P1]`       
+
+####Supported string operations:
+* `type +[P1, P2]` (concat)          
+* `type Reverse[P1]`        
+* `type Substring[P1, P2]`  
+
+####Supported constraints operations:
+* `type Require[P1]`        
 
 ## Examples
 
