@@ -49,7 +49,7 @@ def demoString[P1 <: String with Singleton](implicit op : Reverse[P1] + P1) : op
 val bString : "cbaabc" = demoString["abc"]
 ```
 
-* `Boolean` operations:
+* `Boolean` type operations:
 ```scala
 import singleton.ops._
 def demoBoolean[P1 <: Int with Singleton](implicit op : P1 < 0) : op.Out{} = op.value
@@ -85,6 +85,7 @@ val bNat10 : shapeless.nat._10 = demoSingToNat[5]
 
 * Working with large numbers doesn't slay the compiler:
 ```scala
+import singleton.ops._
 def bigMul[L1 <: Long with Singleton, L2 <: Long with Singleton](implicit p : L1 * L2) : p.Out = p.value
 scala> bigMul[32000L, 6400000L]
 res2: Long = 204800000000
