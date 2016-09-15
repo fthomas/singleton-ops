@@ -47,7 +47,9 @@ trait GeneralMacros {
         case SingleType(pre, sym) =>
           unapply(sym.info asSeenFrom (pre, sym.owner))
         case ConstantType(c) => Some(c)
-        case _ => None
+        case _ =>
+//          print("Exhausted search at: " + showRaw(tp))
+          None
       }
     }
   }
@@ -64,10 +66,18 @@ trait GeneralMacros {
     c.internal.constantType(Constant(t))
 
   def constantTypeAndValueOf[T](t: T)(
-      implicit ev: c.WeakTypeTag[T]): (Type, TypeName, Type, Tree) ={
-    val weakType = weakTypeOf[T]
-    val outTypeName = TypeName("Out" + weakType.toString)
-    (weakType, outTypeName, constantTypeOf(t), Literal(Constant(t)))
+      implicit ev: c.WeakTypeTag[T]): (Type, Literal, TypeName, Type, Tree) ={
+    val outWideType = weakTypeOf[T]
+    val outWideLiteral = Literal(Constant(t))
+    val outTypeName = TypeName("Out" + outWideType.toString)
+    (outWideType, outWideLiteral, outTypeName, constantTypeOf(t), Literal(Constant(t)))
+  }
+
+  def constantTypeAndValueOfNat(t: Int): (Type, Literal, TypeName, Type, Tree) ={
+    val outWideType = typeOf[Int]
+    val outWideLiteral = Literal(Constant(t))
+    val outTypeName = TypeName("OutNat")
+    (outWideType, outWideLiteral, outTypeName, mkNatTpe(t), q"new ${mkNatTpt(t)}")
   }
 
   def extractSingletonValue[T](tpe: Type): T = {
@@ -103,12 +113,13 @@ trait GeneralMacros {
       val aValue = extractSingletonValue[T1](s1Tpe)
 
       import scala.math._
-      val (baseTpe, outTypeName, outTpe, outTree) = (funcName, aValue) match {
+      val (outWideTpe, outWideLiteral, outTypeName, outTpe, outTree) = (funcName, aValue) match {
         case ("Id", a: Int) => constantTypeAndValueOf(a)
         case ("Id", a: Long) => constantTypeAndValueOf(a)
         case ("Id", a: Double) => constantTypeAndValueOf(a)
         case ("Id", a: String) => constantTypeAndValueOf(a)
         case ("Id", a: Boolean) => constantTypeAndValueOf(a)
+        case ("ToNat", a: Int) => constantTypeAndValueOfNat(a)
         case ("ToInt", a: Int) => constantTypeAndValueOf(a.toInt)
         case ("ToInt", a: Long) => constantTypeAndValueOf(a.toInt)
         case ("ToInt", a: Double) => constantTypeAndValueOf(a.toInt)
@@ -134,14 +145,17 @@ trait GeneralMacros {
         case _ => abort(s"Unsupported $funcName[$aValue]", true)
       }
       val appliedTpe = tq"$opSym[$nTpe, $s1Tpe]"
-      q"""
+      val genTree = q"""
         new $appliedTpe {
-          type BaseType = $baseTpe
+          type OutWide = $outWideTpe
           type Out = $outTpe
           type $outTypeName = $outTpe
           val value: $outTpe = $outTree
+          val valueWide: $outWideTpe = $outWideLiteral
         }
       """
+//      print(genTree)
+      genTree
     }
   }
   ///////////////////////////////////////////////////////////////////////////////////////////
@@ -171,7 +185,7 @@ trait GeneralMacros {
       val bValue = extractSingletonValue[T2](s2Tpe)
 
       import scala.math._
-      val (baseTpe, outTypeName, outTpe, outTree) = (funcName, aValue, bValue) match {
+      val (outWideTpe, outWideLiteral, outTypeName, outTpe, outTree) = (funcName, aValue, bValue) match {
         case ("+", a: Int, b: Int) => constantTypeAndValueOf(a + b)
         case ("+", a: Int, b: Long) => constantTypeAndValueOf(a + b)
         case ("+", a: Int, b: Double) => constantTypeAndValueOf(a + b)
@@ -291,80 +305,48 @@ trait GeneralMacros {
       val appliedTpe = tq"$opSym[$nTpe, $s1Tpe, $s2Tpe]"
       q"""
         new $appliedTpe {
-          type BaseType = $baseTpe
+          type OutWide = $outWideTpe
           type Out = $outTpe
           type $outTypeName = $outTpe
           val value: $outTpe = $outTree
+          val valueWide: $outWideTpe = $outWideLiteral
         }
       """
     }
   }
   ///////////////////////////////////////////////////////////////////////////////////////////
 
-  ///////////////////////////////////////////////////////////////////////////////////////////
-  // ToNat Interface
-  ///////////////////////////////////////////////////////////////////////////////////////////
-  def materializeToNat[F, S1](
-      implicit ev0: c.WeakTypeTag[F],
-      evs1: c.WeakTypeTag[S1]): MaterializeToNatAux =
-    new MaterializeToNatAux(symbolOf[F], weakTypeOf[S1])
+  //copied from Shapeless
+  import scala.annotation.tailrec
+  def mkNatTpt(i: Int): Tree = {
+    val succSym = typeOf[shapeless.Succ[_]].typeConstructor.typeSymbol
+    val _0Sym = typeOf[shapeless._0].typeSymbol
 
-  final class MaterializeToNatAux(opSym: TypeSymbol, s1Tpe: Type) {
-    def usingFuncName[T1]: Tree = {
-      val aValue = extractSingletonValue[T1](s1Tpe)
-
-      val natType: Type = aValue match {
-        case a: Int =>
-          if (a >= 0)
-            mkNatTpe(a)
-          else
-            abort(s"Unsupported negative integer to convert to Nat", true)
-        case _ =>
-          abort(s"Unsupported value type to convert to Nat", true)
-      }
-      val appliedTpe = tq"$opSym[$s1Tpe]"
-      val genTree = q"""
-        new $appliedTpe {
-          type N = $natType
-        }
-      """
-//      print(genTree)
-      genTree
+    @tailrec
+    def loop(i: Int, acc: Tree): Tree = {
+      if (i == 0) acc
+      else loop(i - 1, AppliedTypeTree(Ident(succSym), List(acc)))
     }
 
-    //copied from Shapeless
-    import shapeless._
-    import scala.annotation.tailrec
-    def mkNatTpt(i: Int): Tree = {
-      val succSym = typeOf[Succ[_]].typeConstructor.typeSymbol
-      val _0Sym = typeOf[_0].typeSymbol
-
-      @tailrec
-      def loop(i: Int, acc: Tree): Tree = {
-        if (i == 0) acc
-        else loop(i - 1, AppliedTypeTree(Ident(succSym), List(acc)))
-      }
-
-      loop(i, Ident(_0Sym))
-    }
-
-    //copied from Shapeless
-    def mkNatTpe(i: Int): Type = {
-      val succTpe = typeOf[Succ[_]].typeConstructor
-      val _0Tpe = typeOf[_0]
-
-      @tailrec
-      def loop(i: Int, acc: Type): Type = {
-        if (i == 0) acc
-        else loop(i - 1, appliedType(succTpe, acc))
-      }
-
-      loop(i, _0Tpe)
-    }
-
-    //copied from Shapeless
-    def mkNatValue(i: Int): Tree =
-      q""" new ${mkNatTpt(i)} """
+    loop(i, Ident(_0Sym))
   }
+
+  //copied from Shapeless
+  def mkNatTpe(i: Int): Type = {
+    val succTpe = typeOf[shapeless.Succ[_]].typeConstructor
+    val _0Tpe = typeOf[shapeless._0]
+
+    @tailrec
+    def loop(i: Int, acc: Type): Type = {
+      if (i == 0) acc
+      else loop(i - 1, appliedType(succTpe, acc))
+    }
+
+    loop(i, _0Tpe)
+  }
+
+  //copied from Shapeless
+  def mkNatValue(i: Int): Tree =
+  q""" new ${mkNatTpt(i)} """
   ///////////////////////////////////////////////////////////////////////////////////////////
 }
