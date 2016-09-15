@@ -1,5 +1,6 @@
 package singleton.ops.impl
 import macrocompat.bundle
+import shapeless.Nat
 
 import scala.reflect.macros.whitebox
 
@@ -23,6 +24,7 @@ trait GeneralMacros {
     */
   object Const {
     def unapply(tp: Type): Option[Constant] = {
+//      print(showRaw(tp))
       tp match {
         case tp @ ExistentialType(_, _) => unapply(tp.underlying)
         case TypeBounds(lo, hi) => unapply(hi)
@@ -41,6 +43,24 @@ trait GeneralMacros {
         case TypeRef(_, sym, _) if sym == symbolOf[shapeless._0] =>
           Some(Constant(0))
         ////////////////////////////////////////////////////////////////////////
+
+        case TypeRef(_, sym, args) if sym == symbolOf[Op1Macro[_,_]] =>
+          val funcName = unapply(args.head)
+          val aValue = unapply(args(1))
+          (funcName, aValue) match {
+            case (Some(Constant(f : String)), Some(Constant(a))) => op1Calc(f, a)
+            case _ => None
+          }
+
+        case TypeRef(_, sym, args) if sym == symbolOf[Op2Macro[_,_,_]] =>
+          val funcName = unapply(args.head)
+          val aValue = unapply(args(1))
+          val bValue = unapply(args(2))
+          (funcName, aValue, bValue) match {
+            case (Some(Constant(f : String)), Some(Constant(a)), Some(Constant(b))) => op2Calc(f, a, b)
+            case _ => None
+          }
+
         case TypeRef(_, sym, _) if sym.isAliasType => unapply(tp.dealias)
         case TypeRef(pre, sym, Nil) =>
           unapply(sym.info asSeenFrom (pre, sym.owner))
@@ -69,7 +89,14 @@ trait GeneralMacros {
       implicit ev: c.WeakTypeTag[T]): (Type, Literal, TypeName, Type, Tree) ={
     val outWideType = weakTypeOf[T]
     val outWideLiteral = Literal(Constant(t))
-    val outTypeName = TypeName("Out" + outWideType.toString)
+    val outTypeName = t match {
+      case tt : Nat => TypeName("OutNat")
+      case tt : Int => TypeName("OutInt")
+      case tt : Long => TypeName("OutLong")
+      case tt : Double => TypeName("OutDouble")
+      case tt : String => TypeName("OutString")
+      case tt : Boolean => TypeName("OutBoolean")
+    }
     (outWideType, outWideLiteral, outTypeName, constantTypeOf(t), Literal(Constant(t)))
   }
 
@@ -89,7 +116,7 @@ trait GeneralMacros {
 
     val value = tpe match {
       case Const(Constant(t)) => t
-      case _ => extractionFailed(tpe, false)
+      case _ => extractionFailed(tpe, true)
     }
 
     value.asInstanceOf[T]
@@ -107,41 +134,48 @@ trait GeneralMacros {
       evs1: c.WeakTypeTag[S1]): MaterializeOp1AuxGen =
     new MaterializeOp1AuxGen(symbolOf[F], weakTypeOf[N], weakTypeOf[S1])
 
+  def op1Calc[T1](funcName : String, aValue : T1) : Option[Constant] = {
+    import scala.math._
+    val ret = (funcName, aValue) match {
+      case ("Id", a: Int) => Some(Constant(a))
+      case ("Id", a: Long) => Some(Constant(a))
+      case ("Id", a: Double) => Some(Constant(a))
+      case ("Id", a: String) => Some(Constant(a))
+      case ("Id", a: Boolean) => Some(Constant(a))
+      case ("ToNat", a: Int) => Some(Constant(a))
+      case ("ToInt", a: Int) => Some(Constant(a.toInt))
+      case ("ToInt", a: Long) => Some(Constant(a.toInt))
+      case ("ToInt", a: Double) => Some(Constant(a.toInt))
+      case ("ToLong", a: Int) => Some(Constant(a.toLong))
+      case ("ToLong", a: Long) => Some(Constant(a.toLong))
+      case ("ToLong", a: Double) => Some(Constant(a.toLong))
+      case ("ToDouble", a: Int) => Some(Constant(a.toDouble))
+      case ("ToDouble", a: Long) => Some(Constant(a.toDouble))
+      case ("ToDouble", a: Double) => Some(Constant(a.toDouble))
+      case ("Negate", a: Int) => Some(Constant(-a))
+      case ("Negate", a: Long) => Some(Constant(-a))
+      case ("Negate", a: Double) => Some(Constant(-a))
+      case ("Abs", a: Int) => Some(Constant(abs(a)))
+      case ("Abs", a: Long) => Some(Constant(abs(a)))
+      case ("Abs", a: Double) => Some(Constant(abs(a)))
+      case ("Reverse", a: String) => Some(Constant(a.reverse))
+      case ("!", a: Boolean) => Some(Constant(!a))
+      case ("Require", a: Boolean) =>
+        if (!a)
+          abort(s"Cannot prove requirement Require[...]", true)
+        else
+          Some(Constant(a))
+      case _ => abort(s"Unsupported $funcName[$aValue]", true)
+    }
+    ret
+  }
   final class MaterializeOp1AuxGen(opSym: TypeSymbol, nTpe: Type, s1Tpe: Type) {
     def usingFuncName[N, T1, T2]: Tree = {
       val funcName = extractSingletonValue[N](nTpe).asInstanceOf[String]
       val aValue = extractSingletonValue[T1](s1Tpe)
-
-      import scala.math._
-      val (outWideTpe, outWideLiteral, outTypeName, outTpe, outTree) = (funcName, aValue) match {
-        case ("Id", a: Int) => constantTypeAndValueOf(a)
-        case ("Id", a: Long) => constantTypeAndValueOf(a)
-        case ("Id", a: Double) => constantTypeAndValueOf(a)
-        case ("Id", a: String) => constantTypeAndValueOf(a)
-        case ("Id", a: Boolean) => constantTypeAndValueOf(a)
-        case ("ToNat", a: Int) => constantTypeAndValueOfNat(a)
-        case ("ToInt", a: Int) => constantTypeAndValueOf(a.toInt)
-        case ("ToInt", a: Long) => constantTypeAndValueOf(a.toInt)
-        case ("ToInt", a: Double) => constantTypeAndValueOf(a.toInt)
-        case ("ToLong", a: Int) => constantTypeAndValueOf(a.toLong)
-        case ("ToLong", a: Long) => constantTypeAndValueOf(a.toLong)
-        case ("ToLong", a: Double) => constantTypeAndValueOf(a.toLong)
-        case ("ToDouble", a: Int) => constantTypeAndValueOf(a.toDouble)
-        case ("ToDouble", a: Long) => constantTypeAndValueOf(a.toDouble)
-        case ("ToDouble", a: Double) => constantTypeAndValueOf(a.toDouble)
-        case ("Negate", a: Int) => constantTypeAndValueOf(-a)
-        case ("Negate", a: Long) => constantTypeAndValueOf(-a)
-        case ("Negate", a: Double) => constantTypeAndValueOf(-a)
-        case ("Abs", a: Int) => constantTypeAndValueOf(abs(a))
-        case ("Abs", a: Long) => constantTypeAndValueOf(abs(a))
-        case ("Abs", a: Double) => constantTypeAndValueOf(abs(a))
-        case ("Reverse", a: String) => constantTypeAndValueOf(a.reverse)
-        case ("!", a: Boolean) => constantTypeAndValueOf(!a)
-        case ("Require", a: Boolean) =>
-          if (!a)
-            abort(s"Cannot prove requirement Require[...]", true)
-          else
-            constantTypeAndValueOf(a)
+      val (outWideTpe, outWideLiteral, outTypeName, outTpe, outTree) = (funcName, op1Calc(funcName,aValue)) match {
+        case ("ToNat", Some(Constant(t : Int))) => constantTypeAndValueOfNat(t)
+        case (_, Some(Constant(t))) =>  constantTypeAndValueOf(t)
         case _ => abort(s"Unsupported $funcName[$aValue]", true)
       }
       val appliedTpe = tq"$opSym[$nTpe, $s1Tpe]"
@@ -175,6 +209,127 @@ trait GeneralMacros {
       weakTypeOf[S2]
     )
 
+  def op2Calc[T1, T2](funcName : String, aValue : T1, bValue : T2) : Option[Constant] = {
+    import scala.math._
+    val ret = (funcName, aValue, bValue) match {
+      case ("+", a: Int, b: Int) => Some(Constant(a + b))
+      case ("+", a: Int, b: Long) => Some(Constant(a + b))
+      case ("+", a: Int, b: Double) => Some(Constant(a + b))
+      case ("+", a: Long, b: Int) => Some(Constant(a + b))
+      case ("+", a: Long, b: Long) => Some(Constant(a + b))
+      case ("+", a: Long, b: Double) => Some(Constant(a + b))
+      case ("+", a: Double, b: Int) => Some(Constant(a + b))
+      case ("+", a: Double, b: Long) => Some(Constant(a + b))
+      case ("+", a: Double, b: Double) => Some(Constant(a + b))
+      case ("+", a: String, b: String) => Some(Constant(a + b))
+
+      case ("-", a: Int, b: Int) => Some(Constant(a - b))
+      case ("-", a: Int, b: Long) => Some(Constant(a - b))
+      case ("-", a: Int, b: Double) => Some(Constant(a - b))
+      case ("-", a: Long, b: Int) => Some(Constant(a - b))
+      case ("-", a: Long, b: Long) => Some(Constant(a - b))
+      case ("-", a: Long, b: Double) => Some(Constant(a - b))
+      case ("-", a: Double, b: Int) => Some(Constant(a - b))
+      case ("-", a: Double, b: Long) => Some(Constant(a - b))
+      case ("-", a: Double, b: Double) => Some(Constant(a - b))
+
+      case ("*", a: Int, b: Int) => Some(Constant(a * b))
+      case ("*", a: Int, b: Double) => Some(Constant(a * b))
+      case ("*", a: Long, b: Int) => Some(Constant(a * b))
+      case ("*", a: Long, b: Long) => Some(Constant(a * b))
+      case ("*", a: Long, b: Double) => Some(Constant(a * b))
+      case ("*", a: Double, b: Int) => Some(Constant(a * b))
+      case ("*", a: Double, b: Long) => Some(Constant(a * b))
+      case ("*", a: Double, b: Double) => Some(Constant(a * b))
+
+      case ("/", a: Int, b: Int) => Some(Constant(a / b))
+      case ("/", a: Int, b: Long) => Some(Constant(a / b))
+      case ("/", a: Int, b: Double) => Some(Constant(a / b))
+      case ("/", a: Long, b: Int) => Some(Constant(a / b))
+      case ("/", a: Long, b: Long) => Some(Constant(a / b))
+      case ("/", a: Long, b: Double) => Some(Constant(a / b))
+      case ("/", a: Double, b: Int) => Some(Constant(a / b))
+      case ("/", a: Double, b: Long) => Some(Constant(a / b))
+      case ("/", a: Double, b: Double) => Some(Constant(a / b))
+
+      case ("<", a: Int, b: Int) => Some(Constant(a < b))
+      case ("<", a: Int, b: Long) => Some(Constant(a < b))
+      case ("<", a: Int, b: Double) => Some(Constant(a < b))
+      case ("<", a: Long, b: Int) => Some(Constant(a < b))
+      case ("<", a: Long, b: Long) => Some(Constant(a < b))
+      case ("<", a: Long, b: Double) => Some(Constant(a < b))
+      case ("<", a: Double, b: Int) => Some(Constant(a < b))
+      case ("<", a: Double, b: Long) => Some(Constant(a < b))
+      case ("<", a: Double, b: Double) => Some(Constant(a < b))
+
+      case ("==", a: Int, b: Int) => Some(Constant(a == b))
+      case ("==", a: Int, b: Long) => Some(Constant(a == b))
+      case ("==", a: Int, b: Double) => Some(Constant(a == b))
+      case ("==", a: Long, b: Int) => Some(Constant(a == b))
+      case ("==", a: Long, b: Long) => Some(Constant(a == b))
+      case ("==", a: Long, b: Double) => Some(Constant(a == b))
+      case ("==", a: Double, b: Int) => Some(Constant(a == b))
+      case ("==", a: Double, b: Long) => Some(Constant(a == b))
+      case ("==", a: Double, b: Double) => Some(Constant(a == b))
+
+      case ("!=", a: Int, b: Int) => Some(Constant(a != b))
+      case ("!=", a: Int, b: Long) => Some(Constant(a != b))
+      case ("!=", a: Int, b: Double) => Some(Constant(a != b))
+      case ("!=", a: Long, b: Int) => Some(Constant(a != b))
+      case ("!=", a: Long, b: Long) => Some(Constant(a != b))
+      case ("!=", a: Long, b: Double) => Some(Constant(a != b))
+      case ("!=", a: Double, b: Int) => Some(Constant(a != b))
+      case ("!=", a: Double, b: Long) => Some(Constant(a != b))
+      case ("!=", a: Double, b: Double) => Some(Constant(a != b))
+
+      case (">", a: Int, b: Int) => Some(Constant(a > b))
+      case (">", a: Int, b: Long) => Some(Constant(a > b))
+      case (">", a: Int, b: Double) => Some(Constant(a > b))
+      case (">", a: Long, b: Int) => Some(Constant(a > b))
+      case (">", a: Long, b: Long) => Some(Constant(a > b))
+      case (">", a: Long, b: Double) => Some(Constant(a > b))
+      case (">", a: Double, b: Int) => Some(Constant(a > b))
+      case (">", a: Double, b: Long) => Some(Constant(a > b))
+      case (">", a: Double, b: Double) => Some(Constant(a > b))
+
+      case ("<=", a: Int, b: Int) => Some(Constant(a <= b))
+      case ("<=", a: Int, b: Long) => Some(Constant(a <= b))
+      case ("<=", a: Int, b: Double) => Some(Constant(a <= b))
+      case ("<=", a: Long, b: Int) => Some(Constant(a <= b))
+      case ("<=", a: Long, b: Long) => Some(Constant(a <= b))
+      case ("<=", a: Long, b: Double) => Some(Constant(a <= b))
+      case ("<=", a: Double, b: Int) => Some(Constant(a <= b))
+      case ("<=", a: Double, b: Long) => Some(Constant(a <= b))
+      case ("<=", a: Double, b: Double) => Some(Constant(a <= b))
+
+      case (">=", a: Int, b: Int) => Some(Constant(a >= b))
+      case (">=", a: Int, b: Long) => Some(Constant(a >= b))
+      case (">=", a: Int, b: Double) => Some(Constant(a >= b))
+      case (">=", a: Long, b: Int) => Some(Constant(a >= b))
+      case (">=", a: Long, b: Long) => Some(Constant(a >= b))
+      case (">=", a: Long, b: Double) => Some(Constant(a >= b))
+      case (">=", a: Double, b: Int) => Some(Constant(a >= b))
+      case (">=", a: Double, b: Long) => Some(Constant(a >= b))
+      case (">=", a: Double, b: Double) => Some(Constant(a >= b))
+
+      case ("&&", a: Boolean, b: Boolean) => Some(Constant(a && b))
+      case ("||", a: Boolean, b: Boolean) => Some(Constant(a || b))
+
+      case ("Min", a: Int, b: Int) => Some(Constant(min(a, b)))
+      case ("Min", a: Long, b: Long) => Some(Constant(min(a, b)))
+      case ("Min", a: Double, b: Double) => Some(Constant(min(a, b)))
+
+      case ("Max", a: Int, b: Int) => Some(Constant(max(a, b)))
+      case ("Max", a: Long, b: Long) => Some(Constant(max(a, b)))
+      case ("Max", a: Double, b: Double) => Some(Constant(max(a, b)))
+
+      case ("Substring", a: String, b: Int) => Some(Constant(a.substring(b)))
+
+      case _ => abort(s"Unsupported $funcName[$aValue, $bValue]", true)
+    }
+    ret
+  }
+  
   final class MaterializeOp2AuxGen(opSym: TypeSymbol,
                                    nTpe: Type,
                                    s1Tpe: Type,
@@ -184,126 +339,12 @@ trait GeneralMacros {
       val aValue = extractSingletonValue[T1](s1Tpe)
       val bValue = extractSingletonValue[T2](s2Tpe)
 
-      import scala.math._
-      val (outWideTpe, outWideLiteral, outTypeName, outTpe, outTree) = (funcName, aValue, bValue) match {
-        case ("+", a: Int, b: Int) => constantTypeAndValueOf(a + b)
-        case ("+", a: Int, b: Long) => constantTypeAndValueOf(a + b)
-        case ("+", a: Int, b: Double) => constantTypeAndValueOf(a + b)
-        case ("+", a: Long, b: Int) => constantTypeAndValueOf(a + b)
-        case ("+", a: Long, b: Long) => constantTypeAndValueOf(a + b)
-        case ("+", a: Long, b: Double) => constantTypeAndValueOf(a + b)
-        case ("+", a: Double, b: Int) => constantTypeAndValueOf(a + b)
-        case ("+", a: Double, b: Long) => constantTypeAndValueOf(a + b)
-        case ("+", a: Double, b: Double) => constantTypeAndValueOf(a + b)
-        case ("+", a: String, b: String) => constantTypeAndValueOf(a + b)
-
-        case ("-", a: Int, b: Int) => constantTypeAndValueOf(a - b)
-        case ("-", a: Int, b: Long) => constantTypeAndValueOf(a - b)
-        case ("-", a: Int, b: Double) => constantTypeAndValueOf(a - b)
-        case ("-", a: Long, b: Int) => constantTypeAndValueOf(a - b)
-        case ("-", a: Long, b: Long) => constantTypeAndValueOf(a - b)
-        case ("-", a: Long, b: Double) => constantTypeAndValueOf(a - b)
-        case ("-", a: Double, b: Int) => constantTypeAndValueOf(a - b)
-        case ("-", a: Double, b: Long) => constantTypeAndValueOf(a - b)
-        case ("-", a: Double, b: Double) => constantTypeAndValueOf(a - b)
-
-        case ("*", a: Int, b: Int) => constantTypeAndValueOf(a * b)
-        case ("*", a: Int, b: Double) => constantTypeAndValueOf(a * b)
-        case ("*", a: Long, b: Int) => constantTypeAndValueOf(a * b)
-        case ("*", a: Long, b: Long) => constantTypeAndValueOf(a * b)
-        case ("*", a: Long, b: Double) => constantTypeAndValueOf(a * b)
-        case ("*", a: Double, b: Int) => constantTypeAndValueOf(a * b)
-        case ("*", a: Double, b: Long) => constantTypeAndValueOf(a * b)
-        case ("*", a: Double, b: Double) => constantTypeAndValueOf(a * b)
-
-        case ("/", a: Int, b: Int) => constantTypeAndValueOf(a / b)
-        case ("/", a: Int, b: Long) => constantTypeAndValueOf(a / b)
-        case ("/", a: Int, b: Double) => constantTypeAndValueOf(a / b)
-        case ("/", a: Long, b: Int) => constantTypeAndValueOf(a / b)
-        case ("/", a: Long, b: Long) => constantTypeAndValueOf(a / b)
-        case ("/", a: Long, b: Double) => constantTypeAndValueOf(a / b)
-        case ("/", a: Double, b: Int) => constantTypeAndValueOf(a / b)
-        case ("/", a: Double, b: Long) => constantTypeAndValueOf(a / b)
-        case ("/", a: Double, b: Double) => constantTypeAndValueOf(a / b)
-
-        case ("<", a: Int, b: Int) => constantTypeAndValueOf(a < b)
-        case ("<", a: Int, b: Long) => constantTypeAndValueOf(a < b)
-        case ("<", a: Int, b: Double) => constantTypeAndValueOf(a < b)
-        case ("<", a: Long, b: Int) => constantTypeAndValueOf(a < b)
-        case ("<", a: Long, b: Long) => constantTypeAndValueOf(a < b)
-        case ("<", a: Long, b: Double) => constantTypeAndValueOf(a < b)
-        case ("<", a: Double, b: Int) => constantTypeAndValueOf(a < b)
-        case ("<", a: Double, b: Long) => constantTypeAndValueOf(a < b)
-        case ("<", a: Double, b: Double) => constantTypeAndValueOf(a < b)
-
-        case ("==", a: Int, b: Int) => constantTypeAndValueOf(a == b)
-        case ("==", a: Int, b: Long) => constantTypeAndValueOf(a == b)
-        case ("==", a: Int, b: Double) => constantTypeAndValueOf(a == b)
-        case ("==", a: Long, b: Int) => constantTypeAndValueOf(a == b)
-        case ("==", a: Long, b: Long) => constantTypeAndValueOf(a == b)
-        case ("==", a: Long, b: Double) => constantTypeAndValueOf(a == b)
-        case ("==", a: Double, b: Int) => constantTypeAndValueOf(a == b)
-        case ("==", a: Double, b: Long) => constantTypeAndValueOf(a == b)
-        case ("==", a: Double, b: Double) => constantTypeAndValueOf(a == b)
-
-        case ("!=", a: Int, b: Int) => constantTypeAndValueOf(a != b)
-        case ("!=", a: Int, b: Long) => constantTypeAndValueOf(a != b)
-        case ("!=", a: Int, b: Double) => constantTypeAndValueOf(a != b)
-        case ("!=", a: Long, b: Int) => constantTypeAndValueOf(a != b)
-        case ("!=", a: Long, b: Long) => constantTypeAndValueOf(a != b)
-        case ("!=", a: Long, b: Double) => constantTypeAndValueOf(a != b)
-        case ("!=", a: Double, b: Int) => constantTypeAndValueOf(a != b)
-        case ("!=", a: Double, b: Long) => constantTypeAndValueOf(a != b)
-        case ("!=", a: Double, b: Double) => constantTypeAndValueOf(a != b)
-
-        case (">", a: Int, b: Int) => constantTypeAndValueOf(a > b)
-        case (">", a: Int, b: Long) => constantTypeAndValueOf(a > b)
-        case (">", a: Int, b: Double) => constantTypeAndValueOf(a > b)
-        case (">", a: Long, b: Int) => constantTypeAndValueOf(a > b)
-        case (">", a: Long, b: Long) => constantTypeAndValueOf(a > b)
-        case (">", a: Long, b: Double) => constantTypeAndValueOf(a > b)
-        case (">", a: Double, b: Int) => constantTypeAndValueOf(a > b)
-        case (">", a: Double, b: Long) => constantTypeAndValueOf(a > b)
-        case (">", a: Double, b: Double) => constantTypeAndValueOf(a > b)
-
-        case ("<=", a: Int, b: Int) => constantTypeAndValueOf(a <= b)
-        case ("<=", a: Int, b: Long) => constantTypeAndValueOf(a <= b)
-        case ("<=", a: Int, b: Double) => constantTypeAndValueOf(a <= b)
-        case ("<=", a: Long, b: Int) => constantTypeAndValueOf(a <= b)
-        case ("<=", a: Long, b: Long) => constantTypeAndValueOf(a <= b)
-        case ("<=", a: Long, b: Double) => constantTypeAndValueOf(a <= b)
-        case ("<=", a: Double, b: Int) => constantTypeAndValueOf(a <= b)
-        case ("<=", a: Double, b: Long) => constantTypeAndValueOf(a <= b)
-        case ("<=", a: Double, b: Double) => constantTypeAndValueOf(a <= b)
-
-        case (">=", a: Int, b: Int) => constantTypeAndValueOf(a >= b)
-        case (">=", a: Int, b: Long) => constantTypeAndValueOf(a >= b)
-        case (">=", a: Int, b: Double) => constantTypeAndValueOf(a >= b)
-        case (">=", a: Long, b: Int) => constantTypeAndValueOf(a >= b)
-        case (">=", a: Long, b: Long) => constantTypeAndValueOf(a >= b)
-        case (">=", a: Long, b: Double) => constantTypeAndValueOf(a >= b)
-        case (">=", a: Double, b: Int) => constantTypeAndValueOf(a >= b)
-        case (">=", a: Double, b: Long) => constantTypeAndValueOf(a >= b)
-        case (">=", a: Double, b: Double) => constantTypeAndValueOf(a >= b)
-
-        case ("&&", a: Boolean, b: Boolean) => constantTypeAndValueOf(a && b)
-        case ("||", a: Boolean, b: Boolean) => constantTypeAndValueOf(a || b)
-
-        case ("Min", a: Int, b: Int) => constantTypeAndValueOf(min(a, b))
-        case ("Min", a: Long, b: Long) => constantTypeAndValueOf(min(a, b))
-        case ("Min", a: Double, b: Double) => constantTypeAndValueOf(min(a, b))
-
-        case ("Max", a: Int, b: Int) => constantTypeAndValueOf(max(a, b))
-        case ("Max", a: Long, b: Long) => constantTypeAndValueOf(max(a, b))
-        case ("Max", a: Double, b: Double) => constantTypeAndValueOf(max(a, b))
-
-        case ("Substring", a: String, b: Int) =>
-          constantTypeAndValueOf(a.substring(b))
-
-        case _ => abort(s"Unsupported $funcName[$aValue, $bValue]", true)
+      val (outWideTpe, outWideLiteral, outTypeName, outTpe, outTree) = op2Calc(funcName,aValue,bValue) match {
+        case Some(Constant(t)) =>  constantTypeAndValueOf(t)
       }
+
       val appliedTpe = tq"$opSym[$nTpe, $s1Tpe, $s2Tpe]"
-      q"""
+      val genTree = q"""
         new $appliedTpe {
           type OutWide = $outWideTpe
           type Out = $outTpe
@@ -312,6 +353,8 @@ trait GeneralMacros {
           val valueWide: $outWideTpe = $outWideLiteral
         }
       """
+//      print(genTree)
+      genTree
     }
   }
   ///////////////////////////////////////////////////////////////////////////////////////////

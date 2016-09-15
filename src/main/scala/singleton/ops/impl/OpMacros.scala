@@ -5,7 +5,7 @@ import scala.reflect.macros.whitebox
 /********************************************************************************************************
   * Single argument type function macro
   *******************************************************************************************************/
-trait Op1Macro[N <: String with Singleton, S1] extends SingletonTypeExpr
+trait Op1Macro[N <: String with Singleton, S1] extends Op
 
 @ bundle
 object Op1Macro {
@@ -26,7 +26,7 @@ object Op1Macro {
 /********************************************************************************************************
   * Two arguments type function macro
   *******************************************************************************************************/
-trait Op2Macro[N <: String with Singleton, S1, S2] extends SingletonTypeExpr
+trait Op2Macro[N <: String with Singleton, S1, S2] extends Op
 
 @ bundle
 object Op2Macro {
