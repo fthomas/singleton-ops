@@ -1,9 +1,5 @@
 package singleton.ops
 
-import shapeless.ops._
-import nat._
-import singleton.ops.impl.SingletonTypeExpr
-
 object NewDemo {
   //////////////////////////////
   def demo[L <: Int with Singleton](implicit p : L*L + L) : p.Out = p.value
@@ -60,36 +56,12 @@ class FixedSizeVector[L <: Int with Singleton]() {
 }
 
 object FixedSizeVector {
-  def apply[L <: Int with Singleton] = new FixedSizeVector[L] //(implicit check : LessThan[0, L])
+  def apply[L <: Int with Singleton](implicit check : Require[L > 0]) = new FixedSizeVector[L]
 }
 
 object TestVector {
   val v1 = FixedSizeVector[5]
   val v2 = FixedSizeVector[2]
   val v3 : FixedSizeVector[40] = v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1
-//  val v4 = FixedSizeVector[-1] Will lead to error
+//  val v4 = FixedSizeVector[-1] //Will lead to error could not find implicit value for parameter check: singleton.ops.Require[singleton.ops.>[-1,0]]
 }
-
-
-
-
-
-
-//
-//
-//
-//object Demo {
-//  val a = Sum[1,2]
-//  val av : a.Out = 3
-//  val b = Sum[a.Out, 3]
-//  val bv : b.Out = 6
-//  def add3[A <: Int with Singleton, B <: Int with Singleton, C <: Int with Singleton, D <: Int with Singleton](implicit sum : Sum.Aux[Int, A, B, C], sum2 : Sum[Int, C, D]) = sum2
-//
-////  add3[1,2,0,3]
-//  Sum[1,2]
-//  Sum[1.0,2.0]
-//}
-//
-//case class Foo[A <: Int with Singleton]() {
-//  def foo[B <: Int with Singleton](implicit ev: Sum[Int, A, B]) = Foo[ev.Out]
-//}
