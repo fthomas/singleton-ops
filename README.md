@@ -12,7 +12,7 @@ This library provides type-level operations for [Typelevel Scala][typelevel-scal
 * `Double`
 * `String`
 * `Boolean`
-* `Nat` (from the Shapeless library)
+* `Nat` (from [Shapeless][shapeless])
 
 ####Supported arithmetic operations:
 * `type +[P1, P2]`          
