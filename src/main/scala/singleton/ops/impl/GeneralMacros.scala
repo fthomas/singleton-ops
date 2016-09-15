@@ -162,7 +162,7 @@ trait GeneralMacros {
       case ("!", a: Boolean) => Some(Constant(!a))
       case ("Require", a: Boolean) =>
         if (!a)
-          abort(s"Cannot prove requirement Require[...]", true)
+          abort(s"Cannot prove requirement Require[...]", false)
         else
           Some(Constant(a))
       case _ => abort(s"Unsupported $funcName[$aValue]", true)
