@@ -7,11 +7,11 @@
 This library provides type-level operations for [Typelevel Scala][typelevel-scala] with [SIP-23][sip-23].
 
 ####Supported types:
-* `Int` 
-* `Long`
-* `Double`
-* `String`
-* `Boolean`
+* `Int with Singleton` 
+* `Long with Singleton`
+* `Double with Singleton`
+* `String with Singleton`
+* `Boolean with Singleton`
 * `Nat` (from [Shapeless][shapeless])
 
 ####Supported arithmetic operations:
@@ -19,21 +19,24 @@ This library provides type-level operations for [Typelevel Scala][typelevel-scal
 * `type -[P1, P2]`          
 * `type *[P1, P2]`          
 * `type /[P1, P2]`          
+* `type %[P1, P2]`          
 * `type Abs[P1]`            
 * `type Negate[P1]`         
 
-####Supported logical operations:
-* `type ![P1]`              
-* `type <[P1, P2]`          
-* `type <=[P1, P2]`         
-* `type >=[P1, P2]`         
-* `type >[P1, P2]`          
+####Supported relational operations:
 * `type ==[P1, P2]`         
 * `type !=[P1, P2]`         
-* `type &&[P1, P2]`         
-* `type ||[P1, P2]`         
+* `type >[P1, P2]`          
+* `type <[P1, P2]`          
+* `type >=[P1, P2]`         
+* `type <=[P1, P2]`         
 * `type Min[P1, P2]`        
 * `type Max[P1, P2]`        
+
+####Supported logical operations:
+* `type &&[P1, P2]`         
+* `type ||[P1, P2]`         
+* `type ![P1]`              
 
 ####Supported explicit conversion operations:
 * `type ToNat[P1]`          
