@@ -16,6 +16,7 @@ package object ops {
   type -[P1, P2]            = Op2Macro["-",P1, P2]
   type *[P1, P2]            = Op2Macro["*",P1, P2]
   type /[P1, P2]            = Op2Macro["/",P1, P2]
+  type %[P1, P2]            = Op2Macro["%",P1, P2]
   type <[P1, P2]            = Op2Macro["<",P1, P2]
   type <=[P1, P2]           = Op2Macro["<=",P1, P2]
   type >=[P1, P2]           = Op2Macro[">=",P1, P2]
