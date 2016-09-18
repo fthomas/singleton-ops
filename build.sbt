@@ -2,7 +2,7 @@
 
 val groupId = "eu.timepit"
 val projectName = "singleton-ops"
-val rootPkg = s"$groupId.$projectName"
+val rootPkg = "singleton.ops"
 val gitPubUrl = s"https://github.com/fthomas/$projectName.git"
 val gitDevUrl = s"git@github.com:fthomas/$projectName.git"
 
@@ -156,8 +156,8 @@ lazy val styleSettings = Def.settings(
 )
 
 lazy val miscSettings = Def.settings(
-  initialCommands += """
-    import singleton.ops._
+  initialCommands += s"""
+    import $rootPkg._
   """
 )
 
