@@ -49,7 +49,19 @@ object NewDemo {
   //////////////////////////////
 }
 
-
+/* TODOs:
+Op.Aux[Op, Out]
+Op.AuxNat[Op, Out <: Nat], Op.AuxInt, Op....
+Fix real world matrix example
+Add operations table to readme
+Add Char, Float
+Add Floor, Ceil
+Add Log2 (efficient)
+Add auto refinement for non-generic operations (e.g ToBoolean[A == B])
+Add support for general (refined) <Type>.Out functions
+Add support for member grab Grab(<Type>, "member name")
+Add ITE (If-Then-Else)
+ */
 class FixedSizeVector[L <: Int with Singleton]() {
   def concat[L2 <: Int with Singleton](that : FixedSizeVector[L2])(implicit l : L + L2) = new FixedSizeVector[l.OutInt]
   def + (that : FixedSizeVector[L]) = new FixedSizeVector[L]
