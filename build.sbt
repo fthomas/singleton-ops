@@ -32,6 +32,26 @@ libraryDependencies ++= Seq(
 
 /// settings
 
+lazy val publishSettings = Def.settings(
+  publishMavenStyle := true,
+  pomIncludeRepository := { _ =>
+    false
+  },
+  pomExtra :=
+    <developers>
+      <developer>
+        <id>fthomas</id>
+        <name>Frank S. Thomas</name>
+        <url>https://github.com/fthomas</url>
+      </developer>
+      <developer>
+        <id>soronpo</id>
+        <name>Oron Port</name>
+        <url>https://github.com/soronpo</url>
+      </developer>
+    </developers>
+)
+
 lazy val noPublishSettings = Def.settings(
   publish := (),
   publishLocal := (),
