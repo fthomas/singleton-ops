@@ -8,8 +8,10 @@ package object ops {
   type $String              = String with Singleton
   type $Boolean             = Boolean with Singleton
   type ITE[Cond,TBody,EBody]= OpMacro["ITE",Cond, TBody, EBody]
-  type While[Cond,Body,Ret] = OpMacro["!",Cond, Body, Ret]
+  type While[Cond,Body,Ret] = OpMacro["While",Cond, Body, Ret]
   type ==>[A,B]             = OpMacro["==>",A, B, 0]
+  type :=[A,B]              = OpMacro[":=",A, B, 0]
+  type +=[A,B]              = OpMacro["+=",A, B, 0]
   type SV[Name,Value]       = OpMacro["SV",Name, Value, 0]
   type GV[Name]             = OpMacro["GV",Name, 0, 0]
 

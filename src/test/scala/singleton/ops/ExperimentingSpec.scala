@@ -77,3 +77,27 @@ object TestVector {
   val v3 : FixedSizeVector[40] = v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1
 //  val v4 = FixedSizeVector[-1] //Will lead to error could not find implicit value for parameter check: singleton.ops.Require[singleton.ops.>[-1,0]]
 }
+
+
+object TestSpecials {
+  type F[P1] = 0 + ITE[P1 < 0, 5, 7]
+  def demoITE[P1 <: Int with Singleton](implicit op: F[P1]): op.Out {} = op.value
+  val bITE1 : 7 = demoITE[1]
+  val bITE2 : 5 = demoITE[-1]
+
+  type Average[B,W] = SV["Best",B] ==> SV["Worst", W] ==> (GV["Best"] + GV["Worst"]) / 2
+  def demoSV[B <: Int with Singleton, W <: Int with Singleton](implicit op: Average[B, W]): op.Out {} = op.value
+  val bSV1 : 6 = demoSV[9,3]
+
+  type LoopDemo[M] =
+  "$Cnt" := 0 ==>
+  "$Result" := 0 ==>
+  While["$Cnt" <= M,
+    "$Result" += "$Cnt" ==>
+    "$Cnt" += 1,
+  "$Result"]
+
+  def demoLoop[M <: Int with Singleton](implicit op: LoopDemo[M]): op.Out {} = op.value
+  val bLoop1 : 10 = demoLoop[4]
+
+}
