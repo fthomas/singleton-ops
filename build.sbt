@@ -1,36 +1,92 @@
-name := "singleton-ops"
+/// variables
 
-scalaVersion := "2.11.8"
-scalaOrganization := "org.typelevel"
+val groupId = "eu.timepit"
+val projectName = "singleton-ops"
+val rootPkg = s"$groupId.$projectName"
+val gitPubUrl = s"https://github.com/fthomas/$projectName.git"
+val gitDevUrl = s"git@github.com:fthomas/$projectName.git"
 
-scalacOptions ++= Seq(
-  "-deprecation",
-  "-encoding",
-  "UTF-8",
-  "-feature",
-  "-language:existentials",
-  "-language:experimental.macros",
-  "-language:higherKinds",
-  "-language:implicitConversions",
-  "-unchecked",
-  "-Xfatal-warnings",
-  "-Xlint",
-  "-Yliteral-types",
-  "-Yno-adapted-args",
-  "-Ywarn-numeric-widen",
-  "-Ywarn-value-discard"
-)
+val macroCompatVersion = "1.1.1"
+val macroParadiseVersion = "2.1.0"
+val shapelessVersion = "2.3.2"
+val scalaCheckVersion = "1.13.2"
 
-libraryDependencies ++= Seq(
-  "org.scala-lang" % "scala-compiler" % scalaVersion.value,
-  "org.typelevel" %% "macro-compat" % "1.1.1",
-  compilerPlugin(
-    "org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
-  "com.chuusai" %% "shapeless" % "2.3.2",
-  "org.scalacheck" %% "scalacheck" % "1.13.2" % "test"
-)
+/// projects
+
+lazy val root = project
+  .in(file("."))
+  .settings(commonSettings)
+  .settings(publishSettings)
+  .settings(
+    libraryDependencies ++= Seq(
+      "org.scala-lang" % "scala-compiler" % scalaVersion.value,
+      "org.typelevel" %% "macro-compat" % macroCompatVersion,
+      compilerPlugin(
+        "org.scalamacros" % "paradise" % macroParadiseVersion cross CrossVersion.full),
+      "com.chuusai" %% "shapeless" % shapelessVersion,
+      "org.scalacheck" %% "scalacheck" % scalaCheckVersion % "test"
+    )
+  )
 
 /// settings
+
+lazy val commonSettings = Def.settings(
+  metadataSettings,
+  compileSettings,
+  scaladocSettings,
+  releaseSettings,
+  styleSettings,
+  miscSettings
+)
+
+lazy val metadataSettings = Def.settings(
+  name := projectName,
+  organization := groupId,
+  homepage := Some(url(s"https://github.com/fthomas/$projectName")),
+  startYear := Some(2016),
+  licenses := Seq(
+    "Apache-2.0" -> url("https://www.apache.org/licenses/LICENSE-2.0")),
+  scmInfo := Some(
+    ScmInfo(homepage.value.get,
+            s"scm:git:$gitPubUrl",
+            Some(s"scm:git:$gitDevUrl")))
+)
+
+lazy val compileSettings = Def.settings(
+  scalaVersion := "2.11.8",
+  scalaOrganization := "org.typelevel",
+  scalacOptions ++= Seq(
+    "-deprecation",
+    "-encoding",
+    "UTF-8",
+    "-feature",
+    "-language:existentials",
+    "-language:experimental.macros",
+    "-language:higherKinds",
+    "-language:implicitConversions",
+    "-unchecked",
+    "-Xfatal-warnings",
+    "-Xfuture",
+    "-Xlint",
+    "-Yliteral-types",
+    "-Yno-adapted-args",
+    "-Ywarn-numeric-widen",
+    //"-Ywarn-unused-import",
+    "-Ywarn-value-discard"
+  ),
+  scalacOptions in (Compile, console) -= "-Ywarn-unused-import",
+  scalacOptions in (Test, console) -= "-Ywarn-unused-import"
+)
+
+lazy val scaladocSettings = Def.settings(
+  scalacOptions in (Compile, doc) ++= Seq(
+    "-doc-source-url",
+    scmInfo.value.get.browseUrl + "/tree/master€{FILE_PATH}.scala",
+    "-sourcepath",
+    baseDirectory.in(LocalRootProject).value.getAbsolutePath
+  ),
+  autoAPIMappings := true
+)
 
 lazy val publishSettings = Def.settings(
   publishMavenStyle := true,
