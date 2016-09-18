@@ -52,7 +52,7 @@ lazy val miscSettings = Def.settings(
 
 val validateCommands = Seq(
   "clean",
-  "scalafmtTest",
+  //"scalafmtTest",
   "coverage",
   "test",
   "coverageReport",
