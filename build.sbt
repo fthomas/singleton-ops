@@ -30,10 +30,33 @@ libraryDependencies ++= Seq(
   "org.scalacheck" %% "scalacheck" % "1.13.2" % "test"
 )
 
-initialCommands += """
-  import singleton.ops._
-"""
+/// settings
 
-reformatOnCompileSettings
+lazy val noPublishSettings = Def.settings(
+  publish := (),
+  publishLocal := (),
+  publishArtifact := false
+)
 
-addCommandAlias("validate", ";clean;coverage;test;coverageReport;coverageOff")
+lazy val styleSettings = Def.settings(
+  reformatOnCompileSettings
+)
+
+lazy val miscSettings = Def.settings(
+  initialCommands += """
+    import singleton.ops._
+  """
+)
+
+/// commands
+
+val validateCommands = Seq(
+  "clean",
+  "scalafmtTest",
+  "coverage",
+  "test",
+  "coverageReport",
+  "coverageOff",
+  "doc"
+)
+addCommandAlias("validate", validateCommands.mkString(";", ";", ""))
