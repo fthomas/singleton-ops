@@ -140,7 +140,7 @@ lazy val releaseSettings = {
       runClean,
       runTest,
       setReleaseVersion,
-      updateVersionInReadme,
+      //updateVersionInReadme,
       commitReleaseVersion,
       tagRelease,
       publishArtifacts,
@@ -152,7 +152,7 @@ lazy val releaseSettings = {
 }
 
 lazy val styleSettings = Def.settings(
-  reformatOnCompileSettings
+  //reformatOnCompileSettings
 )
 
 lazy val miscSettings = Def.settings(
