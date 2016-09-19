@@ -71,7 +71,7 @@ lazy val compileSettings = Def.settings(
     "-Yliteral-types",
     "-Yno-adapted-args",
     "-Ywarn-numeric-widen",
-    //"-Ywarn-unused-import",
+    "-Ywarn-unused-import",
     "-Ywarn-value-discard"
   ),
   scalacOptions in (Compile, console) -= "-Ywarn-unused-import",
