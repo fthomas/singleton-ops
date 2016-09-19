@@ -1,6 +1,5 @@
 package singleton.ops
 
-import org.scalacheck.Prop._
 import org.scalacheck.Properties
 import singleton.ops.TestUtils._
 
