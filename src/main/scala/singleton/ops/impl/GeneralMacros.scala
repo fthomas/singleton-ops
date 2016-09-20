@@ -23,10 +23,19 @@ trait GeneralMacros {
     *  available known-at-compile-time values.
     */
   object Const {
+    def unwrapVar(t : Constant) : Option[Constant] = {
+      t match {
+        case Constant(s : String) if Var.validName(s) =>
+          val ret = Some(Var.get(s))
+          ret
+        case _ => Some(t)
+      }
+
+    }
     def unapplyVar(tp : Type) : Option[Constant] = {
       val maybeVar = unapply(tp)
       maybeVar match {
-        case (Some(Constant(s : String))) if Var.validName(s) => Some(Var.get(s))
+        case Some(t : Constant) => unwrapVar(t)
         case _ =>  maybeVar
       }
     }
@@ -55,50 +64,39 @@ trait GeneralMacros {
         // Operational Function
         ////////////////////////////////////////////////////////////////////////
         case TypeRef(_, sym, args) if sym == symbolOf[OpMacro[_,_,_,_]] =>
-          var funcName = unapply(args.head)
-          var assignFunc = false
+          val funcName = unapply(args.head)
 
-          //Checks for assignment function, sets the flag, and changes the function for calculation
-          funcName match {
-            case Some(Constant(":=")) => assignFunc = true; funcName = Some(Constant("Id")) //identity function
-            case Some(Constant("+=")) => assignFunc = true; funcName = Some(Constant("+"))
-            case Some(Constant("-=")) => assignFunc = true; funcName = Some(Constant("-"))
-            case Some(Constant("*=")) => assignFunc = true; funcName = Some(Constant("*"))
-            case Some(Constant("/=")) => assignFunc = true; funcName = Some(Constant("/"))
+          //If function is set/get variable we keep the original string,
+          //otherwise we get the variable's value
+          val aValue = funcName match {
+            case Some(Constant("SV")) => unapply(args(1))
+            case Some(Constant("GV")) => unapply(args(1))
+            case _ => unapplyVar(args(1))
           }
-
-          val aValue = unapply(args(1))
           val retVal = (funcName, aValue) match {
             case (Some(Constant("ITE")), Some(Constant(cond : Boolean))) => //Special control case: ITE (If-Then-Else)
               if (cond)
-                unapply(args(2)) //true (then) part of the IF
+                unapplyVar(args(2)) //true (then) part of the IF
               else
-                unapply(args(3)) //false (else) part of the IF
+                unapplyVar(args(3)) //false (else) part of the IF
             case (Some(Constant("While")), Some(Constant(cond : Boolean))) => //Special control case: While
                 var repeat = cond
                 while (repeat) {
                   unapply(args(2)) //executing body
-                  repeat = unapply(args(1)) match { //reevaluate condition
+                  repeat = unapplyVar(args(1)) match { //reevaluate condition
                     case Some(Constant(updatedCond : Boolean)) => updatedCond
                     case _ => false
                   }
                 }
-                unapply(args(3)) //return value of loop
+              unapplyVar(args(3)) //return value of loop
             case _ => //regular cases
-              val bValue = unapply(args(2))
-              val cValue = unapply(args(3))
+              val bValue = unapplyVar(args(2))
+              val cValue = unapplyVar(args(3))
               (funcName, aValue, bValue, cValue) match {
                 case (Some(Constant(f : String)), Some(Constant(a)), Some(Constant(b)), Some(Constant(c))) => Some(opCalc(f, a, b, c))
                 case _ => None
               }
           }
-
-          //Assign calculated value if this the flag is true
-//          (assignFunc, aValue) match {
-//            case (true, Some(Constant(varName : String))) if Var.validName(varName) => Var.set(varName, retVal.get); retVal
-//            case (true, _) => None
-//            case (false, _) => retVal
-//          }
           retVal
 
         ////////////////////////////////////////////////////////////////////////
@@ -179,7 +177,7 @@ trait GeneralMacros {
       map(name)
     }
     def validName(name : String) : Boolean = {
-      name.startsWith("=")
+      name.startsWith("$")
     }
   }
 

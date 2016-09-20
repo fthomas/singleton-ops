@@ -7,7 +7,7 @@ object NewDemo {
   //////////////////////////////
 
   //////////////////////////////
-  def demoLong[L1 <: XLong, L2 <: XLong](implicit p : Min[L1*L1, L2+L2]) : p.Out = p.value
+  def demoLong[L1 <: XLong, L2 <: XLong](implicit p : Min[L1*L1, L2+L2]) : p.Out {} = p.value
   val bLong1 : 1L = demoLong[1L, 5L]
   val bLong2 : 6L = demoLong[3L, 3L]
   //////////////////////////////
@@ -80,20 +80,20 @@ object TestSpecials {
   def demoITE[P1 <: XInt](implicit op: F[P1]): op.Out {} = op.value
   val bITE1 : 7 = demoITE[1]
   val bITE2 : 5 = demoITE[-1]
-
-  type Average[B,W] = SV["Best",B] ==> SV["Worst", W] ==> (GV["Best"] + GV["Worst"]) / 2
-  def demoSV[B <: XInt, W <: XInt](implicit op: Average[B, W]): op.Out {} = op.value
-  val bSV1 : 6 = demoSV[9,3]
+//
+//  type Average[B,W] = SV["Best",B] ==> SV["Worst", W] ==> (GV["Best"] + GV["Worst"]) / 2
+//  def demoSV[B <: XInt, W <: XInt](implicit op: Average[B, W]): op.Out {} = op.value
+//  val bSV1 : 6 = demoSV[9,3]
 
 //  type LoopDemo[M] =
-//  "$Cnt" := 0 ==>
-//  "$Result" := 0 ==>
-//  While["$Cnt" <= M,
-//    "$Result" += "$Cnt" ==>
-//    "$Cnt" += 1,
-//  "$Result"]
-//
-//  def demoLoop[M <: $Int](implicit op: LoopDemo[M]): op.Out {} = op.value
-//  val bLoop1 : 10 = demoLoop[4]
+//  "$Cnt" := 0 |
+//  "$Result" := "$Cnt" + 1 |
+////  While["$Cnt" <= M,
+////    "$Result" += "$Cnt" ==>
+////    "$Cnt" += 1,
+//  "$Result"//]
+
+//  def demoLoop[M <: XInt](implicit op: "$Cnt" := 0): op.Out {} = op.value
+//  val bLoop1 : 1 = demoLoop[4]
 
 }
