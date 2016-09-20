@@ -25,7 +25,7 @@ trait GeneralMacros {
   object Const {
     def unapply(tp: Type): Option[Constant] = {
 //      print(showRaw(tp))
-      tp match {
+      val retVal = tp match {
         case tp @ ExistentialType(_, _) => unapply(tp.underlying)
         case TypeBounds(lo, hi) => unapply(hi)
         case RefinedType(parents, _) =>
@@ -50,30 +50,37 @@ trait GeneralMacros {
         case TypeRef(_, sym, args) if sym == symbolOf[OpMacro[_,_,_,_]] =>
           val funcName = unapply(args.head)
           val aValue = unapply(args(1))
-          (funcName, aValue) match {
-            case (Some(Constant("ITE")), Some(Constant(cond : Boolean))) => //Special control case: ITE (If-Then-Else)
-              if (cond)
-                unapply(args(2)) //true (then) part of the IF
-              else
-                unapply(args(3)) //false (else) part of the IF
-            case (Some(Constant("While")), Some(Constant(cond : Boolean))) => //Special control case: While
-                var repeat = cond
-                while (repeat) {
-                  unapply(args(2)) //executing body
-                  repeat = unapply(args(1)) match { //reevaluate condition
-                    case Some(Constant(updatedCond : Boolean)) => updatedCond
-                    case _ => false
+
+          funcName match {
+            case Some(Constant(":=")) =>
+            case _ =>
+              val aValue = unapply(args(1))
+              (funcName, aValue) match {
+                case (Some(Constant("ITE")), Some(Constant(cond : Boolean))) => //Special control case: ITE (If-Then-Else)
+                  if (cond)
+                    unapply(args(2)) //true (then) part of the IF
+                  else
+                    unapply(args(3)) //false (else) part of the IF
+                case (Some(Constant("While")), Some(Constant(cond : Boolean))) => //Special control case: While
+                  var repeat = cond
+                  while (repeat) {
+                    unapply(args(2)) //executing body
+                    repeat = unapply(args(1)) match { //reevaluate condition
+                      case Some(Constant(updatedCond : Boolean)) => updatedCond
+                      case _ => false
+                    }
                   }
-                }
-                unapply(args(3)) //return value of loop
-            case _ => //regular cases
-              val bValue = unapply(args(2))
-              val cValue = unapply(args(3))
-              (funcName, aValue, bValue, cValue) match {
-                case (Some(Constant(f : String)), Some(Constant(a)), Some(Constant(b)), Some(Constant(c))) => Some(opCalc(f, a, b, c))
-                case _ => None
+                  unapply(args(3)) //return value of loop
+                case _ => //regular cases
+                  val bValue = unapply(args(2))
+                  val cValue = unapply(args(3))
+                  (funcName, aValue, bValue, cValue) match {
+                    case (Some(Constant(f : String)), Some(Constant(a)), Some(Constant(b)), Some(Constant(c))) => Some(opCalc(f, a, b, c))
+                    case _ => None
+                  }
               }
           }
+
         ////////////////////////////////////////////////////////////////////////
 
         case TypeRef(_, sym, _) if sym.isAliasType => unapply(tp.dealias)
@@ -83,9 +90,14 @@ trait GeneralMacros {
           unapply(sym.info asSeenFrom (pre, sym.owner))
         case ConstantType(t) => Some(t)
         case _ =>
-          print("Exhausted search at: " + showRaw(tp))
+//          print("Exhausted search at: " + showRaw(tp))
           None
       }
+
+//      retVal match {
+//        case Constant(s : String) if s.charAt(0) == '$' =>
+//      }
+      retVal
     }
   }
   ////////////////////////////////////////////////////////////////////

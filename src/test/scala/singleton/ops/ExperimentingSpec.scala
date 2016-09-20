@@ -57,7 +57,6 @@ Add Log2 (efficient)
 Add auto refinement for non-generic operations (e.g ToBoolean[A == B])
 Add support for general (refined) <Type>.Out functions
 Add support for member grab Grab(<Type>, "member name")
-Add ITE (If-Then-Else)
  */
 class FixedSizeVector[L <: XInt]() {
   def concat[L2 <: XInt](that : FixedSizeVector[L2])(implicit l : L + L2) = new FixedSizeVector[l.OutInt]
