@@ -88,7 +88,7 @@ trait GeneralMacros {
 
           //Assign calculated value if this the flag is true
           (assignFunc, aValue) match {
-            case (true, Some(Constant(varName : String))) => VariablesHolder.setVar(varName, retVal.get); retVal
+            case (true, Some(Constant(varName : String))) if varName.startsWith("$") => VariablesHolder.setVar(varName, retVal.get); retVal
             case (true, _) => None
             case (false, _) => retVal
           }
