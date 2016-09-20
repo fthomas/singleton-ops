@@ -23,6 +23,13 @@ trait GeneralMacros {
     *  available known-at-compile-time values.
     */
   object Const {
+    def unapplyVar(tp : Type) : Option[Constant] = {
+      val maybeVar = unapply(tp)
+      maybeVar match {
+        case (Some(Constant(s : String))) if Var.validName(s) => Some(Var.get(s))
+        case _ =>  maybeVar
+      }
+    }
     def unapply(tp: Type): Option[Constant] = {
 //      print(showRaw(tp))
       tp match {
@@ -87,11 +94,12 @@ trait GeneralMacros {
           }
 
           //Assign calculated value if this the flag is true
-          (assignFunc, aValue) match {
-            case (true, Some(Constant(varName : String))) if varName.startsWith("$") => VariablesHolder.setVar(varName, retVal.get); retVal
-            case (true, _) => None
-            case (false, _) => retVal
-          }
+//          (assignFunc, aValue) match {
+//            case (true, Some(Constant(varName : String))) if Var.validName(varName) => Var.set(varName, retVal.get); retVal
+//            case (true, _) => None
+//            case (false, _) => retVal
+//          }
+          retVal
 
         ////////////////////////////////////////////////////////////////////////
 
@@ -161,14 +169,17 @@ trait GeneralMacros {
   def evalTyped[T](expr: c.Expr[T]): T =
     c.eval(c.Expr[T](c.untypecheck(expr.tree)))
 
-  object VariablesHolder {
+  object Var {
     val map = collection.mutable.Map[String, Constant]()
-    def setVar(name : String, value : Constant) : Constant = {
+    def set(name : String, value : Constant) : Constant = {
       map(name) = value
       value
     }
-    def getVar(name : String) : Constant = {
+    def get(name : String) : Constant = {
       map(name)
+    }
+    def validName(name : String) : Boolean = {
+      name.startsWith("=")
     }
   }
 
@@ -257,8 +268,8 @@ trait GeneralMacros {
         else
           Constant(a)
       case ("==>",        _,          b,          _)       => Constant(b)
-      case ("SV",         a: String,  b,          _)       => VariablesHolder.setVar(a, Constant(b))
-      case ("GV",         a: String,  _,          _)       => VariablesHolder.getVar(a)
+      case ("SV",         a: String,  b,          _)       => Var.set(a, Constant(b))
+      case ("GV",         a: String,  _,          _)       => Var.get(a)
 
       case ("+",          a: Char,    b: Char,    _)  => Constant(a + b)
       case ("+",          a: Char,    b: Int,     _)  => Constant(a + b)
