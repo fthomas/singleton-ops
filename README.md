@@ -69,6 +69,16 @@ This library provides type-level operations for [Typelevel Scala][typelevel-scal
 * `type *=[Name, Value]`        
 * `type /=[Name, Value]`        
 
+####Supported Aux Pattern interface:
+* `type OpAuxNat[O <: Op,      Ret_Out <: Nat]`
+* `type OpAuxChar[O <: Op,     Ret_Out <: XChar]`     
+* `type OpAuxInt[O <: Op,      Ret_Out <: XInt]`      
+* `type OpAuxLong[O <: Op,     Ret_Out <: XLong]`    
+* `type OpAuxFloat[O <: Op,    Ret_Out <: XFloat]`   
+* `type OpAuxDouble[O <: Op,   Ret_Out <: XDouble]`  
+* `type OpAuxString[O <: Op,   Ret_Out <: XString]`  
+* `type OpAuxBoolean[O <: Op,  Ret_Out <: XBoolean]` 
+
 
 ## Examples
 
