@@ -19,7 +19,7 @@ object OpMacro {
         S2: c.WeakTypeTag,
         S3: c.WeakTypeTag
     ]: c.Tree =
-      materializeOpGen[OpMacro[_, _, _, _], N, S1, S2, S3].usingFuncName
+      materializeOpGen[OpMacro[N, S1, S2, S3], N].usingFuncName
   }
 }
 /*******************************************************************************************************/

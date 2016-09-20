@@ -1,4 +1,4 @@
-import singleton.ops._
+//import singleton.ops._
 
 //package MatrixExample
 //
