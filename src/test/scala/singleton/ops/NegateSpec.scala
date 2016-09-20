@@ -1,8 +1,6 @@
 package singleton.ops
 
-import org.scalacheck.Prop._
 import org.scalacheck.Properties
-import shapeless.test.illTyped
 import singleton.ops.TestUtils._
 
 class NegateSpec extends Properties("Negate") {

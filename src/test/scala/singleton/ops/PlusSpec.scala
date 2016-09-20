@@ -1,9 +1,6 @@
 package singleton.ops
 
-import org.scalacheck.Prop._
 import org.scalacheck.Properties
-import shapeless.test.illTyped
-import singleton.ops.TestUtils._
 
 class PlusSpec extends Properties("Plus") {
 //  property("1 + 2 == 3") = secure {

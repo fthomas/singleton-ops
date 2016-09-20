@@ -1,10 +1,6 @@
 package singleton.ops.impl
 
-import macrocompat.bundle
 import shapeless.Nat
-
-import scala.reflect.macros.whitebox
-import singleton.ops.impl._
 
 trait Op extends Serializable {
   type Out
