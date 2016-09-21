@@ -7,11 +7,13 @@
 This library provides type-level operations for [Typelevel Scala][typelevel-scala] with [SIP-23][sip-23].
 
 ####Supported types:
-* `Int with Singleton` 
-* `Long with Singleton`
-* `Double with Singleton`
-* `String with Singleton`
-* `Boolean with Singleton`
+* `Char with Singleton` (aliased as `XChar`) 
+* `Int with Singleton` (aliased as `XInt`) 
+* `Long with Singleton` (aliased as `XLong`)
+* `Float with Singleton` (aliased as `XFloat`)
+* `Double with Singleton` (aliased as `XDouble`)
+* `String with Singleton` (aliased as `XString`)
+* `Boolean with Singleton` (aliased as `XBoolean`)
 * `Nat` (from [Shapeless][shapeless])
 
 ####Supported arithmetic operations:
@@ -40,9 +42,12 @@ This library provides type-level operations for [Typelevel Scala][typelevel-scal
 
 ####Supported explicit conversion operations:
 * `type ToNat[P1]`          
+* `type ToChar[P1]`          
 * `type ToInt[P1]`          
 * `type ToLong[P1]`         
+* `type ToFloat[P1]`          
 * `type ToDouble[P1]`       
+* `type ToString[P1]`          
 
 ####Supported string operations:
 * `type +[P1, P2]` (concat)          
@@ -52,18 +57,41 @@ This library provides type-level operations for [Typelevel Scala][typelevel-scal
 ####Supported constraints operations:
 * `type Require[P1]`        
 
+####Supported control operations:
+* `type ==>[A, B]` (`first A then B`)        
+* `type ITE[I,T,E]` (`If (I) Then (T) Else (E)`)      
+* `type While[Cond, Body, Ret]`  (`While (Cond) Run (Body) and then Return (Ret))      
+
+####Supported assignment operations:
+* `type :=[Name, Value]`        
+* `type +=[Name, Value]`        
+* `type -=[Name, Value]`        
+* `type *=[Name, Value]`        
+* `type /=[Name, Value]`        
+
+####Supported Aux Pattern interface:
+* `type OpAuxNat[O <: Op,      Ret_Out <: Nat]`
+* `type OpAuxChar[O <: Op,     Ret_Out <: XChar]`     
+* `type OpAuxInt[O <: Op,      Ret_Out <: XInt]`      
+* `type OpAuxLong[O <: Op,     Ret_Out <: XLong]`    
+* `type OpAuxFloat[O <: Op,    Ret_Out <: XFloat]`   
+* `type OpAuxDouble[O <: Op,   Ret_Out <: XDouble]`  
+* `type OpAuxString[O <: Op,   Ret_Out <: XString]`  
+* `type OpAuxBoolean[O <: Op,  Ret_Out <: XBoolean]` 
+
+
 ## Examples
 
 * `Int` type operations:
 ```scala
 import singleton.ops._
-def demo[L <: Int with Singleton](implicit p : L*L + L) : p.Out = p.value
+def demo[L <: XInt](implicit p : L*L + L) : p.Out {} = p.value
 val b : 30 = demo[5]
 ```
 * `Long` type operations:
 ```scala
 import singleton.ops._
-def demoLong[L1 <: Long with Singleton, L2 <: Long with Singleton](implicit p : Min[L1*L1, L2+L2]) : p.Out = p.value
+def demoLong[L1 <: XLong, L2 <: XLong](implicit p : Min[L1*L1, L2+L2]) : p.Out {} = p.value
 val bLong1 : 1L = demoLong[1L, 5L]
 val bLong2 : 6L = demoLong[3L, 3L]
 ```
@@ -71,28 +99,28 @@ val bLong2 : 6L = demoLong[3L, 3L]
 * `Double` type operations:
 ```scala
 import singleton.ops._
-def demoDouble[L1 <: Double with Singleton, L2 <: Double with Singleton](implicit p : L1 / L2 + 1.0) : p.Out = p.value
+def demoDouble[L1 <: XDouble, L2 <: XDouble](implicit p : L1 / L2 + 1.0) : p.Out {} = p.value
 val bDouble : 1.2 = demoDouble[1.0, 5.0]
 ```
 
 * Combined `Long` and `Int` type operations:
 ```scala
 import singleton.ops._
-def demoSumLongInt[L1 <: Long with Singleton, L2 <: Int with Singleton](implicit p : L1 + L2) : p.Out = p.value
+def demoSumLongInt[L1 <: XLong, L2 <: XInt](implicit p : L1 + L2) : p.Out {} = p.value
 val bSumLongInt : 16L = demoSumLongInt[8L, 8]
 ```
 
 * `String` type operations:
 ```scala
 import singleton.ops._
-def demoString[P1 <: String with Singleton](implicit op : Reverse[P1] + P1) : op.Out{} = op.value
+def demoString[P1 <: XString](implicit op : Reverse[P1] + P1) : op.Out {} = op.value
 val bString : "cbaabc" = demoString["abc"]
 ```
 
 * `Boolean` type operations:
 ```scala
 import singleton.ops._
-def demoBoolean[P1 <: Int with Singleton](implicit op : P1 < 0) : op.Out{} = op.value
+def demoBoolean[P1 <: XInt](implicit op : P1 < 0) : op.Out{} = op.value
 val bBoolean1 : true = demoBoolean[-5]
 val bBoolean2 : false = demoBoolean[5]
 val bBoolean3 : false = demoBoolean[0]
@@ -101,7 +129,7 @@ val bBoolean3 : false = demoBoolean[0]
 * `Boolean` type constraints:
 ```scala
 import singleton.ops._
-def demoRequire[P1 <: Int with Singleton](implicit op : Require[P1 < 0]) : op.Out{} = op.value
+def demoRequire[P1 <: XInt](implicit op : Require[P1 < 0]) : op.Out{} = op.value
 scala> demoRequire[-1]
 demoRequire[-1]
 res0: Boolean(true) = true
@@ -119,14 +147,14 @@ val n = Nat(5)
 def demoNatToSing[L <: Nat](implicit p : L+L) : p.Out {} = p.value
 val bSing10 : 10 = demoNatToSing[n.N]
 //Converting Int singleton to Nat requires explicit `ToNat`
-def demoSingToNat[L <: Int with Singleton](implicit op : ToNat[L+L]) : op.Out = op.value
+def demoSingToNat[L <: XInt](implicit op : ToNat[L+L]) : op.Out = op.value
 val bNat10 : shapeless.nat._10 = demoSingToNat[5]
 ```
 
 * Working with large numbers doesn't slay the compiler:
 ```scala
 import singleton.ops._
-def bigMul[L1 <: Long with Singleton, L2 <: Long with Singleton](implicit p : L1 * L2) : p.Out = p.value
+def bigMul[L1 <: XLong, L2 <: XLong](implicit p : L1 * L2) : p.Out {} = p.value
 scala> bigMul[32000L, 6400000L]
 res2: Long = 204800000000
 ```

@@ -1,3 +1,5 @@
+//import singleton.ops._
+
 //package MatrixExample
 //
 //import singleton.ops._
@@ -43,3 +45,4 @@
 //  def * (that : E) : E = MyElm(value)
 //  def * [R <: Int, C <: Int](that : Matrix[R, C, E]) : Matrix[R, C, E] = new Matrix[R, C, E]
 //}
+
