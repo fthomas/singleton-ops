@@ -40,11 +40,11 @@ trait GeneralMacros {
       }
     }
     def unapply(tp: Type): Option[Constant] = {
-//      print(showRaw(tp))
+      print(tp + " RAW " + showRaw(tp))
       tp match {
         case tp @ ExistentialType(_, _) => unapply(tp.underlying)
         case TypeBounds(lo, hi) => unapply(hi)
-        case RefinedType(parents, _) =>
+        case RefinedType(parents, scope) =>
           parents.iterator map unapply collectFirst { case Some(x) => x }
         case NullaryMethodType(tpe) => unapply(tpe)
         ////////////////////////////////////////////////////////////////////////
@@ -59,6 +59,7 @@ trait GeneralMacros {
         case TypeRef(_, sym, _) if sym == symbolOf[shapeless._0] =>
           Some(Constant(0))
         ////////////////////////////////////////////////////////////////////////
+
 
         ////////////////////////////////////////////////////////////////////////
         // Operational Function
@@ -108,7 +109,7 @@ trait GeneralMacros {
           unapply(sym.info asSeenFrom (pre, sym.owner))
         case ConstantType(t) => Some(t)
         case _ =>
-//          print("Exhausted search at: " + showRaw(tp))
+          print("Exhausted search at: " + showRaw(tp))
           None
       }
     }
@@ -247,6 +248,14 @@ trait GeneralMacros {
       case ("ToString",   a: String, _, _)            => Constant(a.toString)
       case ("ToString",   a: Boolean, _, _)           => Constant(a.toString)
 
+      case ("Print",      a: Char, _, _)              => Constant(print(a.toString))
+      case ("Print",      a: Int, _, _)               => Constant(print(a.toString))
+      case ("Print",      a: Long, _, _)              => Constant(print(a.toString))
+      case ("Print",      a: Float, _, _)             => Constant(print(a.toString))
+      case ("Print",      a: Double, _, _)            => Constant(print(a.toString))
+      case ("Print",      a: String, _, _)            => Constant(print(a.toString))
+      case ("Print",      a: Boolean, _, _)           => Constant(print(a.toString))
+        
       case ("Negate",     a: Char, _, _)              => Constant(-a)
       case ("Negate",     a: Int, _, _)               => Constant(-a)
       case ("Negate",     a: Long, _, _)              => Constant(-a)
@@ -258,6 +267,27 @@ trait GeneralMacros {
       case ("Abs",        a: Float, _, _)             => Constant(abs(a))
       case ("Abs",        a: Double, _, _)            => Constant(abs(a))
 
+      case ("Floor",      a: Float, _, _)             => Constant(floor(a.toDouble))
+      case ("Floor",      a: Double, _, _)            => Constant(floor(a))
+
+      case ("Ceil",       a: Float, _, _)             => Constant(ceil(a.toDouble))
+      case ("Ceil",       a: Double, _, _)            => Constant(ceil(a))
+
+      case ("Round",      a: Float, _, _)             => Constant(round(a))
+      case ("Round",      a: Double, _, _)            => Constant(round(a))
+
+      case ("Sin",        a: Float, _, _)             => Constant(sin(a.toDouble))
+      case ("Sin",        a: Double, _, _)            => Constant(sin(a))
+
+      case ("Cos",        a: Float, _, _)             => Constant(cos(a.toDouble))
+      case ("Cos",        a: Double, _, _)            => Constant(cos(a))
+
+      case ("Tan",        a: Float, _, _)             => Constant(tan(a.toDouble))
+      case ("Tan",        a: Double, _, _)            => Constant(tan(a))
+
+      case ("Sqrt",       a: Float, _, _)             => Constant(sqrt(a.toDouble))
+      case ("Sqrt",       a: Double, _, _)            => Constant(sqrt(a))
+
       case ("Reverse",    a: String, _, _)            => Constant(a.reverse)
       case ("!",          a: Boolean, _, _)           => Constant(!a)
       case ("Require",    a: Boolean, _, _)           =>
@@ -265,9 +295,9 @@ trait GeneralMacros {
           abort(s"Cannot prove requirement Require[...]", false)
         else
           Constant(a)
-      case ("==>",        _,          b,          _)       => Constant(b)
-      case ("SV",         a: String,  b,          _)       => Var.set(a, Constant(b))
-      case ("GV",         a: String,  _,          _)       => Var.get(a)
+      case ("==>",        _,          b,          _)  => Constant(b)
+      case ("SV",         a: String,  b,          _)  => Var.set(a, Constant(b))
+      case ("GV",         a: String,  _,          _)  => Var.get(a)
 
       case ("+",          a: Char,    b: Char,    _)  => Constant(a + b)
       case ("+",          a: Char,    b: Int,     _)  => Constant(a + b)
@@ -399,6 +429,11 @@ trait GeneralMacros {
       case ("%",          a: Double,  b: Long,    _)  => Constant(a % b)
       case ("%",          a: Double,  b: Float,   _)  => Constant(a % b)
       case ("%",          a: Double,  b: Double,  _)  => Constant(a % b)
+
+      case ("Pow",        a: Float,   b: Float,   _)  => Constant(pow(a.toDouble,b.toDouble))
+      case ("Pow",        a: Float,   b: Double,  _)  => Constant(pow(a.toDouble,b.toDouble))
+      case ("Pow",        a: Double,  b: Float,   _)  => Constant(pow(a.toDouble,b.toDouble))
+      case ("Pow",        a: Double,  b: Double,  _)  => Constant(pow(a.toDouble,b.toDouble))
 
       case ("==",         a: Char,    b: Char,    _)  => Constant(a == b)
       case ("==",         a: Char,    b: Int,     _)  => Constant(a == b)

@@ -1,48 +1,32 @@
-//import singleton.ops._
+package MatrixExample
 
-//package MatrixExample
-//
-//import singleton.ops._
-//
-//trait Element {
-//  type E <: Element
-//  def + (that : E) : E
-//  def * (that : E) : E
-//  def * [R <: Int, C <: Int](that : Matrix[R, C, E]) : Matrix[R, C, E]
-//  def IAmElement() : Unit = println("I am Element")
-//}
-//
-//class Matrix[R <: Int, C <: Int, E <: Element] {
-//  def + (that : Matrix[R, C, E]) : Matrix[R, C, E] = new Matrix[R, C, E]
-//  def * (that : E) : Matrix[R, C, E] = new Matrix[R, C, E]
-//  def * [C2 <: Int](that : Matrix[C, C2, E]) : Matrix[R, C2, E] = new Matrix[R, C2, E]
-//  def transpose : Matrix[C, R, E] = new Matrix[C, R, E]
-//}
-//
-//class SquareMatrix[RC <: Int, E <: Element] extends Matrix[RC, RC, E] {
-//  def promoteBy[DeltaRC <: Int](implicit ev: PlusI[RC, DeltaRC]) : SquareMatrix[ev.Out, E] = new SquareMatrix[ev.Out, E]
-//}
-//
-//class RVector[C <: Int, E <: Element] extends Matrix[1, C, E] {
-//  def IAmRVector() : Unit = println("I am Row Vector")
-//}
-//
-//class CVector[R <: Int, E <: Element] extends Matrix[R, 1, E] {
-//  def IAmCVector() : Unit = println("I am Column Vector")
-//}
-//
-//object Implicits {
-//  implicit def e2m[E <: Element](e : E) : Matrix[1, 1, E] = new Matrix[1, 1, E]
-//  implicit def m2sm[RC <: Int, E <: Element](m : Matrix[RC, RC, E]) : SquareMatrix[RC, E] = new SquareMatrix[RC, E]
-//  //implicit def m2e[E <: Element](m : Matrix[1, 1, E]) : E = ???
-//  implicit def m2r[C <: Int, E <: Element](m : Matrix[1, C, E]) = new RVector[C, E]
-//  implicit def m2c[R <: Int, E <: Element](m : Matrix[R, 1, E]) = new CVector[R, E]
-//}
-//
-//case class MyElm(value : Int) extends Element {
-//  type E = MyElm
-//  def + (that : E) : E = MyElm(value)
-//  def * (that : E) : E = MyElm(value)
-//  def * [R <: Int, C <: Int](that : Matrix[R, C, E]) : Matrix[R, C, E] = new Matrix[R, C, E]
-//}
+import singleton.ops._
+
+class Matrix[R <: XInt, C <: XInt] {
+  def + (that : Matrix[R, C]) : Matrix[R, C] = new Matrix[R, C]
+  def * (that : Double) : Matrix[R, C] = new Matrix[R, C]
+  def * [C2 <: XInt](that : Matrix[C, C2]) : Matrix[R, C2] = new Matrix[R, C2]
+  def transpose : Matrix[C, R] = new Matrix[C, R]
+}
+
+class SquareMatrix[RC <: XInt] extends Matrix[RC, RC] {
+  def promoteBy[DeltaRC <: XInt](implicit p: RC + DeltaRC) : SquareMatrix[p.OutInt] = new SquareMatrix[p.OutInt]
+
+}
+
+class RVector[C <: XInt] extends Matrix[1, C] {
+  def IAmRVector() : Unit = println("I am Row Vector")
+}
+
+class CVector[R <: XInt] extends Matrix[R, 1] {
+  def IAmCVector() : Unit = println("I am Column Vector")
+}
+
+object Implicits {
+  implicit def e2m(e : Double) : Matrix[1, 1] = new Matrix[1, 1]
+  implicit def m2sm[RC <: XInt](m : Matrix[RC, RC]) : SquareMatrix[RC] = new SquareMatrix[RC]
+  //implicit def m2e[Double <: Element](m : Matrix[1, 1]) : Double = ???
+  implicit def m2r[C <: XInt](m : Matrix[1, C]) = new RVector[C]
+  implicit def m2c[R <: XInt](m : Matrix[R, 1]) = new CVector[R]
+}
 
