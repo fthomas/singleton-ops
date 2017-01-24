@@ -133,6 +133,7 @@ lazy val releaseSettings = {
   Def.settings(
     releaseCrossBuild := true,
     releasePublishArtifactsAction := PgpKeys.publishSigned.value,
+    releaseVcsSign := true,
     releaseProcess := Seq[ReleaseStep](
       checkSnapshotDependencies,
       inquireVersions,
