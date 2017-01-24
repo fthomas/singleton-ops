@@ -574,6 +574,8 @@ trait GeneralMacros {
       case ("Max",        a: Double,  b: Double,  _)  => Constant(max(a, b))
 
       case ("Substring",  a: String,  b: Int,     _)  => Constant(a.substring(b))
+      case ("Length",     a: String,  _,          _)  => Constant(a.length)
+      case ("CharAt",     a: String,  b: Int,     _)  => Constant(a.charAt(b))
 
       case _ => abort(s"Unsupported $funcName[$aValue, $bValue, $cValue]", true)
     }
