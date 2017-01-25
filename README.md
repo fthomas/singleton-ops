@@ -1,4 +1,5 @@
 # singleton-ops
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/0fde1e38b7cc497aadcf2f90d0bb3b96)](https://www.codacy.com/app/fthomas/singleton-ops?utm_source=github.com&utm_medium=referral&utm_content=fthomas/singleton-ops&utm_campaign=badger)
 [![Build Status](https://travis-ci.org/fthomas/singleton-ops.svg?branch=master)](https://travis-ci.org/fthomas/singleton-ops)
 [![codecov](https://codecov.io/gh/fthomas/singleton-ops/branch/master/graph/badge.svg)](https://codecov.io/gh/fthomas/singleton-ops)
 [![Join the chat at https://gitter.im/fthomas/singleton-ops](https://badges.gitter.im/fthomas/singleton-ops.svg)](https://gitter.im/fthomas/singleton-ops?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
