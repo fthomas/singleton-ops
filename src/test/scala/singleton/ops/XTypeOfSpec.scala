@@ -23,4 +23,5 @@ object XTypeOfSpec {
   def test[ZeroOrOne <: XInt](x : ZeroOrOne)(implicit cond : Require[ZeroOrOne == 0]) : Unit = {}
   //test(5)
   //  val a : 5 = op.value
+  val a : 3 = valueOf[1 + 2]
 }
