@@ -40,7 +40,7 @@ trait GeneralMacros {
       }
     }
     def unapply(tp: Type): Option[Constant] = {
-      print(tp + " RAW " + showRaw(tp))
+//      print(tp + " RAW " + showRaw(tp))
       tp match {
         case tp @ ExistentialType(_, _) => unapply(tp.underlying)
         case TypeBounds(lo, hi) => unapply(hi)
@@ -639,6 +639,42 @@ trait GeneralMacros {
     }
   }
   ///////////////////////////////////////////////////////////////////////////////////////////
+
+
+  ///////////////////////////////////////////////////////////////////////////////////////////
+  // Experimenting
+  ///////////////////////////////////////////////////////////////////////////////////////////
+  def materializeOpVal[F](implicit ev0: c.WeakTypeTag[F]): MaterializeOpAuxVal =
+  new MaterializeOpAuxVal(weakTypeOf[F])
+
+  final class MaterializeOpAuxVal(opTpe: Type) {
+    def usingFuncName(value : c.Expr[Int with Singleton]) : Tree = {
+      print(showCode(value.tree))
+      print(showRaw(value))
+
+//      val aValue = extractSingletonValue(opTpe)
+//
+//      val (outWideTpe, outWideLiteral, outTypeName, outTpe, outTree) = (funcName, aValue) match {
+//        case (Constant("ToNat"), Constant(t : Int)) => constantTypeAndValueOfNat(t)
+//        case (_, Constant(t)) =>  constantTypeAndValueOf(t)
+//      }
+
+      val genTree = q"""
+        new $opTpe {
+          type OutWide = Int
+          type Out = 2
+          type OutInt = 2
+          val value: 2 = 2
+          val valueWide: Int = 2
+        }
+      """
+      //      print(genTree)
+      genTree
+    }
+  }
+  ///////////////////////////////////////////////////////////////////////////////////////////
+
+
 
   //copied from Shapeless
   import scala.annotation.tailrec
