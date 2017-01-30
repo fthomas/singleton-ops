@@ -9,7 +9,7 @@ val gitDevUrl = s"git@github.com:fthomas/$projectName.git"
 val macroCompatVersion = "1.1.1"
 val macroParadiseVersion = "2.1.0"
 val shapelessVersion = "2.3.2"
-val scalaCheckVersion = "1.13.2"
+val scalaCheckVersion = "1.13.4"
 
 /// projects
 
@@ -24,7 +24,7 @@ lazy val root = project
       compilerPlugin(
         "org.scalamacros" % "paradise" % macroParadiseVersion cross CrossVersion.full),
       "com.chuusai" %% "shapeless" % shapelessVersion,
-      "org.scalacheck" %% "scalacheck" % scalaCheckVersion % "test"
+      "org.scalacheck" %% "scalacheck" % scalaCheckVersion % Test
     )
   )
 
@@ -53,7 +53,6 @@ lazy val metadataSettings = Def.settings(
 )
 
 lazy val compileSettings = Def.settings(
-  scalaVersion := "2.11.8",
   scalaOrganization := "org.typelevel",
   scalacOptions ++= Seq(
     "-deprecation",
@@ -134,6 +133,7 @@ lazy val releaseSettings = {
   Def.settings(
     releaseCrossBuild := true,
     releasePublishArtifactsAction := PgpKeys.publishSigned.value,
+    releaseVcsSign := true,
     releaseProcess := Seq[ReleaseStep](
       checkSnapshotDependencies,
       inquireVersions,

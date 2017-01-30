@@ -72,4 +72,6 @@ package object ops {
   type Min[P1, P2]          = OpMacro["Min",P1, P2, 0]
   type Max[P1, P2]          = OpMacro["Max",P1, P2, 0]
   type Substring[P1, P2]    = OpMacro["Substring",P1, P2, 0]
+  type Length[P1]           = OpMacro["Length", P1, 0, 0]
+  type CharAt[P1, P2]       = OpMacro["CharAt", P1, P2, 0]
 }
