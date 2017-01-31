@@ -25,7 +25,26 @@ object XTypeOfSpec {
   //  val a : 5 = op.value
 //    implicit def conv[N <: String with Singleton, S1, S2, S3]
 //    (op : OpMacro[N, S1, S2, S3]) : 3 = 3
-  def demo[X](implicit v : ValueOf[X]) : X = valueOf[X]
-  val two : 2 = demo[1 + 1]
-  val a : Int = valueOf[1 + 2]
+//  def demo[X](implicit v : ValueOf[X]) : X = valueOf[X]
+
+  implicit def bla[OP <: OpMacro[_ <: String with Singleton, _, _, _]]
+  (implicit op: OP) : op.Out = op.value
+
+  trait Box[A]
+  object Box {
+    implicit def apply[A] : Box[A] = new Box[A]{}
+  }
+  implicit def blaBox[OP <: OpMacro[_ <: String with Singleton, _, _, _]]
+  (box: Box[OP])
+  (implicit b: Box[2]) : Box[2] = b
+
+  val a : 2 = bla[1+1]
+//  val b2 = Box[1]
+  val b1p1 : Box[2] = Box[1+1]
+//  implicit def blaLong[N <: String with Singleton, S1, S2, S3]
+//  (op : OpMacro[N, S1, S2, S3]) : Long = op.valueWide.asInstanceOf[Long]
+
+//  val two : Int = demo[1L + 1 + 1]
+
+//  val a : Int = valueOf[1 + 2]
 }

@@ -137,6 +137,7 @@ trait GeneralMacros {
       case tt : Double => (typeOf[Double], TypeName("OutDouble"))
       case tt : String => (typeOf[String], TypeName("OutString"))
       case tt : Boolean => (typeOf[Boolean], TypeName("OutBoolean"))
+      case _ => abort(s"Unsupported type $t", true)
     }
     (outWideType, outWideLiteral, outTypeName, constantTypeOf(t), Literal(Constant(t)))
   }

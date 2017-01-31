@@ -80,7 +80,7 @@ package object ops {
   implicit def convChar[N <: String with Singleton, S1, S2, S3]
   (op : OpMacro[N, S1, S2, S3]{type OutWide = Char}) : Char = op.valueWide
   implicit def convInt[N <: String with Singleton, S1, S2, S3]
-  (op : OpMacro[N, S1, S2, S3]{type OutWide = Int}) : Int = op.valueWide
+  (op : OpMacro[N, S1, S2, S3]) : Int = op.valueWide.asInstanceOf
   implicit def convLong[N <: String with Singleton, S1, S2, S3]
   (op : OpMacro[N, S1, S2, S3]{type OutWide = Long}) : Long = op.valueWide
   implicit def convFloat[N <: String with Singleton, S1, S2, S3]
@@ -92,7 +92,7 @@ package object ops {
   implicit def convBoolean[N <: String with Singleton, S1, S2, S3]
   (op : OpMacro[N, S1, S2, S3]{type OutWide = Boolean}) : Boolean = op.valueWide
 
-  @inline def valueOf[T](implicit vt: ValueOf[T]): T {} = vt.value
-  @inline def valueOf[T <: Op](implicit t: T): t.type {} = t
+//  @inline def valueOf[T](implicit vt: ValueOf[T]): T {} = vt.value
+//  @inline def valueOf[T <: Op](implicit t: T): t.type {} = t
 
 }
