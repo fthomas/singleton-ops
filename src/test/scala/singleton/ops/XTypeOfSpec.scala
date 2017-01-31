@@ -23,5 +23,7 @@ object XTypeOfSpec {
   def test[ZeroOrOne <: XInt](x : ZeroOrOne)(implicit cond : Require[ZeroOrOne == 0]) : Unit = {}
   //test(5)
   //  val a : 5 = op.value
-  val a : 3 = valueOf[1 + 2]
+//    implicit def conv[N <: String with Singleton, S1, S2, S3]
+//    (op : OpMacro[N, S1, S2, S3]) : 3 = 3
+  val a : Int = valueOf[1 + 2]
 }

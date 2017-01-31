@@ -22,11 +22,8 @@ object OpMacro {
       materializeOpGen[OpMacro[N, S1, S2, S3], N].usingFuncName
   }
 
-  implicit def valueOfOp[N <: String with Singleton, S1 : ValueOf, S2 : ValueOf, S3 : ValueOf]
-  (implicit op : OpMacro[N, S1, S2, S3]) : ValueOf[OpMacro[N, S1, S2, S3]] = new ValueOf(op)
-
-  implicit def valueOfOp2[N <: String with Singleton, S1, S2, S3]
-  (op : OpMacro[N, S1, S2, S3]) : op.Out = op.value
+//  implicit def valueOfOpInt[N <: String with Singleton, S1 : ValueOf, S2 : ValueOf, S3 : ValueOf]
+//  (implicit op : OpMacro[N, S1, S2, S3]) : ValueOf[OpMacro[N, S1, S2, S3]] = new ValueOf(op)
 }
 /*******************************************************************************************************/
 

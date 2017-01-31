@@ -126,19 +126,17 @@ trait GeneralMacros {
   def constantTypeOf[T](t: T): Type =
     c.internal.constantType(Constant(t))
 
-  def constantTypeAndValueOf[T](t: T)(
-      implicit ev: c.WeakTypeTag[T]): (Type, Literal, TypeName, Type, Tree) ={
-    val outWideType = weakTypeOf[T]
+  def constantTypeAndValueOf[T](t: T): (Type, Literal, TypeName, Type, Tree) ={
     val outWideLiteral = Literal(Constant(t))
-    val outTypeName = t match {
-      case tt : Nat => TypeName("OutNat")
-      case tt : Char => TypeName("OutChar")
-      case tt : Int => TypeName("OutInt")
-      case tt : Long => TypeName("OutLong")
-      case tt : Float => TypeName("OutFloat")
-      case tt : Double => TypeName("OutDouble")
-      case tt : String => TypeName("OutString")
-      case tt : Boolean => TypeName("OutBoolean")
+    val (outWideType, outTypeName) = t match {
+      case tt : Nat => (typeOf[Nat], TypeName("OutNat"))
+      case tt : Char => (typeOf[Char], TypeName("OutChar"))
+      case tt : Int => (typeOf[Int], TypeName("OutInt"))
+      case tt : Long => (typeOf[Long], TypeName("OutLong"))
+      case tt : Float => (typeOf[Float], TypeName("OutFloat"))
+      case tt : Double => (typeOf[Double], TypeName("OutDouble"))
+      case tt : String => (typeOf[String], TypeName("OutString"))
+      case tt : Boolean => (typeOf[Boolean], TypeName("OutBoolean"))
     }
     (outWideType, outWideLiteral, outTypeName, constantTypeOf(t), Literal(Constant(t)))
   }
@@ -630,8 +628,8 @@ trait GeneralMacros {
       val genTree = q"""
         new $opTpe {
           type OutWide = $outWideTpe
-          type Out = $outTpe
-          type $outTypeName = $outTpe
+          type Out = $outTpe {}
+          type $outTypeName = $outTpe {}
           val value: $outTpe = $outTree
           val valueWide: $outWideTpe = $outWideLiteral
         }

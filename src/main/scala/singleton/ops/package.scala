@@ -74,4 +74,25 @@ package object ops {
   type Substring[P1, P2]    = OpMacro["Substring",P1, P2, 0]
   type Length[P1]           = OpMacro["Length", P1, 0, 0]
   type CharAt[P1, P2]       = OpMacro["CharAt", P1, P2, 0]
+
+  implicit def convChar[N <: String with Singleton, S1, S2, S3]
+  (op : OpMacro[N, S1, S2, S3]{type OutWide = Char}) : Char = op.valueWide
+  implicit def convInt[N <: String with Singleton, S1, S2, S3]
+  (op : OpMacro[N, S1, S2, S3]{type OutWide = Int}) : Int = op.valueWide
+  implicit def convLong[N <: String with Singleton, S1, S2, S3]
+  (op : OpMacro[N, S1, S2, S3]{type OutWide = Long}) : Long = op.valueWide
+  implicit def convFloat[N <: String with Singleton, S1, S2, S3]
+  (op : OpMacro[N, S1, S2, S3]{type OutWide = Float}) : Float = op.valueWide
+  implicit def convDouble[N <: String with Singleton, S1, S2, S3]
+  (op : OpMacro[N, S1, S2, S3]{type OutWide = Double}) : Double = op.valueWide
+  implicit def convString[N <: String with Singleton, S1, S2, S3]
+  (op : OpMacro[N, S1, S2, S3]{type OutWide = String}) : String = op.valueWide
+  implicit def convBoolean[N <: String with Singleton, S1, S2, S3]
+  (op : OpMacro[N, S1, S2, S3]{type OutWide = Boolean}) : Boolean = op.valueWide
+  implicit def convNat[N <: String with Singleton, S1, S2, S3]
+  (op : OpMacro[N, S1, S2, S3]{type OutWide = Nat}) : Nat = op.valueWide
+
+  @inline def valueOf[T](implicit vt: ValueOf[T]): T {} = vt.value
+  @inline def valueOf[T <: Op](implicit t: T): t.type {} = t
+
 }
