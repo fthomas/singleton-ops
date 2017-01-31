@@ -25,5 +25,7 @@ object XTypeOfSpec {
   //  val a : 5 = op.value
 //    implicit def conv[N <: String with Singleton, S1, S2, S3]
 //    (op : OpMacro[N, S1, S2, S3]) : 3 = 3
+  def demo[X](implicit v : ValueOf[X]) : X = valueOf[X]
+  val two : 2 = demo[1 + 1]
   val a : Int = valueOf[1 + 2]
 }
