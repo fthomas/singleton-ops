@@ -34,13 +34,22 @@ object XTypeOfSpec {
   implicit def singletonToOp[X <: Singleton, N <: XString, S1, S2, S3, OP_OUT](x: X)
                (implicit v : ValueOf[X], op : OpMacro[N, S1, S2, S3], opaux: OpAux.Aux[OpMacro[N, S1, S2, S3], OP_OUT], check : Require[X == OP_OUT]) : OpMacro[N, S1, S2, S3] = op
 
-  implicit def opToSingleton[N <: XString, S1, S2, S3](op : OpMacro[N, S1, S2, S3])
-               (implicit v : ValueOf[op.Out]) : op.Out = valueOf[op.Out]
+  implicit def opToSingleton[N <: XString, S1, S2, S3, OP_OUT](op : OpMacro[N, S1, S2, S3])
+               (implicit opaux: OpAux.Aux[OpMacro[N, S1, S2, S3], OP_OUT], v : ValueOf[OP_OUT]) : OP_OUT = valueOf[OP_OUT]
+
+  implicit def opToOp[NA <: XString, SA1, SA2, SA3, NB <: XString, SB1, SB2, SB3, OP_OUTA, OP_OUTB](opA : OpMacro[NA, SA1, SA2, SA3])
+               (implicit
+                opauxA: OpAux.Aux[OpMacro[NA, SA1, SA2, SA3], OP_OUTA],
+                opauxB: OpAux.Aux[OpMacro[NB, SB1, SB2, SB3], OP_OUTB],
+                opB : OpMacro[NB, SB1, SB2, SB3],
+                check : Require[OP_OUTA == OP_OUTB]) : OpMacro[NB, SB1, SB2, SB3] = opB
 
 
-  val litToOp_working : 1 + 1 = 2
-  val opToLit_working : 2 = opToSingleton(imp[1 + 1])
-  val opToLit_notWorking : 2 = imp[1 + 1]
+  val litToOp : 1 + 1 = 2
+  val opToLit : 2 = imp[1 + 1]
+  val opToOp : 4 + 1 = imp[2 + 3]
+
+
 
 
   trait Box[A]
