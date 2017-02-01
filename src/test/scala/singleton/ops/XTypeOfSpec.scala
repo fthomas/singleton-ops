@@ -55,13 +55,13 @@ object XTypeOfSpec {
   object Box {
     implicit def apply[A] : Box[A] = new Box[A]{}
   }
-//  implicit def blaBox[OP <: OpMacro[_ <: String with Singleton, _, _, _]]
-//  (box: Box[OP])
-//  (implicit b: Box[2]) : Box[2] = b
+  implicit def blaBox[OP <: Op]
+  (box: Box[OP])
+  (implicit b: Box[2], check : ) : Box[2] = b
 
 //  val a : 2 = bla[1+1]
 //  val b2 = Box[1]
-//  val b1p1 : Box[2] = Box[1+1]
+  val b1p1 : Box[2] = Box[1+1]
 //  implicit def blaLong[N <: String with Singleton, S1, S2, S3]
 //  (op : OpMacro[N, S1, S2, S3]) : Long = op.valueWide.asInstanceOf[Long]
 
