@@ -46,9 +46,8 @@ object XTypeOfSpec {
 
 
   val litToOp : 1 + 1 = 2
-  val opToLit : 2 = imp[1 + 1]
-  val opToOp : 4 + 1 = imp[2 + 3]
-
+  val opToLit : 2 = valueOf[1 + 1]
+  val opToOp : 4 + 1 = valueOf[2 + 3]
 
 
 
