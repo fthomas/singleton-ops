@@ -93,8 +93,7 @@ package object ops {
 //  (op : OpMacro[N, S1, S2, S3]{type OutWide = Boolean}) : Boolean = op.valueWide
 
 //  def valueOf2[T](implicit vt: ValueOf[T]): T {} = vt.value
-  def valueOf2[OP <: OpMacro[_ <: String with Singleton, _, _, _]]
-  (implicit op: OP) : op.Out = op.value
-  def valueOf2[T](implicit t: ValueOf[T], dummyImplicit: DummyImplicit): t.type {} = t
+//  def valueOf2[OP <: OpMacro[_ <: String with Singleton, _, _, _]]
+//  (implicit op: OP) : op.Out = op.value
 
 }

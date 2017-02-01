@@ -30,7 +30,17 @@ object XTypeOfSpec {
 //  def bla[OP <: OpMacro[_ <: String with Singleton, _, _, _]]
 //  (op: OP) : op.Out {} = op.value
 
-  val two : 2 = valueOf2[2]
+  def imp[T](implicit t: T): t.type {} = t
+  implicit def singletonToOp[X <: Singleton, N <: XString, S1, S2, S3, OP_OUT](x: X)
+               (implicit v : ValueOf[X], op : OpMacro[N, S1, S2, S3], opaux: OpAux.Aux[OpMacro[N, S1, S2, S3], OP_OUT], check : Require[X == OP_OUT]) : OpMacro[N, S1, S2, S3] = op
+
+  implicit def opToSingleton[N <: XString, S1, S2, S3](op : OpMacro[N, S1, S2, S3])
+               (implicit v : ValueOf[op.Out]) : op.Out = valueOf[op.Out]
+
+
+  val litToOp_working : 1 + 1 = 2
+  val opToLit_working : 2 = opToSingleton(imp[1 + 1])
+  val opToLit_notWorking : 2 = imp[1 + 1]
 
 
   trait Box[A]
