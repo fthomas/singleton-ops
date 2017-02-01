@@ -51,7 +51,7 @@ object XTypeOfSpec {
     def value: Int = plus3.value // type mismatch between Int and plus3.Out
   }
 
-  val ev = implicitly[FooEvidence[4-5]]
+  val ev = implicitly[FooEvidence[4]]
 
 
   //  val litToOpVO : 2 = implicitly[ValueOf[2+2]]

@@ -60,7 +60,7 @@ This library provides type-level operations for [Typelevel Scala][typelevel-scal
 ####Supported control operations:
 * `type ==>[A, B]` (`first A then B`)        
 * `type ITE[I,T,E]` (`If (I) Then (T) Else (E)`)      
-* `type While[Cond, Body, Ret]`  (`While (Cond) Run (Body) and then Return (Ret))      
+* `type While[Cond, Body, Ret]`  (`While (Cond) Run (Body) and then Return (Ret)`)      
 
 ####Supported assignment operations:
 * `type :=[Name, Value]`        
