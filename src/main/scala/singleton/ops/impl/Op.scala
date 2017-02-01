@@ -17,10 +17,10 @@ trait Op extends Serializable {
   val valueWide: OutWide
 }
 
-trait OpAux[O <: Op] {type Out}
-object OpAux {
-  type Aux[O <: Op, Ret_Out] = OpAux[O] {type Out = Ret_Out}
-  implicit def impl[O <: Op](implicit o: O) : Aux[O, o.Out] = new OpAux[O] {type Out = o.Out}
+trait OpGen[O <: Op] {type Out}
+object OpGen {
+  type Aux[O <: Op, Ret_Out] = OpGen[O] {type Out = Ret_Out}
+  implicit def impl[O <: Op](implicit o: O) : Aux[O, o.Out] = new OpGen[O] {type Out = o.Out}
 }
 
 trait OpNat[O <: Op] {type Out <: Nat}

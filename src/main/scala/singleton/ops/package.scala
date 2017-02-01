@@ -18,6 +18,7 @@ package object ops {
   /////////////////////////////////////////////////
   //Short aliases of auxiliary operation types
   /////////////////////////////////////////////////
+  type OpAuxGen[O <: Op,      Ret_Out]              = OpGen.Aux[O, Ret_Out]
   type OpAuxNat[O <: Op,      Ret_Out <: Nat]       = OpNat.Aux[O, Ret_Out]
   type OpAuxChar[O <: Op,     Ret_Out <: XChar]     = OpChar.Aux[O, Ret_Out]
   type OpAuxInt[O <: Op,      Ret_Out <: XInt]      = OpInt.Aux[O, Ret_Out]
@@ -52,6 +53,13 @@ package object ops {
   type ToFloat[P1]          = OpMacro["ToFloat",P1, 0, 0]
   type ToDouble[P1]         = OpMacro["ToDouble",P1, 0, 0]
   type ToString[P1]         = OpMacro["ToString",P1, 0, 0]
+  type IsNat[P1]            = OpMacro["IsNat",P1, 0, 0]
+  type IsChar[P1]           = OpMacro["IsChar",P1, 0, 0]
+  type IsInt[P1]            = OpMacro["IsInt",P1, 0, 0]
+  type IsLong[P1]           = OpMacro["IsLong",P1, 0, 0]
+  type IsFloat[P1]          = OpMacro["IsFloat",P1, 0, 0]
+  type IsDouble[P1]         = OpMacro["IsDouble",P1, 0, 0]
+  type IsString[P1]         = OpMacro["IsString",P1, 0, 0]
   type Reverse[P1]          = OpMacro["Reverse",P1, 0, 0]
   type Negate[P1]           = OpMacro["Negate",P1, 0, 0]
   type Abs[P1]              = OpMacro["Abs",P1, 0, 0]
@@ -75,7 +83,43 @@ package object ops {
   type Length[P1]           = OpMacro["Length", P1, 0, 0]
   type CharAt[P1, P2]       = OpMacro["CharAt", P1, P2, 0]
 
-//  implicit def convNat[N <: String with Singleton, S1, S2, S3]
+
+
+  implicit def singletonToOp[
+  X <: Singleton, N <: XString, S1, S2, S3, OP_OUT
+  ](x: X)
+   (implicit
+    v : ValueOf[X],
+    op : OpMacro[N, S1, S2, S3],
+    opaux: OpAuxGen[OpMacro[N, S1, S2, S3], OP_OUT],
+    check : Require[X == OP_OUT]
+   ) : OpMacro[N, S1, S2, S3] = op
+
+
+  implicit def opToSingleton[
+  N <: XString, S1, S2, S3, OP_OUT
+  ](op : OpMacro[N, S1, S2, S3])
+   (implicit
+    opaux: OpAuxGen[OpMacro[N, S1, S2, S3], OP_OUT],
+    v : ValueOf[OP_OUT]
+   ) : OP_OUT = valueOf[OP_OUT]
+
+
+  implicit def opToOp[
+  NA <: XString, SA1, SA2, SA3,
+  NB <: XString, SB1, SB2, SB3,
+  OP_OUTA,
+  OP_OUTB
+  ](opA : OpMacro[NA, SA1, SA2, SA3])
+   (implicit
+    opauxA: OpAuxGen[OpMacro[NA, SA1, SA2, SA3], OP_OUTA],
+    opauxB: OpAuxGen[OpMacro[NB, SB1, SB2, SB3], OP_OUTB],
+    opB : OpMacro[NB, SB1, SB2, SB3],
+    check : Require[OP_OUTA == OP_OUTB]
+  ) : OpMacro[NB, SB1, SB2, SB3] = opB
+
+
+  //  implicit def convNat[N <: String with Singleton, S1, S2, S3]
 //  (op : OpMacro[N, S1, S2, S3]{type OutWide = Nat}) : Nat = op.valueWide
 //  implicit def convChar[N <: String with Singleton, S1, S2, S3]
 //  (op : OpMacro[N, S1, S2, S3]{type OutWide = Char}) : Char = op.valueWide
