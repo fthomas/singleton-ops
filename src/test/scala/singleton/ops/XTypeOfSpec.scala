@@ -32,14 +32,29 @@ object XTypeOfSpec {
 
 //  def imp[T](implicit t: T): t.type {} = t
 
-//  def valueOfInt[X](implicit )
+  def valueOfInt[X](implicit check : Require[IsInt[X]], opInt: OpInt[ToInt[X]]) : opInt.Out = opInt.value
 
+//  def demo[X](implicit v: ValueOf[X], check : Require[IsInt[X]]) : Unit = println(valueOfInt[X])
 
   val litToOp : 1 + 1 = 2
   val opToLit : 2 = valueOf[1 + 1]
   val opToOp : 4 + 1 = valueOf[2 + 3]
 
-//  val litToOpVO : 2 = implicitly[ValueOf[2+2]]
+  type PositiveInt[I] = Require[IsInt[I] && (I > 0)]
+
+  @scala.annotation.implicitNotFound(msg = "Evidence must be a positive integer")
+  abstract class FooEvidence[I](implicit require: PositiveInt[I]) {
+    def value: Int
+  }
+
+  implicit def valueOfFoo[I](implicit require: PositiveInt[I], plus3: OpInt[I + 3]): FooEvidence[I] = new FooEvidence[I] {
+    def value: Int = plus3.value // type mismatch between Int and plus3.Out
+  }
+
+  val ev = implicitly[FooEvidence[4-5]]
+
+
+  //  val litToOpVO : 2 = implicitly[ValueOf[2+2]]
 
 //  trait Box[A]
 //  object Box {

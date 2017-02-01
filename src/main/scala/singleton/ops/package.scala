@@ -123,8 +123,8 @@ package object ops {
 //  (op : OpMacro[N, S1, S2, S3]{type OutWide = Nat}) : Nat = op.valueWide
 //  implicit def convChar[N <: String with Singleton, S1, S2, S3]
 //  (op : OpMacro[N, S1, S2, S3]{type OutWide = Char}) : Char = op.valueWide
-//  implicit def convInt[N <: String with Singleton, S1, S2, S3]
-//  (op : OpMacro[N, S1, S2, S3]) : Int = op.valueWide.asInstanceOf
+  implicit def convInt[N <: String with Singleton, S1, S2, S3]
+  (op : OpMacro[N, S1, S2, S3]{type OutWide = Int}) : Int = op.valueWide
 //  implicit def convLong[N <: String with Singleton, S1, S2, S3]
 //  (op : OpMacro[N, S1, S2, S3]{type OutWide = Long}) : Long = op.valueWide
 //  implicit def convFloat[N <: String with Singleton, S1, S2, S3]
