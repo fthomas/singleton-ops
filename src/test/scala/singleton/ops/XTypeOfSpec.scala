@@ -48,7 +48,7 @@ object XTypeOfSpec {
   }
 
   implicit def valueOfFoo[I](implicit require: PositiveInt[I], plus3: OpInt[I + 3]): FooEvidence[I] = new FooEvidence[I] {
-    def value: Int = plus3.value // type mismatch between Int and plus3.Out
+    def value: Int = plus3
   }
 
   val ev = implicitly[FooEvidence[4]]
