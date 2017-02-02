@@ -54,6 +54,7 @@ lazy val metadataSettings = Def.settings(
 
 lazy val compileSettings = Def.settings(
   scalaOrganization := "org.typelevel",
+  resolvers in ThisBuild += Resolver.sonatypeRepo("orgtypelevel-1198"),
   scalacOptions ++= Seq(
     "-deprecation",
     "-encoding",
@@ -173,7 +174,3 @@ val validateCommands = Seq(
   "doc"
 )
 addCommandAlias("validate", validateCommands.mkString(";", ";", ""))
-
-scalaOrganization in ThisBuild := "org.typelevel"
-scalaVersion in ThisBuild := "2.12.1"
-resolvers in ThisBuild += Resolver.sonatypeRepo("orgtypelevel-1198")
