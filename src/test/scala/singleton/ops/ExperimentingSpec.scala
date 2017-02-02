@@ -108,8 +108,8 @@ object FixedSizedVectorDemo {
     //We gain something better with this method. We can input a type operation, and not just a type literal.
     //E.g. FixedSizeVector[2 + 3].
     //See the `concat` method in how it is helpful.
-    //We need to create equivalency between vectors of different inputs so we added a proof implicit in the
-    //companion object.
+    //We need to create equivalency between vectors of different inputs so we added an implicit keyword in
+    //the companion object.
     //E.g. We want FixedSizeVector[2 + 3] to the same as FixedSizeVector[4 + 1] or FixedSizeVector[5]
     //Note this will NOT be possible: implicitly[FixedSizeVector[2 + 3] =:= FixedSizeVector[5]]
 
@@ -123,8 +123,7 @@ object FixedSizedVectorDemo {
     }
 
     object FixedSizeVector {
-      def apply[L](implicit check : CheckPositive[L]) = new FixedSizeVector[L]
-      implicit def proof[L1, L2](fsz : FixedSizeVector[L1])(implicit check : Require[L1 == L2]) : FixedSizeVector[L2] = new FixedSizeVector[L2]
+      implicit def apply[L](implicit check : CheckPositive[L]) = new FixedSizeVector[L]
     }
 
     object TestVector {
