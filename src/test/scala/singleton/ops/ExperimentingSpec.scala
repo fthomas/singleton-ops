@@ -49,6 +49,22 @@ object NewDemo {
   //////////////////////////////
 }
 
+object SimpleExample {
+  type PositiveInt[I] = Require[IsInt[I] && (I > 0)]
+
+  @scala.annotation.implicitNotFound(msg = "Evidence must be a positive integer")
+  abstract class FooEvidence[I](implicit require: PositiveInt[I]) {
+    def value: Int
+  }
+
+  implicit def valueOfFoo[I](implicit require: PositiveInt[I], plus3: SafeInt[I + 3]): FooEvidence[I] = new FooEvidence[I] {
+    def value: Int = plus3
+  }
+
+  val ev = implicitly[FooEvidence[4]]
+}
+
+
 object RightTriangleDemo {
   type RightTriangle[A,B,C] =
     ((A * A) + (B * B) == (C * C)) ||

@@ -17,15 +17,18 @@ package object ops {
 
   /////////////////////////////////////////////////
   //Short aliases for casting operation type value
+  //Used as upper operation only.
+  //E.g. SafeInt[Something[Nice] + 1] OK
+  //     Something[SafeInt[Nice] + 1] BAD
   /////////////////////////////////////////////////
-  type OpNat[O <: Op]       = impl.OpNat[O]
-  type OpChar[O <: Op]      = impl.OpChar[O]
+  type SafeNat[P1]          = impl.OpNat[Require[IsNat[P1]] ==> P1]
+  type SafeChar[P1]         = impl.OpChar[Require[IsChar[P1]] ==> P1]
   type SafeInt[P1]          = impl.OpInt[Require[IsInt[P1]] ==> P1]
-  type OpLong[O <: Op]      = impl.OpLong[O]
-  type OpFloat[O <: Op]     = impl.OpFloat[O]
-  type OpDouble[O <: Op]    = impl.OpDouble[O]
-  type OpString[O <: Op]    = impl.OpString[O]
-  type OpBoolean[O <: Op]   = impl.OpBoolean[O]
+  type SafeLong[P1]         = impl.OpLong[Require[IsLong[P1]] ==> P1]
+  type SafeFloat[P1]        = impl.OpFloat[Require[IsFloat[P1]] ==> P1]
+  type SafeDouble[P1]       = impl.OpDouble[Require[IsDouble[P1]] ==> P1]
+  type SafeString[P1]       = impl.OpString[Require[IsString[P1]] ==> P1]
+  type SafeBoolean[P1]      = impl.OpBoolean[Require[IsBoolean[P1]] ==> P1]
   /////////////////////////////////////////////////
 
   /////////////////////////////////////////////////
@@ -73,6 +76,7 @@ package object ops {
   type IsFloat[P1]          = OpMacro["IsFloat",P1, 0, 0]
   type IsDouble[P1]         = OpMacro["IsDouble",P1, 0, 0]
   type IsString[P1]         = OpMacro["IsString",P1, 0, 0]
+  type IsBoolean[P1]        = OpMacro["IsBoolean",P1, 0, 0]
   type Reverse[P1]          = OpMacro["Reverse",P1, 0, 0]
   type Negate[P1]           = OpMacro["Negate",P1, 0, 0]
   type Abs[P1]              = OpMacro["Abs",P1, 0, 0]
@@ -98,6 +102,11 @@ package object ops {
 
 
 
+  /////////////////////////////////////////////////
+  //Implicit proof that
+  //singleton type is equivalent to type operation
+  //E.g. val four : 2 + 2 = 4
+  /////////////////////////////////////////////////
   implicit def singletonToOp[
   X <: Singleton, N <: XString, S1, S2, S3, OP_OUT
   ](x: X)
@@ -107,8 +116,14 @@ package object ops {
     opaux: OpAuxGen[OpMacro[N, S1, S2, S3], OP_OUT],
     check : Require[X == OP_OUT]
    ) : OpMacro[N, S1, S2, S3] = op
+  /////////////////////////////////////////////////
 
 
+  /////////////////////////////////////////////////
+  //Implicit proof that
+  //type operation is equivalent to singleton type
+  //E.g. val four : 4 = implicitly[2 + 2]
+  /////////////////////////////////////////////////
   implicit def opToSingleton[
   N <: XString, S1, S2, S3, OP_OUT
   ](op : OpMacro[N, S1, S2, S3])
@@ -116,8 +131,14 @@ package object ops {
     opaux: OpAuxGen[OpMacro[N, S1, S2, S3], OP_OUT],
     v : ValueOf[OP_OUT]
    ) : OP_OUT = valueOf[OP_OUT]
+  /////////////////////////////////////////////////
 
 
+  /////////////////////////////////////////////////
+  //Implicit proof that
+  //type operation is equivalent to a different type operation
+  //E.g. val four : 1 + 3 = implicitly[2 + 2]
+  /////////////////////////////////////////////////
   implicit def opToOp[
   NA <: XString, SA1, SA2, SA3,
   NB <: XString, SB1, SB2, SB3,
@@ -130,5 +151,6 @@ package object ops {
     opB : OpMacro[NB, SB1, SB2, SB3],
     check : Require[OP_OUTA == OP_OUTB]
   ) : OpMacro[NB, SB1, SB2, SB3] = opB
+  /////////////////////////////////////////////////
 
 }
