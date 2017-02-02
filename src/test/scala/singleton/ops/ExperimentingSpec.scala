@@ -103,7 +103,7 @@ object FixedSizedVectorDemo {
   }
 
   object Method_Two {
-    //In this method the length `L` is upper bounded by XInt
+    //In this method the length `L` is not upper bounded
     //However the implicit constraint guards that this is a positive integer type.
     //We gain something better with this method. We can input a type operation, and not just a type literal.
     //E.g. FixedSizeVector[2 + 3].
