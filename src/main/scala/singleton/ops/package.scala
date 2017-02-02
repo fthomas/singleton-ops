@@ -16,6 +16,19 @@ package object ops {
   /////////////////////////////////////////////////
 
   /////////////////////////////////////////////////
+  //Short aliases for casting operation type value
+  /////////////////////////////////////////////////
+  type OpNat[O <: Op]       = impl.OpNat[O]
+  type OpChar[O <: Op]      = impl.OpChar[O]
+  type SafeInt[P1]          = impl.OpInt[Require[IsInt[P1]] ==> P1]
+  type OpLong[O <: Op]      = impl.OpLong[O]
+  type OpFloat[O <: Op]     = impl.OpFloat[O]
+  type OpDouble[O <: Op]    = impl.OpDouble[O]
+  type OpString[O <: Op]    = impl.OpString[O]
+  type OpBoolean[O <: Op]   = impl.OpBoolean[O]
+  /////////////////////////////////////////////////
+
+  /////////////////////////////////////////////////
   //Short aliases of auxiliary operation types
   /////////////////////////////////////////////////
   type OpAuxGen[O <: Op,      Ret_Out]              = OpGen.Aux[O, Ret_Out]
@@ -117,27 +130,5 @@ package object ops {
     opB : OpMacro[NB, SB1, SB2, SB3],
     check : Require[OP_OUTA == OP_OUTB]
   ) : OpMacro[NB, SB1, SB2, SB3] = opB
-
-
-  //  implicit def convNat[N <: String with Singleton, S1, S2, S3]
-//  (op : OpMacro[N, S1, S2, S3]{type OutWide = Nat}) : Nat = op.valueWide
-//  implicit def convChar[N <: String with Singleton, S1, S2, S3]
-//  (op : OpMacro[N, S1, S2, S3]{type OutWide = Char}) : Char = op.valueWide
-  implicit def convInt[N <: String with Singleton, S1, S2, S3]
-  (op : OpMacro[N, S1, S2, S3]{type OutWide = Int}) : Int = op.valueWide
-//  implicit def convLong[N <: String with Singleton, S1, S2, S3]
-//  (op : OpMacro[N, S1, S2, S3]{type OutWide = Long}) : Long = op.valueWide
-//  implicit def convFloat[N <: String with Singleton, S1, S2, S3]
-//  (op : OpMacro[N, S1, S2, S3]{type OutWide = Float}) : Float = op.valueWide
-//  implicit def convDouble[N <: String with Singleton, S1, S2, S3]
-//  (op : OpMacro[N, S1, S2, S3]{type OutWide = Double}) : Double = op.valueWide
-//  implicit def convString[N <: String with Singleton, S1, S2, S3]
-//  (op : OpMacro[N, S1, S2, S3]{type OutWide = String}) : String = op.valueWide
-//  implicit def convBoolean[N <: String with Singleton, S1, S2, S3]
-//  (op : OpMacro[N, S1, S2, S3]{type OutWide = Boolean}) : Boolean = op.valueWide
-
-//  def valueOf2[T](implicit vt: ValueOf[T]): T {} = vt.value
-//  def valueOf2[OP <: OpMacro[_ <: String with Singleton, _, _, _]]
-//  (implicit op: OP) : op.Out = op.value
 
 }

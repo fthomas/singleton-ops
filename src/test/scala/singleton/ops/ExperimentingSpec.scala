@@ -49,40 +49,64 @@ object NewDemo {
   //////////////////////////////
 }
 
+object RightTriangleDemo {
+  type RightTriangle[A,B,C] =
+    ((A * A) + (B * B) == (C * C)) ||
+    ((A * A) + (C * C) == (B * B)) ||
+    ((B * B) + (C * C) == (A * A))
+
+  def fooWith90DegTriangle[A <: XDouble, B <: XDouble, C <: XDouble](implicit check : Require[RightTriangle[A,B,C]]) : Unit = {}
+  fooWith90DegTriangle[5.0,3.0,5.830951894845301] //OK!
+  //  fooWith90DegTriangle[5.0,3.1,5.830951894845301] //Error:(17, 23) could not find implicit value for parameter check: singleton.ops.Require[singleton.ops.ITESpec.RightTriangle[5.0,3.1,5.830951894845301]]
+}
+
+
+object FixedSizedVectorDemo {
+  type CheckPositive[I] = Require[I > 0]
+  object Method_One {
+    class FixedSizeVector[L <: XInt]() {
+      def concat[L2 <: XInt](that : FixedSizeVector[L2])(implicit l : L + L2) = new FixedSizeVector[l.OutInt]
+      def + (that : FixedSizeVector[L]) = new FixedSizeVector[L]
+      def printLength(implicit length : SafeInt[L]) : Unit = println("Vector length is: " + length)
+    }
+
+    object FixedSizeVector {
+      def apply[L <: XInt](implicit check : CheckPositive[L]) = new FixedSizeVector[L]
+    }
+
+    object TestVector {
+      val v1 = FixedSizeVector[5]
+      val v2 = FixedSizeVector[2]
+      val v3 : FixedSizeVector[40] = v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1
+      //  val v4 = FixedSizeVector[-1] //Will lead to error could not find implicit value for parameter check: singleton.ops.Require[singleton.ops.>[-1,0]]
+    }
+  }
+
+  object Method_Two {
+    class FixedSizeVector[L]() {
+      def concat[L2](that : FixedSizeVector[L2]) = new FixedSizeVector[L + L2]
+      def + (that : FixedSizeVector[L]) = new FixedSizeVector[L]
+      def printLength(implicit length : SafeInt[L]) : Unit = println("Vector length is: " + length)
+    }
+
+    object FixedSizeVector {
+      def apply[L](implicit check : CheckPositive[L]) = new FixedSizeVector[L]
+      implicit def proof[L1, L2](fsz : FixedSizeVector[L1])(implicit check : Require[L1 == L2]) : FixedSizeVector[L2] = new FixedSizeVector[L2]
+    }
+
+    object TestVector {
+      val v1 = FixedSizeVector[5]
+      val v2 = FixedSizeVector[2]
+      val v3 : FixedSizeVector[40] = v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1
+      //  val v4 = FixedSizeVector[-1] //Will lead to error could not find implicit value for parameter check: singleton.ops.Require[singleton.ops.>[-1,0]]
+    }
+  }
+}
+
 /* TODOs:
 Fix real world matrix example
 Add operations table to readme
 Add Floor, Ceil
 Add Log2 (efficient)
  */
-//class FixedSizeVector[L]() {
-//  def concat[L2](that : FixedSizeVector[L2]) = new FixedSizeVector[L + L2]
-//  def + (that : FixedSizeVector[L]) = new FixedSizeVector[L]
-//}
-//
-//object FixedSizeVector {
-//  def apply[L](implicit check : Require[L > 0]) = new FixedSizeVector[L]
-//}
-//
-//object TestVector {
-//  val v1 = FixedSizeVector[5]
-//  val v2 = FixedSizeVector[2]
-//  v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1
-////  val v4 = FixedSizeVector[-1] //Will lead to error could not find implicit value for parameter check: singleton.ops.Require[singleton.ops.>[-1,0]]
-//}
 
-class FixedSizeVector[L <: XInt]() {
-  def concat[L2 <: XInt](that : FixedSizeVector[L2])(implicit l : L + L2) = new FixedSizeVector[l.OutInt]
-  def + (that : FixedSizeVector[L]) = new FixedSizeVector[L]
-}
-
-object FixedSizeVector {
-  def apply[L <: XInt](implicit check : Require[L > 0]) = new FixedSizeVector[L]
-}
-
-object TestVector {
-  val v1 = FixedSizeVector[5]
-  val v2 = FixedSizeVector[2]
-  val v3 : FixedSizeVector[40] = v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1
-  //  val v4 = FixedSizeVector[-1] //Will lead to error could not find implicit value for parameter check: singleton.ops.Require[singleton.ops.>[-1,0]]
-}
