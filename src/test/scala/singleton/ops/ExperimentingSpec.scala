@@ -78,9 +78,13 @@ object RightTriangleDemo {
 
 
 object FixedSizedVectorDemo {
-  type CheckPositive[I] = Require[I > 0]
+  //In this method the length `L` is upper bounded by XInt
+  //In the `concat` method we must use `.OutInt` when applying the new type parameter `L + L2`
   object Method_One {
-    class FixedSizeVector[L <: XInt]() {
+    type CheckPositive[I] = Require[I > 0]
+
+    class FixedSizeVector[L <: XInt] private () { //Here we chose to make the constructor private and
+                                                  //add constraints to the companion object.
       def concat[L2 <: XInt](that : FixedSizeVector[L2])(implicit l : L + L2) = new FixedSizeVector[l.OutInt]
       def + (that : FixedSizeVector[L]) = new FixedSizeVector[L]
       def printLength(implicit length : SafeInt[L]) : Unit = println("Vector length is: " + length)
@@ -99,7 +103,20 @@ object FixedSizedVectorDemo {
   }
 
   object Method_Two {
-    class FixedSizeVector[L]() {
+    //In this method the length `L` is upper bounded by XInt
+    //However the implicit constraint guards that this is a positive integer type.
+    //We gain something better with this method. We can input a type operation, and not just a type literal.
+    //E.g. FixedSizeVector[2 + 3].
+    //See the `concat` method in how it is helpful.
+    //We need to create equivalency between vectors of different inputs so we added a proof implicit in the
+    //companion object.
+    //E.g. We want FixedSizeVector[2 + 3] to the same as FixedSizeVector[4 + 1] or FixedSizeVector[5]
+    //Note this will NOT be possible: implicitly[FixedSizeVector[2 + 3] =:= FixedSizeVector[5]]
+
+    type CheckPositive[I] = Require[IsInt[I] && (I > 0)]
+
+    class FixedSizeVector[L] private () { //Here we chose to make the constructor private and
+                                          //add constraints to the companion object.
       def concat[L2](that : FixedSizeVector[L2]) = new FixedSizeVector[L + L2]
       def + (that : FixedSizeVector[L]) = new FixedSizeVector[L]
       def printLength(implicit length : SafeInt[L]) : Unit = println("Vector length is: " + length)
