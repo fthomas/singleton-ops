@@ -109,7 +109,7 @@ trait GeneralMacros {
           unapply(sym.info asSeenFrom (pre, sym.owner))
         case ConstantType(t) => Some(t)
         case _ =>
-          print("Exhausted search at: " + showRaw(tp))
+//          print("Exhausted search at: " + showRaw(tp))
           None
       }
     }
