@@ -158,7 +158,7 @@ trait GeneralMacros {
 
     val value = tpe match {
       case Const(Constant(t)) => Constant(t)
-      case _ => extractionFailed(tpe, true)
+      case _ => extractionFailed(tpe, false)
     }
 
     value
