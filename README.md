@@ -12,7 +12,7 @@ import singleton.ops._
 class MyVec[L] {
   def doubleSize = new MyVec[2 * L]
   def nSize[N] = new MyVec[N * L]
-  def getLenth(implicit length : SafeInt[L]) : Int = length
+  def getLength(implicit length : SafeInt[L]) : Int = length
 }
 object MyVec {
   implicit def apply[L](implicit check : Require[L > 0]) : MyVec[L] = new MyVec[L]()
