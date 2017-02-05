@@ -24,3 +24,8 @@ object FixedSizeVector {
 Length could have just as easily been a `PositiveInt` parameter.
 However, in such a case, it would have been harder to limit `index` with `refined`. An implicit would have been required for the `Index` definition. 
 - @soronpo: The example above demonstrates that whenever we have relational constraints between two parameters, it is better for that relation to be a type argument.
+- @soronpo: Expression type argument literals for structure helps if we want to define implicit conversions between equivalent structures. **Example:**
+```
+trait Matrix[ColumnLength,RowLength]
+```
+We can have an implicit to convert `Matrix[ColumnLength,1] <--> FixedSizeVector[ColumnLength]`.
