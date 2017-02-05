@@ -21,6 +21,23 @@ object OpMacro {
     ]: c.Tree =
       materializeOpGen[OpMacro[N, S1, S2, S3], N].usingFuncName
   }
+
+  implicit def valueOfOp[N <: String with Singleton, S1 : ValueOf, S2 : ValueOf, S3 : ValueOf]
+  (implicit op : OpMacro[N, S1, S2, S3]) : ValueOf[OpMacro[N, S1, S2, S3]] = new ValueOf(op)
+}
+/*******************************************************************************************************/
+
+/********************************************************************************************************
+  * XTypeOf Experimental
+  *******************************************************************************************************/
+@ bundle
+object XTypeOf {
+  def apply(value : Int with Singleton) : Op = macro Macro.impl
+
+  final class Macro(val c: whitebox.Context) extends GeneralMacros {
+    def impl(value : c.Expr[Int with Singleton]): c.Tree =
+      materializeOpVal[Op].usingFuncName(value)
+  }
 }
 /*******************************************************************************************************/
 

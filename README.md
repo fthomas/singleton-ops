@@ -5,7 +5,21 @@
 [![Scaladex](https://index.scala-lang.org/fthomas/singleton-ops/singleton-ops/latest.svg?color=blue)](https://index.scala-lang.org/fthomas/singleton-ops)
 
 This library provides type-level operations for [Typelevel Scala][typelevel-scala] with [SIP-23][sip-23].
+##Simple example:
+```
+import singleton.ops._
 
+class MyVec[L] {
+  def doubleSize = new MyVec[2 * L]
+  def nSize[N] = new MyVec[N * L]
+  def getLength(implicit length : SafeInt[L]) : Int = length
+}
+object MyVec {
+  implicit def apply[L](implicit check : Require[L > 0]) : MyVec[L] = new MyVec[L]()
+}
+val myVec : MyVec[10] = MyVec[4 + 1].doubleSize
+val myBadVec = MyVec[-1] //fails compilation, as required
+```
 ####Supported types:
 * `Char with Singleton` (aliased as `XChar`) 
 * `Int with Singleton` (aliased as `XInt`) 
@@ -60,7 +74,7 @@ This library provides type-level operations for [Typelevel Scala][typelevel-scal
 ####Supported control operations:
 * `type ==>[A, B]` (`first A then B`)        
 * `type ITE[I,T,E]` (`If (I) Then (T) Else (E)`)      
-* `type While[Cond, Body, Ret]`  (`While (Cond) Run (Body) and then Return (Ret))      
+* `type While[Cond, Body, Ret]`  (`While (Cond) Run (Body) and then Return (Ret)`)      
 
 ####Supported assignment operations:
 * `type :=[Name, Value]`        

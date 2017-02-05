@@ -40,11 +40,11 @@ trait GeneralMacros {
       }
     }
     def unapply(tp: Type): Option[Constant] = {
-//      print(showRaw(tp))
+//      print(tp + " RAW " + showRaw(tp))
       tp match {
         case tp @ ExistentialType(_, _) => unapply(tp.underlying)
         case TypeBounds(lo, hi) => unapply(hi)
-        case RefinedType(parents, _) =>
+        case RefinedType(parents, scope) =>
           parents.iterator map unapply collectFirst { case Some(x) => x }
         case NullaryMethodType(tpe) => unapply(tpe)
         ////////////////////////////////////////////////////////////////////////
@@ -59,6 +59,7 @@ trait GeneralMacros {
         case TypeRef(_, sym, _) if sym == symbolOf[shapeless._0] =>
           Some(Constant(0))
         ////////////////////////////////////////////////////////////////////////
+
 
         ////////////////////////////////////////////////////////////////////////
         // Operational Function
@@ -125,19 +126,18 @@ trait GeneralMacros {
   def constantTypeOf[T](t: T): Type =
     c.internal.constantType(Constant(t))
 
-  def constantTypeAndValueOf[T](t: T)(
-      implicit ev: c.WeakTypeTag[T]): (Type, Literal, TypeName, Type, Tree) ={
-    val outWideType = weakTypeOf[T]
+  def constantTypeAndValueOf[T](t: T): (Type, Literal, TypeName, Type, Tree) ={
     val outWideLiteral = Literal(Constant(t))
-    val outTypeName = t match {
-      case tt : Nat => TypeName("OutNat")
-      case tt : Char => TypeName("OutChar")
-      case tt : Int => TypeName("OutInt")
-      case tt : Long => TypeName("OutLong")
-      case tt : Float => TypeName("OutFloat")
-      case tt : Double => TypeName("OutDouble")
-      case tt : String => TypeName("OutString")
-      case tt : Boolean => TypeName("OutBoolean")
+    val (outWideType, outTypeName) = t match {
+      case tt : Nat => (typeOf[Nat], TypeName("OutNat"))
+      case tt : Char => (typeOf[Char], TypeName("OutChar"))
+      case tt : Int => (typeOf[Int], TypeName("OutInt"))
+      case tt : Long => (typeOf[Long], TypeName("OutLong"))
+      case tt : Float => (typeOf[Float], TypeName("OutFloat"))
+      case tt : Double => (typeOf[Double], TypeName("OutDouble"))
+      case tt : String => (typeOf[String], TypeName("OutString"))
+      case tt : Boolean => (typeOf[Boolean], TypeName("OutBoolean"))
+      case _ => abort(s"Unsupported type $t", true)
     }
     (outWideType, outWideLiteral, outTypeName, constantTypeOf(t), Literal(Constant(t)))
   }
@@ -158,7 +158,7 @@ trait GeneralMacros {
 
     val value = tpe match {
       case Const(Constant(t)) => Constant(t)
-      case _ => extractionFailed(tpe, true)
+      case _ => extractionFailed(tpe, false)
     }
 
     value
@@ -247,6 +247,86 @@ trait GeneralMacros {
       case ("ToString",   a: String, _, _)            => Constant(a.toString)
       case ("ToString",   a: Boolean, _, _)           => Constant(a.toString)
 
+      case ("IsNat",      a: Nat, _, _)               => Constant(true)
+      case ("IsNat",      a: Char, _, _)              => Constant(false)
+      case ("IsNat",      a: Int, _, _)               => Constant(false)
+      case ("IsNat",      a: Long, _, _)              => Constant(false)
+      case ("IsNat",      a: Float, _, _)             => Constant(false)
+      case ("IsNat",      a: Double, _, _)            => Constant(false)
+      case ("IsNat",      a: String, _, _)            => Constant(false)
+      case ("IsNat",      a: Boolean, _, _)           => Constant(false)
+
+      case ("IsChar",     a: Nat, _, _)               => Constant(false)
+      case ("IsChar",     a: Char, _, _)              => Constant(true)
+      case ("IsChar",     a: Int, _, _)               => Constant(false)
+      case ("IsChar",     a: Long, _, _)              => Constant(false)
+      case ("IsChar",     a: Float, _, _)             => Constant(false)
+      case ("IsChar",     a: Double, _, _)            => Constant(false)
+      case ("IsChar",     a: String, _, _)            => Constant(false)
+      case ("IsChar",     a: Boolean, _, _)           => Constant(false)
+
+      case ("IsInt",      a: Nat, _, _)               => Constant(false)
+      case ("IsInt",      a: Char, _, _)              => Constant(false)
+      case ("IsInt",      a: Int, _, _)               => Constant(true)
+      case ("IsInt",      a: Long, _, _)              => Constant(false)
+      case ("IsInt",      a: Float, _, _)             => Constant(false)
+      case ("IsInt",      a: Double, _, _)            => Constant(false)
+      case ("IsInt",      a: String, _, _)            => Constant(false)
+      case ("IsInt",      a: Boolean, _, _)           => Constant(false)
+
+      case ("IsLong",     a: Nat, _, _)               => Constant(false)
+      case ("IsLong",     a: Char, _, _)              => Constant(false)
+      case ("IsLong",     a: Int, _, _)               => Constant(false)
+      case ("IsLong",     a: Long, _, _)              => Constant(true)
+      case ("IsLong",     a: Float, _, _)             => Constant(false)
+      case ("IsLong",     a: Double, _, _)            => Constant(false)
+      case ("IsLong",     a: String, _, _)            => Constant(false)
+      case ("IsLong",     a: Boolean, _, _)           => Constant(false)
+
+      case ("IsFloat",    a: Nat, _, _)               => Constant(false)
+      case ("IsFloat",    a: Char, _, _)              => Constant(false)
+      case ("IsFloat",    a: Int, _, _)               => Constant(false)
+      case ("IsFloat",    a: Long, _, _)              => Constant(false)
+      case ("IsFloat",    a: Float, _, _)             => Constant(true)
+      case ("IsFloat",    a: Double, _, _)            => Constant(false)
+      case ("IsFloat",    a: String, _, _)            => Constant(false)
+      case ("IsFloat",    a: Boolean, _, _)           => Constant(false)
+
+      case ("IsDouble",   a: Nat, _, _)               => Constant(false)
+      case ("IsDouble",   a: Char, _, _)              => Constant(false)
+      case ("IsDouble",   a: Int, _, _)               => Constant(false)
+      case ("IsDouble",   a: Long, _, _)              => Constant(false)
+      case ("IsDouble",   a: Float, _, _)             => Constant(false)
+      case ("IsDouble",   a: Double, _, _)            => Constant(true)
+      case ("IsDouble",   a: String, _, _)            => Constant(false)
+      case ("IsDouble",   a: Boolean, _, _)           => Constant(false)
+
+      case ("IsString",   a: Nat, _, _)               => Constant(false)
+      case ("IsString",   a: Char, _, _)              => Constant(false)
+      case ("IsString",   a: Int, _, _)               => Constant(false)
+      case ("IsString",   a: Long, _, _)              => Constant(false)
+      case ("IsString",   a: Float, _, _)             => Constant(false)
+      case ("IsString",   a: Double, _, _)            => Constant(false)
+      case ("IsString",   a: String, _, _)            => Constant(true)
+      case ("IsString",   a: Boolean, _, _)           => Constant(false)
+
+      case ("IsBoolean",  a: Nat, _, _)               => Constant(false)
+      case ("IsBoolean",  a: Char, _, _)              => Constant(false)
+      case ("IsBoolean",  a: Int, _, _)               => Constant(false)
+      case ("IsBoolean",  a: Long, _, _)              => Constant(false)
+      case ("IsBoolean",  a: Float, _, _)             => Constant(false)
+      case ("IsBoolean",  a: Double, _, _)            => Constant(false)
+      case ("IsBoolean",  a: String, _, _)            => Constant(false)
+      case ("IsBoolean",  a: Boolean, _, _)           => Constant(true)
+
+      case ("Print",      a: Char, _, _)              => Constant(print(a.toString))
+      case ("Print",      a: Int, _, _)               => Constant(print(a.toString))
+      case ("Print",      a: Long, _, _)              => Constant(print(a.toString))
+      case ("Print",      a: Float, _, _)             => Constant(print(a.toString))
+      case ("Print",      a: Double, _, _)            => Constant(print(a.toString))
+      case ("Print",      a: String, _, _)            => Constant(print(a.toString))
+      case ("Print",      a: Boolean, _, _)           => Constant(print(a.toString))
+        
       case ("Negate",     a: Char, _, _)              => Constant(-a)
       case ("Negate",     a: Int, _, _)               => Constant(-a)
       case ("Negate",     a: Long, _, _)              => Constant(-a)
@@ -258,6 +338,27 @@ trait GeneralMacros {
       case ("Abs",        a: Float, _, _)             => Constant(abs(a))
       case ("Abs",        a: Double, _, _)            => Constant(abs(a))
 
+      case ("Floor",      a: Float, _, _)             => Constant(floor(a.toDouble))
+      case ("Floor",      a: Double, _, _)            => Constant(floor(a))
+
+      case ("Ceil",       a: Float, _, _)             => Constant(ceil(a.toDouble))
+      case ("Ceil",       a: Double, _, _)            => Constant(ceil(a))
+
+      case ("Round",      a: Float, _, _)             => Constant(round(a))
+      case ("Round",      a: Double, _, _)            => Constant(round(a))
+
+      case ("Sin",        a: Float, _, _)             => Constant(sin(a.toDouble))
+      case ("Sin",        a: Double, _, _)            => Constant(sin(a))
+
+      case ("Cos",        a: Float, _, _)             => Constant(cos(a.toDouble))
+      case ("Cos",        a: Double, _, _)            => Constant(cos(a))
+
+      case ("Tan",        a: Float, _, _)             => Constant(tan(a.toDouble))
+      case ("Tan",        a: Double, _, _)            => Constant(tan(a))
+
+      case ("Sqrt",       a: Float, _, _)             => Constant(sqrt(a.toDouble))
+      case ("Sqrt",       a: Double, _, _)            => Constant(sqrt(a))
+
       case ("Reverse",    a: String, _, _)            => Constant(a.reverse)
       case ("!",          a: Boolean, _, _)           => Constant(!a)
       case ("Require",    a: Boolean, _, _)           =>
@@ -265,9 +366,9 @@ trait GeneralMacros {
           abort(s"Cannot prove requirement Require[...]", false)
         else
           Constant(a)
-      case ("==>",        _,          b,          _)       => Constant(b)
-      case ("SV",         a: String,  b,          _)       => Var.set(a, Constant(b))
-      case ("GV",         a: String,  _,          _)       => Var.get(a)
+      case ("==>",        _,          b,          _)  => Constant(b)
+      case ("SV",         a: String,  b,          _)  => Var.set(a, Constant(b))
+      case ("GV",         a: String,  _,          _)  => Var.get(a)
 
       case ("+",          a: Char,    b: Char,    _)  => Constant(a + b)
       case ("+",          a: Char,    b: Int,     _)  => Constant(a + b)
@@ -399,6 +500,11 @@ trait GeneralMacros {
       case ("%",          a: Double,  b: Long,    _)  => Constant(a % b)
       case ("%",          a: Double,  b: Float,   _)  => Constant(a % b)
       case ("%",          a: Double,  b: Double,  _)  => Constant(a % b)
+
+      case ("Pow",        a: Float,   b: Float,   _)  => Constant(pow(a.toDouble,b.toDouble))
+      case ("Pow",        a: Float,   b: Double,  _)  => Constant(pow(a.toDouble,b.toDouble))
+      case ("Pow",        a: Double,  b: Float,   _)  => Constant(pow(a.toDouble,b.toDouble))
+      case ("Pow",        a: Double,  b: Double,  _)  => Constant(pow(a.toDouble,b.toDouble))
 
       case ("==",         a: Char,    b: Char,    _)  => Constant(a == b)
       case ("==",         a: Char,    b: Int,     _)  => Constant(a == b)
@@ -595,8 +701,8 @@ trait GeneralMacros {
       val genTree = q"""
         new $opTpe {
           type OutWide = $outWideTpe
-          type Out = $outTpe
-          type $outTypeName = $outTpe
+          type Out = $outTpe {}
+          type $outTypeName = $outTpe {}
           val value: $outTpe = $outTree
           val valueWide: $outWideTpe = $outWideLiteral
         }
@@ -606,6 +712,42 @@ trait GeneralMacros {
     }
   }
   ///////////////////////////////////////////////////////////////////////////////////////////
+
+
+  ///////////////////////////////////////////////////////////////////////////////////////////
+  // XTypeOf Experimental
+  ///////////////////////////////////////////////////////////////////////////////////////////
+  def materializeOpVal[F](implicit ev0: c.WeakTypeTag[F]): MaterializeOpAuxVal =
+  new MaterializeOpAuxVal(weakTypeOf[F])
+
+  final class MaterializeOpAuxVal(opTpe: Type) {
+    def usingFuncName(value : c.Expr[Int with Singleton]) : Tree = {
+      print(showCode(value.tree))
+      print(showRaw(value))
+
+//      val aValue = extractSingletonValue(opTpe)
+//
+//      val (outWideTpe, outWideLiteral, outTypeName, outTpe, outTree) = (funcName, aValue) match {
+//        case (Constant("ToNat"), Constant(t : Int)) => constantTypeAndValueOfNat(t)
+//        case (_, Constant(t)) =>  constantTypeAndValueOf(t)
+//      }
+
+      val genTree = q"""
+        new $opTpe {
+          type OutWide = Int
+          type Out = 2
+          type OutInt = 2
+          val value: 2 = 2
+          val valueWide: Int = 2
+        }
+      """
+      //      print(genTree)
+      genTree
+    }
+  }
+  ///////////////////////////////////////////////////////////////////////////////////////////
+
+
 
   //copied from Shapeless
   import scala.annotation.tailrec

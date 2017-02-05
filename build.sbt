@@ -54,6 +54,7 @@ lazy val metadataSettings = Def.settings(
 
 lazy val compileSettings = Def.settings(
   scalaOrganization := "org.typelevel",
+  resolvers in ThisBuild += Resolver.sonatypeRepo("orgtypelevel-1198"),
   scalacOptions ++= Seq(
     "-deprecation",
     "-encoding",
