@@ -173,6 +173,18 @@ scala> bigMul[32000L, 6400000L]
 res2: Long = 204800000000
 ```
 
+## Contributors and participation
+
+* [Frank S. Thomas](https://github.com/fthomas)
+* [Matthew Pocock](https://github.com/drdozer)
+* [Oron Port](https://github.com/soronpo)
+
+The singleton-ops project supports the [Typelevel][typelevel]
+[code of conduct][typelevel-coc] and wants all of its channels (Gitter,
+GitHub, etc.) to be welcoming environments for everyone.
+
 [shapeless]: https://github.com/milessabin/shapeless
 [sip-23]: http://docs.scala-lang.org/sips/pending/42.type.html
+[typelevel]: http://typelevel.org/
+[typelevel-coc]: http://typelevel.org/conduct.html
 [typelevel-scala]: https://github.com/typelevel/scala
