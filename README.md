@@ -22,7 +22,7 @@ val myBadVec = MyVec[-1] //fails compilation, as required
 ```
 
 ---
-## Using refined
+## Using singleton-ops
 
 The latest version of the library is 0.0.4, which is available for Typelevel Scala versions 2.11.8 & 2.12.1.
 
