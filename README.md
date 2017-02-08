@@ -6,7 +6,7 @@
 
 This library provides type-level operations for [Typelevel Scala][typelevel-scala] with [SIP-23][sip-23].
 ##Simple example:
-```
+```scala
 import singleton.ops._
 
 class MyVec[L] {
@@ -20,6 +20,24 @@ object MyVec {
 val myVec : MyVec[10] = MyVec[4 + 1].doubleSize
 val myBadVec = MyVec[-1] //fails compilation, as required
 ```
+
+---
+## Using singleton-ops
+
+The latest version of the library is 0.0.4, which is available for Typelevel Scala versions 2.11.8 & 2.12.1.
+
+If you're using sbt, add the following to your build:
+
+```sbt
+resolvers ++= Seq(Resolver.bintrayRepo("fthomas", "maven"))
+
+libraryDependencies ++= Seq(
+  "eu.timepit" %% "singleton-ops" % "0.0.4"
+)
+```
+**Be sure to follow Typelevel Scala [instructions][typelevel-scala-use], to be able to use literal types in your code.** 
+
+---
 ####Supported types:
 * `Char with Singleton` (aliased as `XChar`) 
 * `Int with Singleton` (aliased as `XInt`) 
@@ -188,3 +206,4 @@ GitHub, etc.) to be welcoming environments for everyone.
 [typelevel]: http://typelevel.org/
 [typelevel-coc]: http://typelevel.org/conduct.html
 [typelevel-scala]: https://github.com/typelevel/scala
+[typelevel-scala-use]: https://github.com/typelevel/scala#how-to-use-typelevel-scala
