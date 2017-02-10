@@ -13,6 +13,9 @@ object OpMacro {
     macro Macro.impl[N, S1, S2, S3]
 
   final class Macro(val c: whitebox.Context) extends GeneralMacros {
+
+    override def opPF: OpPartialFunction = OpPartialFunction.opPf
+
     def impl[
         N <: String with Singleton: c.WeakTypeTag,
         S1: c.WeakTypeTag,
@@ -35,6 +38,9 @@ object XTypeOf {
   def apply(value : Int with Singleton) : Op = macro Macro.impl
 
   final class Macro(val c: whitebox.Context) extends GeneralMacros {
+
+    override def opPF: OpPartialFunction = OpPartialFunction.opPf
+
     def impl(value : c.Expr[Int with Singleton]): c.Tree =
       materializeOpVal[Op].usingFuncName(value)
   }
