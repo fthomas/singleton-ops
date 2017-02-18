@@ -29,8 +29,6 @@ The latest version of the library is 0.0.4, which is available for Typelevel Sca
 If you're using sbt, add the following to your build:
 
 ```sbt
-resolvers ++= Seq(Resolver.bintrayRepo("fthomas", "maven"))
-
 libraryDependencies ++= Seq(
   "eu.timepit" %% "singleton-ops" % "0.0.4"
 )
