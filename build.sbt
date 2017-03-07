@@ -19,10 +19,10 @@ lazy val root = project
   .settings(publishSettings)
   .settings(
     libraryDependencies ++= Seq(
-      "org.scala-lang" % "scala-compiler" % scalaVersion.value,
+      scalaOrganization.value % "scala-compiler" % scalaVersion.value,
       "org.typelevel" %% "macro-compat" % macroCompatVersion,
       compilerPlugin(
-        "org.scalamacros" % "paradise" % macroParadiseVersion cross CrossVersion.full),
+        "org.scalamacros" % "paradise" % macroParadiseVersion cross CrossVersion.patch),
       "com.chuusai" %% "shapeless" % shapelessVersion,
       "org.scalacheck" %% "scalacheck" % scalaCheckVersion % Test
     )
