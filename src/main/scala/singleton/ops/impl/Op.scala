@@ -23,6 +23,7 @@ object OpGen {
   implicit def impl[O <: Op](implicit o: O) : Aux[O, o.Out] = new OpGen[O] {type Out = o.Out; val value = o.value}
 }
 
+@scala.annotation.implicitNotFound(msg = "Unable to prove type argument is a Nat.")
 trait OpNat[O <: Op] {type Out <: Nat; val value : Out}
 object OpNat {
   type Aux[O <: Op, Ret_Out <: Nat] = OpNat[O] {type Out = Ret_Out}
@@ -30,6 +31,7 @@ object OpNat {
   implicit def conv[O <: Op](op : OpNat[O]) : Nat = op.value
 }
 
+@scala.annotation.implicitNotFound(msg = "Unable to prove type argument is a Char.")
 trait OpChar[O <: Op] {type Out <: Char with Singleton; val value : Out}
 object OpChar {
   type Aux[O <: Op, Ret_Out <: Char with Singleton] = OpChar[O] {type Out = Ret_Out}
@@ -37,6 +39,7 @@ object OpChar {
   implicit def conv[O <: Op](op : OpChar[O]) : Char = op.value
 }
 
+@scala.annotation.implicitNotFound(msg = "Unable to prove type argument is an Int.")
 trait OpInt[O <: Op] {type Out <: Int with Singleton; val value : Out}
 object OpInt {
   type Aux[O <: Op, Ret_Out <: Int with Singleton] = OpInt[O] {type Out = Ret_Out}
@@ -44,6 +47,7 @@ object OpInt {
   implicit def conv[O <: Op](op : OpInt[O]) : Int = op.value
 }
 
+@scala.annotation.implicitNotFound(msg = "Unable to prove type argument is a Long.")
 trait OpLong[O <: Op] {type Out <: Long with Singleton; val value : Out}
 object OpLong {
   type Aux[O <: Op, Ret_Out <: Long with Singleton] = OpLong[O] {type Out = Ret_Out}
@@ -51,6 +55,7 @@ object OpLong {
   implicit def conv[O <: Op](op : OpLong[O]) : Long = op.value
 }
 
+@scala.annotation.implicitNotFound(msg = "Unable to prove type argument is a Float.")
 trait OpFloat[O <: Op] {type Out <: Float with Singleton; val value : Out}
 object OpFloat {
   type Aux[O <: Op, Ret_Out <: Float with Singleton] = OpFloat[O] {type Out = Ret_Out}
@@ -58,6 +63,7 @@ object OpFloat {
   implicit def conv[O <: Op](op : OpFloat[O]) : Float = op.value
 }
 
+@scala.annotation.implicitNotFound(msg = "Unable to prove type argument is a Double.")
 trait OpDouble[O <: Op] {type Out <: Double with Singleton; val value : Out}
 object OpDouble {
   type Aux[O <: Op, Ret_Out <: Double with Singleton] = OpDouble[O] {type Out = Ret_Out}
@@ -65,6 +71,7 @@ object OpDouble {
   implicit def conv[O <: Op](op : OpDouble[O]) : Double = op.value
 }
 
+@scala.annotation.implicitNotFound(msg = "Unable to prove type argument is a String.")
 trait OpString[O <: Op] {type Out <: String with Singleton; val value : Out}
 object OpString {
   type Aux[O <: Op, Ret_Out <: String with Singleton] = OpString[O] {type Out = Ret_Out}
@@ -72,6 +79,7 @@ object OpString {
   implicit def conv[O <: Op](op : OpString[O]) : String = op.value
 }
 
+@scala.annotation.implicitNotFound(msg = "Unable to prove type argument is a Boolean.")
 trait OpBoolean[O <: Op] {type Out <: Boolean with Singleton; val value : Out}
 object OpBoolean {
   type Aux[O <: Op, Ret_Out <: Boolean with Singleton] = OpBoolean[O] {type Out = Ret_Out}
