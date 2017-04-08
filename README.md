@@ -5,7 +5,7 @@
 [![Scaladex](https://index.scala-lang.org/fthomas/singleton-ops/singleton-ops/latest.svg?color=blue)](https://index.scala-lang.org/fthomas/singleton-ops)
 
 This library provides type-level operations for [Typelevel Scala][typelevel-scala] with [SIP-23][sip-23].
-##Simple example:
+## Simple example:
 ```scala
 import singleton.ops._
 
@@ -29,8 +29,6 @@ The latest version of the library is 0.0.4, which is available for Typelevel Sca
 If you're using sbt, add the following to your build:
 
 ```sbt
-resolvers ++= Seq(Resolver.bintrayRepo("fthomas", "maven"))
-
 libraryDependencies ++= Seq(
   "eu.timepit" %% "singleton-ops" % "0.0.4"
 )
@@ -38,7 +36,7 @@ libraryDependencies ++= Seq(
 **Be sure to follow Typelevel Scala [instructions][typelevel-scala-use], to be able to use literal types in your code.** 
 
 ---
-####Supported types:
+#### Supported types:
 * `Char with Singleton` (aliased as `XChar`) 
 * `Int with Singleton` (aliased as `XInt`) 
 * `Long with Singleton` (aliased as `XLong`)
@@ -48,7 +46,7 @@ libraryDependencies ++= Seq(
 * `Boolean with Singleton` (aliased as `XBoolean`)
 * `Nat` (from [Shapeless][shapeless])
 
-####Supported arithmetic operations:
+#### Supported arithmetic operations:
 * `type +[P1, P2]`          
 * `type -[P1, P2]`          
 * `type *[P1, P2]`          
@@ -57,7 +55,7 @@ libraryDependencies ++= Seq(
 * `type Abs[P1]`            
 * `type Negate[P1]`         
 
-####Supported relational operations:
+#### Supported relational operations:
 * `type ==[P1, P2]`         
 * `type !=[P1, P2]`         
 * `type >[P1, P2]`          
@@ -67,12 +65,12 @@ libraryDependencies ++= Seq(
 * `type Min[P1, P2]`        
 * `type Max[P1, P2]`        
 
-####Supported logical operations:
+#### Supported logical operations:
 * `type &&[P1, P2]`         
 * `type ||[P1, P2]`         
 * `type ![P1]`              
 
-####Supported explicit conversion operations:
+#### Supported explicit conversion operations:
 * `type ToNat[P1]`          
 * `type ToChar[P1]`          
 * `type ToInt[P1]`          
@@ -81,27 +79,27 @@ libraryDependencies ++= Seq(
 * `type ToDouble[P1]`       
 * `type ToString[P1]`          
 
-####Supported string operations:
+#### Supported string operations:
 * `type +[P1, P2]` (concat)          
 * `type Reverse[P1]`        
 * `type Substring[P1, P2]`  
 
-####Supported constraints operations:
+#### Supported constraints operations:
 * `type Require[P1]`        
 
-####Supported control operations:
+#### Supported control operations:
 * `type ==>[A, B]` (`first A then B`)        
 * `type ITE[I,T,E]` (`If (I) Then (T) Else (E)`)      
 * `type While[Cond, Body, Ret]`  (`While (Cond) Run (Body) and then Return (Ret)`)      
 
-####Supported assignment operations:
+#### Supported assignment operations:
 * `type :=[Name, Value]`        
 * `type +=[Name, Value]`        
 * `type -=[Name, Value]`        
 * `type *=[Name, Value]`        
 * `type /=[Name, Value]`        
 
-####Supported Aux Pattern interface:
+#### Supported Aux Pattern interface:
 * `type OpAuxNat[O <: Op,      Ret_Out <: Nat]`
 * `type OpAuxChar[O <: Op,     Ret_Out <: XChar]`     
 * `type OpAuxInt[O <: Op,      Ret_Out <: XInt]`      
@@ -195,6 +193,7 @@ res2: Long = 204800000000
 
 * [Frank S. Thomas](https://github.com/fthomas)
 * [Matthew Pocock](https://github.com/drdozer)
+* [Naoki Aoyama](https://github.com/aoiroaoino)
 * [Oron Port](https://github.com/soronpo)
 
 The singleton-ops project supports the [Typelevel][typelevel]
