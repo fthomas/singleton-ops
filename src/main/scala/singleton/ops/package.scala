@@ -77,6 +77,7 @@ package object ops {
   type IsDouble[P1]         = OpMacro["IsDouble",P1, 0, 0]
   type IsString[P1]         = OpMacro["IsString",P1, 0, 0]
   type IsBoolean[P1]        = OpMacro["IsBoolean",P1, 0, 0]
+  type IsNotLiteral[P1]     = OpMacro["IsNotLiteral",P1, 0, 0]
   type Reverse[P1]          = OpMacro["Reverse",P1, 0, 0]
   type Negate[P1]           = OpMacro["Negate",P1, 0, 0]
   type Abs[P1]              = OpMacro["Abs",P1, 0, 0]

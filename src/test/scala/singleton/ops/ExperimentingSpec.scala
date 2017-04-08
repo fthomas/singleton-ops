@@ -135,6 +135,16 @@ object FixedSizedVectorDemo {
   }
 }
 
+object NonLiteralTest {
+  def checkPos[X <: Int](x : X)(implicit check : Require[IsNotLiteral[X]], dummyImplicit: DummyImplicit) : Unit = assert(x > 0)
+  def checkPos[X <: XInt](x : X)(implicit check : Require[X > 0]) : Unit = {}
+  var a = 5
+  checkPos(5) //compiletime Pass
+  checkPos(a) //runtime Pass
+  a = -1
+//  checkPos(-1) //compiletime Fail
+  checkPos(a) //runtime Fail
+}
 /* TODOs:
 Fix real world matrix example
 Add operations table to readme
