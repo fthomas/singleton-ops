@@ -75,6 +75,7 @@ trait GeneralMacros {
             case _ => unapplyVar(args(1))
           }
           val retVal = (funcName, aValue) match {
+            case (Some(Constant("IsNotLiteral")), _) => Some(Constant(aValue.isEmpty)) //Looking for non literals (if returned empty)
             case (Some(Constant("ITE")), Some(Constant(cond : Boolean))) => //Special control case: ITE (If-Then-Else)
               if (cond)
                 unapplyVar(args(2)) //true (then) part of the IF
