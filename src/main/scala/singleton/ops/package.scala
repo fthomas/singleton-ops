@@ -110,6 +110,9 @@ package object ops {
   type Length[P1]           = OpMacro["Length", P1, 0, 0]
   type CharAt[P1, P2]       = OpMacro["CharAt", P1, P2, 0]
 
+  type CompileTime[C]       = Require[ITE[IsNotLiteral[C], true, C]]
+  type RunTime[R]           = SafeBoolean[IsNotLiteral[R]]
+
 
 
   /////////////////////////////////////////////////

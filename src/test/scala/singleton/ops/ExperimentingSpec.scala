@@ -145,26 +145,11 @@ object NonLiteralTest {
 //  checkPos(-1) //compiletime Fail
   checkPos(a) //runtime Fail
 
-  final class MegaInt[I](val value : Int) extends AnyVal {
-    def + [R : MegaInt](r : MegaInt[R])(implicit si : I+R) = MegaInt.safe[si.Out](si.value)
-    def knownAtRunTime(implicit rt : RunTime[I]) : Boolean = rt
-    def knownAtCompileTime(implicit rt : RunTime[I]) : Boolean = !rt
-  }
-
-  object MegaInt {
-    implicit def safe[I <: Int with Singleton](i : I) : MegaInt[I] = new MegaInt[I](i)
-    implicit def unsafe[I <: Int](i : I) : MegaInt[Int] = new MegaInt[Int](i)
-    implicit def apply[I](implicit si : SafeInt[I]) : MegaInt[si.Out] = new MegaInt[si.Out](si)
-  }
-
   var b = 1
 
-//  def bl(a : RelaxedWitness.)
   implicit def toValueOfInt[T <: Int](t : T) : ValueOf[T] = new ValueOf[T](t)
   implicit def toValueOfXInt[T <: XInt](t : T) : ValueOf[T] = new ValueOf[T](t)
 
-  type CompileTime[C] = Require[ITE[IsNotLiteral[C], true, C]]
-  type RunTime[R] = SafeBoolean[IsNotLiteral[R]]
 
   def smallerThan50[T <: Int](rw : ValueOf[T])
                              (implicit ct_check: CompileTime[T < 50], rt_check : RunTime[T]) : ValueOf[T] = {
