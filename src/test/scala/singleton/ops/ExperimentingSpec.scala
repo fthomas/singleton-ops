@@ -1,5 +1,7 @@
 package singleton.ops
 
+import singleton.twoface.TwoFace
+
 object NewDemo {
   //////////////////////////////
   def demo[L <: XInt](implicit p : L*L + L) : p.Out = p.value
@@ -145,8 +147,11 @@ object NonLiteralTest {
 //  checkPos(-1) //compiletime Fail
   checkPos(a) //runtime Fail
 
-  val mi = TwoFaceInt[2](2)
-  mi + mi
+  import singleton.twoface._
+  val mi = TwoFace.Int[2](2)
+  val five = 5
+  mi + five
+  val seven : Int = mi + five
   var b = 1
 
   implicit def toValueOfInt[T <: Int](t : T) : ValueOf[T] = new ValueOf[T](t)
