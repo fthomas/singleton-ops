@@ -1,7 +1,5 @@
 package singleton.ops
 
-import singleton.twoface.TwoFace
-
 object NewDemo {
   //////////////////////////////
   def demo[L <: XInt](implicit p : L*L + L) : p.Out = p.value
@@ -138,47 +136,25 @@ object FixedSizedVectorDemo {
 }
 
 object NonLiteralTest {
-  def checkPos[X <: Int](x : X)(implicit check : Require[IsNotLiteral[X]], dummyImplicit: DummyImplicit) : Unit = assert(x > 0)
-  def checkPos[X <: XInt](x : X)(implicit check : Require[X > 0]) : Unit = {}
-  var a = 5
-  checkPos(5) //compiletime Pass
-  checkPos(a) //runtime Pass
-  a = -1
-//  checkPos(-1) //compiletime Fail
-  checkPos(a) //runtime Fail
-
   import singleton.twoface._
-  val mi = TwoFace.Int[2](2)
-  val five = 5
-  mi + five
-  val seven : Int = mi + five
-  var b = 1
 
-  implicit def toValueOfInt[T <: Int](t : T) : ValueOf[T] = new ValueOf[T](t)
-  implicit def toValueOfXInt[T <: XInt](t : T) : ValueOf[T] = new ValueOf[T](t)
-
-
-  def smallerThan50[T <: Int](rw : ValueOf[T])
-                             (implicit ct_check: CompileTime[T < 50], rt_check : RunTime[T]) : ValueOf[T] = {
-    if (rt_check) require(rw.value.asInstanceOf[Int] < 50, "")
-    rw
+  def smallerThan50[T](t : TwoFace.Int[T])
+                      (implicit ct_check: CompileTime[T < 50], rt_check : RunTime[T]) : Unit = {
+    if (rt_check) require(t < 50, "")
   }
 
   var forty = 40
   var sixty = 60
 
-  final val bb = smallerThan50(40).value + 40 //passes compile-time check
   smallerThan50(forty) //passes run-time check
-//  smallerThan50(60) //fails compile-time check
+  smallerThan50(40)    //passes compile-time check
   smallerThan50(sixty) //fails run-time check
-  smallerThan50(bb+40) //fails compile-time check
-
+//  smallerThan50(60)    //fails compile-time check
 }
 
 /* TODOs:
 Fix real world matrix example
 Add operations table to readme
-Add Floor, Ceil
 Add Log2 (efficient)
  */
 
