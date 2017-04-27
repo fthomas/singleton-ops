@@ -4,7 +4,7 @@ import singleton.ops._
 
 object TwoFace {
   sealed trait TwoFaceAny[Face, T] extends Any {
-    def isLiteral(implicit rt : RunTime[T]) : Boolean = !rt
+    def isLiteral(implicit rt : RunTime[T]) : scala.Boolean = !rt
     @inline def getValue : Face
     override def toString = getValue.toString
   }
@@ -61,6 +61,40 @@ object TwoFace {
     def apply[T](value : scala.Int) = new Int[T](value)
   }
 
+  final class Long[T] private[twoface](val value : scala.Long) extends AnyVal with TwoFaceAny[scala.Long, T] {
+    @inline def getValue : scala.Long = value
+  }
+  implicit object Long extends TwoFaceBuilder[Long, scala.Long] {
+    def apply[T](value : scala.Long) = new Long[T](value)
+  }
+
+  final class Float[T] private[twoface](val value : scala.Float) extends AnyVal with TwoFaceAny[scala.Float, T] {
+    @inline def getValue : scala.Float = value
+  }
+  implicit object Float extends TwoFaceBuilder[Float, scala.Float] {
+    def apply[T](value : scala.Float) = new Float[T](value)
+  }
+
+  final class Double[T] private[twoface](val value : scala.Double) extends AnyVal with TwoFaceAny[scala.Double, T] {
+    @inline def getValue : scala.Double = value
+  }
+  implicit object Double extends TwoFaceBuilder[Double, scala.Double] {
+    def apply[T](value : scala.Double) = new Double[T](value)
+  }
+
+  final class String[T] private[twoface](val value : java.lang.String) extends AnyVal with TwoFaceAny[java.lang.String, T] {
+    @inline def getValue : java.lang.String = value
+  }
+  implicit object String extends TwoFaceBuilder[String, java.lang.String] {
+    def apply[T](value : java.lang.String) = new String[T](value)
+  }
+
+  final class Boolean[T] private[twoface](val value : scala.Boolean) extends AnyVal with TwoFaceAny[scala.Boolean, T] {
+    @inline def getValue : scala.Boolean = value
+  }
+  implicit object Boolean extends TwoFaceBuilder[Boolean, scala.Boolean] {
+    def apply[T](value : scala.Boolean) = new Boolean[T](value)
+  }
 }
 
 
