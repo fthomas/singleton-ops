@@ -1,8 +1,7 @@
 package singleton.ops
 
-sealed abstract class TwoFace[Face, T](val value : Face) {
+sealed trait TwoFace[Face, T] extends Any {
   def isLiteral(implicit rt : RunTime[T]) : Boolean = !rt
-  override def toString = value.toString
 }
 sealed trait TwoFaceObj[TF[_], Face] {
   protected[ops] def create[T](value : Face) : TF[T]
@@ -16,11 +15,12 @@ sealed trait TwoFaceObj[TF[_], Face] {
 }
 
 
-final class TwoFaceInt[T] private(value : Int) extends TwoFace[Int, T](value) {
+final class TwoFaceInt[T] private(val value : Int) extends AnyVal with TwoFace[Int, T] {
   def + [R](r : TwoFaceInt[R])(implicit fb : FallBack[Int, T + R]) = TwoFaceInt.op[T + R](this.value + r.value)
   def - [R](r : TwoFaceInt[R])(implicit fb : FallBack[Int, T - R]) = TwoFaceInt.op[T - R](this.value - r.value)
   def * [R](r : TwoFaceInt[R])(implicit fb : FallBack[Int, T * R]) = TwoFaceInt.op[T * R](this.value * r.value)
   def / [R](r : TwoFaceInt[R])(implicit fb : FallBack[Int, T / R]) = TwoFaceInt.op[T / R](this.value / r.value)
+  override def toString = value.toString
 }
 
 object TwoFaceInt extends TwoFaceObj[TwoFaceInt, Int] {
