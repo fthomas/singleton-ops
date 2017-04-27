@@ -21,6 +21,7 @@ package object ops {
   //E.g. SafeInt[Something[Nice] + 1] OK
   //     Something[SafeInt[Nice] + 1] BAD
   /////////////////////////////////////////////////
+  type SafeCast[P1, P2]     = impl.OpCast[P1, true ==> P2]
   type SafeNat[P1]          = impl.OpNat[Require[IsNat[P1]] ==> P1]
   type SafeChar[P1]         = impl.OpChar[Require[IsChar[P1]] ==> P1]
   type SafeInt[P1]          = impl.OpInt[Require[IsInt[P1]] ==> P1]

@@ -28,18 +28,3 @@ object FallBack {
 }
 /////////////////////////////////////////////////
 
-
-
-final class MegaInt[I](val value : Int) extends AnyVal {
-  def + [R : MegaInt](r : MegaInt[R])(implicit fb : FallBack[Int, I+R]) =
-    MegaInt[fb.Out](if (fb.isLiteral) fb.value.get else this.value + r.value)
-  def knownAtRunTime(implicit rt : RunTime[I]) : Boolean = rt
-  def knownAtCompileTime(implicit rt : RunTime[I]) : Boolean = !rt
-}
-
-object MegaInt {
-  def apply[I](i : Int) : MegaInt[I] = new MegaInt[I](i)
-  implicit def safe[I <: Int with Singleton](i : I) : MegaInt[I] = new MegaInt[I](i)
-  implicit def unsafe[I <: Int](i : I) : MegaInt[Int] = new MegaInt[Int](i)
-  implicit def ev[I](implicit si : SafeInt[I]) : MegaInt[si.Out] = new MegaInt[si.Out](si)
-}

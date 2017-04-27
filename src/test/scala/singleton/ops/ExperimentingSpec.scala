@@ -145,6 +145,8 @@ object NonLiteralTest {
 //  checkPos(-1) //compiletime Fail
   checkPos(a) //runtime Fail
 
+  val mi = TwoFaceInt[2](2)
+  mi + mi
   var b = 1
 
   implicit def toValueOfInt[T <: Int](t : T) : ValueOf[T] = new ValueOf[T](t)
