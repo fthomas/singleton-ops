@@ -16,8 +16,8 @@ object TwoFace {
       tfb[T](value)
     implicit def unsafe[T <: Face](value : T)(implicit tfb : TwoFaceBuilder[TF, Face]) : TF[Face] =
       tfb[Face](value)
-    implicit def ev[T](implicit si : SafeCast[Face with Singleton, T], tfb : TwoFaceBuilder[TF, Face]) : TF[si.Out] =
-      tfb[si.Out](si.value)
+    implicit def ev[T](implicit si : true ==> T, tfb : TwoFaceBuilder[TF, Face]) : TF[T] =
+      tfb[T](si.value.asInstanceOf[Face])
   }
 
   sealed trait TwoFaceOp[TF[_], Face, OP] {
