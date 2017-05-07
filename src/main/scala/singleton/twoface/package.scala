@@ -4,6 +4,7 @@ package object twoface {
   @inline implicit def fromTwoFaceUnsafe[Face, T](tf : TwoFace.TwoFaceAny[Face, T]) : Face = tf.getValue
   @inline implicit def fromTwoFaceSafe[Face, T <: Face with Singleton](tf : TwoFace.TwoFaceAny[Face, T])
     (implicit sc: ValueOf[T]) : T {} = valueOf[T]
+  @inline implicit def fromChecked[F, V, C, M](c : Checked[F, V, C, M]) : F = c.value
 
   import TwoFace._
   import singleton.ops._
