@@ -45,3 +45,4 @@ object TwoFace {
     def apply[T](value : scala.Boolean) = new Boolean[T](value)
   }
 }
+

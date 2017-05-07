@@ -2,7 +2,7 @@ package singleton.twoface
 
 import singleton.ops._
 
-sealed trait TwoFaceAny[Face, T] extends Any {
+protected[twoface] trait TwoFaceAny[Face, T] extends Any {
   def isLiteral(implicit rt : RunTime[T]) : scala.Boolean = !rt
   @inline def getValue : Face
   override def toString = getValue.toString

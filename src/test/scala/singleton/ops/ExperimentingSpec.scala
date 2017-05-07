@@ -152,6 +152,22 @@ object NonLiteralTest {
 //  smallerThan50(60)    //fails compile-time check
 }
 
+object CheckedTest {
+  import singleton.twoface._
+  type SmallerThan50[T] = T < 50
+  def smallerThan50[T](t : Checked.Int[T, SmallerThan50, "Not smaller than 50"]) : Unit = {
+    require(t < 50, "") //if (rt_check)
+  }
+
+  var forty = 40
+  var sixty = 60
+
+//  smallerThan50(forty) //passes run-time check
+//  smallerThan50(40)    //passes compile-time check
+//  smallerThan50(sixty) //fails run-time check
+//  Checked.Int.safe[60, SmallerThan50, "Not smaller than 50"](60)
+  smallerThan50(60)    //fails compile-time check
+}
 /* TODOs:
 Fix real world matrix example
 Add operations table to readme

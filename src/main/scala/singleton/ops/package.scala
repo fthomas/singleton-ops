@@ -60,6 +60,7 @@ package object ops {
   type GV[Name]             = OpMacro["GV",Name, 0, 0]
   /////////////////////////////////////////////////
 
+  type Id[P1]               = OpMacro["Id",P1, 0, 0]
   type ![P1]                = OpMacro["!",P1, 0, 0]
   type Require[P1]          = OpMacro["Require",P1, 0, 0]
   type ToNat[P1]            = OpMacro["ToNat",P1, 0, 0]
