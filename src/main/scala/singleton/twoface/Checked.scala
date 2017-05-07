@@ -14,13 +14,13 @@ object Checked {
 //  implicit def ev[F, V, C, M, TFV <: TwoFace.TwoFaceAny[F, V]](implicit tfv : TFV, ct  : CompileTime[C], di : DummyImplicit) : Checked[F, V, C, M] = new Checked[F, V, C, M] {
 //    val value = tfv.getValue
 //  }
-  implicit def fromInt[V : TwoFace.Int, C, M](tfv : TwoFace.Int[V])(implicit ct  : CompileTime[C]) : Checked[Int, V, C, M] = new Checked[Int, V, C, M] {
+  implicit def fromInt[V : TwoFaceAny.Int, C, M](tfv : TwoFaceAny.Int[V])(implicit ct  : CompileTime[C]) : Checked[Int, V, C, M] = new Checked[Int, V, C, M] {
     val value = tfv.getValue
   }
 }
 
 object Bla {
-  val a : Checked[Int, 5, true, "df"] = 5
+//  val a : Checked[Int, 5, true, "df"] = 5
 //  implicitly[Checked[scala.Int, 5, true, "df"]]
 }
 //trait CheckedObj[Chk[F, V, C, M] <: Checked[F, V, C, M]] {

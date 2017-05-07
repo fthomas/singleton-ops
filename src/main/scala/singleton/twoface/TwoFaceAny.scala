@@ -2,28 +2,72 @@ package singleton.twoface
 
 import singleton.ops._
 
-object TwoFace {
-  sealed trait TwoFaceAny[Face, T] extends Any {
-    def isLiteral(implicit rt : RunTime[T]) : scala.Boolean = !rt
-    @inline def getValue : Face
-    override def toString = getValue.toString
-  }
+sealed trait TwoFaceAny[Face, T] extends Any {
+  def isLiteral(implicit rt : RunTime[T]) : scala.Boolean = !rt
+  @inline def getValue : Face
+  override def toString = getValue.toString
+}
 
-  sealed trait TwoFaceBuilder[TF[_], Face] {
-    type Return[OP] = TwoFaceOp[TF, Face, OP]
+object TwoFace {
+  final class Char[T] private(val value : scala.Char) extends AnyVal with TwoFaceAny.Char[T] {
+    @inline def getValue : scala.Char = value
+  }
+  implicit object Char extends TwoFaceAny.Builder[Char, scala.Char] {
+    def apply[T](value : scala.Char) = new Char[T](value)
+  }
+  final class Int[T] private(val value : scala.Int) extends AnyVal with TwoFaceAny.Int[T] {
+    @inline def getValue : scala.Int = value
+  }
+  implicit object Int extends TwoFaceAny.Builder[Int, scala.Int] {
+    def apply[T](value : scala.Int) = new Int[T](value)
+  }
+  final class Long[T] private(val value : scala.Long) extends AnyVal with TwoFaceAny.Long[T] {
+    @inline def getValue : scala.Long = value
+  }
+  implicit object Long extends TwoFaceAny.Builder[Long, scala.Long] {
+    def apply[T](value : scala.Long) = new Long[T](value)
+  }
+  final class Float[T] private(val value : scala.Float) extends AnyVal with TwoFaceAny.Float[T] {
+    @inline def getValue : scala.Float = value
+  }
+  implicit object Float extends TwoFaceAny.Builder[Float, scala.Float] {
+    def apply[T](value : scala.Float) = new Float[T](value)
+  }
+  final class Double[T] private(val value : scala.Double) extends AnyVal with TwoFaceAny.Double[T] {
+    @inline def getValue : scala.Double = value
+  }
+  implicit object Double extends TwoFaceAny.Builder[Double, scala.Double] {
+    def apply[T](value : scala.Double) = new Double[T](value)
+  }
+  final class String[T] private(val value : java.lang.String) extends AnyVal with TwoFaceAny.String[T] {
+    @inline def getValue : java.lang.String = value
+  }
+  implicit object String extends TwoFaceAny.Builder[String, java.lang.String] {
+    def apply[T](value : java.lang.String) = new String[T](value)
+  }
+  final class Boolean[T] private(val value : scala.Boolean) extends AnyVal with TwoFaceAny.Boolean[T] {
+    @inline def getValue : scala.Boolean = value
+  }
+  implicit object Boolean extends TwoFaceAny.Builder[Boolean, scala.Boolean] {
+    def apply[T](value : scala.Boolean) = new Boolean[T](value)
+  }
+}
+
+protected[twoface] object TwoFaceAny {
+  trait Builder[TF[_], Face] {
     def apply[T](value : Face) : TF[T]
-    implicit def safe[T <: Face with Singleton](value : T)(implicit tfb : TwoFaceBuilder[TF, Face]) : TF[T] =
+    implicit def safe[T <: Face with Singleton](value : T)(implicit tfb : Builder[TF, Face]) : TF[T] =
       tfb[T](value)
-    implicit def unsafe[T <: Face](value : T)(implicit tfb : TwoFaceBuilder[TF, Face]) : TF[Face] =
+    implicit def unsafe[T <: Face](value : T)(implicit tfb : Builder[TF, Face]) : TF[Face] =
       tfb[Face](value)
-    implicit def ev[T](implicit si : true ==> T, tfb : TwoFaceBuilder[TF, Face]) : TF[T] =
+    implicit def ev[T](implicit si : true ==> T, tfb : Builder[TF, Face]) : TF[T] =
       tfb[T](si.value.asInstanceOf[Face])
   }
 
   sealed trait TwoFaceOp[TF[_], Face, OP] {
     type FB <: FallBack[Face, OP]
     val fb : FB
-    def apply(op : => Face)(implicit tfb : TwoFaceBuilder[TF, Face]) : TF[fb.Out] =
+    def apply(op : => Face)(implicit tfb : Builder[TF, Face]) : TF[fb.Out] =
       tfb[fb.Out](if (fb.isLiteral) fb.value.get else op)
   }
   object TwoFaceOp {
@@ -31,7 +75,7 @@ object TwoFace {
       new TwoFaceOp[TF, Face, OP]{type FB = fb0.type; val fb : FB = fb0}
   }
 
-  final class Char[T] private(val value : scala.Char) extends AnyVal with TwoFaceAny[scala.Char, T] {
+  trait Char[T] extends Any with TwoFaceAny[scala.Char, T] {
     def +  [R](r : Char[R])(implicit tfo : Int.Return[T + R])        = tfo(this.getValue +  r.getValue)
     def -  [R](r : Char[R])(implicit tfo : Int.Return[T - R])        = tfo(this.getValue -  r.getValue)
     def *  [R](r : Char[R])(implicit tfo : Int.Return[T * R])        = tfo(this.getValue *  r.getValue)
@@ -94,13 +138,12 @@ object TwoFace {
     def toFloat(implicit tfo : Float.Return[ToFloat[T]])             = tfo(this.getValue.toFloat)
     def toDouble(implicit tfo : Double.Return[ToDouble[T]])          = tfo(this.getValue.toDouble)
     def toString(implicit tfo : String.Return[ToString[T]])          = tfo(this.getValue.toString)
-    @inline def getValue : scala.Char = value
   }
-  implicit object Char extends TwoFaceBuilder[Char, scala.Char] {
-    def apply[T](value : scala.Char) = new Char[T](value)
+  object Char {
+    type Return[OP] = TwoFaceOp[TwoFace.Char, scala.Char, OP]
   }
 
-  final class Int[T] private[twoface](val value : scala.Int) extends AnyVal with TwoFaceAny[scala.Int, T] {
+  trait Int[T] extends Any with TwoFaceAny[scala.Int, T] {
     def +  [R](r : Char[R])(implicit tfo : Int.Return[T + R])        = tfo(this.getValue +  r.getValue)
     def -  [R](r : Char[R])(implicit tfo : Int.Return[T - R])        = tfo(this.getValue -  r.getValue)
     def *  [R](r : Char[R])(implicit tfo : Int.Return[T * R])        = tfo(this.getValue *  r.getValue)
@@ -165,13 +208,12 @@ object TwoFace {
     def toFloat(implicit tfo : Float.Return[ToFloat[T]])             = tfo(this.getValue.toFloat)
     def toDouble(implicit tfo : Double.Return[ToDouble[T]])          = tfo(this.getValue.toDouble)
     def toString(implicit tfo : String.Return[ToString[T]])          = tfo(this.getValue.toString)
-    @inline def getValue : scala.Int = value
   }
-  implicit object Int extends TwoFaceBuilder[Int, scala.Int] {
-    def apply[T](value : scala.Int) = new Int[T](value)
+  object Int {
+    type Return[OP] = TwoFaceOp[TwoFace.Int, scala.Int, OP]
   }
 
-  final class Long[T] private[twoface](val value : scala.Long) extends AnyVal with TwoFaceAny[scala.Long, T] {
+  trait Long[T] extends Any with TwoFaceAny[scala.Long, T] {
     def +  [R](r : Char[R])(implicit tfo : Long.Return[T + R])       = tfo(this.getValue +  r.getValue)
     def -  [R](r : Char[R])(implicit tfo : Long.Return[T - R])       = tfo(this.getValue -  r.getValue)
     def *  [R](r : Char[R])(implicit tfo : Long.Return[T * R])       = tfo(this.getValue *  r.getValue)
@@ -236,13 +278,12 @@ object TwoFace {
     def toFloat(implicit tfo : Float.Return[ToFloat[T]])             = tfo(this.getValue.toFloat)
     def toDouble(implicit tfo : Double.Return[ToDouble[T]])          = tfo(this.getValue.toDouble)
     def toString(implicit tfo : String.Return[ToString[T]])          = tfo(this.getValue.toString)
-    @inline def getValue : scala.Long = value
   }
-  implicit object Long extends TwoFaceBuilder[Long, scala.Long] {
-    def apply[T](value : scala.Long) = new Long[T](value)
+  object Long {
+    type Return[OP] = TwoFaceOp[TwoFace.Long, scala.Long, OP]
   }
 
-  final class Float[T] private[twoface](val value : scala.Float) extends AnyVal with TwoFaceAny[scala.Float, T] {
+  trait Float[T] extends Any with TwoFaceAny[scala.Float, T] {
     def +  [R](r : Char[R])(implicit tfo : Float.Return[T + R])      = tfo(this.getValue +  r.getValue)
     def -  [R](r : Char[R])(implicit tfo : Float.Return[T - R])      = tfo(this.getValue -  r.getValue)
     def *  [R](r : Char[R])(implicit tfo : Float.Return[T * R])      = tfo(this.getValue *  r.getValue)
@@ -307,13 +348,12 @@ object TwoFace {
     def toFloat(implicit tfo : Float.Return[ToFloat[T]])             = tfo(this.getValue)
     def toDouble(implicit tfo : Double.Return[ToDouble[T]])          = tfo(this.getValue.toDouble)
     def toString(implicit tfo : String.Return[ToString[T]])          = tfo(this.getValue.toString)
-    @inline def getValue : scala.Float = value
   }
-  implicit object Float extends TwoFaceBuilder[Float, scala.Float] {
-    def apply[T](value : scala.Float) = new Float[T](value)
+  object Float {
+    type Return[OP] = TwoFaceOp[TwoFace.Float, scala.Float, OP]
   }
 
-  final class Double[T] private[twoface](val value : scala.Double) extends AnyVal with TwoFaceAny[scala.Double, T] {
+  trait Double[T] extends Any with TwoFaceAny[scala.Double, T] {
     def +  [R](r : Char[R])(implicit tfo : Double.Return[T + R])     = tfo(this.getValue +  r.getValue)
     def -  [R](r : Char[R])(implicit tfo : Double.Return[T - R])     = tfo(this.getValue -  r.getValue)
     def *  [R](r : Char[R])(implicit tfo : Double.Return[T * R])     = tfo(this.getValue *  r.getValue)
@@ -378,13 +418,12 @@ object TwoFace {
     def toFloat(implicit tfo : Float.Return[ToFloat[T]])             = tfo(this.getValue.toFloat)
     def toDouble(implicit tfo : Double.Return[ToDouble[T]])          = tfo(this.getValue)
     def toString(implicit tfo : String.Return[ToString[T]])          = tfo(this.getValue.toString)
-    @inline def getValue : scala.Double = value
   }
-  implicit object Double extends TwoFaceBuilder[Double, scala.Double] {
-    def apply[T](value : scala.Double) = new Double[T](value)
+  object Double {
+    type Return[OP] = TwoFaceOp[TwoFace.Double, scala.Double, OP]
   }
 
-  final class String[T] private[twoface](val value : java.lang.String) extends AnyVal with TwoFaceAny[java.lang.String, T] {
+  trait String[T] extends Any with TwoFaceAny[java.lang.String, T] {
     def +  [R](r : String[R])(implicit tfo : String.Return[T + R])   = tfo(this.getValue +  r.getValue)
     def reverse(implicit tfo : String.Return[Reverse[T]])            = tfo(this.getValue.reverse)
     def substring[R](r : Int[R])(implicit tfo : String.Return[Substring[T,R]])= tfo(this.getValue substring r.getValue)
@@ -395,23 +434,22 @@ object TwoFace {
     def toFloat(implicit tfo : Float.Return[ToFloat[T]])             = tfo(this.getValue.toFloat)
     def toDouble(implicit tfo : Double.Return[ToDouble[T]])          = tfo(this.getValue.toDouble)
     def toString(implicit tfo : String.Return[ToString[T]])          = tfo(this.getValue)
-    @inline def getValue : java.lang.String = value
   }
-  implicit object String extends TwoFaceBuilder[String, java.lang.String] {
-    def apply[T](value : java.lang.String) = new String[T](value)
+  object String {
+    type Return[OP] = TwoFaceOp[TwoFace.String, java.lang.String, OP]
   }
 
-  final class Boolean[T] private[twoface](val value : scala.Boolean) extends AnyVal with TwoFaceAny[scala.Boolean, T] {
+  trait Boolean[T] extends Any with TwoFaceAny[scala.Boolean, T] {
     def == [R](r : Boolean[R])(implicit tfo : Boolean.Return[T == R])= tfo(this.getValue == r.getValue)
     def != [R](r : Boolean[R])(implicit tfo : Boolean.Return[T != R])= tfo(this.getValue != r.getValue)
     def && [R](r : Boolean[R])(implicit tfo : Boolean.Return[T && R])= tfo(this.getValue && r.getValue)
     def || [R](r : Boolean[R])(implicit tfo : Boolean.Return[T || R])= tfo(this.getValue || r.getValue)
     def toString(implicit tfo : String.Return[ToString[T]])          = tfo(this.getValue.toString)
-    @inline def getValue : scala.Boolean = value
   }
-  implicit object Boolean extends TwoFaceBuilder[Boolean, scala.Boolean] {
-    def apply[T](value : scala.Boolean) = new Boolean[T](value)
+  object Boolean {
+    type Return[OP] = TwoFaceOp[TwoFace.Boolean, scala.Boolean, OP]
   }
+
 }
 
 
