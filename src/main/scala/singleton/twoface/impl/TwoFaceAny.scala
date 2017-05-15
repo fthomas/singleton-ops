@@ -1,6 +1,7 @@
-package singleton.twoface
+package singleton.twoface.impl
 
 import singleton.ops._
+import singleton.twoface.TwoFace
 
 protected[twoface] trait TwoFaceAny[Face, T] extends Any {
   def isLiteral(implicit rt : RunTime[T]) : scala.Boolean = !rt

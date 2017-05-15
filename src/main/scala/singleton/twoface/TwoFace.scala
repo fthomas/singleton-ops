@@ -1,5 +1,6 @@
 package singleton.twoface
 
+import impl._
 
 object TwoFace {
   final class Char[T] private(val value : scala.Char) extends AnyVal with TwoFaceAny.Char[T] {

@@ -4,6 +4,7 @@ package singleton.twoface
   * Created by soronpo on 07/05/2017.
   */
 import singleton.ops._
+import impl._
 //import TwoFace._
 object Checked {
   trait Builder[CHK[_,C[_],_], Face] {

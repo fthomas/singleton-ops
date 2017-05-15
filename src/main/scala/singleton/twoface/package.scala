@@ -1,5 +1,7 @@
 package singleton
 
+import singleton.twoface.impl.TwoFaceAny
+
 package object twoface {
   import TwoFaceAny._
   import singleton.ops._

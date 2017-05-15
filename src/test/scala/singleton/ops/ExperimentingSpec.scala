@@ -171,7 +171,7 @@ object CheckedTest {
 //  smallerThan50(40)    //passes compile-time check
 //  smallerThan50(sixty) //fails run-time check
 //  Checked.Int.safe[60, SmallerThan50, "Not smaller than 50"](60)
-  smallerThan50(Checked.Int.conv(40))    //fails compile-time check
+//  smallerThan50(40)    //fails compile-time check
 }
 /* TODOs:
 Fix real world matrix example
