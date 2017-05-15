@@ -1,6 +1,6 @@
 package singleton
 
-import singleton.twoface.impl.TwoFaceAny
+import twoface.impl._
 
 package object twoface {
   import TwoFaceAny._
