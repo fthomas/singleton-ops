@@ -6,16 +6,22 @@ package singleton.twoface
 import singleton.ops._
 //import TwoFace._
 object Checked {
-  trait Builder[TF[_,C[_],_], Face] {
-    def apply[T, Cond[_], Msg](value : Face) : TF[T, Cond, Msg]
+  trait Builder[CHK[_,C[_],_], Face] {
+    protected def create[T, Cond[_], Msg](value : Face) : CHK[T, Cond, Msg]
     implicit def ev[T, Cond[_], Msg](implicit v : Id[T], ct : CompileTime[Cond[T]]) :
-      TF[T, Cond, Msg] = apply[T, Cond, Msg](v.value.asInstanceOf[Face])
-//    implicit def conv[T <: Face, Cond[_], Msg](t : T)(implicit fb : FallBack[Face, T], ct : CompileTime[Cond[T]]) :
-//      TF[T, Cond, Msg] = apply[T, Cond, Msg](if (fb.isLiteral) fb.value.get else t)
-      implicit def unsafe[T <: Face, Cond[_], Msg](t : T)(implicit ct : CompileTime[Cond[T]], rt : RunTime[T]) :
-      TF[Face, Cond, Msg] = apply[Face, Cond, Msg](t)
-      implicit def safe[T <: Face with Singleton, Cond[_], Msg](t : T)(implicit ct : CompileTime[Cond[T]]) :
-      TF[T, Cond, Msg] = apply[T, Cond, Msg](t)
+      CHK[T, Cond, Msg] = create[T, Cond, Msg](v.value.asInstanceOf[Face])
+    implicit def fromTwoFace[T, Cond[_], Msg, T2](tf : TwoFaceAny[Face, T2])(
+      implicit eq : Require[ITE[IsNotLiteral[T], true, T==T2]], ct : CompileTime[Cond[T]]
+    ) : CHK[T, Cond, Msg] = create[T, Cond, Msg](tf.getValue)
+
+//    implicit def conv[T <: Face, Cond[_], Msg](t : T)(implicit toTF : T => TwoFaceAny[Face, T], ct : CompileTime[Cond[T]]) :
+//    CHK[T, Cond, Msg] = fromTwoFace(toTF(t))
+//    implicit def conv[T <: Face {}, Cond[_], Msg](t : T {})(implicit fb : FallBack[Face, T], ct : CompileTime[Cond[T]]) :
+//      CHK[fb.Out, Cond, Msg] = create[fb.Out, Cond, Msg](if (fb.isLiteral) fb.value.get else t.asInstanceOf[Face])
+//      implicit def unsafe[T <: Face, Cond[_], Msg](t : T)(implicit ct : CompileTime[Cond[T]], rt : RunTime[T]) :
+//      CHK[Face, Cond, Msg] = apply[Face, Cond, Msg](t)
+//      implicit def safe[T <: Face with Singleton, Cond[_], Msg](t : T)(implicit ct : CompileTime[Cond[T]]) :
+//      CHK[T, Cond, Msg] = apply[T, Cond, Msg](t)
   }
 
   @scala.annotation.implicitNotFound("${Msg}")
@@ -23,7 +29,7 @@ object Checked {
     @inline def getValue : scala.Int = value
   }
   object Int extends Builder[Int, scala.Int] {
-    def apply[T, Cond[_], Msg](value : scala.Int) : Int[T, Cond, Msg] = new Int[T, Cond, Msg](value)
+    protected def create[T, Cond[_], Msg](value : scala.Int) : Int[T, Cond, Msg] = new Int[T, Cond, Msg](value)
   }
 }
 
