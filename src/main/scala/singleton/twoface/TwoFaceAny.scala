@@ -10,20 +10,20 @@ protected[twoface] trait TwoFaceAny[Face, T] extends Any {
 
 protected[twoface] object TwoFaceAny {
   trait Builder[TF[_], Face] {
-    def apply[T](value : Face) : TF[T]
-    implicit def safe[T <: Face with Singleton](value : T)(implicit tfb : Builder[TF, Face]) : TF[T] =
-      tfb[T](value)
-    implicit def unsafe[T <: Face](value : T)(implicit tfb : Builder[TF, Face]) : TF[Face] =
-      tfb[Face](value)
-    implicit def ev[T](implicit si : true ==> T, tfb : Builder[TF, Face]) : TF[T] =
-      tfb[T](si.value.asInstanceOf[Face])
+    protected[twoface] def create[T](value : Face) : TF[T]
+    implicit def apply[T <: Face with Singleton](value : T)(implicit tfb : Builder[TF, Face]) : TF[T] =
+      tfb.create[T](value)
+    implicit def apply[T <: Face](value : T)(implicit tfb : Builder[TF, Face], di: DummyImplicit) : TF[Face] =
+      tfb.create[Face](value)
+    implicit def apply[T](implicit si : Id[T], tfb : Builder[TF, Face]) : TF[T] =
+      tfb.create[T](si.value.asInstanceOf[Face])
   }
 
   sealed trait TwoFaceOp[TF[_], Face, OP] {
     type FB <: FallBack[Face, OP]
     val fb : FB
     def apply(op : => Face)(implicit tfb : Builder[TF, Face]) : TF[fb.Out] =
-      tfb[fb.Out](if (fb.isLiteral) fb.value.get else op)
+      tfb.create[fb.Out](if (fb.isLiteral) fb.value.get else op)
   }
   object TwoFaceOp {
     implicit def ev[TF[_], Face, OP](implicit fb0 : FallBack[Face, OP]) : TwoFaceOp[TF, Face, OP]{type FB = fb0.type} =
