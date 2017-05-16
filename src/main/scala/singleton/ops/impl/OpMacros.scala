@@ -27,17 +27,17 @@ object OpMacro {
 }
 /*******************************************************************************************************/
 
-/********************************************************************************************************
-  * XTypeOf Experimental
-  *******************************************************************************************************/
-@ bundle
-object XTypeOf {
-  def apply(value : Int with Singleton) : Op = macro Macro.impl
-
-  final class Macro(val c: whitebox.Context) extends GeneralMacros {
-    def impl(value : c.Expr[Int with Singleton]): c.Tree =
-      materializeOpVal[Op].usingFuncName(value)
-  }
-}
-/*******************************************************************************************************/
+///********************************************************************************************************
+//  * XTypeOf Experimental
+//  *******************************************************************************************************/
+//@ bundle
+//object XTypeOf {
+//  def apply(value : Int with Singleton) : Op = macro Macro.impl
+//
+//  final class Macro(val c: whitebox.Context) extends GeneralMacros {
+//    def impl(value : c.Expr[Int with Singleton]): c.Tree =
+//      materializeOpVal[Op].usingFuncName(value)
+//  }
+//}
+///*******************************************************************************************************/
 

@@ -1,46 +1,60 @@
 package singleton.twoface
-
-/**
-  * Created by soronpo on 07/05/2017.
-  */
-import singleton.ops._
 import impl._
-//import TwoFace._
-object Checked {
-  trait Builder[CHK[_,C[_],_], Face] {
-    protected def create[T, Cond[_], Msg](value : Face) : CHK[T, Cond, Msg]
-    implicit def ev[T, Cond[_], Msg](implicit v : Id[T], ct : CompileTime[Cond[T]]) :
-      CHK[T, Cond, Msg] = create[T, Cond, Msg](v.value.asInstanceOf[Face])
-    implicit def fromTwoFace[T, Cond[_], Msg, T2](tf : TwoFaceAny[Face, T2])(
-      implicit eq : Require[ITE[IsNotLiteral[T], true, T==T2]], ct : CompileTime[Cond[T]]
-    ) : CHK[T, Cond, Msg] = create[T, Cond, Msg](tf.getValue)
 
-//    implicit def conv[T <: Face, Cond[_], Msg](t : T)(implicit toTF : T => TwoFaceAny[Face, T], ct : CompileTime[Cond[T]]) :
-//    CHK[T, Cond, Msg] = fromTwoFace(toTF(t))
-//    implicit def conv[T <: Face {}, Cond[_], Msg](t : T {})(implicit fb : FallBack[Face, T], ct : CompileTime[Cond[T]]) :
-//      CHK[fb.Out, Cond, Msg] = create[fb.Out, Cond, Msg](if (fb.isLiteral) fb.value.get else t.asInstanceOf[Face])
-//      implicit def unsafe[T <: Face, Cond[_], Msg](t : T)(implicit ct : CompileTime[Cond[T]], rt : RunTime[T]) :
-//      CHK[Face, Cond, Msg] = apply[Face, Cond, Msg](t)
-//      implicit def safe[T <: Face with Singleton, Cond[_], Msg](t : T)(implicit ct : CompileTime[Cond[T]]) :
-//      CHK[T, Cond, Msg] = apply[T, Cond, Msg](t)
+object Checked {
+  @scala.annotation.implicitNotFound("${Msg}")
+  final class Char[T, Cond[_], Msg] private(val value : scala.Char) extends AnyVal with TwoFaceAny.Char[T] {
+    @inline def getValue : scala.Char = value
+  }
+  object Char extends CheckedAny.Builder[Char, scala.Char] {
+    protected[twoface] def create[T, Cond[_], Msg](value : scala.Char) : Char[T, Cond, Msg] = new Char[T, Cond, Msg](value)
   }
 
   @scala.annotation.implicitNotFound("${Msg}")
   final class Int[T, Cond[_], Msg] private(val value : scala.Int) extends AnyVal with TwoFaceAny.Int[T] {
     @inline def getValue : scala.Int = value
   }
-  object Int extends Builder[Int, scala.Int] {
-    protected def create[T, Cond[_], Msg](value : scala.Int) : Int[T, Cond, Msg] = new Int[T, Cond, Msg](value)
+  object Int extends CheckedAny.Builder[Int, scala.Int] {
+    protected[twoface] def create[T, Cond[_], Msg](value : scala.Int) : Int[T, Cond, Msg] = new Int[T, Cond, Msg](value)
+  }
+
+  @scala.annotation.implicitNotFound("${Msg}")
+  final class Long[T, Cond[_], Msg] private(val value : scala.Long) extends AnyVal with TwoFaceAny.Long[T] {
+    @inline def getValue : scala.Long = value
+  }
+  object Long extends CheckedAny.Builder[Long, scala.Long] {
+    protected[twoface] def create[T, Cond[_], Msg](value : scala.Long) : Long[T, Cond, Msg] = new Long[T, Cond, Msg](value)
+  }
+
+  @scala.annotation.implicitNotFound("${Msg}")
+  final class Float[T, Cond[_], Msg] private(val value : scala.Float) extends AnyVal with TwoFaceAny.Float[T] {
+    @inline def getValue : scala.Float = value
+  }
+  object Float extends CheckedAny.Builder[Float, scala.Float] {
+    protected[twoface] def create[T, Cond[_], Msg](value : scala.Float) : Float[T, Cond, Msg] = new Float[T, Cond, Msg](value)
+  }
+
+  @scala.annotation.implicitNotFound("${Msg}")
+  final class Double[T, Cond[_], Msg] private(val value : scala.Double) extends AnyVal with TwoFaceAny.Double[T] {
+    @inline def getValue : scala.Double = value
+  }
+  object Double extends CheckedAny.Builder[Double, scala.Double] {
+    protected[twoface] def create[T, Cond[_], Msg](value : scala.Double) : Double[T, Cond, Msg] = new Double[T, Cond, Msg](value)
+  }
+
+  @scala.annotation.implicitNotFound("${Msg}")
+  final class String[T, Cond[_], Msg] private(val value : java.lang.String) extends AnyVal with TwoFaceAny.String[T] {
+    @inline def getValue : java.lang.String = value
+  }
+  object String extends CheckedAny.Builder[String, java.lang.String] {
+    protected[twoface] def create[T, Cond[_], Msg](value : java.lang.String) : String[T, Cond, Msg] = new String[T, Cond, Msg](value)
+  }
+
+  @scala.annotation.implicitNotFound("${Msg}")
+  final class Boolean[T, Cond[_], Msg] private(val value : scala.Boolean) extends AnyVal with TwoFaceAny.Boolean[T] {
+    @inline def getValue : scala.Boolean = value
+  }
+  object Boolean extends CheckedAny.Builder[Boolean, scala.Boolean] {
+    protected[twoface] def create[T, Cond[_], Msg](value : scala.Boolean) : Boolean[T, Cond, Msg] = new Boolean[T, Cond, Msg](value)
   }
 }
-
-
-//object Bla {
-//  val a : Checked.Int[5, true, "df"] = Checked.Int.conv(5)
-//  implicitly[Checked.Int[5, true, "df"]]
-//}
-//trait CheckedObj[Chk[F, V, C, M] <: Checked[F, V, C, M]] {
-//  def create[F, V, C, M](tfv : TwoFaceAny[F, V]) : Chk[F, V, C, M]
-//  implicit def ev[F, V, C, M](implicit tfv : TwoFaceAny[F, V], ct  : CompileTime[C], di : DummyImplicit) : Chk[F, V, C, M] = create(tfv)
-//  implicit def apply[F, V, C, M](tfv : TwoFaceAny[F, V])(implicit ct  : CompileTime[C]) : Chk[F, V, C, M] = create(tfv)
-//}
