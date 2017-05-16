@@ -166,7 +166,7 @@ object CheckedTest {
   val tfForty = TwoFace.Int(forty)
 
 
-//  val chk : Checked.Int[40,SmallerThan50,"Not smaller than 50"] = 40
+  val chk : Checked.Int[0,SmallerThan50,"Not smaller than 50"] = tf40-tf40
 //  smallerThan50(forty) //passes run-time check
 //  smallerThan50(40)    //passes compile-time check
 //  smallerThan50(sixty) //fails run-time check

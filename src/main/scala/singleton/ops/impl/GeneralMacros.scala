@@ -718,10 +718,10 @@ trait GeneralMacros {
   ///////////////////////////////////////////////////////////////////////////////////////////
   // Checked TwoFace
   ///////////////////////////////////////////////////////////////////////////////////////////
-  def materializeOpVal[T, Cond, Msg](implicit ev0: c.WeakTypeTag[Cond], ev1: c.WeakTypeTag[Msg]): MaterializeOpAuxVal[T] =
-  new MaterializeOpAuxVal[T](weakTypeOf[Cond], weakTypeOf[Msg])
+  def materializeOpVal[T, Cond, Msg, Out](implicit ev0: c.WeakTypeTag[Cond], ev1: c.WeakTypeTag[Msg]): MaterializeOpAuxVal[T, Out] =
+  new MaterializeOpAuxVal[T, Out](weakTypeOf[Cond], weakTypeOf[Msg])
 
-  final class MaterializeOpAuxVal[T](condTpe: Type, msgTpe : Type) {
+  final class MaterializeOpAuxVal[T, Out](condTpe: Type, msgTpe : Type) {
     def usingFuncName(value : c.Expr[T]) : Tree = {
 //      print(showRaw(condTpe))
 //      print(showRaw(msgTpe))
