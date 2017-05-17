@@ -722,7 +722,7 @@ trait GeneralMacros {
   new MaterializeOpAuxVal[T]
 
   final class MaterializeOpAuxVal[T] {
-    def usingFuncName(value : c.Expr[T]) : Tree = {
+    def usingFuncName(value : c.Expr[T]) : c.Expr[T] = {
 //      print(showRaw(condTpe))
 //      print(showRaw(msgTpe))
 //      print(showCode(value.tree))
@@ -733,7 +733,7 @@ trait GeneralMacros {
           val outTpe = constantTypeOf(t)
           t match {
             case tt : Char => q"implicitly[_root_.singleton.twoface.Checked.Char[$outTpe]]"
-            case tt : Int => q"implicitly[_root_.singleton.twoface.Checked.Int[$outTpe]]"
+            case tt : Int => q"implicitly[_root_.singleton.twoface.Checked.MyChecked[$outTpe]]"
             case tt : Long => q"implicitly[_root_.singleton.twoface.Checked.Long[$outTpe]]"
             case tt : Float => q"implicitly[_root_.singleton.twoface.Checked.Float[$outTpe]]"
             case tt : Double => q"implicitly[_root_.singleton.twoface.Checked.Double[$outTpe]]"
@@ -750,7 +750,7 @@ trait GeneralMacros {
           }
           symName match {
             case "scala.Char" => q"_root_.singleton.twoface.Checked.Char.create[scala.Char]($value)"
-            case "scala.Int" => q"_root_.singleton.twoface.Checked.Int.create[scala.Int]($value)"
+            case "scala.Int" => q"_root_.singleton.twoface.Checked.MyChecked.create[scala.Int]($value)"
             case "scala.Long" => q"_root_.singleton.twoface.Checked.Long.create[scala.Long]($value)"
             case "scala.Float" => q"_root_.singleton.twoface.Checked.Float.create[scala.Float]($value)"
             case "scala.Double" => q"_root_.singleton.twoface.Checked.Double.create[scala.Double]($value)"
@@ -760,7 +760,7 @@ trait GeneralMacros {
           }
       }
 
-      genTree
+      c.Expr(genTree)
     }
   }
   ///////////////////////////////////////////////////////////////////////////////////////////

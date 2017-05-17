@@ -11,13 +11,13 @@ object Checked {
 //    protected[twoface] def create[T, Cond[_], Msg](value : scala.Char) : Char[T, Cond, Msg] = new Char[T, Cond, Msg](value)
 //  }
 
-  type SmallerThan50[T] = T < 50
+  type FuncSmallerThan50[T] = T < 50
   @scala.annotation.implicitNotFound("My check could not be verified")
-  final class MyChecked[T] private(val value : scala.Int) extends AnyVal with TwoFaceAny.Int[T] {
+  final class SmallerThan[T] private(val value : scala.Int) extends AnyVal with TwoFaceAny.Int[T] {
     @inline def getValue : scala.Int = value
   }
-  implicit object MyChecked extends CheckedAny.Builder[MyChecked, SmallerThan50, scala.Int] {
-    protected[twoface] def create[T](value : scala.Int) : MyChecked[T] = new MyChecked[T](value)
+  implicit object SmallerThan extends CheckedAny.Builder[SmallerThan, FuncSmallerThan50, scala.Int] {
+    def create[T](value : scala.Int) : SmallerThan[T] = new SmallerThan[T](value) //protected[twoface]
   }
 //
 //  @scala.annotation.implicitNotFound("${Msg}")
