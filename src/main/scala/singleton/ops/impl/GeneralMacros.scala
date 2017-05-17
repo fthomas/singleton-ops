@@ -718,10 +718,10 @@ trait GeneralMacros {
   ///////////////////////////////////////////////////////////////////////////////////////////
   // Checked TwoFace
   ///////////////////////////////////////////////////////////////////////////////////////////
-  def materializeOpVal[T, Cond, Msg, Out](implicit ev0: c.WeakTypeTag[Cond], ev1: c.WeakTypeTag[Msg]): MaterializeOpAuxVal[T, Out] =
-  new MaterializeOpAuxVal[T, Out](weakTypeOf[Cond], weakTypeOf[Msg])
+  def materializeOpVal[T]: MaterializeOpAuxVal[T] =
+  new MaterializeOpAuxVal[T]
 
-  final class MaterializeOpAuxVal[T, Out](condTpe: Type, msgTpe : Type) {
+  final class MaterializeOpAuxVal[T] {
     def usingFuncName(value : c.Expr[T]) : Tree = {
 //      print(showRaw(condTpe))
 //      print(showRaw(msgTpe))
@@ -732,13 +732,13 @@ trait GeneralMacros {
         case (Expr(Literal(Constant(t)))) =>
           val outTpe = constantTypeOf(t)
           t match {
-            case tt : Char => q"implicitly[_root_.singleton.twoface.Checked.Char[$outTpe,$condTpe,$msgTpe]]"
-            case tt : Int => q"implicitly[_root_.singleton.twoface.Checked.Int[$outTpe,$condTpe,$msgTpe]]"
-            case tt : Long => q"implicitly[_root_.singleton.twoface.Checked.Long[$outTpe,$condTpe,$msgTpe]]"
-            case tt : Float => q"implicitly[_root_.singleton.twoface.Checked.Float[$outTpe,$condTpe,$msgTpe]]"
-            case tt : Double => q"implicitly[_root_.singleton.twoface.Checked.Double[$outTpe,$condTpe,$msgTpe]]"
-            case tt : String => q"implicitly[_root_.singleton.twoface.Checked.String[$outTpe,$condTpe,$msgTpe]]"
-            case tt : Boolean => q"implicitly[_root_.singleton.twoface.Checked.Boolean[$outTpe,$condTpe,$msgTpe]]"
+            case tt : Char => q"implicitly[_root_.singleton.twoface.Checked.Char[$outTpe]]"
+            case tt : Int => q"implicitly[_root_.singleton.twoface.Checked.Int[$outTpe]]"
+            case tt : Long => q"implicitly[_root_.singleton.twoface.Checked.Long[$outTpe]]"
+            case tt : Float => q"implicitly[_root_.singleton.twoface.Checked.Float[$outTpe]]"
+            case tt : Double => q"implicitly[_root_.singleton.twoface.Checked.Double[$outTpe]]"
+            case tt : String => q"implicitly[_root_.singleton.twoface.Checked.String[$outTpe]]"
+            case tt : Boolean => q"implicitly[_root_.singleton.twoface.Checked.Boolean[$outTpe]]"
             case _ => abort(s"Unsupported type $t", true)
           }
         case _ =>
@@ -749,13 +749,13 @@ trait GeneralMacros {
               abort(s"Unsupported type $t", true)
           }
           symName match {
-            case "scala.Char" => q"_root_.singleton.twoface.Checked.Char.create[scala.Char,$condTpe,$msgTpe]($value)"
-            case "scala.Int" => q"_root_.singleton.twoface.Checked.Int.create[scala.Int,$condTpe,$msgTpe]($value)"
-            case "scala.Long" => q"_root_.singleton.twoface.Checked.Long.create[scala.Long,$condTpe,$msgTpe]($value)"
-            case "scala.Float" => q"_root_.singleton.twoface.Checked.Float.create[scala.Float,$condTpe,$msgTpe]($value)"
-            case "scala.Double" => q"_root_.singleton.twoface.Checked.Double.create[scala.Double,$condTpe,$msgTpe]($value)"
-            case "java.lang.String" => q"_root_.singleton.twoface.Checked.String.create[java.lang.String,$condTpe,$msgTpe]($value)"
-            case "scala.Boolean" => q"_root_.singleton.twoface.Checked.Boolean.create[scala.Boolean,$condTpe,$msgTpe]($value)"
+            case "scala.Char" => q"_root_.singleton.twoface.Checked.Char.create[scala.Char]($value)"
+            case "scala.Int" => q"_root_.singleton.twoface.Checked.Int.create[scala.Int]($value)"
+            case "scala.Long" => q"_root_.singleton.twoface.Checked.Long.create[scala.Long]($value)"
+            case "scala.Float" => q"_root_.singleton.twoface.Checked.Float.create[scala.Float]($value)"
+            case "scala.Double" => q"_root_.singleton.twoface.Checked.Double.create[scala.Double]($value)"
+            case "java.lang.String" => q"_root_.singleton.twoface.Checked.String.create[java.lang.String]($value)"
+            case "scala.Boolean" => q"_root_.singleton.twoface.Checked.Boolean.create[scala.Boolean]($value)"
             case _ => abort(s"Unsupported type $t", true)
           }
       }
