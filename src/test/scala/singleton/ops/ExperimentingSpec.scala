@@ -155,7 +155,9 @@ object NonLiteralTest {
 object CheckedTest {
   import singleton.twoface._
 
-  def smallerThan50[T](t : Checked.SmallerThan[T]) : Unit = {
+  type FuncSmallerThan50[T] = T < 50
+  type MsgSmallerThan50 = "This is bad"
+  def smallerThan50[T](t : Checked.Int[T, FuncSmallerThan50, MsgSmallerThan50]) : Unit = {
     require(t < 50, "") //if (rt_check)
   }
 
