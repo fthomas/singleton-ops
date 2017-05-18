@@ -740,7 +740,7 @@ trait GeneralMacros {
       } catch {
         case e : Throwable =>
           val msg = extractSingletonValue(msgTpe).value.toString
-          abort(msg, true)
+          abort(msg, false)
       }
 
       genTree
