@@ -157,7 +157,8 @@ object CheckedTest {
 
   type FuncSmallerThan50[T] = T < 50
   type MsgSmallerThan50 = "This is bad"
-  def smallerThan50[T](t : Checked.Int[T, FuncSmallerThan50, MsgSmallerThan50]) : Unit = {
+  type CheckedSmallerThan50[T] = Checked.Int[T, FuncSmallerThan50, MsgSmallerThan50]
+  def smallerThan50[T, T2](t : CheckedSmallerThan50[T], t2 : Checked.Int[T2, FuncSmallerThan50, MsgSmallerThan50])(implicit r : CompileTime[T2 < T]) : Unit = {
     require(t < 50, "") //if (rt_check)
   }
 
@@ -174,7 +175,7 @@ object CheckedTest {
 //  smallerThan50(sixty) //fails run-time check
 //  Checked.Int.safe[60, SmallerThan50, "Not smaller than 50"](60)
 //  smallerThan50(40)    //fails compile-time check
-  smallerThan50(tf40)
+  smallerThan50(40, 30)
 }
 /* TODOs:
 Fix real world matrix example
