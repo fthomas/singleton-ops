@@ -718,10 +718,10 @@ trait GeneralMacros {
   ///////////////////////////////////////////////////////////////////////////////////////////
   // Checked TwoFace
   ///////////////////////////////////////////////////////////////////////////////////////////
-  def materializeOpVal[T, Cond, Msg](implicit cond : c.WeakTypeTag[Cond], msg : c.WeakTypeTag[Msg]) :
-    MaterializeOpAuxVal[T, Cond, Msg] = new MaterializeOpAuxVal[T, Cond, Msg](weakTypeOf[Cond], weakTypeOf[Msg])
+  def materializeOpVal[T, Cond, Param, Msg](implicit cond : c.WeakTypeTag[Cond], param : c.WeakTypeTag[Param], msg : c.WeakTypeTag[Msg]) :
+    MaterializeOpAuxVal[T, Cond, Param, Msg] = new MaterializeOpAuxVal[T, Cond, Param, Msg](weakTypeOf[Cond], weakTypeOf[Param], weakTypeOf[Msg])
 
-  final class MaterializeOpAuxVal[T, Cond, Msg](condTpe : Type, msgTpe : Type) {
+  final class MaterializeOpAuxVal[T, Cond, Param, Msg](condTpe : Type, paramTpe : Type, msgTpe : Type) {
     def usingFuncName(value : c.Expr[T]) : c.Tree = {
 //      print(showRaw(condTpe))
 //      print(showRaw(msgTpe))
@@ -732,32 +732,17 @@ trait GeneralMacros {
         case (Expr(Literal(Constant(t)))) =>
           val outTpe = constantTypeOf(t)
           t match {
-            case tt : Char => q"implicitly[_root_.singleton.twoface.Checked.Char[$outTpe,$condTpe,$msgTpe]]"
-            case tt : Int => q"implicitly[_root_.singleton.twoface.Checked.Int[$outTpe,$condTpe,$msgTpe]]"
-            case tt : Long => q"implicitly[_root_.singleton.twoface.Checked.Long[$outTpe,$condTpe,$msgTpe]]"
-            case tt : Float => q"implicitly[_root_.singleton.twoface.Checked.Float[$outTpe,$condTpe,$msgTpe]]"
-            case tt : Double => q"implicitly[_root_.singleton.twoface.Checked.Double[$outTpe,$condTpe,$msgTpe]]"
-            case tt : String => q"implicitly[_root_.singleton.twoface.Checked.String[$outTpe,$condTpe,$msgTpe]]"
-            case tt : Boolean => q"implicitly[_root_.singleton.twoface.Checked.Boolean[$outTpe,$condTpe,$msgTpe]]"
+            case tt : Char => q"implicitly[_root_.singleton.twoface.Checked.Char[$outTpe,$condTpe,$paramTpe,$msgTpe]]"
+            case tt : Int => q"implicitly[_root_.singleton.twoface.Checked.Int[$outTpe,$condTpe,$paramTpe,$msgTpe]]"
+            case tt : Long => q"implicitly[_root_.singleton.twoface.Checked.Long[$outTpe,$condTpe,$paramTpe,$msgTpe]]"
+            case tt : Float => q"implicitly[_root_.singleton.twoface.Checked.Float[$outTpe,$condTpe,$paramTpe,$msgTpe]]"
+            case tt : Double => q"implicitly[_root_.singleton.twoface.Checked.Double[$outTpe,$condTpe,$paramTpe,$msgTpe]]"
+            case tt : String => q"implicitly[_root_.singleton.twoface.Checked.String[$outTpe,$condTpe,$paramTpe,$msgTpe]]"
+            case tt : Boolean => q"implicitly[_root_.singleton.twoface.Checked.Boolean[$outTpe,$condTpe,$paramTpe,$msgTpe]]"
             case _ => abort(s"Unsupported type $t", true)
           }
         case _ =>
-          val t = value.actualType
-          val symName = t match {
-            case (TypeRef(_, sym, _)) => sym.fullName
-            case _ =>
-              abort(s"Unsupported type $t", true)
-          }
-          symName match {
-            case "scala.Char" => q"_root_.singleton.twoface.Checked.Char.create[scala.Char,$condTpe,$msgTpe]($value)"
-            case "scala.Int" => q"_root_.singleton.twoface.Checked.Int.create[scala.Int,$condTpe,$msgTpe]($value)"
-            case "scala.Long" => q"_root_.singleton.twoface.Checked.Long.create[scala.Long,$condTpe,$msgTpe]($value)"
-            case "scala.Float" => q"_root_.singleton.twoface.Checked.Float.create[scala.Float,$condTpe,$msgTpe]($value)"
-            case "scala.Double" => q"_root_.singleton.twoface.Checked.Double.create[scala.Double,$condTpe,$msgTpe]($value)"
-            case "java.lang.String" => q"_root_.singleton.twoface.Checked.String.create[java.lang.String,$condTpe,$msgTpe]($value)"
-            case "scala.Boolean" => q"_root_.singleton.twoface.Checked.Boolean.create[scala.Boolean,$condTpe,$msgTpe]($value)"
-            case _ => abort(s"Unsupported type $t", true)
-          }
+          abort(s"Unsafe", false)
       }
 
       genTree
