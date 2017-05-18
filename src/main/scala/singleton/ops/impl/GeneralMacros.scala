@@ -718,12 +718,11 @@ trait GeneralMacros {
   ///////////////////////////////////////////////////////////////////////////////////////////
   // Checked TwoFace
   ///////////////////////////////////////////////////////////////////////////////////////////
-  def materializeOpVal[T, Cond, Param, Msg](implicit cond : c.WeakTypeTag[Cond], param : c.WeakTypeTag[Param], msg : c.WeakTypeTag[Msg]) :
-    MaterializeOpAuxVal[T, Cond, Param, Msg] = new MaterializeOpAuxVal[T, Cond, Param, Msg](weakTypeOf[Cond], weakTypeOf[Param], weakTypeOf[Msg])
+  def materializeOpVal[T, Cond, Param, Msg, Chk](implicit cond : c.WeakTypeTag[Cond], param : c.WeakTypeTag[Param], msg : c.WeakTypeTag[Msg], chk : c.WeakTypeTag[Chk]) :
+    MaterializeOpAuxVal[T, Cond, Param, Msg, Chk] = new MaterializeOpAuxVal[T, Cond, Param, Msg, Chk](weakTypeOf[Cond], weakTypeOf[Param], weakTypeOf[Msg], symbolOf[Chk])
 
-  final class MaterializeOpAuxVal[T, Cond, Param, Msg](condTpe : Type, paramTpe : Type, msgTpe : Type) {
+  final class MaterializeOpAuxVal[T, Cond, Param, Msg, Chk](condTpe : Type, paramTpe : Type, msgTpe : Type, chkSym : Symbol) {
     def usingFuncName(value : c.Expr[T]) : c.Tree = {
-//      print(showRaw(condTpe))
 //      print(showRaw(msgTpe))
 //      print(showCode(value.tree))
 //      print(showRaw(value.actualType))
@@ -731,18 +730,17 @@ trait GeneralMacros {
       val genTree = value match {
         case (Expr(Literal(Constant(t)))) =>
           val outTpe = constantTypeOf(t)
-          t match {
-            case tt : Char => q"implicitly[_root_.singleton.twoface.Checked.Char[$outTpe,$condTpe,$paramTpe,$msgTpe]]"
-            case tt : Int => q"implicitly[_root_.singleton.twoface.Checked.Int[$outTpe,$condTpe,$paramTpe,$msgTpe]]"
-            case tt : Long => q"implicitly[_root_.singleton.twoface.Checked.Long[$outTpe,$condTpe,$paramTpe,$msgTpe]]"
-            case tt : Float => q"implicitly[_root_.singleton.twoface.Checked.Float[$outTpe,$condTpe,$paramTpe,$msgTpe]]"
-            case tt : Double => q"implicitly[_root_.singleton.twoface.Checked.Double[$outTpe,$condTpe,$paramTpe,$msgTpe]]"
-            case tt : String => q"implicitly[_root_.singleton.twoface.Checked.String[$outTpe,$condTpe,$paramTpe,$msgTpe]]"
-            case tt : Boolean => q"implicitly[_root_.singleton.twoface.Checked.Boolean[$outTpe,$condTpe,$paramTpe,$msgTpe]]"
-            case _ => abort(s"Unsupported type $t", true)
-          }
+          q"implicitly[$chkSym[$outTpe,$condTpe,$paramTpe,$msgTpe]]"
         case _ =>
           abort(s"Unsafe", false)
+      }
+
+      try {
+        c.typecheck(genTree)
+      } catch {
+        case e : Throwable =>
+          val msg = extractSingletonValue(msgTpe).value.toString
+          abort(msg, true)
       }
 
       genTree
