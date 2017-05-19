@@ -7,7 +7,7 @@ object Checked {
     @inline def getValue : scala.Char = value
   }
   object Char extends CheckedAny.Builder[Char, scala.Char] {
-    protected[twoface] def create[T, Cond[_,_], Param, Msg](value : scala.Char) : Char[T, Cond, Param, Msg] = new Char[T, Cond, Param, Msg](value)
+    def create[T, Cond[_,_], Param, Msg](value : scala.Char) : Char[T, Cond, Param, Msg] = new Char[T, Cond, Param, Msg](value)
   }
 
   @scala.annotation.implicitNotFound("${Msg}")
@@ -23,7 +23,7 @@ object Checked {
     @inline def getValue : scala.Long = value
   }
   object Long extends CheckedAny.Builder[Long, scala.Long] {
-    protected[twoface] def create[T, Cond[_,_], Param, Msg](value : scala.Long) : Long[T, Cond, Param, Msg] = new Long[T, Cond, Param, Msg](value)
+    def create[T, Cond[_,_], Param, Msg](value : scala.Long) : Long[T, Cond, Param, Msg] = new Long[T, Cond, Param, Msg](value)
   }
 
   @scala.annotation.implicitNotFound("${Msg}")
@@ -31,7 +31,7 @@ object Checked {
     @inline def getValue : scala.Float = value
   }
   object Float extends CheckedAny.Builder[Float, scala.Float] {
-    protected[twoface] def create[T, Cond[_,_], Param, Msg](value : scala.Float) : Float[T, Cond, Param, Msg] = new Float[T, Cond, Param, Msg](value)
+    def create[T, Cond[_,_], Param, Msg](value : scala.Float) : Float[T, Cond, Param, Msg] = new Float[T, Cond, Param, Msg](value)
   }
 
   @scala.annotation.implicitNotFound("${Msg}")
@@ -39,7 +39,7 @@ object Checked {
     @inline def getValue : scala.Double = value
   }
   object Double extends CheckedAny.Builder[Double, scala.Double] {
-    protected[twoface] def create[T, Cond[_,_], Param, Msg](value : scala.Double) : Double[T, Cond, Param, Msg] = new Double[T, Cond, Param, Msg](value)
+    def create[T, Cond[_,_], Param, Msg](value : scala.Double) : Double[T, Cond, Param, Msg] = new Double[T, Cond, Param, Msg](value)
   }
 
   @scala.annotation.implicitNotFound("${Msg}")
@@ -47,7 +47,7 @@ object Checked {
     @inline def getValue : java.lang.String = value
   }
   object String extends CheckedAny.Builder[String, java.lang.String] {
-    protected[twoface] def create[T, Cond[_,_], Param, Msg](value : java.lang.String) : String[T, Cond, Param, Msg] = new String[T, Cond, Param, Msg](value)
+    def create[T, Cond[_,_], Param, Msg](value : java.lang.String) : String[T, Cond, Param, Msg] = new String[T, Cond, Param, Msg](value)
   }
 
   @scala.annotation.implicitNotFound("${Msg}")
@@ -55,6 +55,6 @@ object Checked {
     @inline def getValue : scala.Boolean = value
   }
   object Boolean extends CheckedAny.Builder[Boolean, scala.Boolean] {
-    protected[twoface] def create[T, Cond[_,_], Param, Msg](value : scala.Boolean) : Boolean[T, Cond, Param, Msg] = new Boolean[T, Cond, Param, Msg](value)
+    def create[T, Cond[_,_], Param, Msg](value : scala.Boolean) : Boolean[T, Cond, Param, Msg] = new Boolean[T, Cond, Param, Msg](value)
   }
 }
