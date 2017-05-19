@@ -718,14 +718,14 @@ trait GeneralMacros {
   ///////////////////////////////////////////////////////////////////////////////////////////
   // Checked TwoFace
   ///////////////////////////////////////////////////////////////////////////////////////////
-  def materializeOpVal[T, Cond, Param, Msg, Chk](implicit cond : c.WeakTypeTag[Cond], param : c.WeakTypeTag[Param], msg : c.WeakTypeTag[Msg], chk : c.WeakTypeTag[Chk]) :
-    MaterializeOpAuxVal[T, Cond, Param, Msg, Chk] = new MaterializeOpAuxVal[T, Cond, Param, Msg, Chk](weakTypeOf[Cond], weakTypeOf[Param], weakTypeOf[Msg], symbolOf[Chk])
+  def CheckedMaterializer[T, Cond, Param, Msg, Chk](implicit t : c.WeakTypeTag[T], cond : c.WeakTypeTag[Cond], param : c.WeakTypeTag[Param], msg : c.WeakTypeTag[Msg], chk : c.WeakTypeTag[Chk]) :
+  CheckedMaterializer[T, Cond, Param, Msg, Chk] = new CheckedMaterializer[T, Cond, Param, Msg, Chk](weakTypeOf[T], weakTypeOf[Cond], weakTypeOf[Param], weakTypeOf[Msg], symbolOf[Chk])
 
-  final class MaterializeOpAuxVal[T, Cond, Param, Msg, Chk](condTpe : Type, paramTpe : Type, msgTpe : Type, chkSym : Symbol) {
-    def usingFuncName(value : c.Expr[T]) : c.Tree = {
-//      print(showRaw(msgTpe))
-//      print(showCode(value.tree))
-//      print(showRaw(value.actualType))
+  final class CheckedMaterializer[T, Cond, Param, Msg, Chk](tTpe : Type, condTpe : Type, paramTpe : Type, msgTpe : Type, chkSym : Symbol) {
+    def safe(value : c.Expr[T]) : c.Tree = {
+      //      print(showRaw(msgTpe))
+      //      print(showCode(value.tree))
+      //      print(showRaw(value.actualType))
 
       val genTree = value match {
         case (Expr(Literal(Constant(t)))) =>
@@ -745,18 +745,8 @@ trait GeneralMacros {
 
       genTree
     }
-  }
-  ///////////////////////////////////////////////////////////////////////////////////////////
 
-
-  ///////////////////////////////////////////////////////////////////////////////////////////
-  // Checked TwoFace
-  ///////////////////////////////////////////////////////////////////////////////////////////
-  def materializeImplMsg[T, Cond, Param, Msg, Chk](implicit t : c.WeakTypeTag[T], cond : c.WeakTypeTag[Cond], param : c.WeakTypeTag[Param], msg : c.WeakTypeTag[Msg], chk : c.WeakTypeTag[Chk]) :
-  MaterializeImplMsg[T, Cond, Param, Msg, Chk] = new MaterializeImplMsg[T, Cond, Param, Msg, Chk](weakTypeOf[T], weakTypeOf[Cond], weakTypeOf[Param], weakTypeOf[Msg], symbolOf[Chk])
-
-  final class MaterializeImplMsg[T, Cond, Param, Msg, Chk](tTpe : Type, condTpe : Type, paramTpe : Type, msgTpe : Type, chkSym : Symbol) {
-    def usingFuncName : c.Tree = {
+    def safeTF : c.Tree = {
 //      print(showRaw(retTpe))
 //      print(showCode(value.tree))
 //      print(showRaw(value.actualType))
