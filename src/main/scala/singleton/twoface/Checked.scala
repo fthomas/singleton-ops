@@ -15,7 +15,7 @@ object Checked {
     @inline def getValue : scala.Int = value
   }
   implicit object Int extends CheckedAny.Builder[Int, scala.Int] {
-    def create[T, Cond[_,_], Param, Msg](value : scala.Int) : Int[T, Cond, Param, Msg] = new Int[T, Cond, Param, Msg](value) //protected[twoface]
+    def create[T, Cond[_,_], Param, Msg](value : scala.Int) : Int[T, Cond, Param, Msg] = new Int[T, Cond, Param, Msg](value)
   }
 
   @scala.annotation.implicitNotFound("${Msg}")
