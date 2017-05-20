@@ -27,18 +27,3 @@ object OpMacro {
   (implicit op : OpMacro[N, S1, S2, S3]) : ValueOf[OpMacro[N, S1, S2, S3]] = new ValueOf(op)
 }
 /*******************************************************************************************************/
-
-///********************************************************************************************************
-//  * XTypeOf Experimental
-//  *******************************************************************************************************/
-//@ bundle
-//object XTypeOf {
-//  def apply(value : Int with Singleton) : Op = macro Macro.impl
-//
-//  final class Macro(val c: whitebox.Context) extends GeneralMacros {
-//    def impl(value : c.Expr[Int with Singleton]): c.Tree =
-//      materializeOpVal[Op].usingFuncName(value)
-//  }
-//}
-///*******************************************************************************************************/
-
