@@ -2,10 +2,11 @@ package singleton.twoface.impl
 
 import singleton.ops._
 import singleton.twoface.TwoFace
+//import singleton.twoface.TwoFace.{Boolean, Char, Double, Float, Long, String}
 
 protected[twoface] trait TwoFaceAny[Face, T] extends Any {
   def isLiteral(implicit rt : RunTime[T]) : scala.Boolean = !rt
-  def unsafeCheck(requirement : Boolean, message: => Any)(implicit rt : RunTime[T]) : Unit =
+  def unsafeCheck(requirement : scala.Boolean, message: => Any)(implicit rt : RunTime[T]) : Unit =
     if (rt) require(requirement, message)
   @inline def getValue : Face
   override def toString = getValue.toString
@@ -167,9 +168,15 @@ protected[twoface] object TwoFaceAny {
     def toDouble(implicit tfo : Double.Return[ToDouble[T]])          = tfo(this.getValue.toDouble)
     def toString(implicit tfo : String.Return[ToString[T]])          = tfo(this.getValue.toString)
   }
-  object Int {
-    type Return[OP] = TwoFaceOp[TwoFace.Int, scala.Int, OP]
+  final class _Int[T](val value : scala.Int) extends AnyVal with TwoFaceAny.Int[T] {
+    @inline def getValue : scala.Int = value
   }
+  implicit object Int extends TwoFaceAny.Builder[Int, scala.Int] {
+    type Return[OP] = TwoFaceOp[Int, scala.Int, OP]
+    protected[twoface] def create[T](value : scala.Int) = new _Int[T](value)
+  }
+//  object Int {
+//  }
 
   trait Long[T] extends Any with TwoFaceAny[scala.Long, T] {
     def +  [R](r : Char[R])(implicit tfo : Long.Return[T + R])       = tfo(this.getValue +  r.getValue)

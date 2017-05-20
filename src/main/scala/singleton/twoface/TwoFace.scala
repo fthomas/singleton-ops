@@ -9,12 +9,14 @@ object TwoFace {
   implicit object Char extends TwoFaceAny.Builder[Char, scala.Char] {
     protected[twoface] def create[T](value : scala.Char) = new Char[T](value)
   }
-  final class Int[T] private(val value : scala.Int) extends AnyVal with TwoFaceAny.Int[T] {
-    @inline def getValue : scala.Int = value
-  }
-  implicit object Int extends TwoFaceAny.Builder[Int, scala.Int] {
-    protected[twoface] def create[T](value : scala.Int) = new Int[T](value)
-  }
+//  final class Int[T] private(val value : scala.Int) extends AnyVal with TwoFaceAny.Int[T] {
+//    @inline def getValue : scala.Int = value
+//  }
+  type Int[T] = TwoFaceAny.Int[T]
+  val Int = TwoFaceAny.Int
+//  implicit object Int extends TwoFaceAny.Builder[Int, scala.Int] {
+//    protected[twoface] def create[T](value : scala.Int) = new Int[T](value)
+//  }
   final class Long[T] private(val value : scala.Long) extends AnyVal with TwoFaceAny.Long[T] {
     @inline def getValue : scala.Long = value
   }

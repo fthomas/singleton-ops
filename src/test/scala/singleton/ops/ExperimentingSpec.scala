@@ -149,9 +149,9 @@ object FixedSizedVectorDemo {
       type FuncCheckedLength[L, P] = L > 0
       type CheckedLength[L] = Checked.Int[L, FuncCheckedLength, 0, "Length must be positive"]
 
-      protected def protCreate[L](length : TwoFace.Int[L]) : FixedSizeVector[L] = {
-        length.unsafeCheck(length > 0, "Length must be positive")
-        new FixedSizeVector[L]{self => val self.length = length}
+      protected def protCreate[L](_length : TwoFace.Int[L]) : FixedSizeVector[L] = {
+        _length.unsafeCheck(_length > 0, "Length must be positive")
+        new FixedSizeVector[L]{val length = _length}
       }
       implicit def apply[L](implicit checkedLength : CheckedLength[L], di : DummyImplicit) = protCreate[L](checkedLength)
       def apply[L](checkedLength : CheckedLength[L]) = protCreate[L](checkedLength)
