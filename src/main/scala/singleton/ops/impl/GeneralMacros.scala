@@ -11,19 +11,52 @@ trait GeneralMacros {
   import c.universe._
 
   ////////////////////////////////////////////////////////////////////
+  // Code thanks to Shapeless
+  // https://github.com/milessabin/shapeless/blob/master/core/src/main/scala/shapeless/lazy.scala
+  ////////////////////////////////////////////////////////////////////
+  def setAnnotation(msg: String)(implicit annotatedSym : TypeSymbol): Unit = {
+    import c.internal._
+    import decorators._
+    val tree0 =
+      c.typecheck(
+        q"""
+          new _root_.scala.annotation.implicitNotFound("dummy")
+        """,
+        silent = false
+      )
+
+    class SubstMessage extends Transformer {
+      val global = c.universe.asInstanceOf[scala.tools.nsc.Global]
+
+      override def transform(tree: Tree): Tree = {
+        super.transform {
+          tree match {
+            case Literal(Constant("dummy")) => Literal(Constant(msg))
+            case t => t
+          }
+        }
+      }
+    }
+
+    val tree = new SubstMessage().transform(tree0)
+
+    annotatedSym.setAnnotations(Annotation(tree))
+    ()
+  }
+  ////////////////////////////////////////////////////////////////////
+
+
+  ////////////////////////////////////////////////////////////////////
   // Code thanks to Paul Phillips
   // https://github.com/paulp/psply/blob/master/src/main/scala/PsplyMacros.scala
   ////////////////////////////////////////////////////////////////////
   import scala.reflect.internal.SymbolTable
-  val g = c.universe.asInstanceOf[SymbolTable]
-
-  implicit def fixSymbolOps(sym: Symbol): g.Symbol = sym.asInstanceOf[g.Symbol]
 
   /** Typecheck singleton types so as to obtain indirectly
     *  available known-at-compile-time values.
     */
   object Const {
-    def unwrapVar(t : Constant) : Option[Constant] = {
+    def unwrapVar(t : Constant)(implicit annotatedSym : TypeSymbol) : Option[Constant] = {
       t match {
         case Constant(s : String) if Var.validName(s) =>
           val ret = Some(Var.get(s))
@@ -32,15 +65,18 @@ trait GeneralMacros {
       }
 
     }
-    def unapplyVar(tp : Type) : Option[Constant] = {
+    def unapplyVar(tp : Type)(implicit annotatedSym : TypeSymbol) : Option[Constant] = {
       val maybeVar = unapply(tp)
       maybeVar match {
         case Some(t : Constant) => unwrapVar(t)
         case _ =>  maybeVar
       }
     }
-    def unapply(tp: Type): Option[Constant] = {
-//      print(tp + " RAW " + showRaw(tp))
+    def unapply(tp: Type)(implicit annotatedSym : TypeSymbol): Option[Constant] = {
+      val g = c.universe.asInstanceOf[SymbolTable]
+      implicit def fixSymbolOps(sym: Symbol): g.Symbol = sym.asInstanceOf[g.Symbol]
+
+      //      print(tp + " RAW " + showRaw(tp))
       tp match {
         case tp @ ExistentialType(_, _) => unapply(tp.underlying)
         case TypeBounds(lo, hi) => unapply(hi)
@@ -117,17 +153,16 @@ trait GeneralMacros {
   }
   ////////////////////////////////////////////////////////////////////
 
-  def abort(msg: String, usePrint: Boolean = false): Nothing = {
-    if (usePrint)
-      print(
-        "Macro error at position " + c.enclosingPosition + "\nMacro error msg: " + msg)
+  def abort(msg: String)(implicit annotatedSym : TypeSymbol): Nothing = {
+    setAnnotation(msg)
     c.abort(c.enclosingPosition, msg)
   }
 
-  def constantTypeOf[T](t: T): Type =
-    c.internal.constantType(Constant(t))
+  def constantTreeOf[T](t : T) : Tree = Literal(Constant(t))
 
-  def constantTypeAndValueOf[T](t: T): (Type, Literal, TypeName, Type, Tree) ={
+  def constantTypeOf[T](t: T) : Type = c.internal.constantType(Constant(t))
+
+  def constantTypeAndValueOf[T](t: T)(implicit annotatedSym : TypeSymbol): (Type, Literal, TypeName, Type, Tree) ={
     val outWideLiteral = Literal(Constant(t))
     val (outWideType, outTypeName) = t match {
       case tt : Nat => (typeOf[Nat], TypeName("OutNat"))
@@ -138,9 +173,9 @@ trait GeneralMacros {
       case tt : Double => (typeOf[Double], TypeName("OutDouble"))
       case tt : String => (typeOf[String], TypeName("OutString"))
       case tt : Boolean => (typeOf[Boolean], TypeName("OutBoolean"))
-      case _ => abort(s"Unsupported type $t", true)
+      case _ => abort(s"Unsupported type $t")
     }
-    (outWideType, outWideLiteral, outTypeName, constantTypeOf(t), Literal(Constant(t)))
+    (outWideType, outWideLiteral, outTypeName, constantTypeOf(t), constantTreeOf(t))
   }
 
   def constantTypeAndValueOfNat(t: Int): (Type, Literal, TypeName, Type, Tree) ={
@@ -150,16 +185,16 @@ trait GeneralMacros {
     (outWideType, outWideLiteral, outTypeName, mkNatTpe(t), q"new ${mkNatTpt(t)}")
   }
 
-  def extractSingletonValue(tpe: Type): Constant = {
-    def extractionFailed(tpe: Type, usePrint : Boolean) = {
+  def extractSingletonValue(tpe: Type)(implicit annotatedSym : TypeSymbol): Constant = {
+    def extractionFailed(tpe: Type) = {
       val msg = s"Cannot extract value from $tpe\n" + "showRaw==> " + showRaw(
         tpe)
-      abort(msg, usePrint)
+      abort(msg)
     }
 
     val value = tpe match {
       case Const(Constant(t)) => Constant(t)
-      case _ => extractionFailed(tpe, false)
+      case _ => extractionFailed(tpe)
     }
 
     value
@@ -188,7 +223,7 @@ trait GeneralMacros {
   def materializeOpGen[F, N](implicit ev0: c.WeakTypeTag[F], evn: c.WeakTypeTag[N]): MaterializeOpAuxGen =
     new MaterializeOpAuxGen(weakTypeOf[F], weakTypeOf[N])
 
-  def opCalc[T1, T2, T3](funcName : String, aValue : T1, bValue : T2, cValue : T3) : Constant = {
+  def opCalc[T1, T2, T3](funcName : String, aValue : T1, bValue : T2, cValue : T3)(implicit annotatedSym : TypeSymbol) : Constant = {
     import scala.math._
     val ret = (funcName, aValue, bValue, cValue) match {
       case ("Id",         a: Char, _, _)              => Constant(a)
@@ -362,9 +397,9 @@ trait GeneralMacros {
 
       case ("Reverse",    a: String, _, _)            => Constant(a.reverse)
       case ("!",          a: Boolean, _, _)           => Constant(!a)
-      case ("Require",    a: Boolean, _, _)           =>
+      case ("Require",    a: Boolean, b: String, _)   =>
         if (!a)
-          abort(s"Cannot prove requirement Require[...]", false)
+          abort(b)
         else
           Constant(a)
       case ("==>",        _,          b,          _)  => Constant(b)
@@ -684,13 +719,14 @@ trait GeneralMacros {
       case ("Length",     a: String,  _,          _)  => Constant(a.length)
       case ("CharAt",     a: String,  b: Int,     _)  => Constant(a.charAt(b))
 
-      case _ => abort(s"Unsupported $funcName[$aValue, $bValue, $cValue]", true)
+      case _ => abort(s"Unsupported $funcName[$aValue, $bValue, $cValue]")
     }
     ret
   }
 
   final class MaterializeOpAuxGen(opTpe: Type, nTpe: Type) {
     def usingFuncName : Tree = {
+      implicit val annotatedSym : TypeSymbol = symbolOf[OpMacro[_,_,_,_]]
       val funcName = extractSingletonValue(nTpe)
       val aValue = extractSingletonValue(opTpe)
 
@@ -718,11 +754,34 @@ trait GeneralMacros {
   ///////////////////////////////////////////////////////////////////////////////////////////
   // Checked TwoFace
   ///////////////////////////////////////////////////////////////////////////////////////////
+  def CheckedImplMaterializer[T, Cond, Param, Msg, Chk](implicit t : c.WeakTypeTag[T], cond : c.WeakTypeTag[Cond], param : c.WeakTypeTag[Param], msg : c.WeakTypeTag[Msg], chk : c.WeakTypeTag[Chk]) :
+  CheckedImplMaterializer[T, Cond, Param, Msg, Chk] = new CheckedImplMaterializer[T, Cond, Param, Msg, Chk](weakTypeOf[T], weakTypeOf[Cond], weakTypeOf[Param], weakTypeOf[Msg], symbolOf[Chk])
+
+  final class CheckedImplMaterializer[T, Cond, Param, Msg, Chk](tTpe : Type, condTpe : Type, paramTpe : Type, msgTpe : Type, chkSym : TypeSymbol) {
+    def impl(vc : c.Tree) : c.Tree = {
+      implicit val annotatedSym : TypeSymbol = chkSym
+      try {
+        c.typecheck(q"val a : true = ${vc}.value")
+      } catch {
+        case e : Throwable =>
+          val msgValue = extractSingletonValue(msgTpe).value.toString
+          abort(msgValue)
+      }
+      val chkTerm = TermName(chkSym.name.toString)
+      val tValue = extractSingletonValue(tTpe).value
+      val tTree = constantTreeOf(tValue)
+      val genTree = q"_root_.singleton.twoface.Checked.$chkTerm.create[$tTpe,$condTpe,$paramTpe,$msgTpe]($tTree)"
+
+      genTree
+    }
+  }
+
   def CheckedMaterializer[T, Cond, Param, Msg, Chk](implicit t : c.WeakTypeTag[T], cond : c.WeakTypeTag[Cond], param : c.WeakTypeTag[Param], msg : c.WeakTypeTag[Msg], chk : c.WeakTypeTag[Chk]) :
   CheckedMaterializer[T, Cond, Param, Msg, Chk] = new CheckedMaterializer[T, Cond, Param, Msg, Chk](weakTypeOf[T], weakTypeOf[Cond], weakTypeOf[Param], weakTypeOf[Msg], symbolOf[Chk])
 
-  final class CheckedMaterializer[T, Cond, Param, Msg, Chk](tTpe : Type, condTpe : Type, paramTpe : Type, msgTpe : Type, chkSym : Symbol) {
+  final class CheckedMaterializer[T, Cond, Param, Msg, Chk](tTpe : Type, condTpe : Type, paramTpe : Type, msgTpe : Type, chkSym : TypeSymbol) {
     def safe : c.Tree = {
+      implicit val annotatedSym : TypeSymbol = chkSym
 //      print(showRaw(retTpe))
 //      print(showCode(value.tree))
 //      print(showRaw(value.actualType))
@@ -733,8 +792,8 @@ trait GeneralMacros {
         c.typecheck(genTree)
       } catch {
         case e : Throwable =>
-          val msg = extractSingletonValue(msgTpe).value.toString
-          abort(msg, false)
+          val msgValue = extractSingletonValue(msgTpe).value.toString
+          abort(msgValue)
       }
 
       genTree

@@ -8,8 +8,8 @@ import scala.reflect.macros.whitebox
 object CheckedAny {
   trait Builder[Chk[_,C[_,_],_,_], Face] {
     protected def create[T, Cond[_,_], Param, Msg](value : Face) : Chk[T, Cond, Param, Msg]
-    implicit def impl[T, Cond[_,_], Param, Msg](implicit v : Id[T], ct : CompileTime[Cond[T, Param]]) :
-      Chk[T, Cond, Param, Msg] = create[T, Cond, Param, Msg](v.value.asInstanceOf[Face])
+    implicit def impl[T, Cond[_,_], Param, Msg](implicit vc : SafeBoolean[ITE[IsNotLiteral[Cond[T, Param]], true, Cond[T, Param]]]) :
+      Chk[T, Cond, Param, Msg] = macro Builder.Macro.impl[T, Cond, Param, Msg, Chk[T, Cond, Param, Msg]]//create[T, Cond, Param, Msg](v.value.asInstanceOf[Face])
     implicit def safe[T <: Face with Singleton, Cond[_,_], Param, Msg](value : T) :
       Chk[T, Cond, Param, Msg] = macro Builder.Macro.safe[T, Cond, Param, Msg, Chk[T, Cond, Param, Msg]]
     implicit def unsafe[Cond[_,_], Param, Msg](value : Face) :
@@ -24,6 +24,10 @@ object CheckedAny {
   @bundle
   object Builder {
     final class Macro(val c: whitebox.Context) extends GeneralMacros {
+      def impl[T, Cond[_,_], Param, Msg, Chk](vc : c.Tree)(
+        implicit
+        t : c.WeakTypeTag[T], cond : c.WeakTypeTag[Cond[_,_]], msg : c.WeakTypeTag[Msg], param: c.WeakTypeTag[Param], chk: c.WeakTypeTag[Chk]
+      ): c.Tree = CheckedImplMaterializer[T, Cond[_,_], Param, Msg, Chk].impl(vc)
       def safe[T, Cond[_,_], Param, Msg, Chk](value : c.Expr[T])(
         implicit
         t : c.WeakTypeTag[T], cond : c.WeakTypeTag[Cond[_,_]], msg : c.WeakTypeTag[Msg], param: c.WeakTypeTag[Param], chk: c.WeakTypeTag[Chk]

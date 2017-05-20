@@ -133,6 +133,37 @@ object FixedSizedVectorDemo {
       //  val v4 = FixedSizeVector[-1] //Will lead to error could not find implicit value for parameter check: singleton.ops.Require[singleton.ops.>[-1,0]]
     }
   }
+
+  object Method_Three { //Using TwoFace and Checked
+    import singleton.twoface._
+
+    trait FixedSizeVector[L] {
+      val length : TwoFace.Int[L]
+      //add constraints to the companion object.
+//      def concat[L2](that : FixedSizeVector[L2]) = new FixedSizeVector(length + that.length)
+//      def + (that : FixedSizeVector[L]) = FixedSizeVector[L]
+      def printLength() : Unit = println("Vector length is: " + length)
+    }
+
+    object FixedSizeVector {
+      type FuncCheckedLength[L, P] = L > 0
+      type CheckedLength[L] = Checked.Int[L, FuncCheckedLength, 0, "Length must be positive"]
+
+      protected def protCreate[L](length : TwoFace.Int[L]) : FixedSizeVector[L] = {
+        length.unsafeCheck(length > 0, "Length must be positive")
+        new FixedSizeVector[L]{self => val self.length = length}
+      }
+      implicit def apply[L](implicit checkedLength : CheckedLength[L], di : DummyImplicit) = protCreate[L](checkedLength)
+      def apply[L](checkedLength : CheckedLength[L]) = protCreate[L](checkedLength)
+    }
+
+    object TestVector {
+      val v1 = FixedSizeVector[5]
+      val v2 = FixedSizeVector(2)
+//      val v3 : FixedSizeVector[40] = v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1
+      //  val v4 = FixedSizeVector[-1] //Will lead to error could not find implicit value for parameter check: singleton.ops.Require[singleton.ops.>[-1,0]]
+    }
+  }
 }
 
 object NonLiteralTest {
@@ -176,9 +207,10 @@ object CheckedTest {
 //  smallerThan50(sixty) //fails run-time check
 //  Checked.Int.safe[60, SmallerThan50, "Not smaller than 50"](60)
 //  smallerThan50(40)    //fails compile-time check
-//  implicitly[Require[false]]
-  implicitly[CheckedSmallerThan50[40]]
-  smallerThan50(45, 30)
+//  implicitly[RequireMsg[false,"I'm the best"]]
+//  implicitly[CheckedSmallerThan50[50]]
+//  implicitly[CheckedSmallerThan50[45]]
+  smallerThan50(40, 30)
 }
 /* TODOs:
 Fix real world matrix example
