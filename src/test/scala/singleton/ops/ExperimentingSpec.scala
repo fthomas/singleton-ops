@@ -146,13 +146,19 @@ object FixedSizedVectorDemo {
     }
 
     object FixedSizeVector {
-      type FuncCheckedLength[L, P] = L > 0
-      type CheckedLength[L] = Checked.Int[L, FuncCheckedLength, 0, "Length must be positive"]
+      //Defining Checked Length Type
+      protected type CondCheckedLength[L, P] = L > 0
+      protected type ParamCheckedLength = 0
+      protected type MsgCheckedLength[L, P] = "Length must be positive (received value of " + L + ")"
+      type CheckedLength[L] = Checked.Int[L, CondCheckedLength, ParamCheckedLength, MsgCheckedLength]
 
-      protected def protCreate[L](_length : TwoFace.Int[L]) : FixedSizeVector[L] = {
-        _length.unsafeCheck(_length > 0, "Length must be positive")
-        new FixedSizeVector[L]{val length = _length}
+      //Protected Constructor (performs unsafe run-time check, if compile-time check is not possible)
+      protected def protCreate[L](l : TwoFace.Int[L]) : FixedSizeVector[L] = {
+        l.unsafeCheck(l > 0, s"Length must be positive (received value of $l)")
+        new FixedSizeVector[L]{val length = l}
       }
+
+      //Public Constructors (perform compile-time check, if possible)
       implicit def apply[L](implicit checkedLength : CheckedLength[L], di : DummyImplicit) = protCreate[L](checkedLength)
       def apply[L](checkedLength : CheckedLength[L]) = protCreate[L](checkedLength)
     }
@@ -186,11 +192,11 @@ object NonLiteralTest {
 object CheckedTest {
   import singleton.twoface._
 
-  type FuncSmallerThan50[T, P] = T < P
-  type MsgSmallerThan50 = "This is bad"
+  type CondSmallerThan50[T, P] = T < P
+  type MsgSmallerThan50[T, P] = "This is bad"
   type Param50 = 50
-  type CheckedSmallerThan50[T] = Checked.Int[T, FuncSmallerThan50, Param50, "This is bad"]
-  def smallerThan50[T, T2](t : CheckedSmallerThan50[T], t2 : Checked.Int[T2, FuncSmallerThan50, Param50, MsgSmallerThan50]) : Unit = {
+  type CheckedSmallerThan50[T] = Checked.Int[T, CondSmallerThan50, Param50, MsgSmallerThan50]
+  def smallerThan50[T, T2](t : CheckedSmallerThan50[T], t2 : Checked.Int[T2, CondSmallerThan50, Param50, MsgSmallerThan50]) : Unit = {
     require(t < 50, "") //if (rt_check)
   }
 
