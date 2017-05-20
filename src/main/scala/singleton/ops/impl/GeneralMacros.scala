@@ -2,11 +2,11 @@ package singleton.ops.impl
 import macrocompat.bundle
 import shapeless.Nat
 
-import scala.reflect.macros.blackbox
+import scala.reflect.macros.whitebox
 
 @bundle
 trait GeneralMacros {
-  val c: blackbox.Context
+  val c: whitebox.Context
 
   import c.universe._
 

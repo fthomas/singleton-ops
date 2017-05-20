@@ -176,6 +176,7 @@ object CheckedTest {
 //  smallerThan50(sixty) //fails run-time check
 //  Checked.Int.safe[60, SmallerThan50, "Not smaller than 50"](60)
 //  smallerThan50(40)    //fails compile-time check
+//  implicitly[Require[false]]
   implicitly[CheckedSmallerThan50[40]]
   smallerThan50(45, 30)
 }

@@ -5,6 +5,7 @@ import scala.reflect.macros.whitebox
 /********************************************************************************************************
   * Three arguments type function macro
   *******************************************************************************************************/
+@scala.annotation.implicitNotFound("Literal operation has failed.")
 trait OpMacro[N <: String with Singleton, S1, S2, S3] extends Op
 
 @ bundle

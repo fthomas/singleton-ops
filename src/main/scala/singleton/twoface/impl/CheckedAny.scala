@@ -3,7 +3,7 @@ package singleton.twoface.impl
 import macrocompat.bundle
 import singleton.ops._
 import singleton.ops.impl._
-import scala.reflect.macros.blackbox
+import scala.reflect.macros.whitebox
 
 object CheckedAny {
   trait Builder[Chk[_,C[_,_],_,_], Face] {
@@ -23,7 +23,7 @@ object CheckedAny {
 
   @bundle
   object Builder {
-    final class Macro(val c: blackbox.Context) extends GeneralMacros {
+    final class Macro(val c: whitebox.Context) extends GeneralMacros {
       def safe[T, Cond[_,_], Param, Msg, Chk](value : c.Expr[T])(
         implicit
         t : c.WeakTypeTag[T], cond : c.WeakTypeTag[Cond[_,_]], msg : c.WeakTypeTag[Msg], param: c.WeakTypeTag[Param], chk: c.WeakTypeTag[Chk]
