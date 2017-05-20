@@ -2,11 +2,11 @@ package singleton.ops.impl
 import macrocompat.bundle
 import shapeless.Nat
 
-import scala.reflect.macros.whitebox
+import scala.reflect.macros.blackbox
 
 @bundle
 trait GeneralMacros {
-  val c: whitebox.Context
+  val c: blackbox.Context
 
   import c.universe._
 
@@ -722,31 +722,7 @@ trait GeneralMacros {
   CheckedMaterializer[T, Cond, Param, Msg, Chk] = new CheckedMaterializer[T, Cond, Param, Msg, Chk](weakTypeOf[T], weakTypeOf[Cond], weakTypeOf[Param], weakTypeOf[Msg], symbolOf[Chk])
 
   final class CheckedMaterializer[T, Cond, Param, Msg, Chk](tTpe : Type, condTpe : Type, paramTpe : Type, msgTpe : Type, chkSym : Symbol) {
-    def safe(value : c.Expr[T]) : c.Tree = {
-      //      print(showRaw(msgTpe))
-      //      print(showCode(value.tree))
-      //      print(showRaw(value.actualType))
-
-      val genTree = value match {
-        case (Expr(Literal(Constant(t)))) =>
-          val outTpe = constantTypeOf(t)
-          q"implicitly[$chkSym[$outTpe,$condTpe,$paramTpe,$msgTpe]]"
-        case _ =>
-          abort(s"Unsafe", false)
-      }
-
-      try {
-        c.typecheck(genTree)
-      } catch {
-        case e : Throwable =>
-          val msg = extractSingletonValue(msgTpe).value.toString
-          abort(msg, false)
-      }
-
-      genTree
-    }
-
-    def safeTF : c.Tree = {
+    def safe : c.Tree = {
 //      print(showRaw(retTpe))
 //      print(showCode(value.tree))
 //      print(showRaw(value.actualType))

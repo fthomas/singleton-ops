@@ -3,7 +3,7 @@ package singleton.twoface.impl
 import macrocompat.bundle
 import singleton.ops._
 import singleton.ops.impl._
-import scala.reflect.macros.whitebox
+import scala.reflect.macros.blackbox
 
 object CheckedAny {
   trait Builder[Chk[_,C[_,_],_,_], Face] {
@@ -23,15 +23,15 @@ object CheckedAny {
 
   @bundle
   object Builder {
-    final class Macro(val c: whitebox.Context) extends GeneralMacros {
+    final class Macro(val c: blackbox.Context) extends GeneralMacros {
       def safe[T, Cond[_,_], Param, Msg, Chk](value : c.Expr[T])(
         implicit
-        cond : c.WeakTypeTag[Cond[_,_]], msg : c.WeakTypeTag[Msg], param: c.WeakTypeTag[Param], chk: c.WeakTypeTag[Chk]
-      ): c.Tree = CheckedMaterializer[T, Cond[_,_], Param, Msg, Chk].safe(value)
+        t : c.WeakTypeTag[T], cond : c.WeakTypeTag[Cond[_,_]], msg : c.WeakTypeTag[Msg], param: c.WeakTypeTag[Param], chk: c.WeakTypeTag[Chk]
+      ): c.Tree = CheckedMaterializer[T, Cond[_,_], Param, Msg, Chk].safe
       def safeTF[VT, T, Cond[_,_], Param, Msg, Chk](value : c.Expr[VT])(
         implicit
         t : c.WeakTypeTag[T], cond : c.WeakTypeTag[Cond[_,_]], msg : c.WeakTypeTag[Msg], param: c.WeakTypeTag[Param], chk: c.WeakTypeTag[Chk]
-      ): c.Tree = CheckedMaterializer[T, Cond[_,_], Param, Msg, Chk].safeTF
+      ): c.Tree = CheckedMaterializer[T, Cond[_,_], Param, Msg, Chk].safe
     }
   }
 }
