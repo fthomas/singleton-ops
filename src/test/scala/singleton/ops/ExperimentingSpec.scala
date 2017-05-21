@@ -167,10 +167,13 @@ object FixedSizedVectorDemo {
     object TestVector {
       import Test._
 
+      //compile-time tests
       val ctv5 : FixedSizeVector[5] = FixedSizeVector[5]
       val ctv2 : FixedSizeVector[2] = FixedSizeVector(2)
       val ctv7 : FixedSizeVector[7] = implicitly[FixedSizeVector[7]]
       val ctv9 : FixedSizeVector[9] = ctv2 concat ctv7
+
+      //run-time tests
       var two = 2
       val rtv2 = FixedSizeVector(two)
       val rtv4 = rtv2 concat rtv2 //runtime concat runtime => runtime
@@ -218,15 +221,6 @@ object CheckedTest {
   val tfForty = TwoFace.Int(forty)
 
 
-//  val chk : Checked.Int[0,SmallerThan50,"Not smaller than 50"] = tf40-tf40
-//  smallerThan50(forty) //passes run-time check
-//  smallerThan50(40)    //passes compile-time check
-//  smallerThan50(sixty) //fails run-time check
-//  Checked.Int.safe[60, SmallerThan50, "Not smaller than 50"](60)
-//  smallerThan50(40)    //fails compile-time check
-//  implicitly[RequireMsg[false,"I'm the best"]]
-//  implicitly[CheckedSmallerThan50[50]]
-//  implicitly[CheckedSmallerThan50[45]]
   smallerThan50(40)
 }
 /* TODOs:
