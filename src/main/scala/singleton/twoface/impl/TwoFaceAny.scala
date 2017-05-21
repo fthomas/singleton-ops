@@ -4,8 +4,6 @@ import singleton.ops._
 
 protected[twoface] trait TwoFaceAny[Face, T] extends Any {
   def isLiteral(implicit rt : RunTime[T]) : scala.Boolean = !rt
-  def unsafeCheck(requirement : scala.Boolean, message: => Any)(implicit rt : RunTime[T]) : Unit =
-    if (rt) require(requirement, message)
   @inline def getValue : Face
   override def toString = getValue.toString
 }

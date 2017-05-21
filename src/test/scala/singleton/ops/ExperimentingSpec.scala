@@ -137,7 +137,7 @@ object FixedSizedVectorDemo {
   object Method_Three { //Using TwoFace and Checked
     import singleton.twoface._
 
-    object Test{
+    object Test {
       class FixedSizeVector[L] private (val length : TwoFace.Int[L]) {
         def concat[L2](that : FixedSizeVector[L2]) = FixedSizeVector.protCreate(this.length + that.length)
         override def toString = s"FixedSizeVector($length)"
@@ -151,17 +151,21 @@ object FixedSizedVectorDemo {
         protected type MsgCheckedLength[L, P] = "Length must be positive (received value of " + ToString[L] + ")"
         type CheckedLength[L] = Checked.Int[L, CondCheckedLength, ParamCheckedLength, MsgCheckedLength]
 
-        //Protected Constructor (performs unsafe run-time check, if compile-time check is not possible)
-        protected def protCreate[L](tfLength : TwoFace.Int[L]) : FixedSizeVector[L] = {
-          tfLength.unsafeCheck(tfLength > 0, s"Length must be positive (received value of $tfLength)")
-          new FixedSizeVector[L](tfLength)
+        implicit object RuntimeCheckedLength extends Checked.Runtime[Int, Int, CondCheckedLength, MsgCheckedLength] {
+          def cond(l : Int, p : Option[Int]) : scala.Boolean = l > 0
+          def msg(l : Int, p : Option[Int]) : java.lang.String = s"Length must be positive (received value of $l)"
         }
 
-        //Public Constructors (perform compile-time check, if possible)
-        def apply[L](checkedLength : CheckedLength[L]) = protCreate(checkedLength)
-        implicit def apply[L](implicit checkedLength : CheckedLength[L], di : DummyImplicit) = protCreate(checkedLength)
-      }
+        //Protected Constructor (performs unsafe run-time check, if compile-time check is not possible)
+        protected def protCreate[L](tfLength : TwoFace.Int[L]) : FixedSizeVector[L] =
+          new FixedSizeVector[L](tfLength)
 
+        //Public Constructors (perform compile-time check, if possible)
+        def apply[L](checkedLength : CheckedLength[L]) =
+          protCreate(checkedLength.unsafeCheck())
+        implicit def apply[L](implicit checkedLength : CheckedLength[L], di : DummyImplicit) =
+          protCreate(checkedLength.unsafeCheck())
+      }
     }
 
     object TestVector {
@@ -172,7 +176,7 @@ object FixedSizedVectorDemo {
       val ctv2 : FixedSizeVector[2] = FixedSizeVector(2)
       val ctv7 : FixedSizeVector[7] = implicitly[FixedSizeVector[7]]
       val ctv9 : FixedSizeVector[9] = ctv2 concat ctv7
-      FixedSizeVector(0) //Compile-time fail
+//      FixedSizeVector(0) //Compile-time fail
 
       //run-time tests
       var two = 2

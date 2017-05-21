@@ -5,6 +5,15 @@ import singleton.ops._
 import singleton.ops.impl._
 import scala.reflect.macros.whitebox
 
+trait CheckedAny[Face, T] extends Any with TwoFaceAny[Face, T] {
+  def unsafeCheck[ParamFace, Cond[_,_], Msg[_,_]](p : Option[ParamFace] = None)
+  (implicit rt : RunTime[T],
+   rtc : singleton.twoface.Checked.Runtime[Face, ParamFace, Cond, Msg]) : this.type = {
+    if (rt) require(rtc.cond(getValue,p), rtc.msg(getValue,p))
+    this
+  }
+}
+
 object CheckedAny {
   trait Builder[Chk[_,C[_,_],_,M[_,_]], Face] {
     type CondHelper[Cond[_,_], T, Param] = ITE[IsNotLiteral[Cond[T, Param]], true, Cond[T, Param]]
