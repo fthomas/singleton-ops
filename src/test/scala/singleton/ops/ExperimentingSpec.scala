@@ -172,16 +172,16 @@ object FixedSizedVectorDemo {
       val ctv2 : FixedSizeVector[2] = FixedSizeVector(2)
       val ctv7 : FixedSizeVector[7] = implicitly[FixedSizeVector[7]]
       val ctv9 : FixedSizeVector[9] = ctv2 concat ctv7
+      FixedSizeVector(0) //Compile-time fail
 
       //run-time tests
       var two = 2
       val rtv2 = FixedSizeVector(two)
       val rtv4 = rtv2 concat rtv2 //runtime concat runtime => runtime
       val rtv6 = rtv4 concat ctv2 //runtime concat compile-time => runtime
-
-      //      FixedSizeVector(0) //Compile-time fail
       var zero = 0
       FixedSizeVector(zero) //Run-time fail
+
     }
   }
 }
