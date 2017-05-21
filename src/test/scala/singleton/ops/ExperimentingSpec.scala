@@ -137,36 +137,43 @@ object FixedSizedVectorDemo {
   object Method_Three { //Using TwoFace and Checked
     import singleton.twoface._
 
-    trait FixedSizeVector[L] {
-      val length : TwoFace.Int[L]
-      //add constraints to the companion object.
-      def concat[L2](that : FixedSizeVector[L2]) = FixedSizeVector.protCreate(length + that.length)
-//      def + (that : FixedSizeVector[L]) = FixedSizeVector[L]
-      def printLength() : Unit = println("Vector length is: " + length)
-    }
-
-    object FixedSizeVector {
-      //Defining Checked Length Type
-      protected type CondCheckedLength[L, P] = L > 0
-      protected type ParamCheckedLength = 0
-      protected type MsgCheckedLength[L, P] = "Length must be positive (received value of " + ToString[L] + ")"
-      type CheckedLength[L] = Checked.Int[L, CondCheckedLength, ParamCheckedLength, MsgCheckedLength]
-
-      //Protected Constructor (performs unsafe run-time check, if compile-time check is not possible)
-      protected def protCreate[L](l : TwoFace.Int[L]) : FixedSizeVector[L] = {
-        l.unsafeCheck(l > 0, s"Length must be positive (received value of $l)")
-        new FixedSizeVector[L]{val length = l}
+    object Test{
+      trait FixedSizeVector[L] {
+        val length : TwoFace.Int[L]
+        //add constraints to the companion object.
+        def concat[L2](that : FixedSizeVector[L2]) = FixedSizeVector.protCreate(this.length ~+ that.length)
+        //      def + (that : FixedSizeVector[L]) = FixedSizeVector[L]
+        def printLength() : Unit = println("Vector length is: " + length)
       }
 
-      //Public Constructors (perform compile-time check, if possible)
-      def apply[L](checkedLength : CheckedLength[L]) = protCreate(checkedLength)
-      implicit def apply[L](implicit checkedLength : CheckedLength[L], di : DummyImplicit) = protCreate(checkedLength)
+      object FixedSizeVector {
+        //Defining Checked Length Type
+        protected type CondCheckedLength[L, P] = L > 0
+        protected type ParamCheckedLength = 0
+        protected type MsgCheckedLength[L, P] = "Length must be positive (received value of " + ToString[L] + ")"
+        type CheckedLength[L] = Checked.Int[L, CondCheckedLength, ParamCheckedLength, MsgCheckedLength]
+
+        //Protected Constructor (performs unsafe run-time check, if compile-time check is not possible)
+        protected def protCreate[L](tfLength : TwoFace.Int[L]) : FixedSizeVector[L] = {
+          tfLength.unsafeCheck(tfLength > 0, s"Length must be positive (received value of $tfLength)")
+          new FixedSizeVector[L]{final val length = tfLength}
+        }
+
+        //Public Constructors (perform compile-time check, if possible)
+        def apply[L](checkedLength : CheckedLength[L]) = protCreate[L](checkedLength)
+        implicit def apply[L](implicit checkedLength : CheckedLength[L], di : DummyImplicit) = protCreate[L](checkedLength)
+      }
+
     }
 
     object TestVector {
-      val v1 : FixedSizeVector[5] = FixedSizeVector[5]
+      import Test._
+      var two = 2
+      val bad = FixedSizeVector(two)
+      val v1 : FixedSizeVector[5] = FixedSizeVector[2+3]
       val v2 : FixedSizeVector[2] = FixedSizeVector(2)
-      val v3 : FixedSizeVector[7] = v1 concat v2 //concat v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1
+      val v3 : FixedSizeVector[40] = v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1
+      bad concat bad
       //  val v4 = FixedSizeVector[-1] //Will lead to error could not find implicit value for parameter check: singleton.ops.Require[singleton.ops.>[-1,0]]
     }
   }

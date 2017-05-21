@@ -11,7 +11,7 @@ trait FallBack[FB, OP] {
 }
 object FallBack {
   type Aux[FB, OP, Ret_Out, Ret_Lit <: XBoolean] = FallBack[FB, OP]{type Out = Ret_Out; type Lit = Ret_Lit}
-  implicit def evLiteral[FB, OP](implicit si : true ==> OP) : Aux[FB, OP, si.Out, true] =
+  implicit def evLiteral[FB, OP](implicit si : Id[OP]) : Aux[FB, OP, si.Out, true] =
   new FallBack[FB, OP] {
     type Out = si.Out
     type Lit = true
