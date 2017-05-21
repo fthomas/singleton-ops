@@ -149,7 +149,7 @@ object FixedSizedVectorDemo {
       //Defining Checked Length Type
       protected type CondCheckedLength[L, P] = L > 0
       protected type ParamCheckedLength = 0
-      protected type MsgCheckedLength[L, P] = "Length must be positive (received value of " + L + ")"
+      protected type MsgCheckedLength[L, P] = "Length must be positive (received value of " + ToString[L] + ")"
       type CheckedLength[L] = Checked.Int[L, CondCheckedLength, ParamCheckedLength, MsgCheckedLength]
 
       //Protected Constructor (performs unsafe run-time check, if compile-time check is not possible)
@@ -164,9 +164,9 @@ object FixedSizedVectorDemo {
     }
 
     object TestVector {
-//      val v1 : FixedSizeVector[5] = FixedSizeVector[5]
-//      val v2 : FixedSizeVector[2] = FixedSizeVector(2)
-//      val v3 : FixedSizeVector[7] = v1 concat v2 //concat v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1
+      val v1 : FixedSizeVector[5] = FixedSizeVector[5]
+      val v2 : FixedSizeVector[2] = FixedSizeVector(2)
+      val v3 : FixedSizeVector[7] = v1 concat v2 //concat v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1
       //  val v4 = FixedSizeVector[-1] //Will lead to error could not find implicit value for parameter check: singleton.ops.Require[singleton.ops.>[-1,0]]
     }
   }
@@ -193,7 +193,7 @@ object CheckedTest {
   import singleton.twoface._
 
   type CondSmallerThan50[T, P] = T < P
-  type MsgSmallerThan50[T, P] = "This is bad"
+  type MsgSmallerThan50[T, P] = "This is bad " + ToString[T]
   type Param50 = 50
   type CheckedSmallerThan50[T] = Checked.Int[T, CondSmallerThan50, Param50, MsgSmallerThan50]
   def smallerThan50[T](t : CheckedSmallerThan50[T]) : Unit = {
@@ -216,7 +216,7 @@ object CheckedTest {
 //  implicitly[RequireMsg[false,"I'm the best"]]
 //  implicitly[CheckedSmallerThan50[50]]
 //  implicitly[CheckedSmallerThan50[45]]
-  smallerThan50(43)
+  smallerThan50(40)
 }
 /* TODOs:
 Fix real world matrix example

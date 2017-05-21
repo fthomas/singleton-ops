@@ -761,25 +761,13 @@ trait GeneralMacros {
     def impl(vc : c.Tree, vm : c.Tree) : c.Tree = {
       implicit val annotatedSym : TypeSymbol = chkSym
       val temp = showCode(vm)
-      val pattern = ".*type Out = (\""
-      print(showCode(vm))
-//      val q"""{
-//        final class $tpname extends $crap {
-//          type OutWide = String
-//          type Out = $outTpe
-//          type OutString = $bla2
-//          val value: $bla3 = $bla4
-//          val valueWide: String = $bla5
-//        }
-//        new $opTpe2()
-//        }
-//      """ = vm
+      val pattern = "(?s).*val valueWide: String = \"(.*)\".*".r
+      val pattern(msgValue) = temp
 
       try {
         c.typecheck(q"val a : true = ${vc}.value")
       } catch {
         case e : Throwable =>
-          val msgValue = "Bloody Msg"//extractSingletonValue(msgTpe).value.toString
           abort(msgValue)
       }
       val chkTerm = TermName(chkSym.name.toString)
