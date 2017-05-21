@@ -138,11 +138,10 @@ object FixedSizedVectorDemo {
     import singleton.twoface._
 
     object Test{
-      trait FixedSizeVector[L] {
-        val length : TwoFace.Int[L]
+      class FixedSizeVector[L] private (val length : TwoFace.Int[L]) {
         def concat[L2](that : FixedSizeVector[L2]) = FixedSizeVector.protCreate(this.length + that.length)
-        //      def + (that : FixedSizeVector[L]) = FixedSizeVector[L]
-        def printLength() : Unit = println("Vector length is: " + length)
+        override def toString = s"FixedSizeVector($length)"
+        def pretty(implicit rt: RunTime[L]) = if (rt) s"FixedSizeVector($length)" else s"FixedSizeVector[$length]"
       }
 
       object FixedSizeVector {
@@ -155,7 +154,7 @@ object FixedSizedVectorDemo {
         //Protected Constructor (performs unsafe run-time check, if compile-time check is not possible)
         protected def protCreate[L](tfLength : TwoFace.Int[L]) : FixedSizeVector[L] = {
           tfLength.unsafeCheck(tfLength > 0, s"Length must be positive (received value of $tfLength)")
-          new FixedSizeVector[L]{final val length = tfLength}
+          new FixedSizeVector[L](tfLength)
         }
 
         //Public Constructors (perform compile-time check, if possible)
