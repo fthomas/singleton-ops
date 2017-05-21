@@ -3,26 +3,26 @@ package singleton.ops
 /////////////////////////////////////////////////
 //Fallback option for non-literals
 /////////////////////////////////////////////////
-trait FallBack[FB, OP] {
+trait FallBack[Base, FB, OP] {
   type Out
   type Lit <: XBoolean
-  val value : Option[FB]
+  val value : Option[Base]
   val isLiteral : Lit {}
 }
 object FallBack {
-  type Aux[FB, OP, Ret_Out, Ret_Lit <: XBoolean] = FallBack[FB, OP]{type Out = Ret_Out; type Lit = Ret_Lit}
-  implicit def evLiteral[FB, OP](implicit si : Id[OP]) : Aux[FB, OP, si.Out, true] =
-  new FallBack[FB, OP] {
+  type Aux[Base, FB, OP, Ret_Out, Ret_Lit <: XBoolean] = FallBack[Base, FB, OP]{type Out = Ret_Out; type Lit = Ret_Lit}
+  implicit def evLiteral[Base, FB, OP](implicit si : Id[OP]) : Aux[Base, FB, OP, si.Out, true] =
+  new FallBack[Base, FB, OP] {
     type Out = si.Out
     type Lit = true
-    val value : Option[FB] = Some(si.valueWide.asInstanceOf[FB])
+    val value : Option[Base] = Some(si.valueWide.asInstanceOf[Base])
     val isLiteral : Lit {} = true
   }
-  implicit def evNotLiteral[FB, OP](implicit rq : Require[IsNotLiteral[OP]]) : Aux[FB, OP, FB, false] =
-    new FallBack[FB, OP] {
+  implicit def evNotLiteral[Base, FB, OP](implicit rq : Require[IsNotLiteral[OP]]) : Aux[Base, FB, OP, FB, false] =
+    new FallBack[Base, FB, OP] {
       type Out = FB
       type Lit = false
-      val value : Option[FB] = None
+      val value : Option[Base] = None
       val isLiteral : Lit {} = false
     }
 }

@@ -140,8 +140,7 @@ object FixedSizedVectorDemo {
     object Test{
       trait FixedSizeVector[L] {
         val length : TwoFace.Int[L]
-        //add constraints to the companion object.
-        def concat[L2](that : FixedSizeVector[L2]) = FixedSizeVector.protCreate(this.length ~+ that.length)
+        def concat[L2](that : FixedSizeVector[L2]) = FixedSizeVector.protCreate(this.length + that.length)
         //      def + (that : FixedSizeVector[L]) = FixedSizeVector[L]
         def printLength() : Unit = println("Vector length is: " + length)
       }
@@ -160,8 +159,8 @@ object FixedSizedVectorDemo {
         }
 
         //Public Constructors (perform compile-time check, if possible)
-        def apply[L](checkedLength : CheckedLength[L]) = protCreate[L](checkedLength)
-        implicit def apply[L](implicit checkedLength : CheckedLength[L], di : DummyImplicit) = protCreate[L](checkedLength)
+        def apply[L](checkedLength : CheckedLength[L]) = protCreate(checkedLength)
+        implicit def apply[L](implicit checkedLength : CheckedLength[L], di : DummyImplicit) = protCreate(checkedLength)
       }
 
     }
@@ -170,7 +169,7 @@ object FixedSizedVectorDemo {
       import Test._
       var two = 2
       val bad = FixedSizeVector(two)
-      val v1 : FixedSizeVector[5] = FixedSizeVector[2+3]
+      val v1 : FixedSizeVector[5] = FixedSizeVector[5]
       val v2 : FixedSizeVector[2] = FixedSizeVector(2)
       val v3 : FixedSizeVector[40] = v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1
       bad concat bad
