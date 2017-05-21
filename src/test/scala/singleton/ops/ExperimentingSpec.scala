@@ -166,13 +166,19 @@ object FixedSizedVectorDemo {
 
     object TestVector {
       import Test._
+
+      val ctv5 : FixedSizeVector[5] = FixedSizeVector[5]
+      val ctv2 : FixedSizeVector[2] = FixedSizeVector(2)
+      val ctv7 : FixedSizeVector[7] = implicitly[FixedSizeVector[7]]
+      val ctv9 : FixedSizeVector[9] = ctv2 concat ctv7
       var two = 2
-      val bad = FixedSizeVector(two)
-      val v1 : FixedSizeVector[5] = FixedSizeVector[5]
-      val v2 : FixedSizeVector[2] = FixedSizeVector(2)
-      val v3 : FixedSizeVector[40] = v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1
-      bad concat bad
-      //  val v4 = FixedSizeVector[-1] //Will lead to error could not find implicit value for parameter check: singleton.ops.Require[singleton.ops.>[-1,0]]
+      val rtv2 = FixedSizeVector(two)
+      val rtv4 = rtv2 concat rtv2 //runtime concat runtime => runtime
+      val rtv6 = rtv4 concat ctv2 //runtime concat compile-time => runtime
+
+      //      FixedSizeVector(0) //Compile-time fail
+      var zero = 0
+      FixedSizeVector(zero) //Run-time fail
     }
   }
 }

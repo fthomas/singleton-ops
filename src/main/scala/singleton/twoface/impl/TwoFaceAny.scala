@@ -3,7 +3,6 @@ package singleton.twoface.impl
 import singleton.ops._
 
 protected[twoface] trait TwoFaceAny[Face, T] extends Any {
-  type Out = T
   def isLiteral(implicit rt : RunTime[T]) : scala.Boolean = !rt
   def unsafeCheck(requirement : scala.Boolean, message: => Any)(implicit rt : RunTime[T]) : Unit =
     if (rt) require(requirement, message)
@@ -96,6 +95,10 @@ protected[twoface] object TwoFaceAny {
     def toFloat(implicit tfo : Float.Return[ToFloat[T]])             = tfo(this.getValue.toFloat)
     def toDouble(implicit tfo : Double.Return[ToDouble[T]])          = tfo(this.getValue.toDouble)
     def toString(implicit tfo : String.Return[ToString[T]])          = tfo(this.getValue.toString)
+    def unsafeForced[NewT](implicit id : SafeChar[NewT]) : _Char[NewT] = {
+      require(getValue == id.value, "Actual run-time value does not match expected compile-time value")
+      Char.create[NewT](getValue)
+    }
   }
   final class _Char[T](val value : scala.Char) extends AnyVal with TwoFaceAny.Char[T] {
     @inline def getValue : scala.Char = value
@@ -170,6 +173,10 @@ protected[twoface] object TwoFaceAny {
     def toFloat(implicit tfo : Float.Return[ToFloat[T]])             = tfo(this.getValue.toFloat)
     def toDouble(implicit tfo : Double.Return[ToDouble[T]])          = tfo(this.getValue.toDouble)
     def toString(implicit tfo : String.Return[ToString[T]])          = tfo(this.getValue.toString)
+    def unsafeForced[NewT](implicit id : SafeInt[NewT]) : _Int[NewT] = {
+      require(getValue == id.value, "Actual run-time value does not match expected compile-time value")
+      Int.create[NewT](getValue)
+    }
   }
   final class _Int[T](val value : scala.Int) extends AnyVal with TwoFaceAny.Int[T] {
     @inline def getValue : scala.Int = value
@@ -244,6 +251,10 @@ protected[twoface] object TwoFaceAny {
     def toFloat(implicit tfo : Float.Return[ToFloat[T]])             = tfo(this.getValue.toFloat)
     def toDouble(implicit tfo : Double.Return[ToDouble[T]])          = tfo(this.getValue.toDouble)
     def toString(implicit tfo : String.Return[ToString[T]])          = tfo(this.getValue.toString)
+    def unsafeForced[NewT](implicit id : SafeLong[NewT]) : _Long[NewT] = {
+      require(getValue == id.value, "Actual run-time value does not match expected compile-time value")
+      Long.create[NewT](getValue)
+    }
   }
   final class _Long[T](val value : scala.Long) extends AnyVal with TwoFaceAny.Long[T] {
     @inline def getValue : scala.Long = value
@@ -318,6 +329,10 @@ protected[twoface] object TwoFaceAny {
     def toFloat(implicit tfo : Float.Return[ToFloat[T]])             = tfo(this.getValue)
     def toDouble(implicit tfo : Double.Return[ToDouble[T]])          = tfo(this.getValue.toDouble)
     def toString(implicit tfo : String.Return[ToString[T]])          = tfo(this.getValue.toString)
+    def unsafeForced[NewT](implicit id : SafeFloat[NewT]) : _Float[NewT] = {
+      require(getValue == id.value, "Actual run-time value does not match expected compile-time value")
+      Float.create[NewT](getValue)
+    }
   }
   final class _Float[T](val value : scala.Float) extends AnyVal with TwoFaceAny.Float[T] {
     @inline def getValue : scala.Float = value
@@ -392,6 +407,10 @@ protected[twoface] object TwoFaceAny {
     def toFloat(implicit tfo : Float.Return[ToFloat[T]])             = tfo(this.getValue.toFloat)
     def toDouble(implicit tfo : Double.Return[ToDouble[T]])          = tfo(this.getValue)
     def toString(implicit tfo : String.Return[ToString[T]])          = tfo(this.getValue.toString)
+    def unsafeForced[NewT](implicit id : SafeDouble[NewT]) : _Double[NewT] = {
+      require(getValue == id.value, "Actual run-time value does not match expected compile-time value")
+      Double.create[NewT](getValue)
+    }
   }
   final class _Double[T](val value : scala.Double) extends AnyVal with TwoFaceAny.Double[T] {
     @inline def getValue : scala.Double = value
@@ -412,6 +431,10 @@ protected[twoface] object TwoFaceAny {
     def toFloat(implicit tfo : Float.Return[ToFloat[T]])             = tfo(this.getValue.toFloat)
     def toDouble(implicit tfo : Double.Return[ToDouble[T]])          = tfo(this.getValue.toDouble)
     def toString(implicit tfo : String.Return[ToString[T]])          = tfo(this.getValue)
+    def unsafeForced[NewT](implicit id : SafeString[NewT]) : _String[NewT] = {
+      require(getValue == id.value, "Actual run-time value does not match expected compile-time value")
+      String.create[NewT](getValue)
+    }
   }
   final class _String[T](val value : java.lang.String) extends AnyVal with TwoFaceAny.String[T] {
     @inline def getValue : java.lang.String = value
@@ -427,6 +450,10 @@ protected[twoface] object TwoFaceAny {
     def && [R](r : Boolean[R])(implicit tfo : Boolean.Return[T && R])= tfo(this.getValue && r.getValue)
     def || [R](r : Boolean[R])(implicit tfo : Boolean.Return[T || R])= tfo(this.getValue || r.getValue)
     def toString(implicit tfo : String.Return[ToString[T]])          = tfo(this.getValue.toString)
+    def unsafeForced[NewT](implicit id : SafeBoolean[NewT]) : _Boolean[NewT] = {
+      require(getValue == id.value, "Actual run-time value does not match expected compile-time value")
+      Boolean.create[NewT](getValue)
+    }
   }
   final class _Boolean[T](val value : scala.Boolean) extends AnyVal with TwoFaceAny.Boolean[T] {
     @inline def getValue : scala.Boolean = value
