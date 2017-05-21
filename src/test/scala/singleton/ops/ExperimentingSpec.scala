@@ -140,7 +140,7 @@ object FixedSizedVectorDemo {
     trait FixedSizeVector[L] {
       val length : TwoFace.Int[L]
       //add constraints to the companion object.
-//      def concat[L2](that : FixedSizeVector[L2]) = new FixedSizeVector(length + that.length)
+      def concat[L2](that : FixedSizeVector[L2]) = FixedSizeVector.protCreate(length + that.length)
 //      def + (that : FixedSizeVector[L]) = FixedSizeVector[L]
       def printLength() : Unit = println("Vector length is: " + length)
     }
@@ -159,14 +159,14 @@ object FixedSizedVectorDemo {
       }
 
       //Public Constructors (perform compile-time check, if possible)
-      implicit def apply[L](implicit checkedLength : CheckedLength[L], di : DummyImplicit) = protCreate[L](checkedLength)
-      def apply[L](checkedLength : CheckedLength[L]) = protCreate[L](checkedLength)
+      def apply[L](checkedLength : CheckedLength[L]) = protCreate(checkedLength)
+      implicit def apply[L](implicit checkedLength : CheckedLength[L], di : DummyImplicit) = protCreate(checkedLength)
     }
 
     object TestVector {
-      val v1 = FixedSizeVector[5]
-      val v2 = FixedSizeVector(2)
-//      val v3 : FixedSizeVector[40] = v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1
+//      val v1 : FixedSizeVector[5] = FixedSizeVector[5]
+//      val v2 : FixedSizeVector[2] = FixedSizeVector(2)
+//      val v3 : FixedSizeVector[7] = v1 concat v2 //concat v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1
       //  val v4 = FixedSizeVector[-1] //Will lead to error could not find implicit value for parameter check: singleton.ops.Require[singleton.ops.>[-1,0]]
     }
   }
@@ -196,7 +196,7 @@ object CheckedTest {
   type MsgSmallerThan50[T, P] = "This is bad"
   type Param50 = 50
   type CheckedSmallerThan50[T] = Checked.Int[T, CondSmallerThan50, Param50, MsgSmallerThan50]
-  def smallerThan50[T, T2](t : CheckedSmallerThan50[T], t2 : Checked.Int[T2, CondSmallerThan50, Param50, MsgSmallerThan50]) : Unit = {
+  def smallerThan50[T](t : CheckedSmallerThan50[T]) : Unit = {
     require(t < 50, "") //if (rt_check)
   }
 
@@ -216,7 +216,7 @@ object CheckedTest {
 //  implicitly[RequireMsg[false,"I'm the best"]]
 //  implicitly[CheckedSmallerThan50[50]]
 //  implicitly[CheckedSmallerThan50[45]]
-  smallerThan50(40, 30)
+  smallerThan50(43)
 }
 /* TODOs:
 Fix real world matrix example

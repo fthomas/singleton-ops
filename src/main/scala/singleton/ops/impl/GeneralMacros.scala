@@ -758,43 +758,34 @@ trait GeneralMacros {
   CheckedImplMaterializer[T, Cond, Param, Msg, Chk] = new CheckedImplMaterializer[T, Cond, Param, Msg, Chk](weakTypeOf[T], weakTypeOf[Cond], weakTypeOf[Param], weakTypeOf[Msg], symbolOf[Chk])
 
   final class CheckedImplMaterializer[T, Cond, Param, Msg, Chk](tTpe : Type, condTpe : Type, paramTpe : Type, msgTpe : Type, chkSym : TypeSymbol) {
-    def impl(vc : c.Tree) : c.Tree = {
+    def impl(vc : c.Tree, vm : c.Tree) : c.Tree = {
       implicit val annotatedSym : TypeSymbol = chkSym
+      val temp = showCode(vm)
+      val pattern = ".*type Out = (\""
+      print(showCode(vm))
+//      val q"""{
+//        final class $tpname extends $crap {
+//          type OutWide = String
+//          type Out = $outTpe
+//          type OutString = $bla2
+//          val value: $bla3 = $bla4
+//          val valueWide: String = $bla5
+//        }
+//        new $opTpe2()
+//        }
+//      """ = vm
+
       try {
         c.typecheck(q"val a : true = ${vc}.value")
       } catch {
         case e : Throwable =>
-          val msgValue = extractSingletonValue(msgTpe).value.toString
+          val msgValue = "Bloody Msg"//extractSingletonValue(msgTpe).value.toString
           abort(msgValue)
       }
       val chkTerm = TermName(chkSym.name.toString)
       val tValue = extractSingletonValue(tTpe).value
       val tTree = constantTreeOf(tValue)
       val genTree = q"_root_.singleton.twoface.Checked.$chkTerm.create[$tTpe,$condTpe,$paramTpe,$msgTpe]($tTree)"
-
-      genTree
-    }
-  }
-
-  def CheckedMaterializer[T, Cond, Param, Msg, Chk](implicit t : c.WeakTypeTag[T], cond : c.WeakTypeTag[Cond], param : c.WeakTypeTag[Param], msg : c.WeakTypeTag[Msg], chk : c.WeakTypeTag[Chk]) :
-  CheckedMaterializer[T, Cond, Param, Msg, Chk] = new CheckedMaterializer[T, Cond, Param, Msg, Chk](weakTypeOf[T], weakTypeOf[Cond], weakTypeOf[Param], weakTypeOf[Msg], symbolOf[Chk])
-
-  final class CheckedMaterializer[T, Cond, Param, Msg, Chk](tTpe : Type, condTpe : Type, paramTpe : Type, msgTpe : Type, chkSym : TypeSymbol) {
-    def safe : c.Tree = {
-      implicit val annotatedSym : TypeSymbol = chkSym
-//      print(showRaw(retTpe))
-//      print(showCode(value.tree))
-//      print(showRaw(value.actualType))
-
-      val genTree = q"implicitly[$chkSym[$tTpe,$condTpe,$paramTpe,$msgTpe]]"
-
-      try {
-        c.typecheck(genTree)
-      } catch {
-        case e : Throwable =>
-          val msgValue = extractSingletonValue(msgTpe).value.toString
-          abort(msgValue)
-      }
 
       genTree
     }
