@@ -9,4 +9,19 @@ object TestUtils {
     body
     true
   }
+
+  def illRun(body: => Unit) : Boolean = {
+    val isIll = try {
+      body
+      false
+    } catch {
+      case _ : Throwable =>
+        true
+    }
+    if (!isIll)
+      assert(false, "Expected assertion did not occur")
+    true
+  }
+
+
 }
