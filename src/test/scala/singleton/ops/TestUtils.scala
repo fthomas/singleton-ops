@@ -23,5 +23,17 @@ object TestUtils {
     true
   }
 
+  type Verify[OP, Result] = Require[(OP == Result) && (
+        (IsNat[OP] && IsNat[Result]) ||
+        (IsChar[OP] && IsChar[Result]) ||
+        (IsInt[OP] && IsInt[Result]) ||
+        (IsLong[OP] && IsLong[Result]) ||
+        (IsFloat[OP] && IsFloat[Result]) ||
+        (IsDouble[OP] && IsDouble[Result]) ||
+        (IsString[OP] && IsString[Result]) ||
+        (IsBoolean[OP] && IsBoolean[Result])
+    )]
 
+  def verifyOp[OP, Result](implicit verify: Verify[OP, Result]) : Prop = wellTyped {}
+  def verifyOpArgs[OP[_,_],L,R,Result](implicit verify: Verify[OP[L,R], Result]) : Prop = wellTyped {}
 }
