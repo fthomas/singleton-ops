@@ -287,6 +287,8 @@ class TwoFaceIntSpec extends Properties("TwoFace.Int") {
     val a : TwoFace.Int[3] = implicitly[TwoFace.Int[2 + 1]]
     val b : TwoFace.Int[3 + 0] = implicitly[TwoFace.Int[2 + 1]]
     val c : TwoFace.Int[3 + 0] = implicitly[TwoFace.Int[3]]
+    val d : 3 = TwoFace.Int(3)
+    val e : Int = TwoFace.Int(us(3))
   }
 
   property("Wrong Implicit Conversions") = {

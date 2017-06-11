@@ -287,6 +287,8 @@ class TwoFaceLongSpec extends Properties("TwoFace.Long") {
     val a : TwoFace.Long[3L] = implicitly[TwoFace.Long[2L + 1L]]
     val b : TwoFace.Long[3L + 0L] = implicitly[TwoFace.Long[2L + 1L]]
     val c : TwoFace.Long[3L + 0L] = implicitly[TwoFace.Long[3L]]
+    val d : 3L = TwoFace.Long(3L)
+    val e : Long = TwoFace.Long(us(3L))
   }
 
   property("Wrong Implicit Conversions") = {

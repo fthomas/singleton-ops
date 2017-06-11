@@ -311,6 +311,8 @@ class TwoFaceFloatSpec extends Properties("TwoFace.Float") {
     val a : TwoFace.Float[3.0f] = implicitly[TwoFace.Float[2.0f + 1.0f]]
     val b : TwoFace.Float[3.0f + 0.0f] = implicitly[TwoFace.Float[2.0f + 1.0f]]
     val c : TwoFace.Float[3.0f + 0.0f] = implicitly[TwoFace.Float[3.0f]]
+    val d : 3.0f = TwoFace.Float(3.0f)
+    val e : Float = TwoFace.Float(us(3.0f))
   }
 
   property("Wrong Implicit Conversions") = {
