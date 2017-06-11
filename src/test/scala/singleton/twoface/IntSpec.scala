@@ -2,6 +2,7 @@ package singleton.twoface
 
 import org.scalacheck.Properties
 import singleton.TestUtils._
+import shapeless.test.illTyped
 
 class IntSpec extends Properties("TwoFace.Int") {
   property("Implicit Creation[]") = {
@@ -277,4 +278,19 @@ class IntSpec extends Properties("TwoFace.Int") {
   property("Unsafe toDouble") = verifyTF(TwoFace.Int(us(1)).toDouble, us(1.0))
   property("Safe toString") = verifyTF(TwoFace.Int(1).toString, "1")
   property("Unsafe toString") = verifyTF(TwoFace.Int(us(1)).toString, us("1"))
+
+  property("Implicit Conversions") = wellTyped {
+    import singleton.ops._
+    val a : TwoFace.Int[3] = implicitly[TwoFace.Int[2 + 1]]
+    val b : TwoFace.Int[3 + 0] = implicitly[TwoFace.Int[2 + 1]]
+    val c : TwoFace.Int[3 + 0] = implicitly[TwoFace.Int[3]]
+  }
+
+  property("Wrong Implicit Conversions") = {
+    import singleton.ops._
+    illTyped("""val a : TwoFace.Int[3] = implicitly[TwoFace.Int[2 + 2]]""")
+    illTyped("""val b : TwoFace.Int[3 + 0] = implicitly[TwoFace.Int[2 + 2]]""")
+    illTyped("""val c : TwoFace.Int[3 + 0] = implicitly[TwoFace.Int[4]]""")
+    true
+  }
 }
