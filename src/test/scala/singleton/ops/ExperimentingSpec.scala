@@ -44,7 +44,7 @@ object NewDemo {
   val n = Nat(5)
   def demoNatToSingletonInt[L <: Nat](implicit p : L+L) : p.Out {} = p.value
   val bSing10 : 10 = demoNatToSingletonInt[n.N]
-  def demoSigNatSig[L <: XInt](implicit op : ToNat[L+L]) : op.Out = op.value
+  def demoSigNatSig[L <: XInt](implicit op : SafeNat[L+L]) : op.Out = op.value
   val bNat5 : shapeless.nat._10 = demoSigNatSig[5]
   //////////////////////////////
 }

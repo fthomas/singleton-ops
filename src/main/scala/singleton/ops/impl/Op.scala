@@ -31,7 +31,6 @@ trait OpNat[O <: Op] extends OpCast[Nat, O]
 object OpNat {
   type Aux[O <: Op, Ret_Out <: Nat] = OpNat[O] {type Out = Ret_Out}
   implicit def impl[O <: Op](implicit o: O) : Aux[O, o.OutNat] = new OpNat[O] {type Out = o.OutNat; val value = o.value.asInstanceOf[o.OutNat]}
-  implicit def conv[O <: Op](op : OpNat[O]) : Nat = op.value
 }
 
 @scala.annotation.implicitNotFound(msg = "Unable to prove type argument is a Char.")

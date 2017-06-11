@@ -129,8 +129,8 @@ class NEqSpec extends Properties("!=") {
   property("String, Float arguments") = {illTyped("""implicitly[OP[leftString,rightFloat]]"""); true}
   property("String, Double arguments") = {illTyped("""implicitly[OP[leftString,rightDouble]]"""); true}
   property("String, String arguments") = {
-    verifyOpArgs[OP,leftString,leftString,resultFalse]
-    verifyOpArgs[OP,leftString,rightString,resultTrue]
+    verifyOp2Args[OP,leftString,leftString,resultFalse]
+    verifyOp2Args[OP,leftString,rightString,resultTrue]
   }
   property("String, Boolean arguments") = {illTyped("""implicitly[OP[leftString,rightBoolean]]"""); true}
   ////////////////////////////////////////////////////////////////////////

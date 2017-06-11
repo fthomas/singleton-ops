@@ -226,6 +226,7 @@ trait GeneralMacros {
   def opCalc[T1, T2, T3](funcName : String, aValue : T1, bValue : T2, cValue : T3)(implicit annotatedSym : TypeSymbol) : Constant = {
     import scala.math._
     val ret = (funcName, aValue, bValue, cValue) match {
+      case ("Id",         a: Nat, _, _)               => Constant(a)
       case ("Id",         a: Char, _, _)              => Constant(a)
       case ("Id",         a: Int, _, _)               => Constant(a)
       case ("Id",         a: Long, _, _)              => Constant(a)
@@ -285,7 +286,7 @@ trait GeneralMacros {
 
       case ("IsNat",      a: Nat, _, _)               => Constant(true)
       case ("IsNat",      a: Char, _, _)              => Constant(false)
-      case ("IsNat",      a: Int, _, _)               => Constant(false)
+      case ("IsNat",      a: Int, _, _)               => Constant(a > 0)
       case ("IsNat",      a: Long, _, _)              => Constant(false)
       case ("IsNat",      a: Float, _, _)             => Constant(false)
       case ("IsNat",      a: Double, _, _)            => Constant(false)

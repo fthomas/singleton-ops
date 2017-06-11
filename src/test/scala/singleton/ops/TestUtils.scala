@@ -35,5 +35,6 @@ object TestUtils {
     )]
 
   def verifyOp[OP, Result](implicit verify: Verify[OP, Result]) : Prop = wellTyped {}
-  def verifyOpArgs[OP[_,_],L,R,Result](implicit verify: Verify[OP[L,R], Result]) : Prop = wellTyped {}
+  def verifyOp1Args[OP[_],L,Result](implicit verify: Verify[OP[L], Result]) : Prop = wellTyped {}
+  def verifyOp2Args[OP[_,_],L,R,Result](implicit verify: Verify[OP[L,R], Result]) : Prop = wellTyped {}
 }

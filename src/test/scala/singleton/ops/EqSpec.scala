@@ -130,8 +130,8 @@ class EqSpec extends Properties("==") {
   property("String, Float arguments") = {illTyped("""implicitly[OP[leftString,rightFloat]]"""); true}
   property("String, Double arguments") = {illTyped("""implicitly[OP[leftString,rightDouble]]"""); true}
   property("String, String arguments") = {
-    verifyOpArgs[OP,leftString,leftString,resultTrue]
-    verifyOpArgs[OP,leftString,rightString,resultFalse]
+    verifyOp2Args[OP,leftString,leftString,resultTrue]
+    verifyOp2Args[OP,leftString,rightString,resultFalse]
   }
   property("String, Boolean arguments") = {illTyped("""implicitly[OP[leftString,rightBoolean]]"""); true}
   ////////////////////////////////////////////////////////////////////////
