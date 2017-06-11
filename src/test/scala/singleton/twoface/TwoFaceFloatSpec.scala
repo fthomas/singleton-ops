@@ -282,6 +282,30 @@ class TwoFaceFloatSpec extends Properties("TwoFace.Float") {
   property("Safe abs") = verifyTF(abs(TwoFace.Float(-1.0f)), 1.0f)
   property("Unsafe abs") = verifyTF(abs(TwoFace.Float(us(-1.0f))), us(1.0f))
 
+  property("Safe sin") = verifyTF(sin(TwoFace.Float(1.0f)), 0.8414709848078965)
+  property("Unsafe sin") = verifyTF(sin(TwoFace.Float(us(1.0f))), us(0.8414709848078965))
+  property("Safe cos") = verifyTF(cos(TwoFace.Float(1.0f)), 0.5403023058681398)
+  property("Unsafe cos") = verifyTF(cos(TwoFace.Float(us(1.0f))), us(0.5403023058681398))
+  property("Safe tan") = verifyTF(tan(TwoFace.Float(1.0f)), 1.5574077246549023)
+  property("Unsafe tan") = verifyTF(tan(TwoFace.Float(us(1.0f))), us(1.5574077246549023))
+  property("Safe ceil") = verifyTF(ceil(TwoFace.Float(1.5f)), 2.0)
+  property("Unsafe ceil") = verifyTF(ceil(TwoFace.Float(us(1.5f))), us(2.0))
+  property("Safe floor") = verifyTF(floor(TwoFace.Float(1.5f)), 1.0)
+  property("Unsafe floor") = verifyTF(floor(TwoFace.Float(us(1.5f))), us(1.0))
+  property("Safe round") = verifyTF(round(TwoFace.Float(1.5f)), 2)
+  property("Unsafe round") = verifyTF(round(TwoFace.Float(us(1.5f))), us(2))
+  property("Safe sqrt") = verifyTF(sqrt(TwoFace.Float(9.0f)), 3.0)
+  property("Unsafe sqrt") = verifyTF(sqrt(TwoFace.Float(us(9.0f))), us(3.0))
+
+  property("Safe Float pow Safe Float") = verifyTF(pow(TwoFace.Float(2.0f), TwoFace.Float(3.0f)), 8.0)
+  property("Safe Float pow Unsafe Float") = verifyTF(pow(TwoFace.Float(2.0f), TwoFace.Float(us(3.0f))), us(8.0))
+  property("Unsafe Float pow Safe Float") = verifyTF(pow(TwoFace.Float(us(2.0f)), TwoFace.Float(3.0f)), us(8.0))
+  property("Unsafe Float pow Unsafe Float") = verifyTF(pow(TwoFace.Float(us(2.0f)), TwoFace.Float(us(3.0f))), us(8.0))
+  property("Safe Float pow Safe Double") = verifyTF(pow(TwoFace.Float(2.0f), TwoFace.Double(3.0)), 8.0)
+  property("Safe Float pow Unsafe Double") = verifyTF(pow(TwoFace.Float(2.0f), TwoFace.Double(us(3.0))), us(8.0))
+  property("Unsafe Float pow Safe Double") = verifyTF(pow(TwoFace.Float(us(2.0f)), TwoFace.Double(3.0)), us(8.0))
+  property("Unsafe Float pow Unsafe Double") = verifyTF(pow(TwoFace.Float(us(2.0f)), TwoFace.Double(us(3.0))), us(8.0))
+  
   property("Implicit Conversions") = wellTyped {
     import singleton.ops._
     val a : TwoFace.Float[3.0f] = implicitly[TwoFace.Float[2.0f + 1.0f]]
