@@ -226,7 +226,6 @@ trait GeneralMacros {
   def opCalc[T1, T2, T3](funcName : String, aValue : T1, bValue : T2, cValue : T3)(implicit annotatedSym : TypeSymbol) : Constant = {
     import scala.math._
     val ret = (funcName, aValue, bValue, cValue) match {
-      case ("Id",         a: Nat, _, _)               => Constant(a)
       case ("Id",         a: Char, _, _)              => Constant(a)
       case ("Id",         a: Int, _, _)               => Constant(a)
       case ("Id",         a: Long, _, _)              => Constant(a)
@@ -284,7 +283,6 @@ trait GeneralMacros {
       case ("ToString",   a: String, _, _)            => Constant(a.toString)
       case ("ToString",   a: Boolean, _, _)           => Constant(a.toString)
 
-      case ("IsNat",      a: Nat, _, _)               => Constant(true)
       case ("IsNat",      a: Char, _, _)              => Constant(false)
       case ("IsNat",      a: Int, _, _)               => Constant(a > 0)
       case ("IsNat",      a: Long, _, _)              => Constant(false)
@@ -293,7 +291,6 @@ trait GeneralMacros {
       case ("IsNat",      a: String, _, _)            => Constant(false)
       case ("IsNat",      a: Boolean, _, _)           => Constant(false)
 
-      case ("IsChar",     a: Nat, _, _)               => Constant(false)
       case ("IsChar",     a: Char, _, _)              => Constant(true)
       case ("IsChar",     a: Int, _, _)               => Constant(false)
       case ("IsChar",     a: Long, _, _)              => Constant(false)
@@ -302,7 +299,6 @@ trait GeneralMacros {
       case ("IsChar",     a: String, _, _)            => Constant(false)
       case ("IsChar",     a: Boolean, _, _)           => Constant(false)
 
-      case ("IsInt",      a: Nat, _, _)               => Constant(false)
       case ("IsInt",      a: Char, _, _)              => Constant(false)
       case ("IsInt",      a: Int, _, _)               => Constant(true)
       case ("IsInt",      a: Long, _, _)              => Constant(false)
@@ -311,7 +307,6 @@ trait GeneralMacros {
       case ("IsInt",      a: String, _, _)            => Constant(false)
       case ("IsInt",      a: Boolean, _, _)           => Constant(false)
 
-      case ("IsLong",     a: Nat, _, _)               => Constant(false)
       case ("IsLong",     a: Char, _, _)              => Constant(false)
       case ("IsLong",     a: Int, _, _)               => Constant(false)
       case ("IsLong",     a: Long, _, _)              => Constant(true)
@@ -320,7 +315,6 @@ trait GeneralMacros {
       case ("IsLong",     a: String, _, _)            => Constant(false)
       case ("IsLong",     a: Boolean, _, _)           => Constant(false)
 
-      case ("IsFloat",    a: Nat, _, _)               => Constant(false)
       case ("IsFloat",    a: Char, _, _)              => Constant(false)
       case ("IsFloat",    a: Int, _, _)               => Constant(false)
       case ("IsFloat",    a: Long, _, _)              => Constant(false)
@@ -329,7 +323,6 @@ trait GeneralMacros {
       case ("IsFloat",    a: String, _, _)            => Constant(false)
       case ("IsFloat",    a: Boolean, _, _)           => Constant(false)
 
-      case ("IsDouble",   a: Nat, _, _)               => Constant(false)
       case ("IsDouble",   a: Char, _, _)              => Constant(false)
       case ("IsDouble",   a: Int, _, _)               => Constant(false)
       case ("IsDouble",   a: Long, _, _)              => Constant(false)
@@ -338,7 +331,6 @@ trait GeneralMacros {
       case ("IsDouble",   a: String, _, _)            => Constant(false)
       case ("IsDouble",   a: Boolean, _, _)           => Constant(false)
 
-      case ("IsString",   a: Nat, _, _)               => Constant(false)
       case ("IsString",   a: Char, _, _)              => Constant(false)
       case ("IsString",   a: Int, _, _)               => Constant(false)
       case ("IsString",   a: Long, _, _)              => Constant(false)
@@ -347,7 +339,6 @@ trait GeneralMacros {
       case ("IsString",   a: String, _, _)            => Constant(true)
       case ("IsString",   a: Boolean, _, _)           => Constant(false)
 
-      case ("IsBoolean",  a: Nat, _, _)               => Constant(false)
       case ("IsBoolean",  a: Char, _, _)              => Constant(false)
       case ("IsBoolean",  a: Int, _, _)               => Constant(false)
       case ("IsBoolean",  a: Long, _, _)              => Constant(false)
