@@ -4,7 +4,7 @@ import org.scalacheck.Properties
 import singleton.TestUtils._
 import shapeless.test.illTyped
 
-class IntSpec extends Properties("TwoFace.Int") {
+class TwoFaceIntSpec extends Properties("TwoFace.Int") {
   property("Implicit Creation[]") = {
     val a = implicitly[TwoFace.Int[2]]
     a.getValue == 2 && a.isLiteral
