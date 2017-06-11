@@ -279,6 +279,9 @@ class TwoFaceDoubleSpec extends Properties("TwoFace.Double") {
   property("Safe toString") = verifyTF(TwoFace.Double(1.0).toString, "1.0")
   property("Unsafe toString") = verifyTF(TwoFace.Double(us(1.0)).toString, us("1.0"))
 
+  property("Safe abs") = verifyTF(abs(TwoFace.Double(-1.0)), 1.0)
+  property("Unsafe abs") = verifyTF(abs(TwoFace.Double(us(-1.0))), us(1.0))
+
   property("Implicit Conversions") = wellTyped {
     import singleton.ops._
     val a : TwoFace.Double[3.0] = implicitly[TwoFace.Double[2.0 + 1.0]]

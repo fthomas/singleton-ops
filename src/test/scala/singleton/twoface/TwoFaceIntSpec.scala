@@ -279,6 +279,9 @@ class TwoFaceIntSpec extends Properties("TwoFace.Int") {
   property("Safe toString") = verifyTF(TwoFace.Int(1).toString, "1")
   property("Unsafe toString") = verifyTF(TwoFace.Int(us(1)).toString, us("1"))
 
+  property("Safe abs") = verifyTF(abs(TwoFace.Int(-1)), 1)
+  property("Unsafe abs") = verifyTF(abs(TwoFace.Int(us(-1))), us(1))
+
   property("Implicit Conversions") = wellTyped {
     import singleton.ops._
     val a : TwoFace.Int[3] = implicitly[TwoFace.Int[2 + 1]]

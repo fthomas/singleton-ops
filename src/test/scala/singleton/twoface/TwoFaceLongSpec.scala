@@ -279,6 +279,9 @@ class TwoFaceLongSpec extends Properties("TwoFace.Long") {
   property("Safe toString") = verifyTF(TwoFace.Long(1L).toString, "1")
   property("Unsafe toString") = verifyTF(TwoFace.Long(us(1L)).toString, us("1"))
 
+  property("Safe abs") = verifyTF(abs(TwoFace.Long(-1L)), 1L)
+  property("Unsafe abs") = verifyTF(abs(TwoFace.Long(us(-1L))), us(1L))
+
   property("Implicit Conversions") = wellTyped {
     import singleton.ops._
     val a : TwoFace.Long[3L] = implicitly[TwoFace.Long[2L + 1L]]

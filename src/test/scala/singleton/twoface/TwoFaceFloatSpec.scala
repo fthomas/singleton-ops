@@ -279,6 +279,9 @@ class TwoFaceFloatSpec extends Properties("TwoFace.Float") {
   property("Safe toString") = verifyTF(TwoFace.Float(1.0f).toString, "1.0")
   property("Unsafe toString") = verifyTF(TwoFace.Float(us(1.0f)).toString, us("1.0"))
 
+  property("Safe abs") = verifyTF(abs(TwoFace.Float(-1.0f)), 1.0f)
+  property("Unsafe abs") = verifyTF(abs(TwoFace.Float(us(-1.0f))), us(1.0f))
+
   property("Implicit Conversions") = wellTyped {
     import singleton.ops._
     val a : TwoFace.Float[3.0f] = implicitly[TwoFace.Float[2.0f + 1.0f]]
