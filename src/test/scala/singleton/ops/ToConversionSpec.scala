@@ -2,7 +2,7 @@ package singleton.ops
 
 import org.scalacheck.Properties
 import shapeless.test.illTyped
-import singleton.ops.TestUtils._
+import singleton.TestUtils._
 
 class ToConversionSpec extends Properties("ToConversion") {
   //ToNat relies on Int and already checked within IdSpec

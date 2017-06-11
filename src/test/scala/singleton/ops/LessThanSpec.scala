@@ -2,7 +2,7 @@ package singleton.ops
 
 import org.scalacheck.Properties
 import shapeless.test.illTyped
-import singleton.ops.TestUtils._
+import singleton.TestUtils._
 
 class LessThanSpec extends Properties("LessThan") {
   property("3.5F < 3.6F") = wellTyped {

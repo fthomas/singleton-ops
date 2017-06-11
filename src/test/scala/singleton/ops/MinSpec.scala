@@ -1,7 +1,7 @@
 package singleton.ops
 
 import org.scalacheck.Properties
-import singleton.ops.TestUtils._
+import singleton.TestUtils._
 
 class MinSpec extends Properties("Min") {
   property("Nat, left is minimum") = verifyOp2Args[Min,shapeless.Nat._1, shapeless.Nat._2, 1]

@@ -1,7 +1,7 @@
 package singleton.ops
 
 import org.scalacheck.Properties
-import singleton.ops.TestUtils._
+import singleton.TestUtils._
 
 class MaxSpec extends Properties("Max") {
   property("Nat, right is maximum") = verifyOp2Args[Max,shapeless.Nat._1, shapeless.Nat._2, 2]

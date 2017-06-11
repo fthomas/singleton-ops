@@ -2,7 +2,7 @@ package singleton.ops
 
 import org.scalacheck.Properties
 import shapeless.test.illTyped
-import singleton.ops.TestUtils._
+import singleton.TestUtils._
 
 class RequireSpec extends Properties("Require") {
   property("True requirement") = wellTyped {implicitly[Require[true]]}

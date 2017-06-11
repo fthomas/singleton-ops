@@ -1,7 +1,7 @@
 package singleton.ops
 
 import org.scalacheck.Properties
-import singleton.ops.TestUtils._
+import singleton.TestUtils._
 
 class LengthSpec extends Properties("Length") {
   property("foobar.length == 6") = wellTyped {

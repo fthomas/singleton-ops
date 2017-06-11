@@ -1,7 +1,7 @@
 package singleton.ops
 
 import org.scalacheck.Properties
-import TestUtils._
+import singleton.TestUtils._
 
 class IdSpec extends Properties("Id") {
   property("Nat") = wellTyped {

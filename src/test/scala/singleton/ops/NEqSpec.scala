@@ -2,7 +2,7 @@ package singleton.ops
 
 import org.scalacheck.{Prop, Properties}
 import shapeless.test.illTyped
-import singleton.ops.TestUtils._
+import singleton.TestUtils._
 
 class NEqSpec extends Properties("!=") {
   property("Basic boolean arguments") = wellTyped {
