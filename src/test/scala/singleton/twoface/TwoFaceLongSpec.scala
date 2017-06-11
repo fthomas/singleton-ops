@@ -258,10 +258,10 @@ class TwoFaceLongSpec extends Properties("TwoFace.Long") {
   property("Unsafe Long min Safe Long") = verifyTF(TwoFace.Long(us(2L)) min TwoFace.Long(1L), us(1L))
   property("Unsafe Long min Unsafe Long") = verifyTF(TwoFace.Long(us(2L)) min TwoFace.Long(us(1L)), us(1L))
 
-  property("Safe Long max Safe Int") = verifyTF(TwoFace.Long(2L) max TwoFace.Long(1L), 2L)
-  property("Safe Long max Unsafe Int") = verifyTF(TwoFace.Long(2L) max TwoFace.Long(us(1L)), us(2L))
-  property("Unsafe Long max Safe Int") = verifyTF(TwoFace.Long(us(2L)) max TwoFace.Long(1L), us(2L))
-  property("Unsafe Long max Unsafe Int") = verifyTF(TwoFace.Long(us(2L)) max TwoFace.Long(us(1L)), us(2L))
+  property("Safe Long max Safe Long") = verifyTF(TwoFace.Long(2L) max TwoFace.Long(1L), 2L)
+  property("Safe Long max Unsafe Long") = verifyTF(TwoFace.Long(2L) max TwoFace.Long(us(1L)), us(2L))
+  property("Unsafe Long max Safe Long") = verifyTF(TwoFace.Long(us(2L)) max TwoFace.Long(1L), us(2L))
+  property("Unsafe Long max Unsafe Long") = verifyTF(TwoFace.Long(us(2L)) max TwoFace.Long(us(1L)), us(2L))
 
   property("Safe Negate") = verifyTF(-TwoFace.Long(-1L), 1L)
   property("Unsafe Negate") = verifyTF(-TwoFace.Long(us(1L)), us(-1L))
@@ -288,9 +288,9 @@ class TwoFaceLongSpec extends Properties("TwoFace.Long") {
 
   property("Wrong Implicit Conversions") = {
     import singleton.ops._
-    illTyped("""val a : TwoFace.Int[3L] = implicitly[TwoFace.Int[2L + 2L]]""")
-    illTyped("""val b : TwoFace.Int[3L + 0L] = implicitly[TwoFace.Int[2L + 2L]]""")
-    illTyped("""val c : TwoFace.Int[3L + 0L] = implicitly[TwoFace.Int[4L]]""")
+    illTyped("""val a : TwoFace.Long[3L] = implicitly[TwoFace.Long[2L + 2L]]""")
+    illTyped("""val b : TwoFace.Long[3L + 0L] = implicitly[TwoFace.Long[2L + 2L]]""")
+    illTyped("""val c : TwoFace.Long[3L + 0L] = implicitly[TwoFace.Long[4L]]""")
     true
   }
 }
