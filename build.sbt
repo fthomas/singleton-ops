@@ -1,6 +1,6 @@
 /// variables
 
-val groupId = "org.me"
+val groupId = "eu.timepit"
 val projectName = "singleton-ops"
 val rootPkg = "singleton.ops"
 val gitPubUrl = s"https://github.com/fthomas/$projectName.git"
