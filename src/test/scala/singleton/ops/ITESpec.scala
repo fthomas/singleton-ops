@@ -1,8 +1,13 @@
 package singleton.ops
 
-object ITESpec {
-  type MyIfFunc[P1] = ITE[P1 < 0, 5, 7]
-  def demoITE[P1 <: XInt](implicit op: MyIfFunc[P1]): op.Out {} = op.value
-  val bITE1 : 7 = demoITE[1]
-  val bITE2 : 5 = demoITE[-1]
+import org.scalacheck.Properties
+import singleton.ops.TestUtils._
+
+class ITESpec extends Properties("ITE") {
+  property("True condition") = wellTyped {
+    implicitly[Require[ITE[true, 1, 2] == 1]]
+  }
+  property("False condition") = wellTyped {
+    implicitly[Require[ITE[false, 1, 2] == 2]]
+  }
 }
