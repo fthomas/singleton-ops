@@ -42,6 +42,10 @@ object TestUtils {
 
   type VerifyTF[OP, Expected] = Require[ITE[IsNotLiteral[Expected], IsNotLiteral[OP], OP == Expected]]
 
+  def verifyTF[OP, Expected](opResult : TwoFace.Char[OP], expectedResult : TwoFace.Char[Expected])
+                            (implicit verify : VerifyTF[OP, Expected]) : Prop = {
+    opResult.getValue == expectedResult.getValue
+  }
   def verifyTF[OP, Expected](opResult : TwoFace.Int[OP], expectedResult : TwoFace.Int[Expected])
                                (implicit verify : VerifyTF[OP, Expected]) : Prop = {
     opResult.getValue == expectedResult.getValue

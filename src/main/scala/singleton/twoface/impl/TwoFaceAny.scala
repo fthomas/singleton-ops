@@ -395,6 +395,8 @@ protected[twoface] object TwoFaceAny {
 
   trait String[T] extends Any with TwoFaceAny[java.lang.String, T] {
     def +  [R](r : String[R])(implicit tfo : String.Return[T + R])   = tfo(this.getValue +  r.getValue)
+    def == [R](r : String[R])(implicit tfo : Boolean.Return[T == R]) = tfo(this.getValue == r.getValue)
+    def != [R](r : String[R])(implicit tfo : Boolean.Return[T != R]) = tfo(this.getValue != r.getValue)
     def reverse(implicit tfo : String.Return[Reverse[T]])            = tfo(this.getValue.reverse)
     def substring[R](r : Int[R])(implicit tfo : String.Return[Substring[T,R]])= tfo(this.getValue substring r.getValue)
     def length(implicit tfo : Int.Return[Length[T]])                 = tfo(this.getValue.length)
