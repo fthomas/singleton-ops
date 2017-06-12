@@ -73,7 +73,7 @@ object RightTriangleDemo {
 
   def fooWith90DegTriangle[A <: XDouble, B <: XDouble, C <: XDouble](implicit check : Require[RightTriangle[A,B,C]]) : Unit = {}
   fooWith90DegTriangle[5.0,3.0,5.830951894845301] //OK!
-  //  fooWith90DegTriangle[5.0,3.1,5.830951894845301] //Error:(17, 23) could not find implicit value for parameter check: singleton.ops.Require[singleton.ops.ITESpec.RightTriangle[5.0,3.1,5.830951894845301]]
+  shapeless.test.illTyped("fooWith90DegTriangle[5.0,3.1,5.830951894845301]")
 }
 
 
@@ -98,7 +98,7 @@ object FixedSizedVectorDemo {
       val v1 = FixedSizeVector[5]
       val v2 = FixedSizeVector[2]
       val v3 : FixedSizeVector[40] = v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1
-      //  val v4 = FixedSizeVector[-1] //Will lead to error could not find implicit value for parameter check: singleton.ops.Require[singleton.ops.>[-1,0]]
+      shapeless.test.illTyped("FixedSizeVector[-1]")
     }
   }
 
@@ -130,7 +130,7 @@ object FixedSizedVectorDemo {
       val v1 = FixedSizeVector[5]
       val v2 = FixedSizeVector[2]
       val v3 : FixedSizeVector[40] = v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1
-      //  val v4 = FixedSizeVector[-1] //Will lead to error could not find implicit value for parameter check: singleton.ops.Require[singleton.ops.>[-1,0]]
+      shapeless.test.illTyped("FixedSizeVector[-1]") //Will lead to error could not find implicit value for parameter check: singleton.ops.Require[singleton.ops.>[-1,0]]
     }
   }
 
@@ -176,7 +176,7 @@ object FixedSizedVectorDemo {
       val ctv2 : FixedSizeVector[2] = FixedSizeVector(2)
       val ctv7 : FixedSizeVector[7] = implicitly[FixedSizeVector[7]]
       val ctv9 : FixedSizeVector[9] = ctv2 concat ctv7
-//      FixedSizeVector(0) //Compile-time fail
+      shapeless.test.illTyped("FixedSizeVector[0]")
 
       //run-time tests
       var two = 2

@@ -5,7 +5,7 @@ import shapeless.test.illTyped
 import singleton.TestUtils._
 import singleton.ops._
 
-class CheckedSpec extends Properties("Checked") {
+class CheckedIntSpec extends Properties("Checked.Int") {
   class FixedSizeVector[L] private (val length : TwoFace.Int[L]) {
     def concat[L2](that : FixedSizeVector[L2]) = FixedSizeVector.protCreate(this.length + that.length)
     override def toString = s"FixedSizeVector($length)"
