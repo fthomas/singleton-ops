@@ -28,7 +28,7 @@ class CheckedLongSpec extends Properties("Checked.Long") {
   property("Run-time checks") = wellTyped {
     smallerThan50(us(40L))
     smallerThan50(TwoFace.Long(us(40L)))
-    illRun{smallerThan50(us(40L))}
-    illRun{smallerThan50(TwoFace.Long(us(40L)))}
+    illRun{smallerThan50(us(50L))}
+    illRun{smallerThan50(TwoFace.Long(us(50L)))}
   }
 }

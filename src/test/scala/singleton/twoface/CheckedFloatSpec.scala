@@ -28,7 +28,7 @@ class CheckedFloatSpec extends Properties("Checked.Float") {
   property("Run-time checks") = wellTyped {
     smallerThan50(us(40.0f))
     smallerThan50(TwoFace.Float(us(40.0f)))
-    illRun{smallerThan50(us(40.0f))}
-    illRun{smallerThan50(TwoFace.Float(us(40.0f)))}
+    illRun{smallerThan50(us(50.0f))}
+    illRun{smallerThan50(TwoFace.Float(us(50.0f)))}
   }
 }

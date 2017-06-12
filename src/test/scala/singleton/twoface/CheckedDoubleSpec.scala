@@ -28,7 +28,7 @@ class CheckedDoubleSpec extends Properties("Checked.Double") {
   property("Run-time checks") = wellTyped {
     smallerThan50(us(40.0))
     smallerThan50(TwoFace.Double(us(40.0)))
-    illRun{smallerThan50(us(40.0))}
-    illRun{smallerThan50(TwoFace.Double(us(40.0)))}
+    illRun{smallerThan50(us(50.0))}
+    illRun{smallerThan50(TwoFace.Double(us(50.0)))}
   }
 }
