@@ -274,8 +274,6 @@ class TwoFaceDoubleSpec extends Properties("TwoFace.Double") {
   property("Unsafe toLong") = verifyTF(TwoFace.Double(us(1.0)).toLong, us(1L))
   property("Safe toFloat") = verifyTF(TwoFace.Double(1.0).toFloat, 1.0f)
   property("Unsafe toFloat") = verifyTF(TwoFace.Double(us(1.0)).toFloat, us(1.0f))
-  property("Safe toDouble") = verifyTF(TwoFace.Double(1.0).toDouble, 1.0)
-  property("Unsafe toDouble") = verifyTF(TwoFace.Double(us(1.0)).toDouble, us(1.0))
   property("Safe toString") = verifyTF(TwoFace.Double(1.0).toString, "1.0")
   property("Unsafe toString") = verifyTF(TwoFace.Double(us(1.0)).toString, us("1.0"))
 

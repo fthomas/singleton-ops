@@ -87,7 +87,6 @@ protected[twoface] object TwoFaceAny {
     def <= [R](r : Double[R])(implicit tfo : Boolean.Return[T <= R]) = tfo(this.getValue <= r.getValue)
     def >= [R](r : Double[R])(implicit tfo : Boolean.Return[T >= R]) = tfo(this.getValue >= r.getValue)
     def unary_-            (implicit tfo : Int.Return[Negate[T]])    = tfo(-this.getValue)
-    def toChar(implicit tfo : Char.Return[ToChar[T]])                = tfo(this.getValue)
     def toInt(implicit tfo : Int.Return[ToInt[T]])                   = tfo(this.getValue.toInt)
     def toLong(implicit tfo : Long.Return[ToLong[T]])                = tfo(this.getValue.toLong)
     def toFloat(implicit tfo : Float.Return[ToFloat[T]])             = tfo(this.getValue.toFloat)
@@ -162,7 +161,6 @@ protected[twoface] object TwoFaceAny {
     def max [R](r : Int[R])(implicit tfo : Int.Return[T Max R])      = tfo(this.getValue max r.getValue)
     def unary_-            (implicit tfo : Int.Return[Negate[T]])    = tfo(-this.getValue)
     def toChar(implicit tfo : Char.Return[ToChar[T]])                = tfo(this.getValue.toChar)
-    def toInt(implicit tfo : Int.Return[ToInt[T]])                   = tfo(this.getValue)
     def toLong(implicit tfo : Long.Return[ToLong[T]])                = tfo(this.getValue.toLong)
     def toFloat(implicit tfo : Float.Return[ToFloat[T]])             = tfo(this.getValue.toFloat)
     def toDouble(implicit tfo : Double.Return[ToDouble[T]])          = tfo(this.getValue.toDouble)
@@ -237,7 +235,6 @@ protected[twoface] object TwoFaceAny {
     def unary_-            (implicit tfo : Long.Return[Negate[T]])   = tfo(-this.getValue)
     def toChar(implicit tfo : Char.Return[ToChar[T]])                = tfo(this.getValue.toChar)
     def toInt(implicit tfo : Int.Return[ToInt[T]])                   = tfo(this.getValue.toInt)
-    def toLong(implicit tfo : Long.Return[ToLong[T]])                = tfo(this.getValue)
     def toFloat(implicit tfo : Float.Return[ToFloat[T]])             = tfo(this.getValue.toFloat)
     def toDouble(implicit tfo : Double.Return[ToDouble[T]])          = tfo(this.getValue.toDouble)
     def toString(implicit tfo : String.Return[ToString[T]])          = tfo(this.getValue.toString)
@@ -312,7 +309,6 @@ protected[twoface] object TwoFaceAny {
     def toChar(implicit tfo : Char.Return[ToChar[T]])                = tfo(this.getValue.toChar)
     def toInt(implicit tfo : Int.Return[ToInt[T]])                   = tfo(this.getValue.toInt)
     def toLong(implicit tfo : Long.Return[ToLong[T]])                = tfo(this.getValue.toLong)
-    def toFloat(implicit tfo : Float.Return[ToFloat[T]])             = tfo(this.getValue)
     def toDouble(implicit tfo : Double.Return[ToDouble[T]])          = tfo(this.getValue.toDouble)
     def toString(implicit tfo : String.Return[ToString[T]])          = tfo(this.getValue.toString)
   }
@@ -387,7 +383,6 @@ protected[twoface] object TwoFaceAny {
     def toInt(implicit tfo : Int.Return[ToInt[T]])                   = tfo(this.getValue.toInt)
     def toLong(implicit tfo : Long.Return[ToLong[T]])                = tfo(this.getValue.toLong)
     def toFloat(implicit tfo : Float.Return[ToFloat[T]])             = tfo(this.getValue.toFloat)
-    def toDouble(implicit tfo : Double.Return[ToDouble[T]])          = tfo(this.getValue)
     def toString(implicit tfo : String.Return[ToString[T]])          = tfo(this.getValue.toString)
   }
   final class _Double[T](val value : scala.Double) extends AnyVal with TwoFaceAny.Double[T] {
@@ -408,7 +403,6 @@ protected[twoface] object TwoFaceAny {
     def toLong(implicit tfo : Long.Return[ToLong[T]])                = tfo(this.getValue.toLong)
     def toFloat(implicit tfo : Float.Return[ToFloat[T]])             = tfo(this.getValue.toFloat)
     def toDouble(implicit tfo : Double.Return[ToDouble[T]])          = tfo(this.getValue.toDouble)
-    def toString(implicit tfo : String.Return[ToString[T]])          = tfo(this.getValue)
   }
   final class _String[T](val value : java.lang.String) extends AnyVal with TwoFaceAny.String[T] {
     @inline def getValue : java.lang.String = value

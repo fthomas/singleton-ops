@@ -270,8 +270,6 @@ class TwoFaceLongSpec extends Properties("TwoFace.Long") {
   //  property("Unsafe toChar") = verifyTF(TwoFace.Long(us(1L)).toChar, us('\u0001'))
   property("Safe toInt") = verifyTF(TwoFace.Long(1L).toInt, 1)
   property("Unsafe toInt") = verifyTF(TwoFace.Long(us(1L)).toInt, us(1))
-  property("Safe toLong") = verifyTF(TwoFace.Long(1L).toLong, 1L)
-  property("Unsafe toLong") = verifyTF(TwoFace.Long(us(1L)).toLong, us(1L))
   property("Safe toFloat") = verifyTF(TwoFace.Long(1L).toFloat, 1.0f)
   property("Unsafe toFloat") = verifyTF(TwoFace.Long(us(1L)).toFloat, us(1.0f))
   property("Safe toDouble") = verifyTF(TwoFace.Long(1L).toDouble, 1.0)

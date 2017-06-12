@@ -272,8 +272,6 @@ class TwoFaceFloatSpec extends Properties("TwoFace.Float") {
   property("Unsafe toInt") = verifyTF(TwoFace.Float(us(1.0f)).toInt, us(1))
   property("Safe toLong") = verifyTF(TwoFace.Float(1.0f).toLong, 1L)
   property("Unsafe toLong") = verifyTF(TwoFace.Float(us(1.0f)).toLong, us(1L))
-  property("Safe toFloat") = verifyTF(TwoFace.Float(1.0f).toFloat, 1.0f)
-  property("Unsafe toFloat") = verifyTF(TwoFace.Float(us(1.0f)).toFloat, us(1.0f))
   property("Safe toDouble") = verifyTF(TwoFace.Float(1.0f).toDouble, 1.0)
   property("Unsafe toDouble") = verifyTF(TwoFace.Float(us(1.0f)).toDouble, us(1.0))
   property("Safe toString") = verifyTF(TwoFace.Float(1.0f).toString, "1.0")
