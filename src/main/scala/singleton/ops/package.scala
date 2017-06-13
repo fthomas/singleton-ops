@@ -21,7 +21,7 @@ package object ops {
   //E.g. SafeInt[Something[Nice] + 1] OK
   //     Something[SafeInt[Nice] + 1] BAD
   /////////////////////////////////////////////////
-  type SafeNat[P1]          = impl.OpNat[Require[IsNat[P1]] ==> P1]
+  type SafeNat[P1]          = impl.OpNat[ToNat[Require[IsNat[P1]] ==> P1]]
   type SafeChar[P1]         = impl.OpChar[Require[IsChar[P1]] ==> P1]
   type SafeInt[P1]          = impl.OpInt[Require[IsInt[P1]] ==> P1]
   type SafeLong[P1]         = impl.OpLong[Require[IsLong[P1]] ==> P1]
@@ -60,8 +60,10 @@ package object ops {
   type GV[Name]             = OpMacro["GV",Name, 0, 0]
   /////////////////////////////////////////////////
 
+  type Id[P1]               = OpMacro["Id",P1, 0, 0]
   type ![P1]                = OpMacro["!",P1, 0, 0]
-  type Require[P1]          = OpMacro["Require",P1, 0, 0]
+  type Require[P1]          = OpMacro["Require",P1, "Cannot prove requirement Require[...]", 0]
+  type RequireMsg[P1,P2]    = OpMacro["Require",P1, P2, 0]
   type ToNat[P1]            = OpMacro["ToNat",P1, 0, 0]
   type ToChar[P1]           = OpMacro["ToChar",P1, 0, 0]
   type ToInt[P1]            = OpMacro["ToInt",P1, 0, 0]
@@ -109,6 +111,9 @@ package object ops {
   type Substring[P1, P2]    = OpMacro["Substring",P1, P2, 0]
   type Length[P1]           = OpMacro["Length", P1, 0, 0]
   type CharAt[P1, P2]       = OpMacro["CharAt", P1, P2, 0]
+
+  type CompileTime[C]       = Require[ITE[IsNotLiteral[C], true, C]]
+  type RunTime[R]           = SafeBoolean[IsNotLiteral[R]]
 
 
 

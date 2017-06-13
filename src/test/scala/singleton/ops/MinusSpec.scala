@@ -4,14 +4,14 @@ import org.scalacheck.Properties
 import shapeless.test.illTyped
 import singleton.TestUtils._
 
-class PlusSpec extends Properties("+") {
-  type OP[L,R] = +[L,R]
-  type leftNat = shapeless.Nat._1
-  type leftChar = '\u0001'
-  type leftInt = 1
-  type leftLong = 1L
-  type leftFloat = 1.0f
-  type leftDouble = 1.0
+class MinusSpec extends Properties("-") {
+  type OP[L,R] = -[L,R]
+  type leftNat = shapeless.Nat._3
+  type leftChar = '\u0003'
+  type leftInt = 3
+  type leftLong = 3L
+  type leftFloat = 3.0f
+  type leftDouble = 3.0
   type leftString = "Something"
   type leftBoolean = true
 
@@ -24,12 +24,11 @@ class PlusSpec extends Properties("+") {
   type rightString = "Else"
   type rightBoolean = false
 
-  type resultNat = shapeless.Nat._3
-  type resultChar = '\u0003'
-  type resultInt = 3
-  type resultLong = 3L
-  type resultFloat = 3.0f
-  type resultDouble = 3.0
+  type resultChar = '\u0001'
+  type resultInt = 1
+  type resultLong = 1L
+  type resultFloat = 1.0f
+  type resultDouble = 1.0
   type resultString = "SomethingElse"
   type resultBoolean = false
 
@@ -120,7 +119,7 @@ class PlusSpec extends Properties("+") {
   property("String, Long arguments") = {illTyped("""implicitly[OP[leftString,rightLong]]"""); true}
   property("String, Float arguments") = {illTyped("""implicitly[OP[leftString,rightFloat]]"""); true}
   property("String, Double arguments") = {illTyped("""implicitly[OP[leftString,rightDouble]]"""); true}
-  property("String, String arguments") = verifyOp2Args[OP,leftString,rightString,resultString]
+  property("String, String arguments") = {illTyped("""implicitly[OP[leftString,rightString]]"""); true}
   property("String, Boolean arguments") = {illTyped("""implicitly[OP[leftString,rightBoolean]]"""); true}
   ////////////////////////////////////////////////////////////////////////
 

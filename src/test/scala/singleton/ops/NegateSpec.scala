@@ -1,21 +1,45 @@
 package singleton.ops
 
 import org.scalacheck.Properties
-import singleton.ops.TestUtils._
+import singleton.TestUtils._
+import shapeless.test.illTyped
 
 class NegateSpec extends Properties("Negate") {
-  property("~2 == -2") = wellTyped {
-    def negate[P1 <: XInt](implicit op : Negate[P1]) : op.Out{} = op.value
-    val r : -2 = negate[2]
+  property("Nat argument") = wellTyped {
+    implicitly[Require[Negate[shapeless.Nat._1] == (-1)]]
   }
 
-  property("~1.5 == -1.5") = wellTyped {
-    def negate[P1 <: XDouble](implicit op : Negate[P1]) : op.Out{} = op.value
-    val r : -1.5 = negate[1.5]
+  property("Char argument") = wellTyped {
+    implicitly[Require[Negate['T'] == (-84)]]
   }
 
-  property("~(~5L) == 5L") = wellTyped {
-    def negate[P1 <: XLong](implicit op : Negate[Negate[P1]]) : op.Out{} = op.value
-    val r : 5L = negate[5L]
+  property("Int argument") = wellTyped {
+    implicitly[Require[Negate[2] == (-2)]]
+    implicitly[Require[Negate[-2] == 2]]
+  }
+
+  property("Long argument") = wellTyped {
+    implicitly[Require[Negate[5L] == (-5L)]]
+    implicitly[Require[Negate[-5L] == 5L]]
+  }
+
+  property("Float argument") = wellTyped {
+    implicitly[Require[Negate[1.5f] == (-1.5f)]]
+    implicitly[Require[Negate[-1.5f] == 1.5f]]
+  }
+
+  property("Double argument") = wellTyped {
+    implicitly[Require[Negate[1.5] == (-1.5)]]
+    implicitly[Require[Negate[-1.5] == 1.5]]
+  }
+
+  property("Boolean argument") = {
+    illTyped("""implicitly[Negate[true]]""")
+    true
+  }
+
+  property("String argument") = {
+    illTyped("""implicitly[Negate["Something"]]""")
+    true
   }
 }

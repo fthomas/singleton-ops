@@ -4,34 +4,30 @@ import org.scalacheck.Properties
 import shapeless.test.illTyped
 import singleton.TestUtils._
 
-class PlusSpec extends Properties("+") {
-  type OP[L,R] = +[L,R]
-  type leftNat = shapeless.Nat._1
-  type leftChar = '\u0001'
-  type leftInt = 1
-  type leftLong = 1L
-  type leftFloat = 1.0f
-  type leftDouble = 1.0
+class ModSpec extends Properties("%") {
+  type OP[L,R] = %[L,R]
+  type leftNat = shapeless.Nat._6
+  type leftChar = '\u0006'
+  type leftInt = 6
+  type leftLong = 6L
+  type leftFloat = 6.0f
+  type leftDouble = 6.0
   type leftString = "Something"
   type leftBoolean = true
 
-  type rightNat = shapeless.Nat._2
-  type rightChar = '\u0002'
-  type rightInt = 2
-  type rightLong = 2L
-  type rightFloat = 2.0f
-  type rightDouble = 2.0
+  type rightNat = shapeless.Nat._7
+  type rightChar = '\u0007'
+  type rightInt = 7
+  type rightLong = 7L
+  type rightFloat = 7.0f
+  type rightDouble = 7.0
   type rightString = "Else"
   type rightBoolean = false
 
-  type resultNat = shapeless.Nat._3
-  type resultChar = '\u0003'
-  type resultInt = 3
-  type resultLong = 3L
-  type resultFloat = 3.0f
-  type resultDouble = 3.0
-  type resultString = "SomethingElse"
-  type resultBoolean = false
+  type resultInt = 6
+  type resultLong = 6L
+  type resultFloat = 6.0f
+  type resultDouble = 6.0
 
   ////////////////////////////////////////////////////////////////////////
   // Nat op XXX
@@ -120,7 +116,7 @@ class PlusSpec extends Properties("+") {
   property("String, Long arguments") = {illTyped("""implicitly[OP[leftString,rightLong]]"""); true}
   property("String, Float arguments") = {illTyped("""implicitly[OP[leftString,rightFloat]]"""); true}
   property("String, Double arguments") = {illTyped("""implicitly[OP[leftString,rightDouble]]"""); true}
-  property("String, String arguments") = verifyOp2Args[OP,leftString,rightString,resultString]
+  property("String, String arguments") = {illTyped("""implicitly[OP[leftString,rightString]]"""); true}
   property("String, Boolean arguments") = {illTyped("""implicitly[OP[leftString,rightBoolean]]"""); true}
   ////////////////////////////////////////////////////////////////////////
 

@@ -44,7 +44,7 @@ object NewDemo {
   val n = Nat(5)
   def demoNatToSingletonInt[L <: Nat](implicit p : L+L) : p.Out {} = p.value
   val bSing10 : 10 = demoNatToSingletonInt[n.N]
-  def demoSigNatSig[L <: XInt](implicit op : ToNat[L+L]) : op.Out = op.value
+  def demoSigNatSig[L <: XInt](implicit op : SafeNat[L+L]) : op.Out = op.value
   val bNat5 : shapeless.nat._10 = demoSigNatSig[5]
   //////////////////////////////
 }
@@ -73,7 +73,7 @@ object RightTriangleDemo {
 
   def fooWith90DegTriangle[A <: XDouble, B <: XDouble, C <: XDouble](implicit check : Require[RightTriangle[A,B,C]]) : Unit = {}
   fooWith90DegTriangle[5.0,3.0,5.830951894845301] //OK!
-  //  fooWith90DegTriangle[5.0,3.1,5.830951894845301] //Error:(17, 23) could not find implicit value for parameter check: singleton.ops.Require[singleton.ops.ITESpec.RightTriangle[5.0,3.1,5.830951894845301]]
+  shapeless.test.illTyped("fooWith90DegTriangle[5.0,3.1,5.830951894845301]")
 }
 
 
@@ -98,7 +98,7 @@ object FixedSizedVectorDemo {
       val v1 = FixedSizeVector[5]
       val v2 = FixedSizeVector[2]
       val v3 : FixedSizeVector[40] = v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1
-      //  val v4 = FixedSizeVector[-1] //Will lead to error could not find implicit value for parameter check: singleton.ops.Require[singleton.ops.>[-1,0]]
+      shapeless.test.illTyped("FixedSizeVector[-1]")
     }
   }
 
@@ -130,25 +130,106 @@ object FixedSizedVectorDemo {
       val v1 = FixedSizeVector[5]
       val v2 = FixedSizeVector[2]
       val v3 : FixedSizeVector[40] = v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1 concat v2 concat v1
-      //  val v4 = FixedSizeVector[-1] //Will lead to error could not find implicit value for parameter check: singleton.ops.Require[singleton.ops.>[-1,0]]
+      shapeless.test.illTyped("FixedSizeVector[-1]") //Will lead to error could not find implicit value for parameter check: singleton.ops.Require[singleton.ops.>[-1,0]]
+    }
+  }
+
+  object Method_Three { //Using TwoFace and Checked
+    import singleton.twoface._
+
+    object Test {
+      class FixedSizeVector[L] private (val length : TwoFace.Int[L]) {
+        def concat[L2](that : FixedSizeVector[L2]) = FixedSizeVector.protCreate(this.length + that.length)
+        override def toString = s"FixedSizeVector($length)"
+        def pretty(implicit rt: RunTime[L]) = if (rt) s"FixedSizeVector($length)" else s"FixedSizeVector[$length]"
+      }
+
+      object FixedSizeVector {
+        //Defining Checked Length Type
+        protected type CondCheckedLength[L, P] = L > 0
+        protected type ParamCheckedLength = 0
+        protected type MsgCheckedLength[L, P] = "Length must be positive (received value of " + ToString[L] + ")"
+        type CheckedLength[L] = Checked.Int[L, CondCheckedLength, ParamCheckedLength, MsgCheckedLength]
+
+        implicit object RuntimeCheckedLength extends Checked.Runtime[Int, Int, CondCheckedLength, MsgCheckedLength] {
+          def cond(l : Int, p : Option[Int]) : scala.Boolean = l > 0
+          def msg(l : Int, p : Option[Int]) : java.lang.String = s"Length must be positive (received value of $l)"
+        }
+
+        //Protected Constructor (performs unsafe run-time check, if compile-time check is not possible)
+        protected def protCreate[L](tfLength : TwoFace.Int[L]) : FixedSizeVector[L] =
+          new FixedSizeVector[L](tfLength)
+
+        //Public Constructors (perform compile-time check, if possible)
+        def apply[L](checkedLength : CheckedLength[L]) =
+          protCreate(checkedLength.unsafeCheck())
+        implicit def apply[L](implicit checkedLength : CheckedLength[L], di : DummyImplicit) =
+          protCreate(checkedLength.unsafeCheck())
+      }
+    }
+
+    object TestVector {
+      import Test._
+
+      //compile-time tests
+      val ctv5 : FixedSizeVector[5] = FixedSizeVector[5]
+      val ctv2 : FixedSizeVector[2] = FixedSizeVector(2)
+      val ctv7 : FixedSizeVector[7] = implicitly[FixedSizeVector[7]]
+      val ctv9 : FixedSizeVector[9] = ctv2 concat ctv7
+      shapeless.test.illTyped("FixedSizeVector[0]")
+
+      //run-time tests
+      var two = 2
+      val rtv2 = FixedSizeVector(two)
+      val rtv4 = rtv2 concat rtv2 //runtime concat runtime => runtime
+      val rtv6 = rtv4 concat ctv2 //runtime concat compile-time => runtime
+      var zero = 0
+      FixedSizeVector(zero) //Run-time fail
+
     }
   }
 }
 
 object NonLiteralTest {
-  def checkPos[X <: Int](x : X)(implicit check : Require[IsNotLiteral[X]], dummyImplicit: DummyImplicit) : Unit = assert(x > 0)
-  def checkPos[X <: XInt](x : X)(implicit check : Require[X > 0]) : Unit = {}
-  var a = 5
-  checkPos(5) //compiletime Pass
-  checkPos(a) //runtime Pass
-  a = -1
-//  checkPos(-1) //compiletime Fail
-  checkPos(a) //runtime Fail
+  import singleton.twoface._
+
+  def smallerThan50[T](t : TwoFace.Int[T])
+                      (implicit ct_check: CompileTime[T < 50], rt_check : RunTime[T]) : Unit = {
+    if (rt_check) require(t < 50, "")
+  }
+
+  var forty = 40
+  var sixty = 60
+
+  smallerThan50(forty) //passes run-time check
+  smallerThan50(40)    //passes compile-time check
+  smallerThan50(sixty) //fails run-time check
+//  smallerThan50(60)    //fails compile-time check
+}
+
+object CheckedTest {
+  import singleton.twoface._
+
+  type CondSmallerThan50[T, P] = T < P
+  type MsgSmallerThan50[T, P] = "This is bad " + ToString[T]
+  type Param50 = 50
+  type CheckedSmallerThan50[T] = Checked.Int[T, CondSmallerThan50, Param50, MsgSmallerThan50]
+  def smallerThan50[T](t : CheckedSmallerThan50[T]) : Unit = {
+    require(t < 50, "") //if (rt_check)
+  }
+
+  var forty = 40
+  var sixty = 60
+  val tf40 = TwoFace.Int(40)
+  val tf60 = TwoFace.Int(60)
+  val tfForty = TwoFace.Int(forty)
+
+
+  smallerThan50(40)
 }
 /* TODOs:
 Fix real world matrix example
 Add operations table to readme
-Add Floor, Ceil
 Add Log2 (efficient)
  */
 

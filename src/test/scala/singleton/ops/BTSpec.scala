@@ -1,17 +1,17 @@
 package singleton.ops
 
-import org.scalacheck.Properties
+import org.scalacheck.{Prop, Properties}
 import shapeless.test.illTyped
 import singleton.TestUtils._
 
-class PlusSpec extends Properties("+") {
-  type OP[L,R] = +[L,R]
-  type leftNat = shapeless.Nat._1
-  type leftChar = '\u0001'
-  type leftInt = 1
-  type leftLong = 1L
-  type leftFloat = 1.0f
-  type leftDouble = 1.0
+class BTSpec extends Properties(">") {
+  type OP[L,R] = >[L,R]
+  type leftNat = shapeless.Nat._3
+  type leftChar = '\u0003'
+  type leftInt = 3
+  type leftLong = 3L
+  type leftFloat = 3.0f
+  type leftDouble = 3.0
   type leftString = "Something"
   type leftBoolean = true
 
@@ -24,24 +24,23 @@ class PlusSpec extends Properties("+") {
   type rightString = "Else"
   type rightBoolean = false
 
-  type resultNat = shapeless.Nat._3
-  type resultChar = '\u0003'
-  type resultInt = 3
-  type resultLong = 3L
-  type resultFloat = 3.0f
-  type resultDouble = 3.0
-  type resultString = "SomethingElse"
-  type resultBoolean = false
+  type resultFalse = false
+  type resultTrue = true
+
+  def verifyBTNum[L,R](implicit
+                       verifyFalse: Verify[Negate[L] > R, resultFalse],
+                       verifyFalse2: Verify[L > L, resultFalse],
+                       verifyTrue: Verify[L > R, resultTrue]) : Prop = wellTyped {}
 
   ////////////////////////////////////////////////////////////////////////
   // Nat op XXX
   ////////////////////////////////////////////////////////////////////////
-  property("Nat, Nat arguments") = verifyOp2Args[OP,leftNat,rightNat,resultInt]
-  property("Nat, Char arguments") = verifyOp2Args[OP,leftNat,rightChar,resultInt]
-  property("Nat, Int arguments") = verifyOp2Args[OP,leftNat,rightInt,resultInt]
-  property("Nat, Long arguments") = verifyOp2Args[OP,leftNat,rightLong,resultLong]
-  property("Nat, Float arguments") = verifyOp2Args[OP,leftNat,rightFloat,resultFloat]
-  property("Nat, Double arguments") = verifyOp2Args[OP,leftNat,rightDouble,resultDouble]
+  property("Nat, Nat arguments") = verifyBTNum[leftNat,rightNat]
+  property("Nat, Char arguments") = verifyBTNum[leftNat,rightChar]
+  property("Nat, Int arguments") = verifyBTNum[leftNat,rightInt]
+  property("Nat, Long arguments") = verifyBTNum[leftNat,rightLong]
+  property("Nat, Float arguments") = verifyBTNum[leftNat,rightFloat]
+  property("Nat, Double arguments") = verifyBTNum[leftNat,rightDouble]
   property("Nat, String arguments") = {illTyped("""implicitly[OP[leftNat,rightString]]"""); true}
   property("Nat, Boolean arguments") = {illTyped("""implicitly[OP[leftNat,rightBoolean]]"""); true}
   ////////////////////////////////////////////////////////////////////////
@@ -49,12 +48,12 @@ class PlusSpec extends Properties("+") {
   ////////////////////////////////////////////////////////////////////////
   // Char op XXX
   ////////////////////////////////////////////////////////////////////////
-  property("Char, Nat arguments") = verifyOp2Args[OP,leftChar,rightNat,resultInt]
-  property("Char, Char arguments") = verifyOp2Args[OP,leftChar,rightChar,resultInt]
-  property("Char, Int arguments") = verifyOp2Args[OP,leftChar,rightInt,resultInt]
-  property("Char, Long arguments") = verifyOp2Args[OP,leftChar,rightLong,resultLong]
-  property("Char, Float arguments") = verifyOp2Args[OP,leftChar,rightFloat,resultFloat]
-  property("Char, Double arguments") = verifyOp2Args[OP,leftChar,rightDouble,resultDouble]
+  property("Char, Nat arguments") = verifyBTNum[leftChar,rightNat]
+  property("Char, Char arguments") = verifyBTNum[leftChar,rightChar]
+  property("Char, Int arguments") = verifyBTNum[leftChar,rightInt]
+  property("Char, Long arguments") = verifyBTNum[leftChar,rightLong]
+  property("Char, Float arguments") = verifyBTNum[leftChar,rightFloat]
+  property("Char, Double arguments") = verifyBTNum[leftChar,rightDouble]
   property("Char, String arguments") = {illTyped("""implicitly[OP[leftChar,rightString]]"""); true}
   property("Char, Boolean arguments") = {illTyped("""implicitly[OP[leftChar,rightBoolean]]"""); true}
   ////////////////////////////////////////////////////////////////////////
@@ -62,12 +61,12 @@ class PlusSpec extends Properties("+") {
   ////////////////////////////////////////////////////////////////////////
   // Int op XXX
   ////////////////////////////////////////////////////////////////////////
-  property("Int, Nat arguments") = verifyOp2Args[OP,leftInt,rightNat,resultInt]
-  property("Int, Char arguments") = verifyOp2Args[OP,leftInt,rightChar,resultInt]
-  property("Int, Int arguments") = verifyOp2Args[OP,leftInt,rightInt,resultInt]
-  property("Int, Long arguments") = verifyOp2Args[OP,leftInt,rightLong,resultLong]
-  property("Int, Float arguments") = verifyOp2Args[OP,leftInt,rightFloat,resultFloat]
-  property("Int, Double arguments") = verifyOp2Args[OP,leftInt,rightDouble,resultDouble]
+  property("Int, Nat arguments") = verifyBTNum[leftInt,rightNat]
+  property("Int, Char arguments") = verifyBTNum[leftInt,rightChar]
+  property("Int, Int arguments") = verifyBTNum[leftInt,rightInt]
+  property("Int, Long arguments") = verifyBTNum[leftInt,rightLong]
+  property("Int, Float arguments") = verifyBTNum[leftInt,rightFloat]
+  property("Int, Double arguments") = verifyBTNum[leftInt,rightDouble]
   property("Int, String arguments") = {illTyped("""implicitly[OP[leftInt,rightString]]"""); true}
   property("Int, Boolean arguments") = {illTyped("""implicitly[OP[leftInt,rightBoolean]]"""); true}
   ////////////////////////////////////////////////////////////////////////
@@ -75,12 +74,12 @@ class PlusSpec extends Properties("+") {
   ////////////////////////////////////////////////////////////////////////
   // Long op XXX
   ////////////////////////////////////////////////////////////////////////
-  property("Long, Nat arguments") = verifyOp2Args[OP,leftLong,rightNat,resultLong]
-  property("Long, Char arguments") = verifyOp2Args[OP,leftLong,rightChar,resultLong]
-  property("Long, Int arguments") = verifyOp2Args[OP,leftLong,rightInt,resultLong]
-  property("Long, Long arguments") = verifyOp2Args[OP,leftLong,rightLong,resultLong]
-  property("Long, Float arguments") = verifyOp2Args[OP,leftLong,rightFloat,resultFloat]
-  property("Long, Double arguments") = verifyOp2Args[OP,leftLong,rightDouble,resultDouble]
+  property("Long, Nat arguments") = verifyBTNum[leftLong,rightNat]
+  property("Long, Char arguments") = verifyBTNum[leftLong,rightChar]
+  property("Long, Int arguments") = verifyBTNum[leftLong,rightInt]
+  property("Long, Long arguments") = verifyBTNum[leftLong,rightLong]
+  property("Long, Float arguments") = verifyBTNum[leftLong,rightFloat]
+  property("Long, Double arguments") = verifyBTNum[leftLong,rightDouble]
   property("Long, String arguments") = {illTyped("""implicitly[OP[leftLong,rightString]]"""); true}
   property("Long, Boolean arguments") = {illTyped("""implicitly[OP[leftLong,rightBoolean]]"""); true}
   ////////////////////////////////////////////////////////////////////////
@@ -88,12 +87,12 @@ class PlusSpec extends Properties("+") {
   ////////////////////////////////////////////////////////////////////////
   // Float op XXX
   ////////////////////////////////////////////////////////////////////////
-  property("Float, Nat arguments") = verifyOp2Args[OP,leftFloat,rightNat,resultFloat]
-  property("Float, Char arguments") = verifyOp2Args[OP,leftFloat,rightChar,resultFloat]
-  property("Float, Int arguments") = verifyOp2Args[OP,leftFloat,rightInt,resultFloat]
-  property("Float, Long arguments") = verifyOp2Args[OP,leftFloat,rightLong,resultFloat]
-  property("Float, Float arguments") = verifyOp2Args[OP,leftFloat,rightFloat,resultFloat]
-  property("Float, Double arguments") = verifyOp2Args[OP,leftFloat,rightDouble,resultDouble]
+  property("Float, Nat arguments") = verifyBTNum[leftFloat,rightNat]
+  property("Float, Char arguments") = verifyBTNum[leftFloat,rightChar]
+  property("Float, Int arguments") = verifyBTNum[leftFloat,rightInt]
+  property("Float, Long arguments") = verifyBTNum[leftFloat,rightLong]
+  property("Float, Float arguments") = verifyBTNum[leftFloat,rightFloat]
+  property("Float, Double arguments") = verifyBTNum[leftFloat,rightDouble]
   property("Float, String arguments") = {illTyped("""implicitly[OP[leftFloat,rightString]]"""); true}
   property("Float, Boolean arguments") = {illTyped("""implicitly[OP[leftFloat,rightBoolean]]"""); true}
   ////////////////////////////////////////////////////////////////////////
@@ -101,12 +100,12 @@ class PlusSpec extends Properties("+") {
   ////////////////////////////////////////////////////////////////////////
   // Double op XXX
   ////////////////////////////////////////////////////////////////////////
-  property("Double, Nat arguments") = verifyOp2Args[OP,leftDouble,rightNat,resultDouble]
-  property("Double, Char arguments") = verifyOp2Args[OP,leftDouble,rightChar,resultDouble]
-  property("Double, Int arguments") = verifyOp2Args[OP,leftDouble,rightInt,resultDouble]
-  property("Double, Long arguments") = verifyOp2Args[OP,leftDouble,rightLong,resultDouble]
-  property("Double, Float arguments") = verifyOp2Args[OP,leftDouble,rightFloat,resultDouble]
-  property("Double, Double arguments") = verifyOp2Args[OP,leftDouble,rightDouble,resultDouble]
+  property("Double, Nat arguments") = verifyBTNum[leftDouble,rightNat]
+  property("Double, Char arguments") = verifyBTNum[leftDouble,rightChar]
+  property("Double, Int arguments") = verifyBTNum[leftDouble,rightInt]
+  property("Double, Long arguments") = verifyBTNum[leftDouble,rightLong]
+  property("Double, Float arguments") = verifyBTNum[leftDouble,rightFloat]
+  property("Double, Double arguments") = verifyBTNum[leftDouble,rightDouble]
   property("Double, String arguments") = {illTyped("""implicitly[OP[leftDouble,rightString]]"""); true}
   property("Double, Boolean arguments") = {illTyped("""implicitly[OP[leftDouble,rightBoolean]]"""); true}
   ////////////////////////////////////////////////////////////////////////
@@ -120,7 +119,7 @@ class PlusSpec extends Properties("+") {
   property("String, Long arguments") = {illTyped("""implicitly[OP[leftString,rightLong]]"""); true}
   property("String, Float arguments") = {illTyped("""implicitly[OP[leftString,rightFloat]]"""); true}
   property("String, Double arguments") = {illTyped("""implicitly[OP[leftString,rightDouble]]"""); true}
-  property("String, String arguments") = verifyOp2Args[OP,leftString,rightString,resultString]
+  property("String, String arguments") = {illTyped("""implicitly[OP[leftString,rightString]]"""); true}
   property("String, Boolean arguments") = {illTyped("""implicitly[OP[leftString,rightBoolean]]"""); true}
   ////////////////////////////////////////////////////////////////////////
 
