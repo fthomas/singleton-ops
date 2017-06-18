@@ -145,18 +145,13 @@ object FixedSizedVectorDemo {
       }
 
       object FixedSizeVector {
-        import singleton.twoface._
-        import singleton.twoface.impl.CheckedAny
-        protected type CondCheckedLength[L, P] = L > 0
-        protected type MsgCheckedLength[L, P] = "Length must be positive (received value of " + ToString[L] + ")"
-        final class Length[L, Param] (val value : scala.Int) extends AnyVal with Checked.Int[L, Param] {
-          @inline def getValue : scala.Int = value
-        }
-        object Length extends CheckedAny.Builder[Length, CondCheckedLength, MsgCheckedLength, scala.Int, scala.Int]
+        protected type CondCheckedLength[L] = L > 0
+        protected type MsgCheckedLength[L] = "Length must be positive (received value of " + ToString[L] + ")"
+        @checked0Param[CondCheckedLength, MsgCheckedLength, Int] class CheckedLength[L]
 
-        implicit object RuntimeCheckedLength extends Length.Runtime {
-          def cond(l : Int, p : Option[Int]) : scala.Boolean = l > 0
-          def msg(l : Int, p : Option[Int]) : java.lang.String = s"Length must be positive (received value of $l)"
+        implicit object RuntimeCheckedLength extends CheckedLength.Runtime {
+          def cond(l : Int) : scala.Boolean = l > 0
+          def msg(l : Int) : java.lang.String = s"Length must be positive (received value of $l)"
         }
 
         //Protected Constructor (performs unsafe run-time check, if compile-time check is not possible)
@@ -164,9 +159,9 @@ object FixedSizedVectorDemo {
           new FixedSizeVector[L](tfLength)
 
         //Public Constructors (perform compile-time check, if possible)
-        def apply[L](checkedLength : Length[L,0]) =
+        def apply[L](checkedLength : CheckedLength[L]) =
           protCreate(checkedLength.unsafeCheck())
-        implicit def apply[L](implicit checkedLength : Length[L,0], di : DummyImplicit) =
+        implicit def apply[L](implicit checkedLength : CheckedLength[L], di : DummyImplicit) =
           protCreate(checkedLength.unsafeCheck())
       }
     }
@@ -209,6 +204,8 @@ object NonLiteralTest {
   smallerThan50(sixty) //fails run-time check
 //  smallerThan50(60)    //fails compile-time check
 }
+
+
 //
 //object CheckedTest {
 //  import singleton.twoface._

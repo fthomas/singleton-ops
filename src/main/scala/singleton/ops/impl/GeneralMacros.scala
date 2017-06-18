@@ -284,7 +284,7 @@ trait GeneralMacros {
       case ("ToString",   a: Boolean, _, _)           => Constant(a.toString)
 
       case ("IsNat",      a: Char, _, _)              => Constant(false)
-      case ("IsNat",      a: Int, _, _)               => Constant(a > 0)
+      case ("IsNat",      a: Int, _, _)               => Constant(a >= 0)
       case ("IsNat",      a: Long, _, _)              => Constant(false)
       case ("IsNat",      a: Float, _, _)             => Constant(false)
       case ("IsNat",      a: Double, _, _)            => Constant(false)
@@ -750,7 +750,15 @@ trait GeneralMacros {
   CheckedImplMaterializer[T, Param, Chk] = new CheckedImplMaterializer[T, Param, Chk](weakTypeOf[T], weakTypeOf[Param], symbolOf[Chk])
 
   final class CheckedImplMaterializer[T, Param, Chk](tTpe : Type, paramTpe : Type, chkSym : TypeSymbol) {
-    def impl(vc : c.Tree, vm : c.Tree) : c.Tree = {
+    def newChecked(paramNum : Int, value : c.Tree)(implicit annotatedSym : TypeSymbol) : c.Tree = {
+      paramNum match {
+        case 0 => q"new $chkSym[$tTpe]($value)"
+        case 1 => q"new $chkSym[$tTpe,$paramTpe]($value)"
+        case _ =>
+          abort("Unsupported number of parameters")
+      }
+    }
+    def impl(paramNum : Int, vc : c.Tree, vm : c.Tree) : c.Tree = {
       implicit val annotatedSym : TypeSymbol = chkSym
       val temp = showCode(vm)
       val pattern = "(?s).*val valueWide: String = \"(.*)\".*".r
@@ -765,18 +773,17 @@ trait GeneralMacros {
       val chkTerm = TermName(chkSym.name.toString)
       val tValue = extractSingletonValue(tTpe).value
       val tTree = constantTreeOf(tValue)
-      val genTree = q"new $chkSym[$tTpe,$paramTpe]($tTree)"
-//      print(genTree)
-//      print(showCode(genTree))
-//      print(showRaw(genTree))
+      val genTree = newChecked(paramNum, tTree)
       genTree
     }
-    def unsafe(value : c.Tree) : c.Tree = {
-      val genTree = q"new $chkSym[$tTpe,$paramTpe]($value)"
+    def unsafe(paramNum : Int, value : c.Tree) : c.Tree = {
+      implicit val annotatedSym : TypeSymbol = chkSym
+      val genTree = newChecked(paramNum, value)
       genTree
     }
-    def unsafeTF(value : c.Tree) : c.Tree = {
-      val genTree = q"new $chkSym[$tTpe,$paramTpe]($value.getValue)"
+    def unsafeTF(paramNum : Int, value : c.Tree) : c.Tree = {
+      implicit val annotatedSym : TypeSymbol = chkSym
+      val genTree = newChecked(paramNum, q"$value.getValue")
       genTree
     }
   }

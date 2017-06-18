@@ -24,7 +24,9 @@ lazy val root = project
       compilerPlugin(
         "org.scalamacros" % "paradise" % macroParadiseVersion cross CrossVersion.patch),
       "com.chuusai" %% "shapeless" % shapelessVersion,
-      "org.scalacheck" %% "scalacheck" % scalaCheckVersion % Test
+      "org.scalacheck" %% "scalacheck" % scalaCheckVersion % Test,
+      "org.scalameta" %% "scalameta" % "1.8.0" % Provided,
+      compilerPlugin("org.scalameta" % "paradise" % "3.0.0-M9" cross CrossVersion.patch)
     )
   )
 
@@ -70,7 +72,8 @@ lazy val compileSettings = Def.settings(
     "-Yliteral-types",
     "-Yno-adapted-args",
     "-Ywarn-numeric-widen",
-    "-Ywarn-unused-import"
+    "-Ywarn-unused-import",
+    "-Xplugin-require:macroparadise"
 //    "-Ywarn-value-discard"
   ),
   scalacOptions in (Compile, console) -= "-Ywarn-unused-import",

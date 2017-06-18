@@ -5,23 +5,23 @@ import singleton.ops._
 import singleton.ops.impl._
 import scala.reflect.macros.whitebox
 
-trait CheckedAny[Face, T] extends Any with TwoFaceAny[Face, T] {
-  def unsafeCheck[ParamFace, Cond[_,_], Msg[_,_]](p : Option[ParamFace] = None)
+trait Checked1Param[Face, T] extends Any with TwoFaceAny[Face, T] {
+  def unsafeCheck[ParamFace, Cond[_,_], Msg[_,_]](p : ParamFace)
   (implicit rt : RunTime[T],
-   rtc : CheckedAny.Runtime[Face, ParamFace, Cond, Msg]) : this.type = {
+   rtc : Checked1Param.Runtime[Face, ParamFace, Cond, Msg]) : this.type = {
     if (rt) require(rtc.cond(getValue,p), rtc.msg(getValue,p))
     this
   }
 }
 
-object CheckedAny {
+object Checked1Param {
   trait Runtime[TFace, ParamFace, Cond[_,_], Msg[_,_]] {
-    def cond(t : TFace, p : Option[ParamFace]) : scala.Boolean
-    def msg(t : TFace, p : Option[ParamFace]) : java.lang.String
+    def cond(t : TFace, p : ParamFace) : scala.Boolean
+    def msg(t : TFace, p : ParamFace) : java.lang.String
   }
 
   trait Builder[Chk[_,_],Cond[_,_],Msg[_,_],Face, ParamFace] {
-    trait Runtime extends CheckedAny.Runtime[Face, ParamFace, Cond, Msg]
+    trait Runtime extends Checked1Param.Runtime[Face, ParamFace, Cond, Msg]
     type CondHelper[T, Param] = ITE[IsNotLiteral[Cond[T, Param]], true, Cond[T, Param]]
     type MsgHelper[T, Param] = ITE[IsNotLiteral[Msg[T, Param]], "Something bad happened", Msg[T, Param]]
 
@@ -50,27 +50,27 @@ object CheckedAny {
       def impl[T, Param, Chk](vc : c.Tree, vm : c.Tree)(
         implicit
         t : c.WeakTypeTag[T], param: c.WeakTypeTag[Param], chk: c.WeakTypeTag[Chk]
-      ): c.Tree = CheckedImplMaterializer[T, Param, Chk].impl(vc, vm)
+      ): c.Tree = CheckedImplMaterializer[T, Param, Chk].impl(1, vc, vm)
 
       def safe[T, Param, Chk](value : c.Tree)(vc : c.Tree, vm : c.Tree)(
         implicit
         t : c.WeakTypeTag[T], param: c.WeakTypeTag[Param], chk: c.WeakTypeTag[Chk]
-      ): c.Tree = CheckedImplMaterializer[T, Param, Chk].impl(vc, vm)
+      ): c.Tree = CheckedImplMaterializer[T, Param, Chk].impl(1, vc, vm)
 
       def safeTF[T, Param, Chk](value : c.Tree)(vc : c.Tree, vm : c.Tree)(
         implicit
         t : c.WeakTypeTag[T], param: c.WeakTypeTag[Param], chk: c.WeakTypeTag[Chk]
-      ): c.Tree = CheckedImplMaterializer[T, Param, Chk].impl(vc, vm)
+      ): c.Tree = CheckedImplMaterializer[T, Param, Chk].impl(1, vc, vm)
 
       def unsafe[T, Param, Chk](value : c.Tree)(
         implicit
         t : c.WeakTypeTag[T], param: c.WeakTypeTag[Param], chk: c.WeakTypeTag[Chk]
-      ): c.Tree = CheckedImplMaterializer[T, Param, Chk].unsafe(value)
+      ): c.Tree = CheckedImplMaterializer[T, Param, Chk].unsafe(1, value)
 
       def unsafeTF[T, Param, Chk](value : c.Tree)(
         implicit
         t : c.WeakTypeTag[T], param: c.WeakTypeTag[Param], chk: c.WeakTypeTag[Chk]
-      ): c.Tree = CheckedImplMaterializer[T, Param, Chk].unsafeTF(value)
+      ): c.Tree = CheckedImplMaterializer[T, Param, Chk].unsafeTF(1, value)
     }
   }
 }

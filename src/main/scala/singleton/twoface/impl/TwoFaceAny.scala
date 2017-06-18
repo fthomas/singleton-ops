@@ -2,13 +2,13 @@ package singleton.twoface.impl
 
 import singleton.ops._
 
-protected[twoface] trait TwoFaceAny[Face, T] extends Any {
+trait TwoFaceAny[Face, T] extends Any {
   def isLiteral(implicit rt : RunTime[T]) : scala.Boolean = !rt
   @inline def getValue : Face
   override def toString = getValue.toString
 }
 
-protected[twoface] object TwoFaceAny {
+object TwoFaceAny {
   trait Builder[TF[_], Face] {
     protected[twoface] def create[T](value : Face) : TF[T]
     implicit def apply[T <: Face with Singleton](value : T)(implicit tfb : Builder[TF, Face]) : TF[T] =
