@@ -145,13 +145,16 @@ object FixedSizedVectorDemo {
       }
 
       object FixedSizeVector {
-        //Defining Checked Length Type
+        import singleton.twoface._
+        import singleton.twoface.impl.CheckedAny
         protected type CondCheckedLength[L, P] = L > 0
-        protected type ParamCheckedLength = 0
         protected type MsgCheckedLength[L, P] = "Length must be positive (received value of " + ToString[L] + ")"
-        type CheckedLength[L] = Checked.Int[L, CondCheckedLength, ParamCheckedLength, MsgCheckedLength]
+        final class Length[L, Param] (val value : scala.Int) extends AnyVal with Checked.Int[L, Param] {
+          @inline def getValue : scala.Int = value
+        }
+        object Length extends CheckedAny.Builder[Length, CondCheckedLength, MsgCheckedLength, scala.Int, scala.Int]
 
-        implicit object RuntimeCheckedLength extends Checked.Runtime[Int, Int, CondCheckedLength, MsgCheckedLength] {
+        implicit object RuntimeCheckedLength extends Length.Runtime {
           def cond(l : Int, p : Option[Int]) : scala.Boolean = l > 0
           def msg(l : Int, p : Option[Int]) : java.lang.String = s"Length must be positive (received value of $l)"
         }
@@ -161,9 +164,9 @@ object FixedSizedVectorDemo {
           new FixedSizeVector[L](tfLength)
 
         //Public Constructors (perform compile-time check, if possible)
-        def apply[L](checkedLength : CheckedLength[L]) =
+        def apply[L](checkedLength : Length[L,0]) =
           protCreate(checkedLength.unsafeCheck())
-        implicit def apply[L](implicit checkedLength : CheckedLength[L], di : DummyImplicit) =
+        implicit def apply[L](implicit checkedLength : Length[L,0], di : DummyImplicit) =
           protCreate(checkedLength.unsafeCheck())
       }
     }
@@ -206,27 +209,27 @@ object NonLiteralTest {
   smallerThan50(sixty) //fails run-time check
 //  smallerThan50(60)    //fails compile-time check
 }
-
-object CheckedTest {
-  import singleton.twoface._
-
-  type CondSmallerThan50[T, P] = T < P
-  type MsgSmallerThan50[T, P] = "This is bad " + ToString[T]
-  type Param50 = 50
-  type CheckedSmallerThan50[T] = Checked.Int[T, CondSmallerThan50, Param50, MsgSmallerThan50]
-  def smallerThan50[T](t : CheckedSmallerThan50[T]) : Unit = {
-    require(t < 50, "") //if (rt_check)
-  }
-
-  var forty = 40
-  var sixty = 60
-  val tf40 = TwoFace.Int(40)
-  val tf60 = TwoFace.Int(60)
-  val tfForty = TwoFace.Int(forty)
-
-
-  smallerThan50(40)
-}
+//
+//object CheckedTest {
+//  import singleton.twoface._
+//
+//  type CondSmallerThan50[T, P] = T < P
+//  type MsgSmallerThan50[T, P] = "This is bad " + ToString[T]
+//  type Param50 = 50
+//  type CheckedSmallerThan50[T] = Checked.Int[T, CondSmallerThan50, Param50, MsgSmallerThan50]
+//  def smallerThan50[T](t : CheckedSmallerThan50[T]) : Unit = {
+//    require(t < 50, "") //if (rt_check)
+//  }
+//
+//  var forty = 40
+//  var sixty = 60
+//  val tf40 = TwoFace.Int(40)
+//  val tf60 = TwoFace.Int(60)
+//  val tfForty = TwoFace.Int(forty)
+//
+//
+//  smallerThan50(40)
+//}
 /* TODOs:
 Fix real world matrix example
 Add operations table to readme

@@ -8,54 +8,69 @@ import scala.reflect.macros.whitebox
 trait CheckedAny[Face, T] extends Any with TwoFaceAny[Face, T] {
   def unsafeCheck[ParamFace, Cond[_,_], Msg[_,_]](p : Option[ParamFace] = None)
   (implicit rt : RunTime[T],
-   rtc : singleton.twoface.Checked.Runtime[Face, ParamFace, Cond, Msg]) : this.type = {
+   rtc : CheckedAny.Runtime[Face, ParamFace, Cond, Msg]) : this.type = {
     if (rt) require(rtc.cond(getValue,p), rtc.msg(getValue,p))
     this
   }
 }
 
 object CheckedAny {
-  trait Builder[Chk[_,C[_,_],_,M[_,_]], Face] {
-    type CondHelper[Cond[_,_], T, Param] = ITE[IsNotLiteral[Cond[T, Param]], true, Cond[T, Param]]
-    type MsgHelper[Msg[_,_], T, Param] = ITE[IsNotLiteral[Msg[T, Param]], "Something bad happened", Msg[T, Param]]
-    protected def create[T, Cond[_,_], Param, Msg[_,_]](value : Face) : Chk[T, Cond, Param, Msg]
+  trait Runtime[TFace, ParamFace, Cond[_,_], Msg[_,_]] {
+    def cond(t : TFace, p : Option[ParamFace]) : scala.Boolean
+    def msg(t : TFace, p : Option[ParamFace]) : java.lang.String
+  }
 
-    implicit def impl[T, Cond[_,_], Param, Msg[_,_]]
-      (implicit vc : CondHelper[Cond, T, Param], vm : MsgHelper[Msg, T, Param]) :
-      Chk[T, Cond, Param, Msg] = macro Builder.Macro.impl[T, Cond, Param, Msg, Chk[T, Cond, Param, Msg]]
+  trait Builder[Chk[_,_],Cond[_,_],Msg[_,_],Face, ParamFace] {
+    trait Runtime extends CheckedAny.Runtime[Face, ParamFace, Cond, Msg]
+    type CondHelper[T, Param] = ITE[IsNotLiteral[Cond[T, Param]], true, Cond[T, Param]]
+    type MsgHelper[T, Param] = ITE[IsNotLiteral[Msg[T, Param]], "Something bad happened", Msg[T, Param]]
 
-    implicit def safe[T <: Face with Singleton, Cond[_,_], Param, Msg[_,_]]
-      (value : T)(implicit vc : CondHelper[Cond, T, Param], vm : MsgHelper[Msg, T, Param]) :
-      Chk[T, Cond, Param, Msg] = macro Builder.Macro.safe[T, Cond, Param, Msg, Chk[T, Cond, Param, Msg]]
+    implicit def impl[T, Param]
+      (implicit vc : CondHelper[T, Param], vm : MsgHelper[T, Param]) :
+      Chk[T, Param] = macro Builder.Macro.impl[T, Param, Chk[T, Param]]
 
-    implicit def unsafe[Cond[_,_], Param, Msg[_,_]](value : Face) :
-      Chk[Face, Cond, Param, Msg] = create[Face, Cond, Param, Msg](value)
+    implicit def safe[T <: Face with Singleton, Param]
+      (value : T)(implicit vc : CondHelper[T, Param], vm : MsgHelper[T, Param]) :
+      Chk[T, Param] = macro Builder.Macro.safe[T, Param, Chk[T, Param]]
 
-    implicit def safeTF[T <: Face with Singleton, Cond[_,_], Param, Msg[_,_]]
-      (value : TwoFaceAny[Face, T])(implicit vc : CondHelper[Cond, T, Param], vm : MsgHelper[Msg, T, Param]) :
-      Chk[T, Cond, Param, Msg] = macro Builder.Macro.safeTF[T, Cond, Param, Msg, Chk[T, Cond, Param, Msg]]
+    implicit def unsafe[Param](value : Face) :
+      Chk[Face, Param] = macro Builder.Macro.unsafe[Face, Param, Chk[Face, Param]]
 
-    implicit def unsafeTF[Cond[_,_], Param, Msg[_,_]](tf : TwoFaceAny[Face, Face]) :
-      Chk[Face, Cond, Param, Msg] = create[Face, Cond, Param, Msg](tf.getValue)
+    implicit def safeTF[T <: Face with Singleton, Param]
+      (value : TwoFaceAny[Face, T])(implicit vc : CondHelper[T, Param], vm : MsgHelper[T, Param]) :
+      Chk[T, Param] = macro Builder.Macro.safeTF[T, Param, Chk[T, Param]]
+
+    implicit def unsafeTF[Param](value : TwoFaceAny[Face, Face]) :
+      Chk[Face, Param] = macro Builder.Macro.unsafeTF[Face, Param, Chk[Face, Param]]
   }
 
   @bundle
   object Builder {
     final class Macro(val c: whitebox.Context) extends GeneralMacros {
-      def impl[T, Cond[_,_], Param, Msg[_,_], Chk](vc : c.Tree, vm : c.Tree)(
+      def impl[T, Param, Chk](vc : c.Tree, vm : c.Tree)(
         implicit
-        t : c.WeakTypeTag[T], cond : c.WeakTypeTag[Cond[_,_]], msg : c.WeakTypeTag[Msg[_,_]], param: c.WeakTypeTag[Param], chk: c.WeakTypeTag[Chk]
-      ): c.Tree = CheckedImplMaterializer[T, Cond[_,_], Param, Msg[_,_], Chk].impl(vc, vm)
+        t : c.WeakTypeTag[T], param: c.WeakTypeTag[Param], chk: c.WeakTypeTag[Chk]
+      ): c.Tree = CheckedImplMaterializer[T, Param, Chk].impl(vc, vm)
 
-      def safe[T, Cond[_,_], Param, Msg[_,_], Chk](value : c.Tree)(vc : c.Tree, vm : c.Tree)(
+      def safe[T, Param, Chk](value : c.Tree)(vc : c.Tree, vm : c.Tree)(
         implicit
-        t : c.WeakTypeTag[T], cond : c.WeakTypeTag[Cond[_,_]], msg : c.WeakTypeTag[Msg[_,_]], param: c.WeakTypeTag[Param], chk: c.WeakTypeTag[Chk]
-      ): c.Tree = CheckedImplMaterializer[T, Cond[_,_], Param, Msg[_,_], Chk].impl(vc, vm)
+        t : c.WeakTypeTag[T], param: c.WeakTypeTag[Param], chk: c.WeakTypeTag[Chk]
+      ): c.Tree = CheckedImplMaterializer[T, Param, Chk].impl(vc, vm)
 
-      def safeTF[T, Cond[_,_], Param, Msg[_,_], Chk](value : c.Tree)(vc : c.Tree, vm : c.Tree)(
+      def safeTF[T, Param, Chk](value : c.Tree)(vc : c.Tree, vm : c.Tree)(
         implicit
-        t : c.WeakTypeTag[T], cond : c.WeakTypeTag[Cond[_,_]], msg : c.WeakTypeTag[Msg[_,_]], param: c.WeakTypeTag[Param], chk: c.WeakTypeTag[Chk]
-      ): c.Tree = CheckedImplMaterializer[T, Cond[_,_], Param, Msg[_,_], Chk].impl(vc, vm)
+        t : c.WeakTypeTag[T], param: c.WeakTypeTag[Param], chk: c.WeakTypeTag[Chk]
+      ): c.Tree = CheckedImplMaterializer[T, Param, Chk].impl(vc, vm)
+
+      def unsafe[T, Param, Chk](value : c.Tree)(
+        implicit
+        t : c.WeakTypeTag[T], param: c.WeakTypeTag[Param], chk: c.WeakTypeTag[Chk]
+      ): c.Tree = CheckedImplMaterializer[T, Param, Chk].unsafe(value)
+
+      def unsafeTF[T, Param, Chk](value : c.Tree)(
+        implicit
+        t : c.WeakTypeTag[T], param: c.WeakTypeTag[Param], chk: c.WeakTypeTag[Chk]
+      ): c.Tree = CheckedImplMaterializer[T, Param, Chk].unsafeTF(value)
     }
   }
 }

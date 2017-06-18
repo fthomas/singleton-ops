@@ -746,10 +746,10 @@ trait GeneralMacros {
   ///////////////////////////////////////////////////////////////////////////////////////////
   // Checked TwoFace
   ///////////////////////////////////////////////////////////////////////////////////////////
-  def CheckedImplMaterializer[T, Cond, Param, Msg, Chk](implicit t : c.WeakTypeTag[T], cond : c.WeakTypeTag[Cond], param : c.WeakTypeTag[Param], msg : c.WeakTypeTag[Msg], chk : c.WeakTypeTag[Chk]) :
-  CheckedImplMaterializer[T, Cond, Param, Msg, Chk] = new CheckedImplMaterializer[T, Cond, Param, Msg, Chk](weakTypeOf[T], weakTypeOf[Cond], weakTypeOf[Param], weakTypeOf[Msg], symbolOf[Chk])
+  def CheckedImplMaterializer[T, Param, Chk](implicit t : c.WeakTypeTag[T], param : c.WeakTypeTag[Param], chk : c.WeakTypeTag[Chk]) :
+  CheckedImplMaterializer[T, Param, Chk] = new CheckedImplMaterializer[T, Param, Chk](weakTypeOf[T], weakTypeOf[Param], symbolOf[Chk])
 
-  final class CheckedImplMaterializer[T, Cond, Param, Msg, Chk](tTpe : Type, condTpe : Type, paramTpe : Type, msgTpe : Type, chkSym : TypeSymbol) {
+  final class CheckedImplMaterializer[T, Param, Chk](tTpe : Type, paramTpe : Type, chkSym : TypeSymbol) {
     def impl(vc : c.Tree, vm : c.Tree) : c.Tree = {
       implicit val annotatedSym : TypeSymbol = chkSym
       val temp = showCode(vm)
@@ -765,8 +765,18 @@ trait GeneralMacros {
       val chkTerm = TermName(chkSym.name.toString)
       val tValue = extractSingletonValue(tTpe).value
       val tTree = constantTreeOf(tValue)
-      val genTree = q"_root_.singleton.twoface.Checked.$chkTerm.create[$tTpe,$condTpe,$paramTpe,$msgTpe]($tTree)"
-
+      val genTree = q"new $chkSym[$tTpe,$paramTpe]($tTree)"
+//      print(genTree)
+//      print(showCode(genTree))
+//      print(showRaw(genTree))
+      genTree
+    }
+    def unsafe(value : c.Tree) : c.Tree = {
+      val genTree = q"new $chkSym[$tTpe,$paramTpe]($value)"
+      genTree
+    }
+    def unsafeTF(value : c.Tree) : c.Tree = {
+      val genTree = q"new $chkSym[$tTpe,$paramTpe]($value.getValue)"
       genTree
     }
   }
