@@ -319,6 +319,6 @@ class TwoFaceLongSpec extends Properties("TwoFace.Long") {
   }
 
   property("ToString") = {
-    TwoFace.Long[1].toString() == "1"
+    TwoFace.Long[1L].toString() == "1"
   }
 }
