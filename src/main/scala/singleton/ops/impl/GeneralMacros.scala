@@ -347,14 +347,6 @@ trait GeneralMacros {
       case ("IsBoolean",  a: String, _, _)            => Constant(false)
       case ("IsBoolean",  a: Boolean, _, _)           => Constant(true)
 
-      case ("Print",      a: Char, _, _)              => Constant(print(a.toString))
-      case ("Print",      a: Int, _, _)               => Constant(print(a.toString))
-      case ("Print",      a: Long, _, _)              => Constant(print(a.toString))
-      case ("Print",      a: Float, _, _)             => Constant(print(a.toString))
-      case ("Print",      a: Double, _, _)            => Constant(print(a.toString))
-      case ("Print",      a: String, _, _)            => Constant(print(a.toString))
-      case ("Print",      a: Boolean, _, _)           => Constant(print(a.toString))
-        
       case ("Negate",     a: Char, _, _)              => Constant(-a)
       case ("Negate",     a: Int, _, _)               => Constant(-a)
       case ("Negate",     a: Long, _, _)              => Constant(-a)

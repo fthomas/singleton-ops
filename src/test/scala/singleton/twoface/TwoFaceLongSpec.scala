@@ -317,4 +317,8 @@ class TwoFaceLongSpec extends Properties("TwoFace.Long") {
     illTyped("""val c : TwoFace.Long[3L + 0L] = implicitly[TwoFace.Long[4L]]""")
     true
   }
+
+  property("ToString") = {
+    TwoFace.Long[1].toString() == "1"
+  }
 }

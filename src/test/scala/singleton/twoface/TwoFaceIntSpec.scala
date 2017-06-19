@@ -317,4 +317,8 @@ class TwoFaceIntSpec extends Properties("TwoFace.Int") {
     illTyped("""val c : TwoFace.Int[3 + 0] = implicitly[TwoFace.Int[4]]""")
     true
   }
+
+  property("ToString") = {
+    TwoFace.Int[1].toString() == "1"
+  }
 }

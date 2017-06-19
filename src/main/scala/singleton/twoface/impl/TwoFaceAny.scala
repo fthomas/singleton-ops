@@ -806,6 +806,7 @@ object TwoFaceAny {
     def != [R](r : Boolean[R])(implicit tfo : Boolean.Return[T != R])= tfo(this.getValue != r.getValue)
     def && [R](r : Boolean[R])(implicit tfo : Boolean.Return[T && R])= tfo(this.getValue && r.getValue)
     def || [R](r : Boolean[R])(implicit tfo : Boolean.Return[T || R])= tfo(this.getValue || r.getValue)
+    def unary_!(implicit tfo : Boolean.Return[![T]])= tfo(!this.getValue)
     def == [R <: XBoolean](r : R)(
       implicit tfo : Boolean.Return[T == R]
     ) = tfo(this.getValue == r)

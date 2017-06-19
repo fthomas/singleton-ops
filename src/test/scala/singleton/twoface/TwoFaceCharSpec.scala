@@ -291,4 +291,8 @@ class TwoFaceCharSpec extends Properties("TwoFace.Char") {
     val d : '\u0003' = TwoFace.Char('\u0003')
     val e : Char = TwoFace.Char(us('\u0003'))
   }
+
+  property("ToString") = {
+    TwoFace.Char['t'].toString() == "t"
+  }
 }

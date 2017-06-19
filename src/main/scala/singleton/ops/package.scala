@@ -83,7 +83,6 @@ package object ops {
   type Reverse[P1]          = OpMacro["Reverse",P1, 0, 0]
   type Negate[P1]           = OpMacro["Negate",P1, 0, 0]
   type Abs[P1]              = OpMacro["Abs",P1, 0, 0]
-  type Print[P1]            = OpMacro["Print",P1, 0, 0]
   type Floor[P1]            = OpMacro["Floor",P1, 0, 0]
   type Ceil[P1]             = OpMacro["Ceil",P1, 0, 0]
   type Round[P1]            = OpMacro["Round",P1, 0, 0]

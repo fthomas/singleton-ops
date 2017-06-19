@@ -21,6 +21,8 @@ class TwoFaceBooleanSpec extends Properties("TwoFace.Boolean") {
     val a = TwoFace.Boolean(us(true))
     a.getValue && !a.isLiteral
   }
+  property("Safe Boolean") = verifyTF(!TwoFace.Boolean(true), false)
+  property("!Unsafe Boolean") = verifyTF(!TwoFace.Boolean(us(false)), us(true))
 
   property("Safe Boolean == Regular Safe Boolean") = verifyTF(TwoFace.Boolean(true) == (true), true)
   property("Safe Boolean == Regular Unsafe Boolean") = verifyTF(TwoFace.Boolean(false) == (us(false)), us(true))
@@ -64,5 +66,9 @@ class TwoFaceBooleanSpec extends Properties("TwoFace.Boolean") {
     illTyped("""val a : TwoFace.Boolean[true] = implicitly[TwoFace.Boolean[false && true]]""")
     illTyped("""val b : TwoFace.Boolean[false && true] = implicitly[TwoFace.Boolean[true]]""")
     true
+  }
+
+  property("ToString") = {
+    TwoFace.Boolean[true].toString() == "true"
   }
 }

@@ -341,4 +341,8 @@ class TwoFaceFloatSpec extends Properties("TwoFace.Float") {
     illTyped("""val c : TwoFace.Float[3.0f + 0.0f] = implicitly[TwoFace.Float[4.0f]]""")
     true
   }
+
+  property("ToString") = {
+    TwoFace.Float[1.0f].toString() == "1.0"
+  }
 }

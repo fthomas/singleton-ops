@@ -5,7 +5,30 @@ import shapeless.test.illTyped
 import singleton.TestUtils._
 
 class ToConversionSpec extends Properties("ToConversion") {
-  //ToNat relies on Int and already checked within IdSpec
+  property("Nat to Nat") = wellTyped {
+    def getNat(implicit op : SafeNat[ToNat[shapeless.Nat._1]]) : op.Out = op.value
+    val ret : shapeless.nat._1 = getNat
+  }
+  property("Char to Nat") = wellTyped {
+    def getNat(implicit op : SafeNat[ToNat['\u0001']]) : op.Out = op.value
+    val ret : shapeless.nat._1 = getNat
+  }
+  property("Int to Nat") = wellTyped {
+    def getNat(implicit op : SafeNat[ToNat[1]]) : op.Out = op.value
+    val ret : shapeless.nat._1 = getNat
+  }
+  property("Long to Nat") = wellTyped {
+    def getNat(implicit op : SafeNat[ToNat[1L]]) : op.Out = op.value
+    val ret : shapeless.nat._1 = getNat
+  }
+  property("Float to Nat") = wellTyped {
+    def getNat(implicit op : SafeNat[ToNat[1.0f]]) : op.Out = op.value
+    val ret : shapeless.nat._1 = getNat
+  }
+  property("Double to Nat") = wellTyped {
+    def getNat(implicit op : SafeNat[ToNat[1.0]]) : op.Out = op.value
+    val ret : shapeless.nat._1 = getNat
+  }
 
   property("Nat to Char") = verifyOp1Args[ToChar,shapeless.Nat._1,'\u0001']
   property("Char to Char") = verifyOp1Args[ToChar,'\u0002','\u0002']

@@ -341,4 +341,8 @@ class TwoFaceDoubleSpec extends Properties("TwoFace.Double") {
     illTyped("""val c : TwoFace.Double[3.0 + 0.0] = implicitly[TwoFace.Double[4.0]]""")
     true
   }
+
+  property("ToString") = {
+    TwoFace.Double[1.0].toString() == "1.0"
+  }
 }
