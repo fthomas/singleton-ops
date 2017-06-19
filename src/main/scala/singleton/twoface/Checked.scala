@@ -22,7 +22,7 @@ class checked0Param[Cond[_], Msg[_], TFace] extends scala.annotation.StaticAnnot
            """
         Term.Block(Seq(updatedCls, companion))
       case _ =>
-        println(defn.structure)
+//        println(defn.structure)
         abort("@checked must annotate a class.")
     }
   }
@@ -47,7 +47,7 @@ class checked1Param[Cond[_,_], Msg[_,_], TFace, ParamFace] extends scala.annotat
            """
         Term.Block(Seq(updatedCls, companion))
       case _ =>
-        println(defn.structure)
+//        println(defn.structure)
         abort("@checked must annotate a class.")
     }
   }

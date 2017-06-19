@@ -9,6 +9,7 @@ object CheckedStringSpec {
   type Cond[T, P] = Length[T] < P
   type Msg[T, P] = "Length of string '" + T + "' is not smaller than " + ToString[P]
   @checked1Param[Cond, Msg, String, Int] class CheckedLengthSmallerThan[T, P]
+  illTyped("""@checked1Param[Cond, Msg, String, Int] trait CheckedLengthSmallerThanBad[T, P]""")
 
   implicit object RuntimeChecked extends CheckedLengthSmallerThan.Runtime {
     def cond(t : String, p : Int) : scala.Boolean = t.length < p

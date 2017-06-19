@@ -9,6 +9,7 @@ object CheckedBooleanSpec {
   type Cond[T] = T
   type Msg[T] = "Failed Check"
   @checked0Param[Cond, Msg, Boolean] class CheckedTrue[T]
+  illTyped("""@checked0Param[Cond, Msg, Boolean] trait CheckedTrueBad[T]""")
 
   implicit object RuntimeChecked extends CheckedTrue.Runtime {
     def cond(l : Boolean) : scala.Boolean = l
