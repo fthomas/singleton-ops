@@ -31,6 +31,82 @@ object TwoFaceAny {
   }
 
   trait Char[T] extends Any with TwoFaceAny[scala.Char, T] {
+    def == [R <: XChar](r : R)(
+      implicit tfo : Boolean.Return[T == R]
+    ) = tfo(this.getValue == r)
+    def == (r : scala.Char)(
+      implicit tfo : Boolean.Return[scala.Boolean],
+      di1 : DummyImplicit
+    ) = tfo(this.getValue == r)
+    def == [R <: XInt](r : R)(
+      implicit tfo : Boolean.Return[T == R],
+      di1 : DummyImplicit,
+      di2 : DummyImplicit
+    ) = tfo(this.getValue == r)
+    def == (r : scala.Int)(
+      implicit tfo : Boolean.Return[scala.Boolean],
+      di1 : DummyImplicit,
+      di2 : DummyImplicit,
+      di3 : DummyImplicit
+    ) = tfo(this.getValue == r)
+    def == [R <: XLong](r : R)(
+      implicit tfo : Boolean.Return[T == R],
+      di1 : DummyImplicit,
+      di2 : DummyImplicit,
+      di3 : DummyImplicit,
+      di4 : DummyImplicit,
+    ) = tfo(this.getValue == r)
+    def == (r : scala.Long)(
+      implicit tfo : Boolean.Return[scala.Boolean],
+      di1 : DummyImplicit,
+      di2 : DummyImplicit,
+      di3 : DummyImplicit,
+      di4 : DummyImplicit,
+      di5 : DummyImplicit,
+    ) = tfo(this.getValue == r)
+    def == [R <: XFloat](r : R)(
+      implicit tfo : Boolean.Return[T == R],
+      di1 : DummyImplicit,
+      di2 : DummyImplicit,
+      di3 : DummyImplicit,
+      di4 : DummyImplicit,
+      di5 : DummyImplicit,
+      di6 : DummyImplicit,
+    ) = tfo(this.getValue == r)
+    def == (r : scala.Float)(
+      implicit tfo : Boolean.Return[scala.Boolean],
+      di1 : DummyImplicit,
+      di2 : DummyImplicit,
+      di3 : DummyImplicit,
+      di4 : DummyImplicit,
+      di5 : DummyImplicit,
+      di6 : DummyImplicit,
+      di7 : DummyImplicit,
+    ) = tfo(this.getValue == r)
+    def == [R <: XDouble](r : R)(
+      implicit tfo : Boolean.Return[T == R],
+      di1 : DummyImplicit,
+      di2 : DummyImplicit,
+      di3 : DummyImplicit,
+      di4 : DummyImplicit,
+      di5 : DummyImplicit,
+      di6 : DummyImplicit,
+      di7 : DummyImplicit,
+      di8 : DummyImplicit,
+    ) = tfo(this.getValue == r)
+    def == (r : scala.Double)(
+      implicit tfo : Boolean.Return[scala.Boolean],
+      di1 : DummyImplicit,
+      di2 : DummyImplicit,
+      di3 : DummyImplicit,
+      di4 : DummyImplicit,
+      di5 : DummyImplicit,
+      di6 : DummyImplicit,
+      di7 : DummyImplicit,
+      di8 : DummyImplicit,
+      di9 : DummyImplicit,
+    ) = tfo(this.getValue == r)
+
     def +  [R](r : Char[R])(implicit tfo : Int.Return[T + R])        = tfo(this.getValue +  r.getValue)
     def -  [R](r : Char[R])(implicit tfo : Int.Return[T - R])        = tfo(this.getValue -  r.getValue)
     def *  [R](r : Char[R])(implicit tfo : Int.Return[T * R])        = tfo(this.getValue *  r.getValue)
@@ -102,6 +178,82 @@ object TwoFaceAny {
   }
 
   trait Int[T] extends Any with TwoFaceAny[scala.Int, T] {
+    def == [R <: XChar](r : R)(
+      implicit tfo : Boolean.Return[T == R]
+    ) = tfo(this.getValue == r)
+    def == (r : scala.Char)(
+      implicit tfo : Boolean.Return[scala.Boolean],
+      di1 : DummyImplicit
+    ) = tfo(this.getValue == r)
+    def == [R <: XInt](r : R)(
+      implicit tfo : Boolean.Return[T == R],
+      di1 : DummyImplicit,
+      di2 : DummyImplicit
+    ) = tfo(this.getValue == r)
+    def == (r : scala.Int)(
+      implicit tfo : Boolean.Return[scala.Boolean],
+      di1 : DummyImplicit,
+      di2 : DummyImplicit,
+      di3 : DummyImplicit
+    ) = tfo(this.getValue == r)
+    def == [R <: XLong](r : R)(
+      implicit tfo : Boolean.Return[T == R],
+      di1 : DummyImplicit,
+      di2 : DummyImplicit,
+      di3 : DummyImplicit,
+      di4 : DummyImplicit,
+    ) = tfo(this.getValue == r)
+    def == (r : scala.Long)(
+      implicit tfo : Boolean.Return[scala.Boolean],
+      di1 : DummyImplicit,
+      di2 : DummyImplicit,
+      di3 : DummyImplicit,
+      di4 : DummyImplicit,
+      di5 : DummyImplicit,
+    ) = tfo(this.getValue == r)
+    def == [R <: XFloat](r : R)(
+      implicit tfo : Boolean.Return[T == R],
+      di1 : DummyImplicit,
+      di2 : DummyImplicit,
+      di3 : DummyImplicit,
+      di4 : DummyImplicit,
+      di5 : DummyImplicit,
+      di6 : DummyImplicit,
+    ) = tfo(this.getValue == r)
+    def == (r : scala.Float)(
+      implicit tfo : Boolean.Return[scala.Boolean],
+      di1 : DummyImplicit,
+      di2 : DummyImplicit,
+      di3 : DummyImplicit,
+      di4 : DummyImplicit,
+      di5 : DummyImplicit,
+      di6 : DummyImplicit,
+      di7 : DummyImplicit,
+    ) = tfo(this.getValue == r)
+    def == [R <: XDouble](r : R)(
+      implicit tfo : Boolean.Return[T == R],
+      di1 : DummyImplicit,
+      di2 : DummyImplicit,
+      di3 : DummyImplicit,
+      di4 : DummyImplicit,
+      di5 : DummyImplicit,
+      di6 : DummyImplicit,
+      di7 : DummyImplicit,
+      di8 : DummyImplicit,
+    ) = tfo(this.getValue == r)
+    def == (r : scala.Double)(
+      implicit tfo : Boolean.Return[scala.Boolean],
+      di1 : DummyImplicit,
+      di2 : DummyImplicit,
+      di3 : DummyImplicit,
+      di4 : DummyImplicit,
+      di5 : DummyImplicit,
+      di6 : DummyImplicit,
+      di7 : DummyImplicit,
+      di8 : DummyImplicit,
+      di9 : DummyImplicit,
+    ) = tfo(this.getValue == r)
+
     def +  [R](r : Char[R])(implicit tfo : Int.Return[T + R])        = tfo(this.getValue +  r.getValue)
     def -  [R](r : Char[R])(implicit tfo : Int.Return[T - R])        = tfo(this.getValue -  r.getValue)
     def *  [R](r : Char[R])(implicit tfo : Int.Return[T * R])        = tfo(this.getValue *  r.getValue)
@@ -175,6 +327,82 @@ object TwoFaceAny {
   }
 
   trait Long[T] extends Any with TwoFaceAny[scala.Long, T] {
+    def == [R <: XChar](r : R)(
+      implicit tfo : Boolean.Return[T == R]
+    ) = tfo(this.getValue == r)
+    def == (r : scala.Char)(
+      implicit tfo : Boolean.Return[scala.Boolean],
+      di1 : DummyImplicit
+    ) = tfo(this.getValue == r)
+    def == [R <: XInt](r : R)(
+      implicit tfo : Boolean.Return[T == R],
+      di1 : DummyImplicit,
+      di2 : DummyImplicit
+    ) = tfo(this.getValue == r)
+    def == (r : scala.Int)(
+      implicit tfo : Boolean.Return[scala.Boolean],
+      di1 : DummyImplicit,
+      di2 : DummyImplicit,
+      di3 : DummyImplicit
+    ) = tfo(this.getValue == r)
+    def == [R <: XLong](r : R)(
+      implicit tfo : Boolean.Return[T == R],
+      di1 : DummyImplicit,
+      di2 : DummyImplicit,
+      di3 : DummyImplicit,
+      di4 : DummyImplicit,
+    ) = tfo(this.getValue == r)
+    def == (r : scala.Long)(
+      implicit tfo : Boolean.Return[scala.Boolean],
+      di1 : DummyImplicit,
+      di2 : DummyImplicit,
+      di3 : DummyImplicit,
+      di4 : DummyImplicit,
+      di5 : DummyImplicit,
+    ) = tfo(this.getValue == r)
+    def == [R <: XFloat](r : R)(
+      implicit tfo : Boolean.Return[T == R],
+      di1 : DummyImplicit,
+      di2 : DummyImplicit,
+      di3 : DummyImplicit,
+      di4 : DummyImplicit,
+      di5 : DummyImplicit,
+      di6 : DummyImplicit,
+    ) = tfo(this.getValue == r)
+    def == (r : scala.Float)(
+      implicit tfo : Boolean.Return[scala.Boolean],
+      di1 : DummyImplicit,
+      di2 : DummyImplicit,
+      di3 : DummyImplicit,
+      di4 : DummyImplicit,
+      di5 : DummyImplicit,
+      di6 : DummyImplicit,
+      di7 : DummyImplicit,
+    ) = tfo(this.getValue == r)
+    def == [R <: XDouble](r : R)(
+      implicit tfo : Boolean.Return[T == R],
+      di1 : DummyImplicit,
+      di2 : DummyImplicit,
+      di3 : DummyImplicit,
+      di4 : DummyImplicit,
+      di5 : DummyImplicit,
+      di6 : DummyImplicit,
+      di7 : DummyImplicit,
+      di8 : DummyImplicit,
+    ) = tfo(this.getValue == r)
+    def == (r : scala.Double)(
+      implicit tfo : Boolean.Return[scala.Boolean],
+      di1 : DummyImplicit,
+      di2 : DummyImplicit,
+      di3 : DummyImplicit,
+      di4 : DummyImplicit,
+      di5 : DummyImplicit,
+      di6 : DummyImplicit,
+      di7 : DummyImplicit,
+      di8 : DummyImplicit,
+      di9 : DummyImplicit,
+    ) = tfo(this.getValue == r)
+
     def +  [R](r : Char[R])(implicit tfo : Long.Return[T + R])       = tfo(this.getValue +  r.getValue)
     def -  [R](r : Char[R])(implicit tfo : Long.Return[T - R])       = tfo(this.getValue -  r.getValue)
     def *  [R](r : Char[R])(implicit tfo : Long.Return[T * R])       = tfo(this.getValue *  r.getValue)
@@ -248,6 +476,82 @@ object TwoFaceAny {
   }
 
   trait Float[T] extends Any with TwoFaceAny[scala.Float, T] {
+    def == [R <: XChar](r : R)(
+      implicit tfo : Boolean.Return[T == R]
+    ) = tfo(this.getValue == r)
+    def == (r : scala.Char)(
+      implicit tfo : Boolean.Return[scala.Boolean],
+      di1 : DummyImplicit
+    ) = tfo(this.getValue == r)
+    def == [R <: XInt](r : R)(
+      implicit tfo : Boolean.Return[T == R],
+      di1 : DummyImplicit,
+      di2 : DummyImplicit
+    ) = tfo(this.getValue == r)
+    def == (r : scala.Int)(
+      implicit tfo : Boolean.Return[scala.Boolean],
+      di1 : DummyImplicit,
+      di2 : DummyImplicit,
+      di3 : DummyImplicit
+    ) = tfo(this.getValue == r)
+    def == [R <: XLong](r : R)(
+      implicit tfo : Boolean.Return[T == R],
+      di1 : DummyImplicit,
+      di2 : DummyImplicit,
+      di3 : DummyImplicit,
+      di4 : DummyImplicit,
+    ) = tfo(this.getValue == r)
+    def == (r : scala.Long)(
+      implicit tfo : Boolean.Return[scala.Boolean],
+      di1 : DummyImplicit,
+      di2 : DummyImplicit,
+      di3 : DummyImplicit,
+      di4 : DummyImplicit,
+      di5 : DummyImplicit,
+    ) = tfo(this.getValue == r)
+    def == [R <: XFloat](r : R)(
+      implicit tfo : Boolean.Return[T == R],
+      di1 : DummyImplicit,
+      di2 : DummyImplicit,
+      di3 : DummyImplicit,
+      di4 : DummyImplicit,
+      di5 : DummyImplicit,
+      di6 : DummyImplicit,
+    ) = tfo(this.getValue == r)
+    def == (r : scala.Float)(
+      implicit tfo : Boolean.Return[scala.Boolean],
+      di1 : DummyImplicit,
+      di2 : DummyImplicit,
+      di3 : DummyImplicit,
+      di4 : DummyImplicit,
+      di5 : DummyImplicit,
+      di6 : DummyImplicit,
+      di7 : DummyImplicit,
+    ) = tfo(this.getValue == r)
+    def == [R <: XDouble](r : R)(
+      implicit tfo : Boolean.Return[T == R],
+      di1 : DummyImplicit,
+      di2 : DummyImplicit,
+      di3 : DummyImplicit,
+      di4 : DummyImplicit,
+      di5 : DummyImplicit,
+      di6 : DummyImplicit,
+      di7 : DummyImplicit,
+      di8 : DummyImplicit,
+    ) = tfo(this.getValue == r)
+    def == (r : scala.Double)(
+      implicit tfo : Boolean.Return[scala.Boolean],
+      di1 : DummyImplicit,
+      di2 : DummyImplicit,
+      di3 : DummyImplicit,
+      di4 : DummyImplicit,
+      di5 : DummyImplicit,
+      di6 : DummyImplicit,
+      di7 : DummyImplicit,
+      di8 : DummyImplicit,
+      di9 : DummyImplicit,
+    ) = tfo(this.getValue == r)
+
     def +  [R](r : Char[R])(implicit tfo : Float.Return[T + R])      = tfo(this.getValue +  r.getValue)
     def -  [R](r : Char[R])(implicit tfo : Float.Return[T - R])      = tfo(this.getValue -  r.getValue)
     def *  [R](r : Char[R])(implicit tfo : Float.Return[T * R])      = tfo(this.getValue *  r.getValue)
@@ -321,6 +625,82 @@ object TwoFaceAny {
   }
 
   trait Double[T] extends Any with TwoFaceAny[scala.Double, T] {
+    def == [R <: XChar](r : R)(
+      implicit tfo : Boolean.Return[T == R]
+    ) = tfo(this.getValue == r)
+    def == (r : scala.Char)(
+      implicit tfo : Boolean.Return[scala.Boolean],
+      di1 : DummyImplicit
+    ) = tfo(this.getValue == r)
+    def == [R <: XInt](r : R)(
+      implicit tfo : Boolean.Return[T == R],
+      di1 : DummyImplicit,
+      di2 : DummyImplicit
+    ) = tfo(this.getValue == r)
+    def == (r : scala.Int)(
+      implicit tfo : Boolean.Return[scala.Boolean],
+      di1 : DummyImplicit,
+      di2 : DummyImplicit,
+      di3 : DummyImplicit
+    ) = tfo(this.getValue == r)
+    def == [R <: XLong](r : R)(
+      implicit tfo : Boolean.Return[T == R],
+      di1 : DummyImplicit,
+      di2 : DummyImplicit,
+      di3 : DummyImplicit,
+      di4 : DummyImplicit,
+    ) = tfo(this.getValue == r)
+    def == (r : scala.Long)(
+      implicit tfo : Boolean.Return[scala.Boolean],
+      di1 : DummyImplicit,
+      di2 : DummyImplicit,
+      di3 : DummyImplicit,
+      di4 : DummyImplicit,
+      di5 : DummyImplicit,
+    ) = tfo(this.getValue == r)
+    def == [R <: XFloat](r : R)(
+      implicit tfo : Boolean.Return[T == R],
+      di1 : DummyImplicit,
+      di2 : DummyImplicit,
+      di3 : DummyImplicit,
+      di4 : DummyImplicit,
+      di5 : DummyImplicit,
+      di6 : DummyImplicit,
+    ) = tfo(this.getValue == r)
+    def == (r : scala.Float)(
+      implicit tfo : Boolean.Return[scala.Boolean],
+      di1 : DummyImplicit,
+      di2 : DummyImplicit,
+      di3 : DummyImplicit,
+      di4 : DummyImplicit,
+      di5 : DummyImplicit,
+      di6 : DummyImplicit,
+      di7 : DummyImplicit,
+    ) = tfo(this.getValue == r)
+    def == [R <: XDouble](r : R)(
+      implicit tfo : Boolean.Return[T == R],
+      di1 : DummyImplicit,
+      di2 : DummyImplicit,
+      di3 : DummyImplicit,
+      di4 : DummyImplicit,
+      di5 : DummyImplicit,
+      di6 : DummyImplicit,
+      di7 : DummyImplicit,
+      di8 : DummyImplicit,
+    ) = tfo(this.getValue == r)
+    def == (r : scala.Double)(
+      implicit tfo : Boolean.Return[scala.Boolean],
+      di1 : DummyImplicit,
+      di2 : DummyImplicit,
+      di3 : DummyImplicit,
+      di4 : DummyImplicit,
+      di5 : DummyImplicit,
+      di6 : DummyImplicit,
+      di7 : DummyImplicit,
+      di8 : DummyImplicit,
+      di9 : DummyImplicit,
+    ) = tfo(this.getValue == r)
+
     def +  [R](r : Char[R])(implicit tfo : Double.Return[T + R])     = tfo(this.getValue +  r.getValue)
     def -  [R](r : Char[R])(implicit tfo : Double.Return[T - R])     = tfo(this.getValue -  r.getValue)
     def *  [R](r : Char[R])(implicit tfo : Double.Return[T * R])     = tfo(this.getValue *  r.getValue)
@@ -397,6 +777,13 @@ object TwoFaceAny {
     def +  [R](r : String[R])(implicit tfo : String.Return[T + R])   = tfo(this.getValue +  r.getValue)
     def == [R](r : String[R])(implicit tfo : Boolean.Return[T == R]) = tfo(this.getValue == r.getValue)
     def != [R](r : String[R])(implicit tfo : Boolean.Return[T != R]) = tfo(this.getValue != r.getValue)
+    def == [R <: XString](r : R)(
+      implicit tfo : Boolean.Return[T == R]
+    ) = tfo(this.getValue == r)
+    def == (r : java.lang.String)(
+      implicit tfo : Boolean.Return[scala.Boolean],
+      di1 : DummyImplicit
+    ) = tfo(this.getValue == r)
     def reverse(implicit tfo : String.Return[Reverse[T]])            = tfo(this.getValue.reverse)
     def substring[R](r : Int[R])(implicit tfo : String.Return[Substring[T,R]])= tfo(this.getValue substring r.getValue)
     def length(implicit tfo : Int.Return[Length[T]])                 = tfo(this.getValue.length)
@@ -419,6 +806,13 @@ object TwoFaceAny {
     def != [R](r : Boolean[R])(implicit tfo : Boolean.Return[T != R])= tfo(this.getValue != r.getValue)
     def && [R](r : Boolean[R])(implicit tfo : Boolean.Return[T && R])= tfo(this.getValue && r.getValue)
     def || [R](r : Boolean[R])(implicit tfo : Boolean.Return[T || R])= tfo(this.getValue || r.getValue)
+    def == [R <: XBoolean](r : R)(
+      implicit tfo : Boolean.Return[T == R]
+    ) = tfo(this.getValue == r)
+    def == (r : scala.Boolean)(
+      implicit tfo : Boolean.Return[scala.Boolean],
+      di1 : DummyImplicit
+    ) = tfo(this.getValue == r)
     def toString(implicit tfo : String.Return[ToString[T]])          = tfo(this.getValue.toString)
   }
   final class _Boolean[T](val value : scala.Boolean) extends AnyVal with TwoFaceAny.Boolean[T] {

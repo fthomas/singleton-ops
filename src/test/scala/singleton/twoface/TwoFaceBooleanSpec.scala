@@ -22,6 +22,11 @@ class TwoFaceBooleanSpec extends Properties("TwoFace.Boolean") {
     a.getValue && !a.isLiteral
   }
 
+  property("Safe Boolean == Regular Safe Boolean") = verifyTF(TwoFace.Boolean(true) == (true), true)
+  property("Safe Boolean == Regular Unsafe Boolean") = verifyTF(TwoFace.Boolean(false) == (us(false)), us(true))
+  property("Unsafe Boolean == Regular Safe Boolean") = verifyTF(TwoFace.Boolean(us(true)) == (true), us(true))
+  property("Unsafe Boolean == Regular Unsafe Boolean") = verifyTF(TwoFace.Boolean(us(false)) == (us(false)), us(true))
+
   property("Safe Boolean == Safe Boolean") = verifyTF(TwoFace.Boolean(true) == TwoFace.Boolean(true), true)
   property("Safe Boolean == Unsafe Boolean") = verifyTF(TwoFace.Boolean(false) == TwoFace.Boolean(us(false)), us(true))
   property("Unsafe Boolean == Safe Boolean") = verifyTF(TwoFace.Boolean(us(true)) == TwoFace.Boolean(true), us(true))
