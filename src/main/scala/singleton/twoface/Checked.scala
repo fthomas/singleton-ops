@@ -8,19 +8,42 @@ class checked0Param[Cond[_], Msg[_], TFace] extends scala.annotation.StaticAnnot
     defn match {
       case cls @ Defn.Class(_, name, _, ctor, _) =>
         val q"type T = $tFaceName" = q"type T = $TFace"
+        val className = Type.Name(name.value)
+        val objectName = Term.Name(name.value)
+        val ctorName = Ctor.Name(name.value)
+        val shellClassName = Type.Name(name.value + "Shell")
+        val shellCtorName = Ctor.Name(name.value + "Shell")
+        val shellObjectName = Term.Name(name.value + "Shell")
         val updatedCls =
           q"""
-             final class ${Type.Name(name.value)}[T] (val value : $TFace) extends AnyVal with
-               _root_.singleton.twoface.impl.Checked0Param[${Type.Name(name.value)}, $TFace, T] with
+             final class $className[T] (val value : $TFace) extends AnyVal with
+               _root_.singleton.twoface.impl.Checked0Param[$className, $TFace, T] with
                ${Ctor.Name("_root_.singleton.twoface.impl.TwoFaceAny." + tFaceName.toString())}[T] {
                @inline def getValue : $TFace = value
              }
            """
         val companion =
           q"""
-             object ${Term.Name(name.value)} extends _root_.singleton.twoface.impl.Checked0Param.Builder[${Type.Name(name.value)}, $Cond, $Msg, $TFace]
+             object $objectName extends _root_.singleton.twoface.impl.Checked0Param.Builder[$className, $Cond, $Msg, $TFace] {
+               type Shell[T] = $shellClassName[T]
+             }
            """
-        Term.Block(Seq(updatedCls, companion))
+        val shellCls =
+          q"""
+             final class $shellClassName[T] extends
+               _root_.singleton.twoface.impl.Checked0ParamShell[$className, $TFace, T] {
+               def apply(value : $TFace) : $className[T] = new $ctorName[T](value)
+             }
+           """
+        val shellCompanion =
+          q"""
+             object $shellObjectName extends _root_.singleton.twoface.impl.Checked0ParamShell.Builder[$shellClassName, $className, $Cond, $Msg, $TFace] {
+               def create[T] : $shellClassName[T] = new $shellCtorName[T]
+             }
+           """
+        val a = Term.Block(Seq(updatedCls, companion, shellCls, shellCompanion))
+//        println(a)
+        a
       case _ =>
 //        println(defn.structure)
         abort("@checked must annotate a class.")
@@ -33,17 +56,19 @@ class checked1Param[Cond[_,_], Msg[_,_], TFace, ParamFace] extends scala.annotat
     defn match {
       case cls @ Defn.Class(_, name, _, ctor, _) =>
         val q"type T = $tFaceName" = q"type T = $TFace"
+        val className = Type.Name(name.value)
+        val objectName = Term.Name(name.value)
         val updatedCls =
           q"""
-             final class ${Type.Name(name.value)}[T, Param] (val value : $TFace) extends AnyVal with
-               _root_.singleton.twoface.impl.Checked1Param[${Type.Name(name.value)}, $TFace, $ParamFace, T] with
+             final class $className[T, Param] (val value : $TFace) extends AnyVal with
+               _root_.singleton.twoface.impl.Checked1Param[$className, $TFace, $ParamFace, T] with
                ${Ctor.Name("_root_.singleton.twoface.impl.TwoFaceAny." + tFaceName.toString())}[T] {
                @inline def getValue : $TFace = value
              }
            """
         val companion =
           q"""
-             object ${Term.Name(name.value)} extends _root_.singleton.twoface.impl.Checked1Param.Builder[${Type.Name(name.value)}, $Cond, $Msg, $TFace, $ParamFace]
+             object $objectName extends _root_.singleton.twoface.impl.Checked1Param.Builder[$className, $Cond, $Msg, $TFace, $ParamFace]
            """
         Term.Block(Seq(updatedCls, companion))
       case _ =>

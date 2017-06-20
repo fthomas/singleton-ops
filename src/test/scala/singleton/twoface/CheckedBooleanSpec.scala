@@ -25,8 +25,8 @@ class CheckedBooleanSpec extends Properties("Checked.Boolean") {
   property("Compile-time checks") = wellTyped {
     condTrue(true)
     condTrue(TwoFace.Boolean(true))
-    illTyped("""smallerThan50(false)""")
-    illTyped("""smallerThan50(TwoFace.Boolean(false))""")
+    illTyped("""condTrue(false)""")
+    illTyped("""condTrue(TwoFace.Boolean(false))""")
   }
 
   property("Run-time checks") = wellTyped {
@@ -34,5 +34,18 @@ class CheckedBooleanSpec extends Properties("Checked.Boolean") {
     condTrue(TwoFace.Boolean(us(true)))
     illRun{condTrue(us(false))}
     illRun{condTrue(TwoFace.Boolean(us(false)))}
+  }
+
+  def condTrueImpl[T](realValue : Boolean)(implicit t : CheckedTrueShell[T]) : Unit = {t(realValue).unsafeCheck()}
+
+  property("Shell compile-time checks") = wellTyped {
+    condTrueImpl[true](true)
+    illTyped("""condTrueImpl[false](true)""", "Failed Check")
+    illTyped("""condTrueImpl[false](false)""", "Failed Check")
+  }
+
+  property("Shell run-time checks") = wellTyped {
+    condTrueImpl[Boolean](true)
+    illRun{condTrueImpl[Boolean](false)}
   }
 }
