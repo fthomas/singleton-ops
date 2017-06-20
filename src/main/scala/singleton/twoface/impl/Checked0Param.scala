@@ -5,23 +5,25 @@ import singleton.ops._
 import singleton.ops.impl._
 import scala.reflect.macros.whitebox
 
-trait Checked0Param[Cond[_], Msg[_], Face, T] extends Any with TwoFaceAny[Face, T] {
+trait Checked0Param[Chk[_], Face, T] extends Any with TwoFaceAny[Face, T] {
   def unsafeCheck()
   (implicit rt : RunTime[T],
-   rtc : Checked0Param.Runtime[Cond, Msg, Face]) : this.type = {
+   rtc : Checked0Param.Runtime[Chk, Face]) : this.type = {
     if (rt) require(rtc.cond(getValue), rtc.msg(getValue))
     this
   }
 }
 
+
 object Checked0Param {
-  trait Runtime[Cond[_], Msg[_], TFace] {
+  trait Runtime[Chk[_], TFace] {
     def cond(t : TFace) : scala.Boolean
     def msg(t : TFace) : java.lang.String
   }
 
   trait Builder[Chk[_], Cond[_], Msg[_], Face] {
-    trait Runtime extends Checked0Param.Runtime[Cond, Msg, Face]
+    type Shell[T] <: Checked0ParamShell[Chk, Cond, Msg, Face, T]
+    trait Runtime extends Checked0Param.Runtime[Chk, Face]
     type CondHelper[T] = ITE[IsNotLiteral[Cond[T]], true, Cond[T]]
     type MsgHelper[T] = ITE[IsNotLiteral[Msg[T]], "Something bad happened", Msg[T]]
 
@@ -72,5 +74,22 @@ object Checked0Param {
         t : c.WeakTypeTag[T], chk: c.WeakTypeTag[Chk]
       ): c.Tree = CheckedImplMaterializer[T, T, Chk].unsafeTF(0, value)
     }
+  }
+}
+
+trait Checked0ParamShell[Chk[_], Cond[_], Msg[_], Face, T] {
+  def apply(value : Face) : Chk[_]
+}
+
+
+object Checked0ParamShell {
+  trait Builder[ChkShl[_], Chk[_], Cond[_], Msg[_], Face] {
+    type CondHelper[T] = ITE[IsNotLiteral[Cond[T]], true, Cond[T]]
+    type MsgHelper[T] = ITE[IsNotLiteral[Msg[T]], "Something bad happened", Msg[T]]
+    def create[T] : ChkShl[T]
+
+    implicit def impl[T]
+    (implicit vc : CondHelper[T], vm : MsgHelper[T]) :
+    ChkShl[T] = create[T]
   }
 }

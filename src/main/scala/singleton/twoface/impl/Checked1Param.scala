@@ -5,23 +5,23 @@ import singleton.ops._
 import singleton.ops.impl._
 import scala.reflect.macros.whitebox
 
-trait Checked1Param[Cond[_,_], Msg[_,_], Face, ParamFace, T] extends Any with TwoFaceAny[Face, T] {
+trait Checked1Param[Chk[_,_], Face, ParamFace, T] extends Any with TwoFaceAny[Face, T] {
   def unsafeCheck(p : ParamFace)
   (implicit rt : RunTime[T],
-   rtc : Checked1Param.Runtime[Cond, Msg, Face, ParamFace]) : this.type = {
+   rtc : Checked1Param.Runtime[Chk, Face, ParamFace]) : this.type = {
     if (rt) require(rtc.cond(getValue,p), rtc.msg(getValue,p))
     this
   }
 }
 
 object Checked1Param {
-  trait Runtime[Cond[_,_], Msg[_,_], TFace, ParamFace] {
+  trait Runtime[Chk[_,_], TFace, ParamFace] {
     def cond(t : TFace, p : ParamFace) : scala.Boolean
     def msg(t : TFace, p : ParamFace) : java.lang.String
   }
 
   trait Builder[Chk[_,_], Cond[_,_], Msg[_,_], Face, ParamFace] {
-    trait Runtime extends Checked1Param.Runtime[Cond, Msg, Face, ParamFace]
+    trait Runtime extends Checked1Param.Runtime[Chk, Face, ParamFace]
     type CondHelper[T, Param] = ITE[IsNotLiteral[Cond[T, Param]], true, Cond[T, Param]]
     type MsgHelper[T, Param] = ITE[IsNotLiteral[Msg[T, Param]], "Something bad happened", Msg[T, Param]]
 

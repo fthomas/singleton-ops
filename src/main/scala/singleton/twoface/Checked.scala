@@ -11,7 +11,7 @@ class checked0Param[Cond[_], Msg[_], TFace] extends scala.annotation.StaticAnnot
         val updatedCls =
           q"""
              final class ${Type.Name(name.value)}[T] (val value : $TFace) extends AnyVal with
-               _root_.singleton.twoface.impl.Checked0Param[$Cond, $Msg, $TFace, T] with
+               _root_.singleton.twoface.impl.Checked0Param[${Type.Name(name.value)}, $TFace, T] with
                ${Ctor.Name("_root_.singleton.twoface.impl.TwoFaceAny." + tFaceName.toString())}[T] {
                @inline def getValue : $TFace = value
              }
@@ -36,7 +36,7 @@ class checked1Param[Cond[_,_], Msg[_,_], TFace, ParamFace] extends scala.annotat
         val updatedCls =
           q"""
              final class ${Type.Name(name.value)}[T, Param] (val value : $TFace) extends AnyVal with
-               _root_.singleton.twoface.impl.Checked1Param[$Cond, $Msg, $TFace, $ParamFace, T] with
+               _root_.singleton.twoface.impl.Checked1Param[${Type.Name(name.value)}, $TFace, $ParamFace, T] with
                ${Ctor.Name("_root_.singleton.twoface.impl.TwoFaceAny." + tFaceName.toString())}[T] {
                @inline def getValue : $TFace = value
              }
