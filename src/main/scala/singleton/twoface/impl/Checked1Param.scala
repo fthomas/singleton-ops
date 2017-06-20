@@ -21,6 +21,7 @@ object Checked1Param {
   }
 
   trait Builder[Chk[_,_], Cond[_,_], Msg[_,_], Face, ParamFace] {
+    type Shell[T, Param] <: Checked1ParamShell[Chk, Face, T, Param]
     trait Runtime extends Checked1Param.Runtime[Chk, Face, ParamFace]
     type CondHelper[T, Param] = ITE[IsNotLiteral[Cond[T, Param]], true, Cond[T, Param]]
     type MsgHelper[T, Param] = ITE[IsNotLiteral[Msg[T, Param]], "Something bad happened", Msg[T, Param]]
@@ -72,5 +73,23 @@ object Checked1Param {
         t : c.WeakTypeTag[T], param: c.WeakTypeTag[Param], chk: c.WeakTypeTag[Chk]
       ): c.Tree = CheckedImplMaterializer[T, Param, Chk].unsafeTF(1, value)
     }
+  }
+}
+
+
+trait Checked1ParamShell[Chk[_,_], Face, T, Param] {
+  def apply(value : Face) : Chk[_,_]
+}
+
+object Checked1ParamShell {
+  trait Builder[ChkShl[_,_], Chk[_,_], Cond[_,_], Msg[_,_], Face, ParamFace] {
+    type MsgHelper[T, Param] = ITE[IsNotLiteral[Msg[T, Param]], "Something bad happened", Msg[T, Param]]
+    type CondHelper[T, Param] =
+      RequireMsgSym[ITE[IsNotLiteral[Cond[T, Param]], true, Cond[T, Param]], MsgHelper[T, Param], ChkShl[_,_]]
+    def create[T, Param] : ChkShl[T, Param]
+
+    implicit def impl[T, Param]
+    (implicit vc : CondHelper[T, Param]) :
+    ChkShl[T, Param] = create[T, Param]
   }
 }
