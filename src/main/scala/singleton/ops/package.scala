@@ -62,8 +62,9 @@ package object ops {
 
   type Id[P1]               = OpMacro["Id",P1, 0, 0]
   type ![P1]                = OpMacro["!",P1, 0, 0]
-  type Require[P1]          = OpMacro["Require",P1, "Cannot prove requirement Require[...]", 0]
-  type RequireMsg[P1,P2]    = OpMacro["Require",P1, P2, 0]
+  type Require[Cond]        = OpMacro["Require",Cond, "Cannot prove requirement Require[...]", 0]
+  type RequireMsg[Cond,Msg] = OpMacro["Require",Cond, Msg, 0]
+  type RequireMsgSym[Cond,Msg,Sym] = OpMacro["Require",Cond, Msg, Sym]
   type ToNat[P1]            = OpMacro["ToNat",P1, 0, 0]
   type ToChar[P1]           = OpMacro["ToChar",P1, 0, 0]
   type ToInt[P1]            = OpMacro["ToInt",P1, 0, 0]

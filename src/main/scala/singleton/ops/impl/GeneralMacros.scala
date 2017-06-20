@@ -131,6 +131,9 @@ trait GeneralMacros {
               val bValue = unapplyVar(args(2))
               val cValue = unapplyVar(args(3))
               (funcName, aValue, bValue, cValue) match {
+                case (Some(Constant("Require")), Some(Constant(a)), Some(Constant(b)), None) =>
+                  implicit val annotatedSym : TypeSymbol = args(3).typeSymbol.asType
+                  Some(opCalc("Require", a, b, c))
                 case (Some(Constant(f : String)), Some(Constant(a)), Some(Constant(b)), Some(Constant(c))) => Some(opCalc(f, a, b, c))
                 case _ => None
               }
