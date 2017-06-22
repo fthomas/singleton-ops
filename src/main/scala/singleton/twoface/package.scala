@@ -6,12 +6,6 @@ package object twoface {
   import TwoFaceAny._
   import singleton.ops._
 
-  @inline implicit def fromTwoFaceUnsafe[Face, T](tf : TwoFaceAny[Face, T]) : Face = tf.getValue
-  @inline implicit def fromTwoFaceSafe[Face, T <: Face with Singleton](tf : TwoFaceAny[Face, T])
-    (implicit sc: ValueOf[T]) : T {} = valueOf[T]
-//  @inline implicit def fromChecked[F, V, C, M](c : Checked[F, V, C, M]) : F = c.value
-
-
   def abs[T](x : Int[T])(implicit tfo : Int.Return[Abs[T]]) = tfo(math.abs(x.getValue))
   def abs[T](x : Long[T])(implicit tfo : Long.Return[Abs[T]]) = tfo(math.abs(x.getValue))
   def abs[T](x : Float[T])(implicit tfo : Float.Return[Abs[T]]) = tfo(math.abs(x.getValue))

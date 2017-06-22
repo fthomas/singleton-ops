@@ -9,6 +9,10 @@ trait TwoFaceAny[Face, T] extends Any {
 }
 
 object TwoFaceAny {
+  @inline implicit def fromTwoFaceUnsafe[Face, T](tf : TwoFaceAny[Face, T]) : Face = tf.getValue
+  @inline implicit def fromTwoFaceSafe[Face, T <: Face with Singleton](tf : TwoFaceAny[Face, T])
+                                                                      (implicit sc: ValueOf[T]) : T {} = valueOf[T]
+
   trait Builder[TF[_], Face] {
     protected[twoface] def create[T](value : Face) : TF[T]
     implicit def apply[T <: Face with Singleton](value : T)(implicit tfb : Builder[TF, Face]) : TF[T] =
