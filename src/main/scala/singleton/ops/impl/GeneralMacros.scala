@@ -202,22 +202,18 @@ trait GeneralMacros {
     value
   }
 
-  def extractValueFromOpTree(opTree : c.Tree)(implicit annotatedSym : TypeSymbol) : Constant = {
-    def extractionFailed = {
-      val msg = s"Cannot extract value from $opTree\n" + "showCode==> " + showCode(opTree)
-      abort(msg)
-    }
+  def extractValueFromOpTree(opTree : c.Tree)(implicit annotatedSym : TypeSymbol) : Option[Constant] = {
     def outFindCond(elem : c.Tree) : Boolean = elem match {
       case q"val value : $typeTree = $valueTree" => true
       case _ => false
     }
-    def getOut(opClsBlk : List[c.Tree]) : Constant = opClsBlk.find(outFindCond) match {
+    def getOut(opClsBlk : List[c.Tree]) : Option[Constant] = opClsBlk.find(outFindCond) match {
       case Some(q"val value : $typeTree = $valueTree") =>
         valueTree match {
-          case Literal(const) => const
-          case _ => extractionFailed
+          case Literal(const) => Some(const)
+          case _ => None
         }
-      case _ => extractionFailed
+      case _ => None
     }
 
     opTree match {
@@ -225,7 +221,7 @@ trait GeneralMacros {
         $mods class $tpname[..$tparams] $ctorMods(...$paramss) extends ..$parents { $self => ..$opClsBlk }
         $expr(...$exprss)
       }""" => getOut(opClsBlk)
-      case _ => extractionFailed
+      case _ => None
     }
   }
 
@@ -782,13 +778,14 @@ trait GeneralMacros {
     def impl(paramNum : Int, vc : c.Tree, vm : c.Tree) : c.Tree = {
       implicit val annotatedSym : TypeSymbol = chkSym
       val msgValue = extractValueFromOpTree(vm) match {
-        case Constant(s : String) => s
-        case _ => abort("Error message is not a string")
+        case Some(Constant(s : String)) => s
+        case _ => abort("Invalid error message:\n" + showRaw(vm))
       }
 
       extractValueFromOpTree(vc) match {
-        case Constant(true) =>     //condition given to macro must be true
-        case _ => abort(msgValue)  //otherwise the given error message is set as the abort message
+        case Some(Constant(true)) =>                  //condition given to macro must be true
+        case Some(Constant(false)) => abort(msgValue) //otherwise the given error message is set as the abort message
+        case _ => abort("Unable to retrieve compile-time value:\n" + showRaw(vm))
       }
 
       val chkTerm = TermName(chkSym.name.toString)
