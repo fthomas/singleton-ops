@@ -287,8 +287,8 @@ class TwoFaceDoubleSpec extends Properties("TwoFace.Double") {
   property("Safe Negate") = verifyTF(-TwoFace.Double(-1.0), 1.0)
   property("Unsafe Negate") = verifyTF(-TwoFace.Double(us(1.0)), us(-1.0))
 
-  //  property("Safe toChar") = verifyTF(TwoFace.Double(7.0).toChar, '\u0001')
-  //  property("Unsafe toChar") = verifyTF(TwoFace.Double(us(1L)).toChar, us('\u0001'))
+  property("Safe toChar") = verifyTF(TwoFace.Double(1.0).toChar, '\u0001')
+  property("Unsafe toChar") = verifyTF(TwoFace.Double(us(1.0)).toChar, us('\u0001'))
   property("Safe toInt") = verifyTF(TwoFace.Double(1.0).toInt, 1)
   property("Unsafe toInt") = verifyTF(TwoFace.Double(us(1.0)).toInt, us(1))
   property("Safe toLong") = verifyTF(TwoFace.Double(1.0).toLong, 1L)
