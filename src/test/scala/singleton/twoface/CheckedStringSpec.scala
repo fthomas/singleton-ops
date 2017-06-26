@@ -7,7 +7,7 @@ import singleton.ops._
 
 object CheckedStringSpec {
   type Cond[T, P] = Length[T] < P
-  type Msg[T, P] = "Length of string " + T + " is not smaller than " + ToString[P]
+  type Msg[T, P] = "Length of string '" + T + "' is not smaller than " + ToString[P]
   @checked1Param[Cond, Msg, String, Int] class CheckedLengthSmallerThan[T, P]
   illTyped("""@checked1Param[Cond, Msg, String, Int] trait CheckedLengthSmallerThanBad[T, P]""")
 
@@ -25,8 +25,8 @@ class CheckedStringSpec extends Properties("Checked.String") {
   property("Compile-time checks") = wellTyped {
     lengthSmallerThan5("Hi")
     lengthSmallerThan5(TwoFace.String("Hi"))
-    illTyped("""lengthSmallerThan5("Hello")""","Length of string Hello is not smaller than 5")
-    illTyped("""lengthSmallerThan5(TwoFace.String("Hello"))""","Length of string Hello is not smaller than 5")
+    illTyped("""lengthSmallerThan5("Hello")""","Length of string 'Hello' is not smaller than 5")
+    illTyped("""lengthSmallerThan5(TwoFace.String("Hello"))""","Length of string 'Hello' is not smaller than 5")
   }
 
   property("Run-time checks") = wellTyped {
@@ -41,7 +41,7 @@ class CheckedStringSpec extends Properties("Checked.String") {
 
   property("Shell compile-time checks") = wellTyped {
     lengthSmallerThan5Impl["Hi"](us("Hi"))
-    illTyped("""lengthSmallerThan5Impl["Hello"](us("Hello"))""", "Length of string Hello is not smaller than 5")
+    illTyped("""lengthSmallerThan5Impl["Hello"](us("Hello"))""", "Length of string 'Hello' is not smaller than 5")
   }
 
   property("Shell run-time checks") = wellTyped {
