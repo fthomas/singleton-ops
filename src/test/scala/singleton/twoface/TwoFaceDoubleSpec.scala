@@ -23,6 +23,9 @@ class TwoFaceDoubleSpec extends Properties("TwoFace.Double") {
     a.getValue == 2.0 && !a.isLiteral
   }
 
+  property("Safe ifThenElse") = verifyTF(ifThenElse(true, 1.0, 2.0), 1.0)
+  property("Unsafe ifThenElse") = verifyTF(ifThenElse(us(false), 1.0, 2.0), us(2.0))
+
   property("Pi") = verifyTF(Pi, 3.141592653589793)
   property("E") = verifyTF(E, 2.718281828459045)
 

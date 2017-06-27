@@ -23,6 +23,9 @@ class TwoFaceFloatSpec extends Properties("TwoFace.Float") {
     a.getValue == 2.0f && !a.isLiteral
   }
 
+  property("Safe ifThenElse") = verifyTF(ifThenElse(true, 1.0f, 2.0f), 1.0f)
+  property("Unsafe ifThenElse") = verifyTF(ifThenElse(us(false), 1.0f, 2.0f), us(2.0f))
+
   property("Safe Float + Safe Char") = verifyTF(TwoFace.Float(2.0f) + TwoFace.Char('\u0001'), 3.0f)
   property("Safe Float + Unsafe Char") = verifyTF(TwoFace.Float(2.0f) + TwoFace.Char(us('\u0001')), us(3.0f))
   property("Unsafe Float + Safe Char") = verifyTF(TwoFace.Float(us(2.0f)) + TwoFace.Char('\u0001'), us(3.0f))

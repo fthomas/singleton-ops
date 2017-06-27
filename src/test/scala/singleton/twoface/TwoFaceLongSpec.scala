@@ -23,6 +23,9 @@ class TwoFaceLongSpec extends Properties("TwoFace.Long") {
     a.getValue == 2L && !a.isLiteral
   }
 
+  property("Safe ifThenElse") = verifyTF(ifThenElse(true, 1L, 2L), 1L)
+  property("Unsafe ifThenElse") = verifyTF(ifThenElse(us(false), 1L, 2L), us(2L))
+
   property("Safe Long + Safe Char") = verifyTF(TwoFace.Long(2L) + TwoFace.Char('\u0001'), 3L)
   property("Safe Long + Unsafe Char") = verifyTF(TwoFace.Long(2L) + TwoFace.Char(us('\u0001')), us(3L))
   property("Unsafe Long + Safe Char") = verifyTF(TwoFace.Long(us(2L)) + TwoFace.Char('\u0001'), us(3L))

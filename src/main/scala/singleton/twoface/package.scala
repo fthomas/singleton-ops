@@ -5,6 +5,29 @@ import twoface.impl._
 package object twoface {
   import TwoFaceAny._
 
+  import singleton.ops.ITE
+  def ifThenElse[I,T,E](cond: Boolean[I], trueVal : Char[T], elseVal : Char[E])
+                       (implicit tfo : Char.Return[ITE[I, T, E]]) =
+    tfo(if (cond.getValue) trueVal.getValue else elseVal.getValue)
+  def ifThenElse[I,T,E](cond: Boolean[I], trueVal : Int[T], elseVal : Int[E])
+                       (implicit tfo : Int.Return[ITE[I, T, E]]) =
+    tfo(if (cond.getValue) trueVal.getValue else elseVal.getValue)
+  def ifThenElse[I,T,E](cond: Boolean[I], trueVal : Long[T], elseVal : Long[E])
+                       (implicit tfo : Long.Return[ITE[I, T, E]]) =
+    tfo(if (cond.getValue) trueVal.getValue else elseVal.getValue)
+  def ifThenElse[I,T,E](cond: Boolean[I], trueVal : Float[T], elseVal : Float[E])
+                       (implicit tfo : Float.Return[ITE[I, T, E]]) =
+    tfo(if (cond.getValue) trueVal.getValue else elseVal.getValue)
+  def ifThenElse[I,T,E](cond: Boolean[I], trueVal : Double[T], elseVal : Double[E])
+                       (implicit tfo : Double.Return[ITE[I, T, E]]) =
+    tfo(if (cond.getValue) trueVal.getValue else elseVal.getValue)
+  def ifThenElse[I,T,E](cond: Boolean[I], trueVal : String[T], elseVal : String[E])
+                       (implicit tfo : String.Return[ITE[I, T, E]]) =
+    tfo(if (cond.getValue) trueVal.getValue else elseVal.getValue)
+  def ifThenElse[I,T,E](cond: Boolean[I], trueVal : Boolean[T], elseVal : Boolean[E])
+                       (implicit tfo : Boolean.Return[ITE[I, T, E]]) =
+    tfo(if (cond.getValue) trueVal.getValue else elseVal.getValue)
+
   object math {
     import singleton.ops.math._
     val Pi = new _Double[Pi](scala.math.Pi)

@@ -23,6 +23,9 @@ class TwoFaceIntSpec extends Properties("TwoFace.Int") {
     a.getValue == 2 && !a.isLiteral
   }
 
+  property("Safe ifThenElse") = verifyTF(ifThenElse(true, 1, 2), 1)
+  property("Unsafe ifThenElse") = verifyTF(ifThenElse(us(false), 1, 2), us(2))
+
   property("Safe Int + Safe Char") = verifyTF(TwoFace.Int(2) + TwoFace.Char('\u0001'), 3)
   property("Safe Int + Unsafe Char") = verifyTF(TwoFace.Int(2) + TwoFace.Char(us('\u0001')), us(3))
   property("Unsafe Int + Safe Char") = verifyTF(TwoFace.Int(us(2)) + TwoFace.Char('\u0001'), us(3))

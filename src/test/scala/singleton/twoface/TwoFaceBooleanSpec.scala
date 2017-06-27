@@ -21,6 +21,9 @@ class TwoFaceBooleanSpec extends Properties("TwoFace.Boolean") {
     val a = TwoFace.Boolean(us(true))
     a.getValue && !a.isLiteral
   }
+  property("Safe ifThenElse") = verifyTF(ifThenElse(true, false, true), false)
+  property("Unsafe ifThenElse") = verifyTF(ifThenElse(us(false), false, true), us(true))
+
   property("Safe Boolean") = verifyTF(!TwoFace.Boolean(true), false)
   property("!Unsafe Boolean") = verifyTF(!TwoFace.Boolean(us(false)), us(true))
 
