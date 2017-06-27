@@ -1,5 +1,6 @@
 package singleton.twoface
 
+import singleton.twoface.math._
 import org.scalacheck.Properties
 import shapeless.test.illTyped
 import singleton.TestUtils._
@@ -315,6 +316,10 @@ class TwoFaceFloatSpec extends Properties("TwoFace.Float") {
   property("Unsafe round") = verifyTF(round(TwoFace.Float(us(1.5f))), us(2))
   property("Safe sqrt") = verifyTF(sqrt(TwoFace.Float(9.0f)), 3.0)
   property("Unsafe sqrt") = verifyTF(sqrt(TwoFace.Float(us(9.0f))), us(3.0))
+  property("Safe log") = verifyTF(log(TwoFace.Float(9.0f)), 2.1972245773362196)
+  property("Unsafe log") = verifyTF(log(TwoFace.Float(us(9.0f))), us(2.1972245773362196))
+  property("Safe log10") = verifyTF(log10(TwoFace.Float(9.0f)), 0.9542425094393249)
+  property("Unsafe log10") = verifyTF(log10(TwoFace.Float(us(9.0f))), us(0.9542425094393249))
 
   property("Safe Float pow Safe Float") = verifyTF(pow(TwoFace.Float(2.0f), TwoFace.Float(3.0f)), 8.0)
   property("Safe Float pow Unsafe Float") = verifyTF(pow(TwoFace.Float(2.0f), TwoFace.Float(us(3.0f))), us(8.0))

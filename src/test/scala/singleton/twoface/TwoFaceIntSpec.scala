@@ -1,5 +1,6 @@
 package singleton.twoface
 
+import singleton.twoface.math._
 import org.scalacheck.Properties
 import singleton.TestUtils._
 import shapeless.test.illTyped
@@ -300,6 +301,9 @@ class TwoFaceIntSpec extends Properties("TwoFace.Int") {
 
   property("Safe abs") = verifyTF(abs(TwoFace.Int(-1)), 1)
   property("Unsafe abs") = verifyTF(abs(TwoFace.Int(us(-1))), us(1))
+
+  property("Safe numberOfLeadingZeros") = verifyTF(TwoFace.Int.numberOfLeadingZeros(TwoFace.Int(1)), 31)
+  property("Unsafe numberOfLeadingZeros") = verifyTF(TwoFace.Int.numberOfLeadingZeros(TwoFace.Int(us(1))), us(31))
 
   property("Implicit Conversions") = wellTyped {
     import singleton.ops._

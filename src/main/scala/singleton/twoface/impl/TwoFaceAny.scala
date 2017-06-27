@@ -328,6 +328,8 @@ object TwoFaceAny {
   implicit object Int extends TwoFaceAny.Builder[Int, scala.Int] {
     type Return[OP] = TwoFaceOp[Int, scala.Int, OP]
     protected[twoface] def create[T](value : scala.Int) = new _Int[T](value)
+    def numberOfLeadingZeros[T](t : Int[T])(implicit tfo : Int.Return[NumberOfLeadingZeros[T]]) =
+      tfo(Integer.numberOfLeadingZeros(t.getValue))
   }
 
   trait Long[T] extends Any with TwoFaceAny[scala.Long, T] {
@@ -477,6 +479,8 @@ object TwoFaceAny {
   implicit object Long extends TwoFaceAny.Builder[Long, scala.Long] {
     type Return[OP] = TwoFaceOp[Long, scala.Long, OP]
     protected[twoface] def create[T](value : scala.Long) = new _Long[T](value)
+    def numberOfLeadingZeros[T](t : Long[T])(implicit tfo : Int.Return[NumberOfLeadingZeros[T]]) =
+      tfo(java.lang.Long.numberOfLeadingZeros(t.getValue))
   }
 
   trait Float[T] extends Any with TwoFaceAny[scala.Float, T] {

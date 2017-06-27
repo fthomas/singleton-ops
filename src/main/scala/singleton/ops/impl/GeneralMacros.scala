@@ -383,6 +383,9 @@ trait GeneralMacros {
       case ("Abs",        a: Float, _, _)             => Constant(abs(a))
       case ("Abs",        a: Double, _, _)            => Constant(abs(a))
 
+      case ("NumberOfLeadingZeros", a: Int, _, _)     => Constant(java.lang.Integer.numberOfLeadingZeros(a))
+      case ("NumberOfLeadingZeros", a: Long, _, _)    => Constant(java.lang.Long.numberOfLeadingZeros(a))
+
       case ("Floor",      a: Float, _, _)             => Constant(floor(a.toDouble))
       case ("Floor",      a: Double, _, _)            => Constant(floor(a))
 
@@ -403,6 +406,12 @@ trait GeneralMacros {
 
       case ("Sqrt",       a: Float, _, _)             => Constant(sqrt(a.toDouble))
       case ("Sqrt",       a: Double, _, _)            => Constant(sqrt(a))
+
+      case ("Log",        a: Float, _, _)             => Constant(log(a.toDouble))
+      case ("Log",        a: Double, _, _)            => Constant(log(a))
+
+      case ("Log10",      a: Float, _, _)             => Constant(log10(a.toDouble))
+      case ("Log10",      a: Double, _, _)            => Constant(log10(a))
 
       case ("Reverse",    a: String, _, _)            => Constant(a.reverse)
       case ("!",          a: Boolean, _, _)           => Constant(!a)

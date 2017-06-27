@@ -83,14 +83,7 @@ package object ops {
   type IsNotLiteral[P1]     = OpMacro["IsNotLiteral",P1, 0, 0]
   type Reverse[P1]          = OpMacro["Reverse",P1, 0, 0]
   type Negate[P1]           = OpMacro["Negate",P1, 0, 0]
-  type Abs[P1]              = OpMacro["Abs",P1, 0, 0]
-  type Floor[P1]            = OpMacro["Floor",P1, 0, 0]
-  type Ceil[P1]             = OpMacro["Ceil",P1, 0, 0]
-  type Round[P1]            = OpMacro["Round",P1, 0, 0]
-  type Sin[P1]              = OpMacro["Sin",P1, 0, 0]
-  type Cos[P1]              = OpMacro["Cos",P1, 0, 0]
-  type Tan[P1]              = OpMacro["Tan",P1, 0, 0]
-  type Sqrt[P1]             = OpMacro["Sqrt",P1, 0, 0]
+  type NumberOfLeadingZeros[P1] = OpMacro["NumberOfLeadingZeros",P1, 0, 0]
 
   type +[P1, P2]            = OpMacro["+",P1, P2, 0]
   type -[P1, P2]            = OpMacro["-",P1, P2, 0]
@@ -105,7 +98,6 @@ package object ops {
   type !=[P1, P2]           = OpMacro["!=",P1, P2, 0]
   type &&[P1, P2]           = OpMacro["&&",P1, P2, 0]
   type ||[P1, P2]           = OpMacro["||",P1, P2, 0]
-  type Pow[P1, P2]          = OpMacro["Pow",P1, P2, 0]
   type Min[P1, P2]          = OpMacro["Min",P1, P2, 0]
   type Max[P1, P2]          = OpMacro["Max",P1, P2, 0]
   type Substring[P1, P2]    = OpMacro["Substring",P1, P2, 0]
@@ -115,6 +107,21 @@ package object ops {
   type CompileTime[C]       = Require[ITE[IsNotLiteral[C], true, C]]
   type RunTime[R]           = SafeBoolean[IsNotLiteral[R]]
 
+  object math {
+    type Pi                 = 3.141592653589793
+    type E                  = 2.718281828459045
+    type Abs[P1]            = OpMacro["Abs",P1, 0, 0]
+    type Pow[P1, P2]        = OpMacro["Pow",P1, P2, 0]
+    type Floor[P1]          = OpMacro["Floor",P1, 0, 0]
+    type Ceil[P1]           = OpMacro["Ceil",P1, 0, 0]
+    type Round[P1]          = OpMacro["Round",P1, 0, 0]
+    type Sin[P1]            = OpMacro["Sin",P1, 0, 0]
+    type Cos[P1]            = OpMacro["Cos",P1, 0, 0]
+    type Tan[P1]            = OpMacro["Tan",P1, 0, 0]
+    type Sqrt[P1]           = OpMacro["Sqrt",P1, 0, 0]
+    type Log[P1]            = OpMacro["Log",P1, 0, 0]
+    type Log10[P1]          = OpMacro["Log10",P1, 0, 0]
+  }
 
 
   /////////////////////////////////////////////////

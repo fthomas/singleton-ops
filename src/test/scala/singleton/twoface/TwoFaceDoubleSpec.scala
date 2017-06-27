@@ -1,5 +1,6 @@
 package singleton.twoface
 
+import singleton.twoface.math._
 import org.scalacheck.Properties
 import shapeless.test.illTyped
 import singleton.TestUtils._
@@ -21,6 +22,9 @@ class TwoFaceDoubleSpec extends Properties("TwoFace.Double") {
     val a = TwoFace.Double(us(2.0))
     a.getValue == 2.0 && !a.isLiteral
   }
+
+  property("Pi") = verifyTF(Pi, 3.141592653589793)
+  property("E") = verifyTF(E, 2.718281828459045)
 
   property("Safe Double + Safe Char") = verifyTF(TwoFace.Double(2.0) + TwoFace.Char('\u0001'), 3.0)
   property("Safe Double + Unsafe Char") = verifyTF(TwoFace.Double(2.0) + TwoFace.Char(us('\u0001')), us(3.0))
@@ -315,6 +319,10 @@ class TwoFaceDoubleSpec extends Properties("TwoFace.Double") {
   property("Unsafe round") = verifyTF(round(TwoFace.Double(us(1.5))), us(2L))
   property("Safe sqrt") = verifyTF(sqrt(TwoFace.Double(9.0)), 3.0)
   property("Unsafe sqrt") = verifyTF(sqrt(TwoFace.Double(us(9.0))), us(3.0))
+  property("Safe log") = verifyTF(log(TwoFace.Double(9.0)), 2.1972245773362196)
+  property("Unsafe log") = verifyTF(log(TwoFace.Double(us(9.0))), us(2.1972245773362196))
+  property("Safe log10") = verifyTF(log10(TwoFace.Double(9.0)), 0.9542425094393249)
+  property("Unsafe log10") = verifyTF(log10(TwoFace.Double(us(9.0))), us(0.9542425094393249))
 
   property("Safe Double pow Safe Float") = verifyTF(pow(TwoFace.Double(2.0), TwoFace.Float(3.0f)), 8.0)
   property("Safe Double pow Unsafe Float") = verifyTF(pow(TwoFace.Double(2.0), TwoFace.Float(us(3.0f))), us(8.0))
