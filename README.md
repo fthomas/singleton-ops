@@ -106,14 +106,6 @@ If `C` isn't verifiable at compile-time, then the requirement is considered to b
 #### Supported control operations:
 * `type ==>[A, B]` (`first A then B`)        
 * `type ITE[I,T,E]` (`If (I) Then (T) Else (E)`)      
-* `type While[Cond, Body, Ret]`  (`While (Cond) Run (Body) and then Return (Ret)`)      
-
-#### Supported assignment operations:
-* `type :=[Name, Value]`        
-* `type +=[Name, Value]`        
-* `type -=[Name, Value]`        
-* `type *=[Name, Value]`        
-* `type /=[Name, Value]`        
 
 #### Supported Aux Pattern interface:
 * `type OpAuxNat[O <: Op,      Ret_Out <: Nat]`

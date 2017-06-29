@@ -56,22 +56,6 @@ trait GeneralMacros {
     *  available known-at-compile-time values.
     */
   object Const {
-    def unwrapVar(t : Constant)(implicit annotatedSym : TypeSymbol) : Option[Constant] = {
-      t match {
-        case Constant(s : String) if Var.validName(s) =>
-          val ret = Some(Var.get(s))
-          ret
-        case _ => Some(t)
-      }
-
-    }
-    def unapplyVar(tp : Type)(implicit annotatedSym : TypeSymbol) : Option[Constant] = {
-      val maybeVar = unapply(tp)
-      maybeVar match {
-        case Some(t : Constant) => unwrapVar(t)
-        case _ =>  maybeVar
-      }
-    }
     def unapply(tp: Type)(implicit annotatedSym : TypeSymbol): Option[Constant] = {
       val g = c.universe.asInstanceOf[SymbolTable]
       implicit def fixSymbolOps(sym: Symbol): g.Symbol = sym.asInstanceOf[g.Symbol]
@@ -96,7 +80,6 @@ trait GeneralMacros {
           Some(Constant(0))
         ////////////////////////////////////////////////////////////////////////
 
-
         ////////////////////////////////////////////////////////////////////////
         // Operational Function
         ////////////////////////////////////////////////////////////////////////
@@ -105,31 +88,17 @@ trait GeneralMacros {
 
           //If function is set/get variable we keep the original string,
           //otherwise we get the variable's value
-          val aValue = funcName match {
-            case Some(Constant("SV")) => unapply(args(1))
-            case Some(Constant("GV")) => unapply(args(1))
-            case _ => unapplyVar(args(1))
-          }
+          val aValue = unapply(args(1))
           val retVal = (funcName, aValue) match {
             case (Some(Constant("IsNotLiteral")), _) => Some(Constant(aValue.isEmpty)) //Looking for non literals (if returned empty)
             case (Some(Constant("ITE")), Some(Constant(cond : Boolean))) => //Special control case: ITE (If-Then-Else)
               if (cond)
-                unapplyVar(args(2)) //true (then) part of the IF
+                unapply(args(2)) //true (then) part of the IF
               else
-                unapplyVar(args(3)) //false (else) part of the IF
-            case (Some(Constant("While")), Some(Constant(cond : Boolean))) => //Special control case: While
-                var repeat = cond
-                while (repeat) {
-                  unapply(args(2)) //executing body
-                  repeat = unapplyVar(args(1)) match { //reevaluate condition
-                    case Some(Constant(updatedCond : Boolean)) => updatedCond
-                    case _ => false
-                  }
-                }
-              unapplyVar(args(3)) //return value of loop
+                unapply(args(3)) //false (else) part of the IF
             case _ => //regular cases
-              val bValue = unapplyVar(args(2))
-              val cValue = unapplyVar(args(3))
+              val bValue = unapply(args(2))
+              val cValue = unapply(args(3))
               (funcName, aValue, bValue, cValue) match {
                 case (Some(Constant("Require")), Some(Constant(a)), Some(Constant(b)), None) =>
                   implicit val annotatedSym : TypeSymbol = args(3).typeSymbol.asType
@@ -227,20 +196,6 @@ trait GeneralMacros {
 
   def evalTyped[T](expr: c.Expr[T]): T =
     c.eval(c.Expr[T](c.untypecheck(expr.tree)))
-
-  object Var {
-    val map = collection.mutable.Map[String, Constant]()
-    def set(name : String, value : Constant) : Constant = {
-      map(name) = value
-      value
-    }
-    def get(name : String) : Constant = {
-      map(name)
-    }
-    def validName(name : String) : Boolean = {
-      name.startsWith("$")
-    }
-  }
 
   ///////////////////////////////////////////////////////////////////////////////////////////
   // Three operands (Generic)
@@ -421,8 +376,6 @@ trait GeneralMacros {
         else
           Constant(a)
       case ("==>",        _,          b,          _)  => Constant(b)
-      case ("SV",         a: String,  b,          _)  => Var.set(a, Constant(b))
-      case ("GV",         a: String,  _,          _)  => Var.get(a)
 
       case ("+",          a: Char,    b: Char,    _)  => Constant(a + b)
       case ("+",          a: Char,    b: Int,     _)  => Constant(a + b)

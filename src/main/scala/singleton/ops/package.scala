@@ -49,15 +49,7 @@ package object ops {
   //Special control aliases
   /////////////////////////////////////////////////
   type ITE[Cond,TBody,EBody]= OpMacro["ITE",Cond, TBody, EBody]
-  type While[Cond,Body,Ret] = OpMacro["While",Cond, Body, Ret]
   type ==>[A,B]             = OpMacro["==>",A, B, 0]
-  type :=[Name,Value]       = SV[Name, Value]
-  type +=[Name,Value]       = SV[Name, GV[Name] + Value]
-  type -=[Name,Value]       = SV[Name, GV[Name] - Value]
-  type *=[Name,Value]       = SV[Name, GV[Name] * Value]
-  type /=[Name,Value]       = SV[Name, GV[Name] / Value]
-  type SV[Name,Value]       = OpMacro["SV",Name, Value, 0]
-  type GV[Name]             = OpMacro["GV",Name, 0, 0]
   /////////////////////////////////////////////////
 
   type Id[P1]               = OpMacro["Id",P1, 0, 0]
