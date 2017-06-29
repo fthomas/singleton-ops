@@ -49,21 +49,14 @@ package object ops {
   //Special control aliases
   /////////////////////////////////////////////////
   type ITE[Cond,TBody,EBody]= OpMacro["ITE",Cond, TBody, EBody]
-  type While[Cond,Body,Ret] = OpMacro["While",Cond, Body, Ret]
   type ==>[A,B]             = OpMacro["==>",A, B, 0]
-  type :=[Name,Value]       = SV[Name, Value]
-  type +=[Name,Value]       = SV[Name, GV[Name] + Value]
-  type -=[Name,Value]       = SV[Name, GV[Name] - Value]
-  type *=[Name,Value]       = SV[Name, GV[Name] * Value]
-  type /=[Name,Value]       = SV[Name, GV[Name] / Value]
-  type SV[Name,Value]       = OpMacro["SV",Name, Value, 0]
-  type GV[Name]             = OpMacro["GV",Name, 0, 0]
   /////////////////////////////////////////////////
 
   type Id[P1]               = OpMacro["Id",P1, 0, 0]
   type ![P1]                = OpMacro["!",P1, 0, 0]
-  type Require[P1]          = OpMacro["Require",P1, "Cannot prove requirement Require[...]", 0]
-  type RequireMsg[P1,P2]    = OpMacro["Require",P1, P2, 0]
+  type Require[Cond]        = OpMacro["Require",Cond, "Cannot prove requirement Require[...]", 0]
+  type RequireMsg[Cond,Msg] = OpMacro["Require",Cond, Msg, 0]
+  type RequireMsgSym[Cond,Msg,Sym] = OpMacro["Require",Cond, Msg, Sym]
   type ToNat[P1]            = OpMacro["ToNat",P1, 0, 0]
   type ToChar[P1]           = OpMacro["ToChar",P1, 0, 0]
   type ToInt[P1]            = OpMacro["ToInt",P1, 0, 0]
@@ -82,15 +75,7 @@ package object ops {
   type IsNotLiteral[P1]     = OpMacro["IsNotLiteral",P1, 0, 0]
   type Reverse[P1]          = OpMacro["Reverse",P1, 0, 0]
   type Negate[P1]           = OpMacro["Negate",P1, 0, 0]
-  type Abs[P1]              = OpMacro["Abs",P1, 0, 0]
-  type Print[P1]            = OpMacro["Print",P1, 0, 0]
-  type Floor[P1]            = OpMacro["Floor",P1, 0, 0]
-  type Ceil[P1]             = OpMacro["Ceil",P1, 0, 0]
-  type Round[P1]            = OpMacro["Round",P1, 0, 0]
-  type Sin[P1]              = OpMacro["Sin",P1, 0, 0]
-  type Cos[P1]              = OpMacro["Cos",P1, 0, 0]
-  type Tan[P1]              = OpMacro["Tan",P1, 0, 0]
-  type Sqrt[P1]             = OpMacro["Sqrt",P1, 0, 0]
+  type NumberOfLeadingZeros[P1] = OpMacro["NumberOfLeadingZeros",P1, 0, 0]
 
   type +[P1, P2]            = OpMacro["+",P1, P2, 0]
   type -[P1, P2]            = OpMacro["-",P1, P2, 0]
@@ -105,7 +90,6 @@ package object ops {
   type !=[P1, P2]           = OpMacro["!=",P1, P2, 0]
   type &&[P1, P2]           = OpMacro["&&",P1, P2, 0]
   type ||[P1, P2]           = OpMacro["||",P1, P2, 0]
-  type Pow[P1, P2]          = OpMacro["Pow",P1, P2, 0]
   type Min[P1, P2]          = OpMacro["Min",P1, P2, 0]
   type Max[P1, P2]          = OpMacro["Max",P1, P2, 0]
   type Substring[P1, P2]    = OpMacro["Substring",P1, P2, 0]
@@ -115,6 +99,21 @@ package object ops {
   type CompileTime[C]       = Require[ITE[IsNotLiteral[C], true, C]]
   type RunTime[R]           = SafeBoolean[IsNotLiteral[R]]
 
+  object math {
+    type Pi                 = 3.141592653589793
+    type E                  = 2.718281828459045
+    type Abs[P1]            = OpMacro["Abs",P1, 0, 0]
+    type Pow[P1, P2]        = OpMacro["Pow",P1, P2, 0]
+    type Floor[P1]          = OpMacro["Floor",P1, 0, 0]
+    type Ceil[P1]           = OpMacro["Ceil",P1, 0, 0]
+    type Round[P1]          = OpMacro["Round",P1, 0, 0]
+    type Sin[P1]            = OpMacro["Sin",P1, 0, 0]
+    type Cos[P1]            = OpMacro["Cos",P1, 0, 0]
+    type Tan[P1]            = OpMacro["Tan",P1, 0, 0]
+    type Sqrt[P1]           = OpMacro["Sqrt",P1, 0, 0]
+    type Log[P1]            = OpMacro["Log",P1, 0, 0]
+    type Log10[P1]          = OpMacro["Log10",P1, 0, 0]
+  }
 
 
   /////////////////////////////////////////////////

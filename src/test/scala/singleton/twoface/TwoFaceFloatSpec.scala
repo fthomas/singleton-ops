@@ -1,5 +1,6 @@
 package singleton.twoface
 
+import singleton.twoface.math._
 import org.scalacheck.Properties
 import shapeless.test.illTyped
 import singleton.TestUtils._
@@ -21,6 +22,9 @@ class TwoFaceFloatSpec extends Properties("TwoFace.Float") {
     val a = TwoFace.Float(us(2.0f))
     a.getValue == 2.0f && !a.isLiteral
   }
+
+  property("Safe ifThenElse") = verifyTF(ifThenElse(true, 1.0f, 2.0f), 1.0f)
+  property("Unsafe ifThenElse") = verifyTF(ifThenElse(us(false), 1.0f, 2.0f), us(2.0f))
 
   property("Safe Float + Safe Char") = verifyTF(TwoFace.Float(2.0f) + TwoFace.Char('\u0001'), 3.0f)
   property("Safe Float + Unsafe Char") = verifyTF(TwoFace.Float(2.0f) + TwoFace.Char(us('\u0001')), us(3.0f))
@@ -211,6 +215,27 @@ class TwoFaceFloatSpec extends Properties("TwoFace.Float") {
   property("Unsafe Float >= Safe Double") = verifyTF(TwoFace.Float(us(7.0f)) >= TwoFace.Double(4.0), us(true))
   property("Unsafe Float >= Unsafe Double") = verifyTF(TwoFace.Float(us(7.0f)) >= TwoFace.Double(us(4.0)), us(true))
 
+  property("Safe Float == Regular Safe Char") = verifyTF(TwoFace.Float(7.0f) == ('\u0007'), true)
+  property("Safe Float == Regular Unsafe Char") = verifyTF(TwoFace.Float(7.0f) == (us('\u0007')), us(true))
+  property("Unsafe Float == Regular Safe Char") = verifyTF(TwoFace.Float(us(7.0f)) == ('\u0007'), us(true))
+  property("Unsafe Float == Regular Unsafe Char") = verifyTF(TwoFace.Float(us(7.0f)) == (us('\u0007')), us(true))
+  property("Safe Float == Regular Safe Int") = verifyTF(TwoFace.Float(7.0f) == (7), true)
+  property("Safe Float == Regular Unsafe Int") = verifyTF(TwoFace.Float(7.0f) == (us(7)), us(true))
+  property("Unsafe Float == Regular Safe Int") = verifyTF(TwoFace.Float(us(7.0f)) == (7), us(true))
+  property("Unsafe Float == Regular Unsafe Int") = verifyTF(TwoFace.Float(us(7.0f)) == (us(7)), us(true))
+  property("Safe Float == Regular Safe Long") = verifyTF(TwoFace.Float(7.0f) == (7L), true)
+  property("Safe Float == Regular Unsafe Long") = verifyTF(TwoFace.Float(7.0f) == (us(7L)), us(true))
+  property("Unsafe Float == Regular Safe Long") = verifyTF(TwoFace.Float(us(7.0f)) == (7L), us(true))
+  property("Unsafe Float == Regular Unsafe Long") = verifyTF(TwoFace.Float(us(7.0f)) == (us(7L)), us(true))
+  property("Safe Float == Regular Safe Float") = verifyTF(TwoFace.Float(7.0f) == (7.0f), true)
+  property("Safe Float == Regular Unsafe Float") = verifyTF(TwoFace.Float(7.0f) == (us(7.0f)), us(true))
+  property("Unsafe Float == Regular Safe Float") = verifyTF(TwoFace.Float(us(7.0f)) == (7.0f), us(true))
+  property("Unsafe Float == Regular Unsafe Float") = verifyTF(TwoFace.Float(us(7.0f)) == (us(7.0f)), us(true))
+  property("Safe Float == Regular Safe Double") = verifyTF(TwoFace.Float(7.0f) == (7.0), true)
+  property("Safe Float == Regular Unsafe Double") = verifyTF(TwoFace.Float(7.0f) == (us(7.0)), us(true))
+  property("Unsafe Float == Regular Safe Double") = verifyTF(TwoFace.Float(us(7.0f)) == (7.0), us(true))
+  property("Unsafe Float == Regular Unsafe Double") = verifyTF(TwoFace.Float(us(7.0f)) == (us(7.0)), us(true))
+
   property("Safe Float == Safe Char") = verifyTF(TwoFace.Float(7.0f) == TwoFace.Char('\u0007'), true)
   property("Safe Float == Unsafe Char") = verifyTF(TwoFace.Float(7.0f) == TwoFace.Char(us('\u0007')), us(true))
   property("Unsafe Float == Safe Char") = verifyTF(TwoFace.Float(us(7.0f)) == TwoFace.Char('\u0007'), us(true))
@@ -266,8 +291,8 @@ class TwoFaceFloatSpec extends Properties("TwoFace.Float") {
   property("Safe Negate") = verifyTF(-TwoFace.Float(-1.0f), 1.0f)
   property("Unsafe Negate") = verifyTF(-TwoFace.Float(us(1.0f)), us(-1.0f))
 
-  //  property("Safe toChar") = verifyTF(TwoFace.Float(7.0f).toChar, '\u0001')
-  //  property("Unsafe toChar") = verifyTF(TwoFace.Float(us(1L)).toChar, us('\u0001'))
+  property("Safe toChar") = verifyTF(TwoFace.Float(1.0f).toChar, '\u0001')
+  property("Unsafe toChar") = verifyTF(TwoFace.Float(us(1.0f)).toChar, us('\u0001'))
   property("Safe toInt") = verifyTF(TwoFace.Float(1.0f).toInt, 1)
   property("Unsafe toInt") = verifyTF(TwoFace.Float(us(1.0f)).toInt, us(1))
   property("Safe toLong") = verifyTF(TwoFace.Float(1.0f).toLong, 1L)
@@ -294,6 +319,10 @@ class TwoFaceFloatSpec extends Properties("TwoFace.Float") {
   property("Unsafe round") = verifyTF(round(TwoFace.Float(us(1.5f))), us(2))
   property("Safe sqrt") = verifyTF(sqrt(TwoFace.Float(9.0f)), 3.0)
   property("Unsafe sqrt") = verifyTF(sqrt(TwoFace.Float(us(9.0f))), us(3.0))
+  property("Safe log") = verifyTF(log(TwoFace.Float(9.0f)), 2.1972245773362196)
+  property("Unsafe log") = verifyTF(log(TwoFace.Float(us(9.0f))), us(2.1972245773362196))
+  property("Safe log10") = verifyTF(log10(TwoFace.Float(9.0f)), 0.9542425094393249)
+  property("Unsafe log10") = verifyTF(log10(TwoFace.Float(us(9.0f))), us(0.9542425094393249))
 
   property("Safe Float pow Safe Float") = verifyTF(pow(TwoFace.Float(2.0f), TwoFace.Float(3.0f)), 8.0)
   property("Safe Float pow Unsafe Float") = verifyTF(pow(TwoFace.Float(2.0f), TwoFace.Float(us(3.0f))), us(8.0))
@@ -319,5 +348,9 @@ class TwoFaceFloatSpec extends Properties("TwoFace.Float") {
     illTyped("""val b : TwoFace.Float[3.0f + 0.0f] = implicitly[TwoFace.Float[2.0f + 2.0f]]""")
     illTyped("""val c : TwoFace.Float[3.0f + 0.0f] = implicitly[TwoFace.Float[4.0f]]""")
     true
+  }
+
+  property("ToString") = {
+    TwoFace.Float[1.0f].toString() == "1.0"
   }
 }

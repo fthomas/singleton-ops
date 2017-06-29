@@ -22,10 +22,18 @@ class TwoFaceStringSpec extends Properties("TwoFace.String") {
     a.getValue == "Something" && !a.isLiteral
   }
 
+  property("Safe ifThenElse") = verifyTF(ifThenElse(true, "Hi", "Hello"), "Hi")
+  property("Unsafe ifThenElse") = verifyTF(ifThenElse(us(false), "Hi", "Hello"), us("Hello"))
+
   property("Safe String + Safe String") = verifyTF(TwoFace.String("Some") + TwoFace.String("thing"), "Something")
   property("Safe String + Unsafe String") = verifyTF(TwoFace.String("Some") + TwoFace.String(us("thing")), us("Something"))
   property("Unsafe String + Safe String") = verifyTF(TwoFace.String(us("Some")) + TwoFace.String("thing"), us("Something"))
   property("Unsafe String + Unsafe String") = verifyTF(TwoFace.String(us("Some")) + TwoFace.String(us("thing")), us("Something"))
+
+  property("Safe String == Regular Safe String") = verifyTF(TwoFace.String("Some") == ("Some"), true)
+  property("Safe String == Regular Unsafe String") = verifyTF(TwoFace.String("Some") == (us("Some")), us(true))
+  property("Unsafe String == Regular Safe String") = verifyTF(TwoFace.String(us("Some")) == ("Some"), us(true))
+  property("Unsafe String == Regular Unsafe String") = verifyTF(TwoFace.String(us("Some")) == (us("Some")), us(true))
 
   property("Safe String == Safe String") = verifyTF(TwoFace.String("Some") == TwoFace.String("Some"), true)
   property("Safe String == Unsafe String") = verifyTF(TwoFace.String("Some") == TwoFace.String(us("Some")), us(true))

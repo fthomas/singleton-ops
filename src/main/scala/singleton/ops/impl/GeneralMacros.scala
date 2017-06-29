@@ -56,22 +56,6 @@ trait GeneralMacros {
     *  available known-at-compile-time values.
     */
   object Const {
-    def unwrapVar(t : Constant)(implicit annotatedSym : TypeSymbol) : Option[Constant] = {
-      t match {
-        case Constant(s : String) if Var.validName(s) =>
-          val ret = Some(Var.get(s))
-          ret
-        case _ => Some(t)
-      }
-
-    }
-    def unapplyVar(tp : Type)(implicit annotatedSym : TypeSymbol) : Option[Constant] = {
-      val maybeVar = unapply(tp)
-      maybeVar match {
-        case Some(t : Constant) => unwrapVar(t)
-        case _ =>  maybeVar
-      }
-    }
     def unapply(tp: Type)(implicit annotatedSym : TypeSymbol): Option[Constant] = {
       val g = c.universe.asInstanceOf[SymbolTable]
       implicit def fixSymbolOps(sym: Symbol): g.Symbol = sym.asInstanceOf[g.Symbol]
@@ -96,7 +80,6 @@ trait GeneralMacros {
           Some(Constant(0))
         ////////////////////////////////////////////////////////////////////////
 
-
         ////////////////////////////////////////////////////////////////////////
         // Operational Function
         ////////////////////////////////////////////////////////////////////////
@@ -105,32 +88,21 @@ trait GeneralMacros {
 
           //If function is set/get variable we keep the original string,
           //otherwise we get the variable's value
-          val aValue = funcName match {
-            case Some(Constant("SV")) => unapply(args(1))
-            case Some(Constant("GV")) => unapply(args(1))
-            case _ => unapplyVar(args(1))
-          }
+          val aValue = unapply(args(1))
           val retVal = (funcName, aValue) match {
             case (Some(Constant("IsNotLiteral")), _) => Some(Constant(aValue.isEmpty)) //Looking for non literals (if returned empty)
             case (Some(Constant("ITE")), Some(Constant(cond : Boolean))) => //Special control case: ITE (If-Then-Else)
               if (cond)
-                unapplyVar(args(2)) //true (then) part of the IF
+                unapply(args(2)) //true (then) part of the IF
               else
-                unapplyVar(args(3)) //false (else) part of the IF
-            case (Some(Constant("While")), Some(Constant(cond : Boolean))) => //Special control case: While
-                var repeat = cond
-                while (repeat) {
-                  unapply(args(2)) //executing body
-                  repeat = unapplyVar(args(1)) match { //reevaluate condition
-                    case Some(Constant(updatedCond : Boolean)) => updatedCond
-                    case _ => false
-                  }
-                }
-              unapplyVar(args(3)) //return value of loop
+                unapply(args(3)) //false (else) part of the IF
             case _ => //regular cases
-              val bValue = unapplyVar(args(2))
-              val cValue = unapplyVar(args(3))
+              val bValue = unapply(args(2))
+              val cValue = unapply(args(3))
               (funcName, aValue, bValue, cValue) match {
+                case (Some(Constant("Require")), Some(Constant(a)), Some(Constant(b)), None) =>
+                  implicit val annotatedSym : TypeSymbol = args(3).typeSymbol.asType
+                  Some(opCalc("Require", a, b, c))
                 case (Some(Constant(f : String)), Some(Constant(a)), Some(Constant(b)), Some(Constant(c))) => Some(opCalc(f, a, b, c))
                 case _ => None
               }
@@ -187,8 +159,7 @@ trait GeneralMacros {
 
   def extractSingletonValue(tpe: Type)(implicit annotatedSym : TypeSymbol): Constant = {
     def extractionFailed(tpe: Type) = {
-      val msg = s"Cannot extract value from $tpe\n" + "showRaw==> " + showRaw(
-        tpe)
+      val msg = s"Cannot extract value from $tpe\n" + "showRaw==> " + showRaw(tpe)
       abort(msg)
     }
 
@@ -200,22 +171,31 @@ trait GeneralMacros {
     value
   }
 
-  def evalTyped[T](expr: c.Expr[T]): T =
-    c.eval(c.Expr[T](c.untypecheck(expr.tree)))
+  def extractValueFromOpTree(opTree : c.Tree)(implicit annotatedSym : TypeSymbol) : Option[Constant] = {
+    def outFindCond(elem : c.Tree) : Boolean = elem match {
+      case q"val value : $typeTree = $valueTree" => true
+      case _ => false
+    }
+    def getOut(opClsBlk : List[c.Tree]) : Option[Constant] = opClsBlk.find(outFindCond) match {
+      case Some(q"val value : $typeTree = $valueTree") =>
+        valueTree match {
+          case Literal(const) => Some(const)
+          case _ => None
+        }
+      case _ => None
+    }
 
-  object Var {
-    val map = collection.mutable.Map[String, Constant]()
-    def set(name : String, value : Constant) : Constant = {
-      map(name) = value
-      value
-    }
-    def get(name : String) : Constant = {
-      map(name)
-    }
-    def validName(name : String) : Boolean = {
-      name.startsWith("$")
+    opTree match {
+      case q"""{
+        $mods class $tpname[..$tparams] $ctorMods(...$paramss) extends ..$parents { $self => ..$opClsBlk }
+        $expr(...$exprss)
+      }""" => getOut(opClsBlk)
+      case _ => None
     }
   }
+
+  def evalTyped[T](expr: c.Expr[T]): T =
+    c.eval(c.Expr[T](c.untypecheck(expr.tree)))
 
   ///////////////////////////////////////////////////////////////////////////////////////////
   // Three operands (Generic)
@@ -284,7 +264,7 @@ trait GeneralMacros {
       case ("ToString",   a: Boolean, _, _)           => Constant(a.toString)
 
       case ("IsNat",      a: Char, _, _)              => Constant(false)
-      case ("IsNat",      a: Int, _, _)               => Constant(a > 0)
+      case ("IsNat",      a: Int, _, _)               => Constant(a >= 0)
       case ("IsNat",      a: Long, _, _)              => Constant(false)
       case ("IsNat",      a: Float, _, _)             => Constant(false)
       case ("IsNat",      a: Double, _, _)            => Constant(false)
@@ -347,14 +327,6 @@ trait GeneralMacros {
       case ("IsBoolean",  a: String, _, _)            => Constant(false)
       case ("IsBoolean",  a: Boolean, _, _)           => Constant(true)
 
-      case ("Print",      a: Char, _, _)              => Constant(print(a.toString))
-      case ("Print",      a: Int, _, _)               => Constant(print(a.toString))
-      case ("Print",      a: Long, _, _)              => Constant(print(a.toString))
-      case ("Print",      a: Float, _, _)             => Constant(print(a.toString))
-      case ("Print",      a: Double, _, _)            => Constant(print(a.toString))
-      case ("Print",      a: String, _, _)            => Constant(print(a.toString))
-      case ("Print",      a: Boolean, _, _)           => Constant(print(a.toString))
-        
       case ("Negate",     a: Char, _, _)              => Constant(-a)
       case ("Negate",     a: Int, _, _)               => Constant(-a)
       case ("Negate",     a: Long, _, _)              => Constant(-a)
@@ -365,6 +337,9 @@ trait GeneralMacros {
       case ("Abs",        a: Long, _, _)              => Constant(abs(a))
       case ("Abs",        a: Float, _, _)             => Constant(abs(a))
       case ("Abs",        a: Double, _, _)            => Constant(abs(a))
+
+      case ("NumberOfLeadingZeros", a: Int, _, _)     => Constant(java.lang.Integer.numberOfLeadingZeros(a))
+      case ("NumberOfLeadingZeros", a: Long, _, _)    => Constant(java.lang.Long.numberOfLeadingZeros(a))
 
       case ("Floor",      a: Float, _, _)             => Constant(floor(a.toDouble))
       case ("Floor",      a: Double, _, _)            => Constant(floor(a))
@@ -387,6 +362,12 @@ trait GeneralMacros {
       case ("Sqrt",       a: Float, _, _)             => Constant(sqrt(a.toDouble))
       case ("Sqrt",       a: Double, _, _)            => Constant(sqrt(a))
 
+      case ("Log",        a: Float, _, _)             => Constant(log(a.toDouble))
+      case ("Log",        a: Double, _, _)            => Constant(log(a))
+
+      case ("Log10",      a: Float, _, _)             => Constant(log10(a.toDouble))
+      case ("Log10",      a: Double, _, _)            => Constant(log10(a))
+
       case ("Reverse",    a: String, _, _)            => Constant(a.reverse)
       case ("!",          a: Boolean, _, _)           => Constant(!a)
       case ("Require",    a: Boolean, b: String, _)   =>
@@ -395,8 +376,6 @@ trait GeneralMacros {
         else
           Constant(a)
       case ("==>",        _,          b,          _)  => Constant(b)
-      case ("SV",         a: String,  b,          _)  => Var.set(a, Constant(b))
-      case ("GV",         a: String,  _,          _)  => Var.get(a)
 
       case ("+",          a: Char,    b: Char,    _)  => Constant(a + b)
       case ("+",          a: Char,    b: Int,     _)  => Constant(a + b)
@@ -746,27 +725,45 @@ trait GeneralMacros {
   ///////////////////////////////////////////////////////////////////////////////////////////
   // Checked TwoFace
   ///////////////////////////////////////////////////////////////////////////////////////////
-  def CheckedImplMaterializer[T, Cond, Param, Msg, Chk](implicit t : c.WeakTypeTag[T], cond : c.WeakTypeTag[Cond], param : c.WeakTypeTag[Param], msg : c.WeakTypeTag[Msg], chk : c.WeakTypeTag[Chk]) :
-  CheckedImplMaterializer[T, Cond, Param, Msg, Chk] = new CheckedImplMaterializer[T, Cond, Param, Msg, Chk](weakTypeOf[T], weakTypeOf[Cond], weakTypeOf[Param], weakTypeOf[Msg], symbolOf[Chk])
+  def CheckedImplMaterializer[T, Param, Chk](implicit t : c.WeakTypeTag[T], param : c.WeakTypeTag[Param], chk : c.WeakTypeTag[Chk]) :
+  CheckedImplMaterializer[T, Param, Chk] = new CheckedImplMaterializer[T, Param, Chk](weakTypeOf[T], weakTypeOf[Param], symbolOf[Chk])
 
-  final class CheckedImplMaterializer[T, Cond, Param, Msg, Chk](tTpe : Type, condTpe : Type, paramTpe : Type, msgTpe : Type, chkSym : TypeSymbol) {
-    def impl(vc : c.Tree, vm : c.Tree) : c.Tree = {
-      implicit val annotatedSym : TypeSymbol = chkSym
-      val temp = showCode(vm)
-      val pattern = "(?s).*val valueWide: String = \"(.*)\".*".r
-      val pattern(msgValue) = temp
-
-      try {
-        c.typecheck(q"val a : true = ${vc}.value")
-      } catch {
-        case e : Throwable =>
-          abort(msgValue)
+  final class CheckedImplMaterializer[T, Param, Chk](tTpe : Type, paramTpe : Type, chkSym : TypeSymbol) {
+    def newChecked(paramNum : Int, valueTree : c.Tree)(implicit annotatedSym : TypeSymbol) : c.Tree = {
+      paramNum match {
+        case 0 => q"new $chkSym[$tTpe]($valueTree)"
+        case 1 => q"new $chkSym[$tTpe,$paramTpe]($valueTree)"
+        case _ =>
+          abort("Unsupported number of parameters")
       }
+    }
+    def impl(paramNum : Int, vc : c.Tree, vm : c.Tree) : c.Tree = {
+      implicit val annotatedSym : TypeSymbol = chkSym
+      val msgValue = extractValueFromOpTree(vm) match {
+        case Some(Constant(s : String)) => s
+        case _ => abort("Invalid error message:\n" + showRaw(vm))
+      }
+
+      extractValueFromOpTree(vc) match {
+        case Some(Constant(true)) =>                  //condition given to macro must be true
+        case Some(Constant(false)) => abort(msgValue) //otherwise the given error message is set as the abort message
+        case _ => abort("Unable to retrieve compile-time value:\n" + showRaw(vm))
+      }
+
       val chkTerm = TermName(chkSym.name.toString)
       val tValue = extractSingletonValue(tTpe).value
-      val tTree = constantTreeOf(tValue)
-      val genTree = q"_root_.singleton.twoface.Checked.$chkTerm.create[$tTpe,$condTpe,$paramTpe,$msgTpe]($tTree)"
-
+      val tValueTree = constantTreeOf(tValue)
+      val genTree = newChecked(paramNum, tValueTree)
+      genTree
+    }
+    def unsafe(paramNum : Int, valueTree : c.Tree) : c.Tree = {
+      implicit val annotatedSym : TypeSymbol = chkSym
+      val genTree = newChecked(paramNum, valueTree)
+      genTree
+    }
+    def unsafeTF(paramNum : Int, valueTree : c.Tree) : c.Tree = {
+      implicit val annotatedSym : TypeSymbol = chkSym
+      val genTree = newChecked(paramNum, q"$valueTree.getValue")
       genTree
     }
   }

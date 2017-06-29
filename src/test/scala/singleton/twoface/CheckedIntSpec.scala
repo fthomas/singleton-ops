@@ -5,49 +5,33 @@ import shapeless.test.illTyped
 import singleton.TestUtils._
 import singleton.ops._
 
+object CheckedIntSpec {
+  type Cond[T] = T < 50
+  type Msg[T] = "Failed Check"
+  @checked0Param[Cond, Msg, Int] class CheckedSmallerThan50[T]
+
+  implicit object RuntimeChecked extends CheckedSmallerThan50.Runtime {
+    def cond(l : Int) : scala.Boolean = l < 50
+    def msg(l : Int) : java.lang.String = s"Failed Check"
+  }
+}
+
 class CheckedIntSpec extends Properties("Checked.Int") {
-  class FixedSizeVector[L] private (val length : TwoFace.Int[L]) {
-    def concat[L2](that : FixedSizeVector[L2]) = FixedSizeVector.protCreate(this.length + that.length)
-    override def toString = s"FixedSizeVector($length)"
-    def pretty(implicit rt: RunTime[L]) = if (rt) s"FixedSizeVector($length)" else s"FixedSizeVector[$length]"
-  }
+  import CheckedIntSpec._
 
-  object FixedSizeVector {
-    //Defining Checked Length Type
-    protected type CondCheckedLength[L, P] = L > 0
-    protected type ParamCheckedLength = 0
-    protected type MsgCheckedLength[L, P] = "Length must be positive (received value of " + ToString[L] + ")"
-    type CheckedLength[L] = Checked.Int[L, CondCheckedLength, ParamCheckedLength, MsgCheckedLength]
-
-    implicit object RuntimeCheckedLength extends Checked.Runtime[Int, Int, CondCheckedLength, MsgCheckedLength] {
-      def cond(l : Int, p : Option[Int]) : scala.Boolean = l > 0
-      def msg(l : Int, p : Option[Int]) : java.lang.String = s"Length must be positive (received value of $l)"
-    }
-
-    //Protected Constructor (performs unsafe run-time check, if compile-time check is not possible)
-    protected def protCreate[L](tfLength : TwoFace.Int[L]) : FixedSizeVector[L] =
-      new FixedSizeVector[L](tfLength)
-
-    //Public Constructors (perform compile-time check, if possible)
-    def apply[L](checkedLength : CheckedLength[L]) =
-      protCreate(checkedLength.unsafeCheck())
-    implicit def apply[L](implicit checkedLength : CheckedLength[L], di : DummyImplicit) =
-      protCreate(checkedLength.unsafeCheck())
-  }
+  def smallerThan50[T](t : CheckedSmallerThan50[T]) : Unit = {t.unsafeCheck()}
 
   property("Compile-time checks") = wellTyped {
-    val ctv5 : FixedSizeVector[5] = FixedSizeVector[5]
-    val ctv2 : FixedSizeVector[2] = FixedSizeVector(2)
-    val ctv7 : FixedSizeVector[7] = implicitly[FixedSizeVector[7]]
-    val ctv9 : FixedSizeVector[9] = ctv2 concat ctv7
-    illTyped("""FixedSizeVector(0)""")
+    smallerThan50(40)
+    smallerThan50(TwoFace.Int(40))
+    illTyped("""smallerThan50(50)""")
+    illTyped("""smallerThan50(TwoFace.Int(50))""")
   }
 
   property("Run-time checks") = wellTyped {
-    val ctv2 = FixedSizeVector(2)
-    val rtv2 = FixedSizeVector(us(2))
-    val rtv4 = rtv2 concat rtv2 //runtime concat runtime => runtime
-    val rtv6 = rtv4 concat ctv2 //runtime concat compile-time => runtime
-    illRun{FixedSizeVector(us(0))}
+    smallerThan50(us(40))
+    smallerThan50(TwoFace.Int(us(40)))
+    illRun{smallerThan50(us(50))}
+    illRun{smallerThan50(TwoFace.Int(us(50)))}
   }
 }

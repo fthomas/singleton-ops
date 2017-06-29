@@ -145,15 +145,13 @@ object FixedSizedVectorDemo {
       }
 
       object FixedSizeVector {
-        //Defining Checked Length Type
-        protected type CondCheckedLength[L, P] = L > 0
-        protected type ParamCheckedLength = 0
-        protected type MsgCheckedLength[L, P] = "Length must be positive (received value of " + ToString[L] + ")"
-        type CheckedLength[L] = Checked.Int[L, CondCheckedLength, ParamCheckedLength, MsgCheckedLength]
+        protected type CondCheckedLength[L] = L > 0
+        protected type MsgCheckedLength[L] = "Length must be positive (received value of " + ToString[L] + ")"
+        @checked0Param[CondCheckedLength, MsgCheckedLength, Int] class CheckedLength[L]
 
-        implicit object RuntimeCheckedLength extends Checked.Runtime[Int, Int, CondCheckedLength, MsgCheckedLength] {
-          def cond(l : Int, p : Option[Int]) : scala.Boolean = l > 0
-          def msg(l : Int, p : Option[Int]) : java.lang.String = s"Length must be positive (received value of $l)"
+        implicit object RuntimeCheckedLength extends CheckedLength.Runtime {
+          def cond(l : Int) : scala.Boolean = l > 0
+          def msg(l : Int) : java.lang.String = s"Length must be positive (received value of $l)"
         }
 
         //Protected Constructor (performs unsafe run-time check, if compile-time check is not possible)
@@ -207,26 +205,28 @@ object NonLiteralTest {
 //  smallerThan50(60)    //fails compile-time check
 }
 
-object CheckedTest {
-  import singleton.twoface._
 
-  type CondSmallerThan50[T, P] = T < P
-  type MsgSmallerThan50[T, P] = "This is bad " + ToString[T]
-  type Param50 = 50
-  type CheckedSmallerThan50[T] = Checked.Int[T, CondSmallerThan50, Param50, MsgSmallerThan50]
-  def smallerThan50[T](t : CheckedSmallerThan50[T]) : Unit = {
-    require(t < 50, "") //if (rt_check)
-  }
-
-  var forty = 40
-  var sixty = 60
-  val tf40 = TwoFace.Int(40)
-  val tf60 = TwoFace.Int(60)
-  val tfForty = TwoFace.Int(forty)
-
-
-  smallerThan50(40)
-}
+//
+//object CheckedTest {
+//  import singleton.twoface._
+//
+//  type CondSmallerThan50[T, P] = T < P
+//  type MsgSmallerThan50[T, P] = "This is bad " + ToString[T]
+//  type Param50 = 50
+//  type CheckedSmallerThan50[T] = Checked.Int[T, CondSmallerThan50, Param50, MsgSmallerThan50]
+//  def smallerThan50[T](t : CheckedSmallerThan50[T]) : Unit = {
+//    require(t < 50, "") //if (rt_check)
+//  }
+//
+//  var forty = 40
+//  var sixty = 60
+//  val tf40 = TwoFace.Int(40)
+//  val tf60 = TwoFace.Int(60)
+//  val tfForty = TwoFace.Int(forty)
+//
+//
+//  smallerThan50(40)
+//}
 /* TODOs:
 Fix real world matrix example
 Add operations table to readme

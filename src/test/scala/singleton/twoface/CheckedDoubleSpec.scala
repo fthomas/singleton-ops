@@ -5,16 +5,19 @@ import shapeless.test.illTyped
 import singleton.TestUtils._
 import singleton.ops._
 
-class CheckedDoubleSpec extends Properties("Checked.Double") {
-  type CondSmallerThan50[T, P] = T < P
-  type MsgSmallerThan50[T, P] = "Failed Check"
-  type Param50 = 50.0
-  type CheckedSmallerThan50[T] = Checked.Double[T, CondSmallerThan50, Param50, MsgSmallerThan50]
+object CheckedDoubleSpec {
+  type Cond[T] = T < 50.0
+  type Msg[T] = "Failed Check"
+  @checked0Param[Cond, Msg, Double] class CheckedSmallerThan50[T]
 
-  implicit object RuntimeChecked extends Checked.Runtime[Double, Double, CondSmallerThan50, MsgSmallerThan50] {
-    def cond(l : Double, p : Option[Double]) : scala.Boolean = l < 50.0
-    def msg(l : Double, p : Option[Double]) : java.lang.String = s"Failed Check"
+  implicit object RuntimeChecked extends CheckedSmallerThan50.Runtime {
+    def cond(l : Double) : scala.Boolean = l < 50.0
+    def msg(l : Double) : java.lang.String = s"Failed Check"
   }
+}
+
+class CheckedDoubleSpec extends Properties("Checked.Double") {
+  import CheckedDoubleSpec._
 
   def smallerThan50[T](t : CheckedSmallerThan50[T]) : Unit = {t.unsafeCheck()}
 

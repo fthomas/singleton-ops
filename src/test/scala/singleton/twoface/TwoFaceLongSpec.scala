@@ -1,5 +1,6 @@
 package singleton.twoface
 
+import singleton.twoface.math._
 import org.scalacheck.Properties
 import shapeless.test.illTyped
 import singleton.TestUtils._
@@ -21,6 +22,9 @@ class TwoFaceLongSpec extends Properties("TwoFace.Long") {
     val a = TwoFace.Long(us(2L))
     a.getValue == 2L && !a.isLiteral
   }
+
+  property("Safe ifThenElse") = verifyTF(ifThenElse(true, 1L, 2L), 1L)
+  property("Unsafe ifThenElse") = verifyTF(ifThenElse(us(false), 1L, 2L), us(2L))
 
   property("Safe Long + Safe Char") = verifyTF(TwoFace.Long(2L) + TwoFace.Char('\u0001'), 3L)
   property("Safe Long + Unsafe Char") = verifyTF(TwoFace.Long(2L) + TwoFace.Char(us('\u0001')), us(3L))
@@ -211,6 +215,27 @@ class TwoFaceLongSpec extends Properties("TwoFace.Long") {
   property("Unsafe Long >= Safe Double") = verifyTF(TwoFace.Long(us(7L)) >= TwoFace.Double(4.0), us(true))
   property("Unsafe Long >= Unsafe Double") = verifyTF(TwoFace.Long(us(7L)) >= TwoFace.Double(us(4.0)), us(true))
 
+  property("Safe Long == Regular Safe Char") = verifyTF(TwoFace.Long(7L) == ('\u0007'), true)
+  property("Safe Long == Regular Unsafe Char") = verifyTF(TwoFace.Long(7L) == (us('\u0007')), us(true))
+  property("Unsafe Long == Regular Safe Char") = verifyTF(TwoFace.Long(us(7L)) == ('\u0007'), us(true))
+  property("Unsafe Long == Regular Unsafe Char") = verifyTF(TwoFace.Long(us(7L)) == (us('\u0007')), us(true))
+  property("Safe Long == Regular Safe Int") = verifyTF(TwoFace.Long(7L) == (7), true)
+  property("Safe Long == Regular Unsafe Int") = verifyTF(TwoFace.Long(7L) == (us(7)), us(true))
+  property("Unsafe Long == Regular Safe Int") = verifyTF(TwoFace.Long(us(7L)) == (7), us(true))
+  property("Unsafe Long == Regular Unsafe Int") = verifyTF(TwoFace.Long(us(7L)) == (us(7)), us(true))
+  property("Safe Long == Regular Safe Long") = verifyTF(TwoFace.Long(7L) == (7L), true)
+  property("Safe Long == Regular Unsafe Long") = verifyTF(TwoFace.Long(7L) == (us(7L)), us(true))
+  property("Unsafe Long == Regular Safe Long") = verifyTF(TwoFace.Long(us(7L)) == (7L), us(true))
+  property("Unsafe Long == Regular Unsafe Long") = verifyTF(TwoFace.Long(us(7L)) == (us(7L)), us(true))
+  property("Safe Long == Regular Safe Float") = verifyTF(TwoFace.Long(7L) == (7.0f), true)
+  property("Safe Long == Regular Unsafe Float") = verifyTF(TwoFace.Long(7L) == (us(7.0f)), us(true))
+  property("Unsafe Long == Regular Safe Float") = verifyTF(TwoFace.Long(us(7L)) == (7.0f), us(true))
+  property("Unsafe Long == Regular Unsafe Float") = verifyTF(TwoFace.Long(us(7L)) == (us(7.0f)), us(true))
+  property("Safe Long == Regular Safe Double") = verifyTF(TwoFace.Long(7L) == (7.0), true)
+  property("Safe Long == Regular Unsafe Double") = verifyTF(TwoFace.Long(7L) == (us(7.0)), us(true))
+  property("Unsafe Long == Regular Safe Double") = verifyTF(TwoFace.Long(us(7L)) == (7.0), us(true))
+  property("Unsafe Long == Regular Unsafe Double") = verifyTF(TwoFace.Long(us(7L)) == (us(7.0)), us(true))
+
   property("Safe Long == Safe Char") = verifyTF(TwoFace.Long(7L) == TwoFace.Char('\u0007'), true)
   property("Safe Long == Unsafe Char") = verifyTF(TwoFace.Long(7L) == TwoFace.Char(us('\u0007')), us(true))
   property("Unsafe Long == Safe Char") = verifyTF(TwoFace.Long(us(7L)) == TwoFace.Char('\u0007'), us(true))
@@ -266,8 +291,8 @@ class TwoFaceLongSpec extends Properties("TwoFace.Long") {
   property("Safe Negate") = verifyTF(-TwoFace.Long(-1L), 1L)
   property("Unsafe Negate") = verifyTF(-TwoFace.Long(us(1L)), us(-1L))
 
-  //  property("Safe toChar") = verifyTF(TwoFace.Long(7L).toChar, '\u0001')
-  //  property("Unsafe toChar") = verifyTF(TwoFace.Long(us(1L)).toChar, us('\u0001'))
+  property("Safe toChar") = verifyTF(TwoFace.Long(1L).toChar, '\u0001')
+  property("Unsafe toChar") = verifyTF(TwoFace.Long(us(1L)).toChar, us('\u0001'))
   property("Safe toInt") = verifyTF(TwoFace.Long(1L).toInt, 1)
   property("Unsafe toInt") = verifyTF(TwoFace.Long(us(1L)).toInt, us(1))
   property("Safe toFloat") = verifyTF(TwoFace.Long(1L).toFloat, 1.0f)
@@ -279,6 +304,9 @@ class TwoFaceLongSpec extends Properties("TwoFace.Long") {
 
   property("Safe abs") = verifyTF(abs(TwoFace.Long(-1L)), 1L)
   property("Unsafe abs") = verifyTF(abs(TwoFace.Long(us(-1L))), us(1L))
+
+  property("Safe numberOfLeadingZeros") = verifyTF(TwoFace.Long.numberOfLeadingZeros(TwoFace.Long(1L)), 63)
+  property("Unsafe numberOfLeadingZeros") = verifyTF(TwoFace.Long.numberOfLeadingZeros(TwoFace.Long(us(1L))), us(63))
 
   property("Implicit Conversions") = wellTyped {
     import singleton.ops._
@@ -295,5 +323,9 @@ class TwoFaceLongSpec extends Properties("TwoFace.Long") {
     illTyped("""val b : TwoFace.Long[3L + 0L] = implicitly[TwoFace.Long[2L + 2L]]""")
     illTyped("""val c : TwoFace.Long[3L + 0L] = implicitly[TwoFace.Long[4L]]""")
     true
+  }
+
+  property("ToString") = {
+    TwoFace.Long[1L].toString() == "1"
   }
 }

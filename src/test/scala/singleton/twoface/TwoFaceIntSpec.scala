@@ -1,5 +1,6 @@
 package singleton.twoface
 
+import singleton.twoface.math._
 import org.scalacheck.Properties
 import singleton.TestUtils._
 import shapeless.test.illTyped
@@ -21,6 +22,9 @@ class TwoFaceIntSpec extends Properties("TwoFace.Int") {
     val a = TwoFace.Int(us(2))
     a.getValue == 2 && !a.isLiteral
   }
+
+  property("Safe ifThenElse") = verifyTF(ifThenElse(true, 1, 2), 1)
+  property("Unsafe ifThenElse") = verifyTF(ifThenElse(us(false), 1, 2), us(2))
 
   property("Safe Int + Safe Char") = verifyTF(TwoFace.Int(2) + TwoFace.Char('\u0001'), 3)
   property("Safe Int + Unsafe Char") = verifyTF(TwoFace.Int(2) + TwoFace.Char(us('\u0001')), us(3))
@@ -232,6 +236,27 @@ class TwoFaceIntSpec extends Properties("TwoFace.Int") {
   property("Unsafe Int == Safe Double") = verifyTF(TwoFace.Int(us(7)) == TwoFace.Double(7.0), us(true))
   property("Unsafe Int == Unsafe Double") = verifyTF(TwoFace.Int(us(7)) == TwoFace.Double(us(7.0)), us(true))
 
+  property("Safe Int == Regular Safe Char") = verifyTF(TwoFace.Int(7) == ('\u0007'), true)
+  property("Safe Int == Regular Unsafe Char") = verifyTF(TwoFace.Int(7) == (us('\u0007')), us(true))
+  property("Unsafe Int == Regular Safe Char") = verifyTF(TwoFace.Int(us(7)) == ('\u0007'), us(true))
+  property("Unsafe Int == Regular Unsafe Char") = verifyTF(TwoFace.Int(us(7)) == (us('\u0007')), us(true))
+  property("Safe Int == Regular Safe Int") = verifyTF(TwoFace.Int(7) == (7), true)
+  property("Safe Int == Regular Unsafe Int") = verifyTF(TwoFace.Int(7) == (us(7)), us(true))
+  property("Unsafe Int == Regular Safe Int") = verifyTF(TwoFace.Int(us(7)) == (7), us(true))
+  property("Unsafe Int == Regular Unsafe Int") = verifyTF(TwoFace.Int(us(7)) == (us(7)), us(true))
+  property("Safe Int == Regular Safe Long") = verifyTF(TwoFace.Int(7) == (7L), true)
+  property("Safe Int == Regular Unsafe Long") = verifyTF(TwoFace.Int(7) == (us(7L)), us(true))
+  property("Unsafe Int == Regular Safe Long") = verifyTF(TwoFace.Int(us(7)) == (7L), us(true))
+  property("Unsafe Int == Regular Unsafe Long") = verifyTF(TwoFace.Int(us(7)) == (us(7L)), us(true))
+  property("Safe Int == Regular Safe Float") = verifyTF(TwoFace.Int(7) == (7.0f), true)
+  property("Safe Int == Regular Unsafe Float") = verifyTF(TwoFace.Int(7) == (us(7.0f)), us(true))
+  property("Unsafe Int == Regular Safe Float") = verifyTF(TwoFace.Int(us(7)) == (7.0f), us(true))
+  property("Unsafe Int == Regular Unsafe Float") = verifyTF(TwoFace.Int(us(7)) == (us(7.0f)), us(true))
+  property("Safe Int == Regular Safe Double") = verifyTF(TwoFace.Int(7) == (7.0), true)
+  property("Safe Int == Regular Unsafe Double") = verifyTF(TwoFace.Int(7) == (us(7.0)), us(true))
+  property("Unsafe Int == Regular Safe Double") = verifyTF(TwoFace.Int(us(7)) == (7.0), us(true))
+  property("Unsafe Int == Regular Unsafe Double") = verifyTF(TwoFace.Int(us(7)) == (us(7.0)), us(true))
+
   property("Safe Int != Safe Char") = verifyTF(TwoFace.Int(7) != TwoFace.Char('\u0007'), false)
   property("Safe Int != Unsafe Char") = verifyTF(TwoFace.Int(7) != TwoFace.Char(us('\u0007')), us(false))
   property("Unsafe Int != Safe Char") = verifyTF(TwoFace.Int(us(7)) != TwoFace.Char('\u0007'), us(false))
@@ -266,8 +291,8 @@ class TwoFaceIntSpec extends Properties("TwoFace.Int") {
   property("Safe Negate") = verifyTF(-TwoFace.Int(-1), 1)
   property("Unsafe Negate") = verifyTF(-TwoFace.Int(us(1)), us(-1))
 
-  //  property("Safe toChar") = verifyTF(TwoFace.Int(1).toChar, '\u0001')
-  //  property("Unsafe toChar") = verifyTF(TwoFace.Int(us(1)).toChar, us('\u0001'))
+  property("Safe toChar") = verifyTF(TwoFace.Int(1).toChar, '\u0001')
+  property("Unsafe toChar") = verifyTF(TwoFace.Int(us(1)).toChar, us('\u0001'))
   property("Safe toLong") = verifyTF(TwoFace.Int(1).toLong, 1L)
   property("Unsafe toLong") = verifyTF(TwoFace.Int(us(1)).toLong, us(1L))
   property("Safe toFloat") = verifyTF(TwoFace.Int(1).toFloat, 1.0f)
@@ -279,6 +304,9 @@ class TwoFaceIntSpec extends Properties("TwoFace.Int") {
 
   property("Safe abs") = verifyTF(abs(TwoFace.Int(-1)), 1)
   property("Unsafe abs") = verifyTF(abs(TwoFace.Int(us(-1))), us(1))
+
+  property("Safe numberOfLeadingZeros") = verifyTF(TwoFace.Int.numberOfLeadingZeros(TwoFace.Int(1)), 31)
+  property("Unsafe numberOfLeadingZeros") = verifyTF(TwoFace.Int.numberOfLeadingZeros(TwoFace.Int(us(1))), us(31))
 
   property("Implicit Conversions") = wellTyped {
     import singleton.ops._
@@ -295,5 +323,9 @@ class TwoFaceIntSpec extends Properties("TwoFace.Int") {
     illTyped("""val b : TwoFace.Int[3 + 0] = implicitly[TwoFace.Int[2 + 2]]""")
     illTyped("""val c : TwoFace.Int[3 + 0] = implicitly[TwoFace.Int[4]]""")
     true
+  }
+
+  property("ToString") = {
+    TwoFace.Int[1].toString() == "1"
   }
 }

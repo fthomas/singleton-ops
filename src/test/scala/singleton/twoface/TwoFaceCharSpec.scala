@@ -21,6 +21,9 @@ class TwoFaceCharSpec extends Properties("TwoFace.Char") {
     a.getValue == '\u0002' && !a.isLiteral
   }
 
+  property("Safe ifThenElse") = verifyTF(ifThenElse(true, '\u0001', '\u0002'), '\u0001')
+  property("Unsafe ifThenElse") = verifyTF(ifThenElse(us(false), '\u0001', '\u0002'), us('\u0002'))
+
   property("Safe Char + Safe Char") = verifyTF(TwoFace.Char('\u0002') + TwoFace.Char('\u0001'), 3)
   property("Safe Char + Unsafe Char") = verifyTF(TwoFace.Char('\u0002') + TwoFace.Char(us('\u0001')), us(3))
   property("Unsafe Char + Safe Char") = verifyTF(TwoFace.Char(us('\u0002')) + TwoFace.Char('\u0001'), us(3))
@@ -210,6 +213,27 @@ class TwoFaceCharSpec extends Properties("TwoFace.Char") {
   property("Unsafe Char >= Safe Double") = verifyTF(TwoFace.Char(us('\u0007')) >= TwoFace.Double(4.0), us(true))
   property("Unsafe Char >= Unsafe Double") = verifyTF(TwoFace.Char(us('\u0007')) >= TwoFace.Double(us(4.0)), us(true))
 
+  property("Safe Char == Regular Safe Char") = verifyTF(TwoFace.Char('\u0007') == ('\u0007'), true)
+  property("Safe Char == Regular Unsafe Char") = verifyTF(TwoFace.Char('\u0007') == (us('\u0007')), us(true))
+  property("Unsafe Char == Regular Safe Char") = verifyTF(TwoFace.Char(us('\u0007')) == ('\u0007'), us(true))
+  property("Unsafe Char == Regular Unsafe Char") = verifyTF(TwoFace.Char(us('\u0007')) == (us('\u0007')), us(true))
+  property("Safe Char == Regular Safe Int") = verifyTF(TwoFace.Char('\u0007') == (7), true)
+  property("Safe Char == Regular Unsafe Int") = verifyTF(TwoFace.Char('\u0007') == (us(7)), us(true))
+  property("Unsafe Char == Regular Safe Int") = verifyTF(TwoFace.Char(us('\u0007')) == (7), us(true))
+  property("Unsafe Char == Regular Unsafe Int") = verifyTF(TwoFace.Char(us('\u0007')) == (us(7)), us(true))
+  property("Safe Char == Regular Safe Long") = verifyTF(TwoFace.Char('\u0007') == (7L), true)
+  property("Safe Char == Regular Unsafe Long") = verifyTF(TwoFace.Char('\u0007') == (us(7L)), us(true))
+  property("Unsafe Char == Regular Safe Long") = verifyTF(TwoFace.Char(us('\u0007')) == (7L), us(true))
+  property("Unsafe Char == Regular Unsafe Long") = verifyTF(TwoFace.Char(us('\u0007')) == (us(7L)), us(true))
+  property("Safe Char == Regular Safe Float") = verifyTF(TwoFace.Char('\u0007') == (7.0f), true)
+  property("Safe Char == Regular Unsafe Float") = verifyTF(TwoFace.Char('\u0007') == (us(7.0f)), us(true))
+  property("Unsafe Char == Regular Safe Float") = verifyTF(TwoFace.Char(us('\u0007')) == (7.0f), us(true))
+  property("Unsafe Char == Regular Unsafe Float") = verifyTF(TwoFace.Char(us('\u0007')) == (us(7.0f)), us(true))
+  property("Safe Char == Regular Safe Double") = verifyTF(TwoFace.Char('\u0007') == (7.0), true)
+  property("Safe Char == Regular Unsafe Double") = verifyTF(TwoFace.Char('\u0007') == (us(7.0)), us(true))
+  property("Unsafe Char == Regular Safe Double") = verifyTF(TwoFace.Char(us('\u0007')) == (7.0), us(true))
+  property("Unsafe Char == Regular Unsafe Double") = verifyTF(TwoFace.Char(us('\u0007')) == (us(7.0)), us(true))
+
   property("Safe Char == Safe Char") = verifyTF(TwoFace.Char('\u0007') == TwoFace.Char('\u0007'), true)
   property("Safe Char == Unsafe Char") = verifyTF(TwoFace.Char('\u0007') == TwoFace.Char(us('\u0007')), us(true))
   property("Unsafe Char == Safe Char") = verifyTF(TwoFace.Char(us('\u0007')) == TwoFace.Char('\u0007'), us(true))
@@ -269,5 +293,9 @@ class TwoFaceCharSpec extends Properties("TwoFace.Char") {
   property("Implicit Conversions") = wellTyped {
     val d : '\u0003' = TwoFace.Char('\u0003')
     val e : Char = TwoFace.Char(us('\u0003'))
+  }
+
+  property("ToString") = {
+    TwoFace.Char['t'].toString() == "t"
   }
 }
