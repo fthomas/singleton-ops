@@ -67,6 +67,7 @@ trait GeneralMacros {
   object CalcNLDouble extends CalcNLit(1.0)
   object CalcNLString extends CalcNLit("1")
   object CalcNLBoolean extends CalcNLit(true)
+  case class CalcUnknown(t: Type) extends Calc {type T0 = Type}
 
 //  case class Calc(const : Constant)
 //  object Calc {
@@ -127,10 +128,15 @@ trait GeneralMacros {
           //otherwise we get the variable's value
           val aValue = unapply(args(1))
           val retVal = (funcName, aValue) match {
-            case (Some(CalcLit("IsNotLiteral")), _) => //Looking for non literals
+            case (Some(CalcLit("GetNonLiteral")), _) => //Getting non-literal type
               aValue match {
-                case None => Some(CalcLit(true))
-                case Some(CalcNLit(t)) => Some(CalcLit(true))
+                case None => Some(CalcUnknown(args(1)))
+                case t => t
+              }
+            case (Some(CalcLit("IsNonLiteral")), _) => //Looking for non literals
+              aValue match {
+                case None => Some(CalcLit(true)) //Unknown value
+                case Some(CalcNLit(t)) => Some(CalcLit(true)) //non-literal type (e.g., Int, Long,...)
                 case _ => Some(CalcLit(false))
               }
             case (Some(CalcLit("ITE")), Some(CalcLit(cond : Boolean))) => //Special control case: ITE (If-Then-Else)
@@ -754,22 +760,27 @@ trait GeneralMacros {
     def usingFuncName : Tree = {
       implicit val annotatedSym : TypeSymbol = symbolOf[OpMacro[_,_,_,_]]
       val funcName = extractSingletonValue(nTpe)
-      val aValue = extractSingletonValue(opTpe)
+      val genTree = funcName match {
+//        case Constant("GetNonLiteral") =>
+        case _ =>
+          val aValue = extractSingletonValue(opTpe)
 
-      val (outWideTpe, outWideLiteral, outTypeName, outTpe, outTree) = (funcName, aValue) match {
-        case (Constant("ToNat"), Constant(t : Int)) => constantTypeAndValueOfNat(t)
-        case (_, Constant(t)) =>  constantTypeAndValueOf(t)
+          val (outWideTpe, outWideLiteral, outTypeName, outTpe, outTree) = (funcName, aValue) match {
+            case (Constant("ToNat"), Constant(t : Int)) => constantTypeAndValueOfNat(t)
+            case (_, Constant(t)) =>  constantTypeAndValueOf(t)
+          }
+
+          q"""
+          new $opTpe {
+            type OutWide = $outWideTpe
+            type Out = $outTpe {}
+            type $outTypeName = $outTpe {}
+            val value: $outTpe = $outTree
+            val valueWide: $outWideTpe = $outWideLiteral
+          }
+          """
+
       }
-
-      val genTree = q"""
-        new $opTpe {
-          type OutWide = $outWideTpe
-          type Out = $outTpe {}
-          type $outTypeName = $outTpe {}
-          val value: $outTpe = $outTree
-          val valueWide: $outWideTpe = $outWideLiteral
-        }
-      """
 //      print(genTree)
       genTree
     }

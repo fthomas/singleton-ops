@@ -40,7 +40,7 @@ object TestUtils {
   def verifyOp1Args[OP[_],L,Expected](implicit verify: Verify[OP[L], Expected]) : Prop = wellTyped {}
   def verifyOp2Args[OP[_,_],L,R,Expected](implicit verify: Verify[OP[L,R], Expected]) : Prop = wellTyped {}
 
-  type VerifyTF[OP, Expected] = Require[ITE[IsNotLiteral[Expected], IsNotLiteral[OP], OP == Expected]]
+  type VerifyTF[OP, Expected] = Require[ITE[IsNonLiteral[Expected], IsNonLiteral[OP], OP == Expected]]
 
   def verifyTF[OP, Expected](opResult : TwoFace.Char[OP], expectedResult : TwoFace.Char[Expected])
                             (implicit verify : VerifyTF[OP, Expected]) : Prop = {

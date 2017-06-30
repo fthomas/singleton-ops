@@ -18,7 +18,7 @@ object FallBack {
     val value : Option[Base] = Some(si.valueWide.asInstanceOf[Base])
     val isLiteral : Lit {} = true
   }
-  implicit def evNotLiteral[Base, FB, OP](implicit rq : Require[IsNotLiteral[OP]]) : Aux[Base, FB, OP, FB, false] =
+  implicit def evNonLiteral[Base, FB, OP](implicit rq : Require[IsNonLiteral[OP]]) : Aux[Base, FB, OP, FB, false] =
     new FallBack[Base, FB, OP] {
       type Out = FB
       type Lit = false

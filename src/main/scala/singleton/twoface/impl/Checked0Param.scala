@@ -24,8 +24,8 @@ object Checked0Param {
   trait Builder[Chk[_], Cond[_], Msg[_], Face] {
     type Shell[T] <: Checked0ParamShell[Chk, Face, T]
     trait Runtime extends Checked0Param.Runtime[Chk, Face]
-    type CondHelper[T] = ITE[IsNotLiteral[Cond[T]], true, Cond[T]]
-    type MsgHelper[T] = ITE[IsNotLiteral[Msg[T]], "Something bad happened", Msg[T]]
+    type CondHelper[T] = ITE[IsNonLiteral[Cond[T]], true, Cond[T]]
+    type MsgHelper[T] = ITE[IsNonLiteral[Msg[T]], "Something bad happened", Msg[T]]
 
     implicit def impl[T]
     (implicit vc : CondHelper[T], vm : MsgHelper[T]) :
@@ -84,8 +84,8 @@ trait Checked0ParamShell[Chk[_], Face, T] {
 
 object Checked0ParamShell {
   trait Builder[ChkShl[_], Chk[_], Cond[_], Msg[_], Face] {
-    type MsgHelper[T] = ITE[IsNotLiteral[Msg[T]], "Something bad happened", Msg[T]]
-    type CondHelper[T] = RequireMsgSym[ITE[IsNotLiteral[Cond[T]], true, Cond[T]], MsgHelper[T],ChkShl[_]]
+    type MsgHelper[T] = ITE[IsNonLiteral[Msg[T]], "Something bad happened", Msg[T]]
+    type CondHelper[T] = RequireMsgSym[ITE[IsNonLiteral[Cond[T]], true, Cond[T]], MsgHelper[T],ChkShl[_]]
     def create[T] : ChkShl[T]
 
     implicit def impl[T]
