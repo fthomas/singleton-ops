@@ -24,13 +24,13 @@ object TwoFaceAny {
   }
 
   sealed trait TwoFaceOp[TF[_], Face, OP] {
-    type FB <: FallBack[Face, OP, OP]
+    type FB <: AcceptNonLiteral[OP]
     val fb : FB
     def apply(op : => Face)(implicit tfb : Builder[TF, Face]) : TF[fb.Out] =
-      tfb.create[fb.Out](if (fb.isLiteral) fb.value.get else op)
+      tfb.create[fb.Out](if (fb.isLiteral) fb.valueWide.asInstanceOf[Face] else op)
   }
   object TwoFaceOp {
-    implicit def ev[TF[_], Face, OP](implicit fb0 : FallBack[Face, OP, OP]) : TwoFaceOp[TF, Face, OP]{type FB = fb0.type} =
+    implicit def ev[TF[_], Face, OP](implicit fb0 : AcceptNonLiteral[OP]) : TwoFaceOp[TF, Face, OP]{type FB = fb0.type} =
       new TwoFaceOp[TF, Face, OP]{type FB = fb0.type; val fb : FB = fb0}
   }
 

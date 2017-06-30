@@ -65,7 +65,7 @@ trait GeneralMacros {
   object CalcNLDouble extends CalcNLit(1.0)
   object CalcNLString extends CalcNLit("1")
   object CalcNLBoolean extends CalcNLit(true)
-//  case class CalcUnknown(t: Type) extends Calc {type T0 = Type}
+  case class CalcUnknown(t: Type) extends Calc {type T0 = Type}
 
 //  case class Calc(const : Constant)
 //  object Calc {
@@ -127,7 +127,10 @@ trait GeneralMacros {
           val aValue = unapply(args(1))
           val retVal = (funcName, aValue) match {
             case (Some(CalcLit("AcceptNonLiteral")), _) => //Getting non-literal type
-              aValue
+              aValue match {
+                case None => Some(CalcUnknown(args(1)))
+                case _ => aValue
+              }
             case (Some(CalcLit("IsNonLiteral")), _) => //Looking for non literals
               aValue match {
                 case None => Some(CalcLit(true)) //Unknown value
@@ -240,8 +243,8 @@ trait GeneralMacros {
       """
   }
 
-  def genOpTreeNLit[T](opTpe : Type, calc : CalcNLit[T])(implicit tt1 : c.TypeTag[T], annotatedSym : TypeSymbol) : Tree = {
-    val outTpe = runtimeTypeOf(calc.t)
+  def genOpTreeNLit[T](opTpe : Type, t : T)(implicit annotatedSym : TypeSymbol) : Tree = {
+    val outTpe = runtimeTypeOf(t)
     q"""
       new $opTpe {
         type OutWide = Option[$outTpe]
@@ -250,6 +253,19 @@ trait GeneralMacros {
         final val value: Option[$outTpe] = None
         final val isLiteral = false
         final val valueWide: Option[$outTpe] = None
+      }
+      """
+  }
+
+  def genOpTreeUnknown(opTpe : Type, t : Type)(implicit annotatedSym : TypeSymbol) : Tree = {
+    q"""
+      new $opTpe {
+        type OutWide = Option[$t]
+        type Out = $t
+        type Value = Option[$t]
+        final val value: Option[$t] = None
+        final val isLiteral = false
+        final val valueWide: Option[$t] = None
       }
       """
   }
@@ -800,7 +816,8 @@ trait GeneralMacros {
       val genTree = (funcName, opResult) match {
         case (CalcLit("ToNat"), CalcLit(t : Int)) => genOpTreeNat(opTpe, t)
         case (CalcLit(s : String), CalcLit(t)) =>  genOpTreeLit(opTpe, t)
-        case (CalcLit("AcceptNonLiteral"), CalcNLit(t)) => genOpTreeNLit(opTpe, CalcNLit(t))
+        case (CalcLit("AcceptNonLiteral"), CalcNLit(t)) => genOpTreeNLit(opTpe, t)
+        case (CalcLit("AcceptNonLiteral"), CalcUnknown(t)) => genOpTreeUnknown(opTpe, t)
         case _ => extractionFailed(opTpe)
       }
 
