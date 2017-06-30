@@ -1,7 +1,5 @@
 package singleton.ops.impl
 import macrocompat.bundle
-import shapeless.Nat
-
 import scala.reflect.macros.whitebox
 
 @bundle
@@ -192,33 +190,68 @@ trait GeneralMacros {
 
   def constantTypeOf[T](t: T) : Type = c.internal.constantType(Constant(t))
 
-  def constantTypeAndValueOf[T](t: T)(implicit annotatedSym : TypeSymbol): (Type, Tree, TypeName, Type, Tree) ={
-    val outWideLiteral = Literal(Constant(t))
-    val (outWideType, outTypeName) = t match {
-      case tt : Nat => (typeOf[Nat], TypeName("OutNat"))
-      case tt : Char => (typeOf[Char], TypeName("OutChar"))
-      case tt : Int => (typeOf[Int], TypeName("OutInt"))
-      case tt : Long => (typeOf[Long], TypeName("OutLong"))
-      case tt : Float => (typeOf[Float], TypeName("OutFloat"))
-      case tt : Double => (typeOf[Double], TypeName("OutDouble"))
-      case tt : String => (typeOf[String], TypeName("OutString"))
-      case tt : Boolean => (typeOf[Boolean], TypeName("OutBoolean"))
+  def runtimeTypeOf[T](t : T)(implicit annotatedSym : TypeSymbol) : Type = {
+    t match {
+      case tt : Char => typeOf[Char]
+      case tt : Int => typeOf[Int]
+      case tt : Long => typeOf[Long]
+      case tt : Float => typeOf[Float]
+      case tt : Double => typeOf[Double]
+      case tt : String => typeOf[String]
+      case tt : Boolean => typeOf[Boolean]
       case _ => abort(s"Unsupported type $t")
     }
-    (outWideType, outWideLiteral, outTypeName, constantTypeOf(t), constantTreeOf(t))
+  }
+  def genOpTreeLit[T](opTpe : Type, t: T)(implicit annotatedSym : TypeSymbol) : Tree = {
+    val outWideLiteral = Literal(Constant(t))
+    val outWideTpe = runtimeTypeOf(t)
+    val outTypeName = TypeName("Out" + outWideTpe.typeSymbol.name.toString)
+    val outTpe = constantTypeOf(t)
+    val outTree = constantTreeOf(t)
+    q"""
+      new $opTpe {
+        type OutWide = $outWideTpe
+        type Out = $outTpe
+        type Value = $outTpe
+        type $outTypeName = $outTpe
+        final val value: $outTpe = $outTree
+        final val isLiteral = true
+        final val valueWide: $outWideTpe = $outWideLiteral
+      }
+      """
   }
 
-  def constantTypeAndValueOfNat(t: Int): (Type, Tree, TypeName, Type, Tree) ={
-    val outWideType = typeOf[Int]
+  def genOpTreeNat(opTpe : Type, t: Int) : Tree = {
+    val outWideTpe = typeOf[Int]
     val outWideLiteral = Literal(Constant(t))
     val outTypeName = TypeName("OutNat")
-    (outWideType, outWideLiteral, outTypeName, mkNatTpe(t), q"new ${mkNatTpt(t)}")
+    val outTpe = mkNatTpe(t)
+    val outTree = q"new ${mkNatTpt(t)}"
+    q"""
+      new $opTpe {
+        type OutWide = $outWideTpe
+        type Out = $outTpe
+        type Value = $outTpe
+        type $outTypeName = $outTpe
+        final val value: $outTpe = $outTree
+        final val isLiteral = true
+        final val valueWide: $outWideTpe = $outWideLiteral
+      }
+      """
   }
 
-  def typeAndValueOfNLit[T](calc : CalcNLit[T])(implicit wtt : c.TypeTag[Option[T]]) :
-  (Type, Tree, TypeName, Type, Tree) ={
-    val retType = typeOf[Option[T]]
-    (retType, q"None", TypeName("IgnoreMe"), retType, q"None")
+  def genOpTreeNLit[T](opTpe : Type, calc : CalcNLit[T])(implicit tt1 : c.TypeTag[T], annotatedSym : TypeSymbol) : Tree = {
+    val outTpe = runtimeTypeOf(calc.t)
+    q"""
+      new $opTpe {
+        type OutWide = Option[$outTpe]
+        type Out = $outTpe
+        type Value = Option[$outTpe]
+        final val value: Option[$outTpe] = None
+        final val isLiteral = false
+        final val valueWide: Option[$outTpe] = None
+      }
+      """
   }
 
   def extractionFailed(tpe: Type)(implicit annotatedSym : TypeSymbol) = {
@@ -236,11 +269,11 @@ trait GeneralMacros {
 
   def extractValueFromOpTree(opTree : c.Tree)(implicit annotatedSym : TypeSymbol) : Option[Constant] = {
     def outFindCond(elem : c.Tree) : Boolean = elem match {
-      case q"val value : $typeTree = $valueTree" => true
+      case q"final val value : $typeTree = $valueTree" => true
       case _ => false
     }
     def getOut(opClsBlk : List[c.Tree]) : Option[Constant] = opClsBlk.find(outFindCond) match {
-      case Some(q"val value : $typeTree = $valueTree") =>
+      case Some(q"final val value : $typeTree = $valueTree") =>
         valueTree match {
           case Literal(const) => Some(const)
           case _ => None
@@ -762,26 +795,14 @@ trait GeneralMacros {
     def usingFuncName : Tree = {
       implicit val annotatedSym : TypeSymbol = symbolOf[OpMacro[_,_,_,_]]
       val funcName = extractSingletonValue(nTpe)
-      val aValue = extractSingletonValue(opTpe)
+      val opResult = extractSingletonValue(opTpe)
 
-      val (outWideTpe, outWideLiteral, outTypeName, outTpe, outTree) = (funcName, aValue) match {
-        case (CalcLit("ToNat"), CalcLit(t : Int)) => constantTypeAndValueOfNat(t)
-        case (CalcLit(s : String), CalcLit(t)) =>  constantTypeAndValueOf(t)
-        case (CalcLit("AcceptNonLiteral"), CalcNLit(t)) => typeAndValueOfNLit(CalcNLit(t))
+      val genTree = (funcName, opResult) match {
+        case (CalcLit("ToNat"), CalcLit(t : Int)) => genOpTreeNat(opTpe, t)
+        case (CalcLit(s : String), CalcLit(t)) =>  genOpTreeLit(opTpe, t)
+        case (CalcLit("AcceptNonLiteral"), CalcNLit(t)) => genOpTreeNLit(opTpe, CalcNLit(t))
         case _ => extractionFailed(opTpe)
       }
-
-      val genTree = q"""
-      new $opTpe {
-        type OutWide = $outWideTpe
-        type Out = $outTpe
-        type Value = $outTpe
-        type $outTypeName = $outTpe
-        val value: $outTpe = $outTree
-        final val isLiteral = true
-        val valueWide: $outWideTpe = $outWideLiteral
-      }
-      """
 
 //      print(genTree)
       genTree
