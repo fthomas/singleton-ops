@@ -5,6 +5,7 @@ import shapeless.Nat
 trait Op extends Serializable {
   type Out
   type OutWide
+  type Value
   type OutNat <: Nat
   type OutChar <: Char with Singleton
   type OutInt <: Int with Singleton
@@ -13,17 +14,18 @@ trait Op extends Serializable {
   type OutDouble <: Double with Singleton
   type OutString <: String with Singleton
   type OutBoolean <: Boolean with Singleton
-  val value: Out {}
+  val value: Value
+  val isLiteral : Boolean
   val valueWide: OutWide
 }
 
 trait OpGen[O <: Op] {type Out; val value : Out}
 object OpGen {
   type Aux[O <: Op, Ret_Out] = OpGen[O] {type Out = Ret_Out}
-  implicit def impl[O <: Op](implicit o: O) : Aux[O, o.Out] = new OpGen[O] {type Out = o.Out; val value = o.value}
+  implicit def impl[O <: Op](implicit o: O) : Aux[O, o.Out] = new OpGen[O] {type Out = o.Out; val value = o.value.asInstanceOf[o.Out]}
 }
 
-trait OpCast[T, O <: Op] {type Out <: T; val value : Out}
+trait OpCast[T, O <: Op] {type Out <: T; type Value = Out; val value : Value}
 
 
 @scala.annotation.implicitNotFound(msg = "Unable to prove type argument is a Nat.")

@@ -775,8 +775,10 @@ trait GeneralMacros {
       new $opTpe {
         type OutWide = $outWideTpe
         type Out = $outTpe
+        type Value = $outTpe
         type $outTypeName = $outTpe
         val value: $outTpe = $outTree
+        final val isLiteral = true
         val valueWide: $outWideTpe = $outWideLiteral
       }
       """
