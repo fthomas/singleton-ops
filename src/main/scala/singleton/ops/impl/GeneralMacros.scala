@@ -80,9 +80,7 @@ trait GeneralMacros {
     */
   object Const {
     ////////////////////////////////////////////////////////////////////////
-    // For Shapeless Nat
-    // -----------------
-    // Calculates the integer value of Nat
+    // Calculates the integer value of Shapeless Nat
     ////////////////////////////////////////////////////////////////////////
     def calcNat(tp: Type)(implicit annotatedSym : TypeSymbol): Int = {
       tp match {
