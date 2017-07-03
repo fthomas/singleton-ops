@@ -79,6 +79,16 @@ trait GeneralMacros {
     *  available known-at-compile-time values.
     */
   object Const {
+    def calcNat(tp: Type)(implicit annotatedSym : TypeSymbol): Int = {
+      tp match {
+        case TypeRef(_, sym, args) if sym == symbolOf[shapeless.Succ[_]] =>
+          calcNat(args.head) + 1
+        case TypeRef(_, sym, _) if sym == symbolOf[shapeless._0] =>
+          0
+        case _ =>
+          abort(s"Given Nat type is defective: $tp, raw: ${showRaw(tp)}")
+      }
+    }
     def unapply(tp: Type)(implicit annotatedSym : TypeSymbol): Option[Calc] = {
       val g = c.universe.asInstanceOf[SymbolTable]
       implicit def fixSymbolOps(sym: Symbol): g.Symbol = sym.asInstanceOf[g.Symbol]
@@ -106,14 +116,8 @@ trait GeneralMacros {
         ////////////////////////////////////////////////////////////////////////
         // For Shapeless Nat
         ////////////////////////////////////////////////////////////////////////
-        case TypeRef(_, sym, args) if sym == symbolOf[shapeless.Succ[_]] =>
-          val next = unapply(args.head)
-          next match {
-            case Some(CalcLit(t: Int)) => Some(CalcLit(t + 1))
-            case _ => None
-          }
-        case TypeRef(_, sym, _) if sym == symbolOf[shapeless._0] =>
-          Some(CalcLit(0))
+        case TypeRef(_, sym, args) if sym == symbolOf[shapeless.Succ[_]] || sym == symbolOf[shapeless._0] =>
+          Some(CalcLit(calcNat(tp)))
         ////////////////////////////////////////////////////////////////////////
 
         ////////////////////////////////////////////////////////////////////////
@@ -838,12 +842,11 @@ trait GeneralMacros {
         case (CalcLit("ToNat"), CalcLit(t : Int)) => genOpTreeNat(opTpe, t)
         case (CalcLit(s : String), CalcLit(t)) =>  genOpTreeLit(opTpe, t)
         case (_, CalcNLit(t : Tree)) =>
-//          val msg = c.eval(c.Expr(c.typecheck(
-//            q"""
-//               "Boom shagaboom"
-//             """))).asInstanceOf[String]
-//          abort(msg)
-          genOpTreeWitness(opTpe, t)
+          val msg = c.eval(c.Expr(c.typecheck(
+            q"""
+               1.0
+             """))).asInstanceOf[Double]
+          abort(math.sin(msg).toString)
         case (CalcLit("AcceptNonLiteral"), CalcNLit(t)) => genOpTreeNLit(opTpe, t)
         case (CalcLit("AcceptNonLiteral"), CalcUnknown(t)) => genOpTreeUnknown(opTpe, t)
         case _ => extractionFailed(opTpe)
