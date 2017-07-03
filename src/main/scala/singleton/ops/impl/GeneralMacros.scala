@@ -65,6 +65,8 @@ trait GeneralMacros {
   object CalcNLDouble extends CalcNLit(1.0)
   object CalcNLString extends CalcNLit("1")
   object CalcNLBoolean extends CalcNLit(true)
+  case class CalcLitTree(t: Tree) extends Calc {type T0 = Tree}
+  case class CalcNLitTree(t: Tree) extends Calc {type T0 = Tree}
   case class CalcUnknown(t: Type) extends Calc {type T0 = Type}
 
 //  case class Calc(const : Constant)
@@ -82,17 +84,86 @@ trait GeneralMacros {
     ////////////////////////////////////////////////////////////////////////
     // Calculates the integer value of Shapeless Nat
     ////////////////////////////////////////////////////////////////////////
-    def calcNat(tp: Type)(implicit annotatedSym : TypeSymbol): Int = {
+    def calcNat(tp: Type)(implicit annotatedSym : TypeSymbol): CalcLit[Int] = {
       tp match {
         case TypeRef(_, sym, args) if sym == symbolOf[shapeless.Succ[_]] =>
-          calcNat(args.head) + 1
+          CalcLit(calcNat(args.head).t + 1)
         case TypeRef(_, sym, _) if sym == symbolOf[shapeless._0] =>
-          0
+          CalcLit(0)
         case _ =>
           abort(s"Given Nat type is defective: $tp, raw: ${showRaw(tp)}")
       }
     }
     ////////////////////////////////////////////////////////////////////////
+
+    def unapplyOpArg(tp: Type)(implicit annotatedSym : TypeSymbol): Option[Calc] = {
+      unapply(tp) match {
+        case Some(CalcLit(t)) =>
+          Some(CalcLitTree(Literal(Constant(t))))
+        case Some(CalcNLit(t)) =>
+          Some(CalcNLitTree(q"_root_.shapeless.Witness[$tp].value"))
+        case Some(CalcLitTree(t)) =>
+          Some(CalcLitTree(t))
+        case Some(CalcNLitTree(t)) =>
+          Some(CalcNLitTree(t))
+        case _ =>
+          Some(CalcUnknown(tp))
+      }
+    }
+
+    def unapplyOp(tp: Type)(implicit annotatedSym : TypeSymbol): Option[Calc] = {
+      val args = tp.typeArgs
+      val funcName = unapply(args.head)
+
+      //If function is set/get variable we keep the original string,
+      //otherwise we get the variable's value
+      val aValue = unapply(args(1))
+      val retVal = (funcName, aValue) match {
+        case (Some(CalcLit("NL")), _) => //Getting non-literal type
+          Some(CalcNLit(q"_root_.shapeless.Witness[${args(1)}].value"))
+        case (Some(CalcLit("AcceptNonLiteral")), _) => //Getting non-literal type
+          aValue match {
+            case None => Some(CalcUnknown(args(1)))
+            case _ => aValue
+          }
+        case (Some(CalcLit("IsNonLiteral")), _) => //Looking for non literals
+          aValue match {
+            case None => Some(CalcLit(true)) //Unknown value
+            case Some(CalcNLit(t)) => Some(CalcLit(true)) //non-literal type (e.g., Int, Long,...)
+            case _ => Some(CalcLit(false))
+          }
+        case (Some(CalcLit("ITE")), Some(CalcLit(cond : Boolean))) => //Special control case: ITE (If-Then-Else)
+          if (cond)
+            unapply(args(2)) //true (then) part of the IF
+          else
+            unapply(args(3)) //false (else) part of the IF
+        case (Some(CalcLit("ITE")), Some(CalcNLBoolean)) => //Non-literal condition will return non-literal type
+          val bValue = unapply(args(2)) //used to take the type from the true clause of the If
+          bValue match {
+            case Some(Calc(t)) => Some(CalcNLit(t)) //forcing non-literal type
+            case _ => None
+          }
+        case _ => //regular cases
+          val bValue = unapply(args(2))
+          val cValue = unapply(args(3))
+          (funcName, aValue, bValue, cValue) match {
+            case (Some(CalcLit("Require")), Some(CalcLit(a)), Some(CalcLit(b)), None) =>
+              implicit val annotatedSym : TypeSymbol = args(3).typeSymbol.asType
+              Some(opCalc("Require", a, b, c))
+            case (Some(CalcLit(f : String)), Some(Calc(a)), Some(Calc(b)), Some(Calc(c))) =>
+              val calc = opCalc(f, a, b, c)
+              (aValue, bValue, cValue) match {
+                //All parameters are literals, so the result is a literal
+                case (Some(CalcLit(a0)), Some(CalcLit(b0)), Some(CalcLit(c0))) => Some(calc)
+                //One or more of the paramters is non-literal, so the result is non-literal
+                case _ => Some(CalcNLit(calc.t))
+              }
+            case _ => None
+          }
+      }
+      retVal
+    }
+
     def unapply(tp: Type)(implicit annotatedSym : TypeSymbol): Option[Calc] = {
       val g = c.universe.asInstanceOf[SymbolTable]
       implicit def fixSymbolOps(sym: Symbol): g.Symbol = sym.asInstanceOf[g.Symbol]
@@ -121,63 +192,14 @@ trait GeneralMacros {
         // For Shapeless Nat
         ////////////////////////////////////////////////////////////////////////
         case TypeRef(_, sym, args) if sym == symbolOf[shapeless.Succ[_]] || sym == symbolOf[shapeless._0] =>
-          Some(CalcLit(calcNat(tp)))
+          Some(calcNat(tp))
         ////////////////////////////////////////////////////////////////////////
 
         ////////////////////////////////////////////////////////////////////////
         // Operational Function
         ////////////////////////////////////////////////////////////////////////
         case TypeRef(_, sym, args) if sym == symbolOf[OpMacro[_,_,_,_]] =>
-          val funcName = unapply(args.head)
-
-          //If function is set/get variable we keep the original string,
-          //otherwise we get the variable's value
-          val aValue = unapply(args(1))
-          val retVal = (funcName, aValue) match {
-            case (Some(CalcLit("NL")), _) => //Getting non-literal type
-              Some(CalcNLit(q"_root_.shapeless.Witness[${args(1)}].value"))
-            case (Some(CalcLit("AcceptNonLiteral")), _) => //Getting non-literal type
-              aValue match {
-                case None => Some(CalcUnknown(args(1)))
-                case _ => aValue
-              }
-            case (Some(CalcLit("IsNonLiteral")), _) => //Looking for non literals
-              aValue match {
-                case None => Some(CalcLit(true)) //Unknown value
-                case Some(CalcNLit(t)) => Some(CalcLit(true)) //non-literal type (e.g., Int, Long,...)
-                case _ => Some(CalcLit(false))
-              }
-            case (Some(CalcLit("ITE")), Some(CalcLit(cond : Boolean))) => //Special control case: ITE (If-Then-Else)
-              if (cond)
-                unapply(args(2)) //true (then) part of the IF
-              else
-                unapply(args(3)) //false (else) part of the IF
-            case (Some(CalcLit("ITE")), Some(CalcNLBoolean)) => //Non-literal condition will return non-literal type
-              val bValue = unapply(args(2)) //used to take the type from the true clause of the If
-              bValue match {
-                case Some(Calc(t)) => Some(CalcNLit(t)) //forcing non-literal type
-                case _ => None
-              }
-            case _ => //regular cases
-              val bValue = unapply(args(2))
-              val cValue = unapply(args(3))
-              (funcName, aValue, bValue, cValue) match {
-                case (Some(CalcLit("Require")), Some(CalcLit(a)), Some(CalcLit(b)), None) =>
-                  implicit val annotatedSym : TypeSymbol = args(3).typeSymbol.asType
-                  Some(opCalc("Require", a, b, c))
-                case (Some(CalcLit(f : String)), Some(Calc(a)), Some(Calc(b)), Some(Calc(c))) =>
-                  val calc = opCalc(f, a, b, c)
-                  (aValue, bValue, cValue) match {
-                    //All parameters are literals, so the result is a literal
-                    case (Some(CalcLit(a0)), Some(CalcLit(b0)), Some(CalcLit(c0))) => Some(calc)
-                    //One or more of the paramters is non-literal, so the result is non-literal
-                    case _ => Some(CalcNLit(calc.t))
-                  }
-                case _ => None
-              }
-          }
-          retVal
-
+          unapplyOp(tp)
         ////////////////////////////////////////////////////////////////////////
 
         case TypeRef(_, sym, _) if sym.isAliasType => unapply(tp.dealias)
