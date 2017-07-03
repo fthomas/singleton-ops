@@ -1,7 +1,8 @@
 package singleton.ops.impl
 import macrocompat.bundle
-import scala.reflect.macros.whitebox
 
+import scala.reflect.macros.whitebox
+import scala.reflect.macros.TypecheckException
 @bundle
 trait GeneralMacros {
   val c: whitebox.Context
@@ -65,8 +66,13 @@ trait GeneralMacros {
   object CalcNLDouble extends CalcNLit(1.0)
   object CalcNLString extends CalcNLit("1")
   object CalcNLBoolean extends CalcNLit(true)
-  case class CalcLitTree(t: Tree) extends Calc {type T0 = Tree}
-  case class CalcNLitTree(t: Tree) extends Calc {type T0 = Tree}
+  sealed trait CalcTree extends Calc {type T0 = Tree}
+  object CalcTree {
+    def apply(_t : Tree) = new CalcTree{val t = _t}
+    def unapply(arg: CalcTree): Option[Tree] = Some(arg.t)
+  }
+  case class CalcLitTree(t: Tree) extends CalcTree
+  case class CalcNLitTree(t: Tree) extends CalcTree
   case class CalcUnknown(t: Type) extends Calc {type T0 = Type}
 
 //  case class Calc(const : Constant)
@@ -99,7 +105,7 @@ trait GeneralMacros {
     def unapplyOpArg(tp: Type)(implicit annotatedSym : TypeSymbol): Option[Calc] = {
       unapply(tp) match {
         case Some(CalcLit(t)) =>
-          Some(CalcLit(t))//Some(CalcLitTree(Literal(Constant(t))))
+          Some(CalcLitTree(Literal(Constant(t))))
         case Some(CalcNLit(t)) =>
           Some(CalcNLitTree(q"_root_.shapeless.Witness[$tp].value"))
         case Some(CalcLitTree(t)) =>
@@ -113,7 +119,10 @@ trait GeneralMacros {
 
     def unapplyOp(tp: Type)(implicit annotatedSym : TypeSymbol): Option[Calc] = {
       val args = tp.typeArgs
-      val funcName = unapply(args.head)
+      val funcName = unapply(args.head) match {
+        case (Some(CalcLit(f : String))) => f
+        case _ => abort(s"Unexpected bad function name: ${args.head}")
+      }
 
       //If function is set/get variable we keep the original string,
       //otherwise we get the variable's value
@@ -121,23 +130,23 @@ trait GeneralMacros {
       val retVal = (funcName, aValue) match {
 //        case (Some(CalcLit("NL")), _) => //Getting non-literal type
 //          Some(CalcNLit(q"_root_.shapeless.Witness[${args(1)}].value"))
-        case (Some(CalcLit("AcceptNonLiteral")), _) => //Getting non-literal type
+        case ("AcceptNonLiteral", _) => //Getting non-literal type
           aValue match {
             case None => Some(CalcUnknown(args(1)))
             case _ => aValue
           }
-        case (Some(CalcLit("IsNonLiteral")), _) => //Looking for non literals
+        case ("IsNonLiteral", _) => //Looking for non literals
           aValue match {
             case None => Some(CalcLit(true)) //Unknown value
             case Some(CalcNLit(t)) => Some(CalcLit(true)) //non-literal type (e.g., Int, Long,...)
             case _ => Some(CalcLit(false))
           }
-        case (Some(CalcLit("ITE")), Some(CalcLit(cond : Boolean))) => //Special control case: ITE (If-Then-Else)
+        case ("ITE", Some(CalcLit(cond : Boolean))) => //Special control case: ITE (If-Then-Else)
           if (cond)
             unapplyOpArg(args(2)) //true (then) part of the IF
           else
             unapplyOpArg(args(3)) //false (else) part of the IF
-        case (Some(CalcLit("ITE")), Some(CalcNLBoolean)) => //Non-literal condition will return non-literal type
+        case ("ITE", Some(CalcNLBoolean)) => //Non-literal condition will return non-literal type
           val bValue = unapplyOpArg(args(2)) //used to take the type from the true clause of the If
           bValue match {
             case Some(Calc(t)) => Some(CalcNLit(t)) //forcing non-literal type
@@ -146,20 +155,12 @@ trait GeneralMacros {
         case _ => //regular cases
           val bValue = unapplyOpArg(args(2))
           val cValue = unapplyOpArg(args(3))
-          (funcName, aValue, bValue, cValue) match {
-            case (Some(CalcLit("Require")), Some(CalcLit(a)), Some(CalcLit(b)), None) =>
-              implicit val annotatedSym : TypeSymbol = args(3).typeSymbol.asType
-              Some(opCalc("Require", a, b, c))
-            case (Some(CalcLit(f : String)), Some(Calc(a)), Some(Calc(b)), Some(Calc(c))) =>
-              Some(opCalc(f, a, b, c))
-//              val calc = opCalc(f, a, b, c)
-//              (aValue, bValue, cValue) match {
-//                //All parameters are literals, so the result is a literal
-//                case (Some(CalcLit(a0)), Some(CalcLit(b0)), Some(CalcLit(c0))) => Some(calc)
-//                //One or more of the paramters is non-literal, so the result is non-literal
-//                case Some(CalcNLitTree(t)) => Some(CalcNLitTree(calc.t))
-//                case _ => None
-//              }
+          (aValue, bValue, cValue) match {
+//            case (Some(CalcLit("Require")), Some(CalcLit(a)), Some(CalcLit(b)), None) =>
+//              implicit val annotatedSym : TypeSymbol = args(3).typeSymbol.asType
+//              Some(opCalc("Require", a, b, c))
+            case (Some(a : CalcTree), Some(b: CalcTree), Some(c : CalcTree)) =>
+              Some(opCalc(funcName, a, b, c))
             case _ => None
           }
       }
@@ -357,8 +358,15 @@ trait GeneralMacros {
     }
   }
 
-  def evalTyped[T](expr: c.Expr[T]): T =
-    c.eval(c.Expr[T](c.untypecheck(expr.tree)))
+  def evalTyped[T](tree: Tree)(implicit annotatedSym : TypeSymbol): Constant = {
+    try {
+      Constant(c.eval(c.Expr(c.untypecheck(tree))))
+    } catch {
+      case e: TypecheckException =>
+        val msg = e.getMessage
+        abort(s"Unexpected error during type check.\nMessage: $msg\nType: $tree\nRaw: ${showRaw(tree)}" )
+    }
+  }
 
   ///////////////////////////////////////////////////////////////////////////////////////////
   // Three operands (Generic)
@@ -366,498 +374,542 @@ trait GeneralMacros {
   def materializeOpGen[F, N](implicit ev0: c.WeakTypeTag[F], evn: c.WeakTypeTag[N]): MaterializeOpAuxGen =
     new MaterializeOpAuxGen(weakTypeOf[F], weakTypeOf[N])
 
-  def opCalc[T1, T2, T3](funcName : String, aValue : T1, bValue : T2, cValue : T3)(implicit annotatedSym : TypeSymbol) : Calc = {
-    import scala.math._
-    val ret = (funcName, aValue, bValue, cValue) match {
-      case ("Id",         a: Char, _, _)              => CalcLit(a)
-      case ("Id",         a: Int, _, _)               => CalcLit(a)
-      case ("Id",         a: Long, _, _)              => CalcLit(a)
-      case ("Id",         a: Float, _, _)             => CalcLit(a)
-      case ("Id",         a: Double, _, _)            => CalcLit(a)
-      case ("Id",         a: String, _, _)            => CalcLit(a)
-      case ("Id",         a: Boolean, _, _)           => CalcLit(a)
-      case ("Id",         a: Tree, _, _)              => CalcNLitTree(a)
-
-      case ("ToNat",      a: Char, _, _)              => CalcLit(a.toInt)
-      case ("ToNat",      a: Int, _, _)               => CalcLit(a.toInt)
-      case ("ToNat",      a: Long, _, _)              => CalcLit(a.toInt)
-      case ("ToNat",      a: Float, _, _)             => CalcLit(a.toInt)
-      case ("ToNat",      a: Double, _, _)            => CalcLit(a.toInt)
-      case ("ToNat",      a: String, _, _)            => CalcLit(a.toInt)
-
-      case ("ToChar",     a: Char, _, _)              => CalcLit(a.toChar)
-      case ("ToChar",     a: Int, _, _)               => CalcLit(a.toChar)
-      case ("ToChar",     a: Long, _, _)              => CalcLit(a.toChar)
-      case ("ToChar",     a: Float, _, _)             => CalcLit(a.toChar)
-      case ("ToChar",     a: Double, _, _)            => CalcLit(a.toChar)
-
-      case ("ToInt",      a: Char, _, _)              => CalcLit(a.toInt)
-      case ("ToInt",      a: Int, _, _)               => CalcLit(a.toInt)
-      case ("ToInt",      a: Long, _, _)              => CalcLit(a.toInt)
-      case ("ToInt",      a: Float, _, _)             => CalcLit(a.toInt)
-      case ("ToInt",      a: Double, _, _)            => CalcLit(a.toInt)
-      case ("ToInt",      a: String, _, _)            => CalcLit(a.toInt)
-
-      case ("ToLong",     a: Char, _, _)              => CalcLit(a.toLong)
-      case ("ToLong",     a: Int, _, _)               => CalcLit(a.toLong)
-      case ("ToLong",     a: Long, _, _)              => CalcLit(a.toLong)
-      case ("ToLong",     a: Float, _, _)             => CalcLit(a.toLong)
-      case ("ToLong",     a: Double, _, _)            => CalcLit(a.toLong)
-      case ("ToLong",     a: String, _, _)            => CalcLit(a.toLong)
-
-      case ("ToFloat",    a: Char, _, _)              => CalcLit(a.toFloat)
-      case ("ToFloat",    a: Int, _, _)               => CalcLit(a.toFloat)
-      case ("ToFloat",    a: Long, _, _)              => CalcLit(a.toFloat)
-      case ("ToFloat",    a: Float, _, _)             => CalcLit(a.toFloat)
-      case ("ToFloat",    a: Double, _, _)            => CalcLit(a.toFloat)
-      case ("ToFloat",    a: String, _, _)            => CalcLit(a.toFloat)
-
-      case ("ToDouble",   a: Char, _, _)              => CalcLit(a.toDouble)
-      case ("ToDouble",   a: Int, _, _)               => CalcLit(a.toDouble)
-      case ("ToDouble",   a: Long, _, _)              => CalcLit(a.toDouble)
-      case ("ToDouble",   a: Float, _, _)             => CalcLit(a.toDouble)
-      case ("ToDouble",   a: Double, _, _)            => CalcLit(a.toDouble)
-      case ("ToDouble",   a: String, _, _)            => CalcLit(a.toDouble)
-
-      case ("ToString",   a: Char, _, _)              => CalcLit(a.toString)
-      case ("ToString",   a: Int, _, _)               => CalcLit(a.toString)
-      case ("ToString",   a: Long, _, _)              => CalcLit(a.toString)
-      case ("ToString",   a: Float, _, _)             => CalcLit(a.toString)
-      case ("ToString",   a: Double, _, _)            => CalcLit(a.toString)
-      case ("ToString",   a: String, _, _)            => CalcLit(a.toString)
-      case ("ToString",   a: Boolean, _, _)           => CalcLit(a.toString)
-
-      case ("IsNat",      a: Char, _, _)              => CalcLit(false)
-      case ("IsNat",      a: Int, _, _)               => CalcLit(a >= 0)
-      case ("IsNat",      a: Long, _, _)              => CalcLit(false)
-      case ("IsNat",      a: Float, _, _)             => CalcLit(false)
-      case ("IsNat",      a: Double, _, _)            => CalcLit(false)
-      case ("IsNat",      a: String, _, _)            => CalcLit(false)
-      case ("IsNat",      a: Boolean, _, _)           => CalcLit(false)
-
-      case ("IsChar",     a: Char, _, _)              => CalcLit(true)
-      case ("IsChar",     a: Int, _, _)               => CalcLit(false)
-      case ("IsChar",     a: Long, _, _)              => CalcLit(false)
-      case ("IsChar",     a: Float, _, _)             => CalcLit(false)
-      case ("IsChar",     a: Double, _, _)            => CalcLit(false)
-      case ("IsChar",     a: String, _, _)            => CalcLit(false)
-      case ("IsChar",     a: Boolean, _, _)           => CalcLit(false)
-
-      case ("IsInt",      a: Char, _, _)              => CalcLit(false)
-      case ("IsInt",      a: Int, _, _)               => CalcLit(true)
-      case ("IsInt",      a: Long, _, _)              => CalcLit(false)
-      case ("IsInt",      a: Float, _, _)             => CalcLit(false)
-      case ("IsInt",      a: Double, _, _)            => CalcLit(false)
-      case ("IsInt",      a: String, _, _)            => CalcLit(false)
-      case ("IsInt",      a: Boolean, _, _)           => CalcLit(false)
-
-      case ("IsLong",     a: Char, _, _)              => CalcLit(false)
-      case ("IsLong",     a: Int, _, _)               => CalcLit(false)
-      case ("IsLong",     a: Long, _, _)              => CalcLit(true)
-      case ("IsLong",     a: Float, _, _)             => CalcLit(false)
-      case ("IsLong",     a: Double, _, _)            => CalcLit(false)
-      case ("IsLong",     a: String, _, _)            => CalcLit(false)
-      case ("IsLong",     a: Boolean, _, _)           => CalcLit(false)
-
-      case ("IsFloat",    a: Char, _, _)              => CalcLit(false)
-      case ("IsFloat",    a: Int, _, _)               => CalcLit(false)
-      case ("IsFloat",    a: Long, _, _)              => CalcLit(false)
-      case ("IsFloat",    a: Float, _, _)             => CalcLit(true)
-      case ("IsFloat",    a: Double, _, _)            => CalcLit(false)
-      case ("IsFloat",    a: String, _, _)            => CalcLit(false)
-      case ("IsFloat",    a: Boolean, _, _)           => CalcLit(false)
-
-      case ("IsDouble",   a: Char, _, _)              => CalcLit(false)
-      case ("IsDouble",   a: Int, _, _)               => CalcLit(false)
-      case ("IsDouble",   a: Long, _, _)              => CalcLit(false)
-      case ("IsDouble",   a: Float, _, _)             => CalcLit(false)
-      case ("IsDouble",   a: Double, _, _)            => CalcLit(true)
-      case ("IsDouble",   a: String, _, _)            => CalcLit(false)
-      case ("IsDouble",   a: Boolean, _, _)           => CalcLit(false)
-
-      case ("IsString",   a: Char, _, _)              => CalcLit(false)
-      case ("IsString",   a: Int, _, _)               => CalcLit(false)
-      case ("IsString",   a: Long, _, _)              => CalcLit(false)
-      case ("IsString",   a: Float, _, _)             => CalcLit(false)
-      case ("IsString",   a: Double, _, _)            => CalcLit(false)
-      case ("IsString",   a: String, _, _)            => CalcLit(true)
-      case ("IsString",   a: Boolean, _, _)           => CalcLit(false)
-
-      case ("IsBoolean",  a: Char, _, _)              => CalcLit(false)
-      case ("IsBoolean",  a: Int, _, _)               => CalcLit(false)
-      case ("IsBoolean",  a: Long, _, _)              => CalcLit(false)
-      case ("IsBoolean",  a: Float, _, _)             => CalcLit(false)
-      case ("IsBoolean",  a: Double, _, _)            => CalcLit(false)
-      case ("IsBoolean",  a: String, _, _)            => CalcLit(false)
-      case ("IsBoolean",  a: Boolean, _, _)           => CalcLit(true)
-
-      case ("Negate",     a: Char, _, _)              => CalcLit(-a)
-      case ("Negate",     a: Int, _, _)               => CalcLit(-a)
-      case ("Negate",     a: Long, _, _)              => CalcLit(-a)
-      case ("Negate",     a: Float, _, _)             => CalcLit(-a)
-      case ("Negate",     a: Double, _, _)            => CalcLit(-a)
-
-      case ("Abs",        a: Int, _, _)               => CalcLit(abs(a))
-      case ("Abs",        a: Long, _, _)              => CalcLit(abs(a))
-      case ("Abs",        a: Float, _, _)             => CalcLit(abs(a))
-      case ("Abs",        a: Double, _, _)            => CalcLit(abs(a))
-
-      case ("NumberOfLeadingZeros", a: Int, _, _)     => CalcLit(java.lang.Integer.numberOfLeadingZeros(a))
-      case ("NumberOfLeadingZeros", a: Long, _, _)    => CalcLit(java.lang.Long.numberOfLeadingZeros(a))
-
-      case ("Floor",      a: Float, _, _)             => CalcLit(floor(a.toDouble))
-      case ("Floor",      a: Double, _, _)            => CalcLit(floor(a))
-
-      case ("Ceil",       a: Float, _, _)             => CalcLit(ceil(a.toDouble))
-      case ("Ceil",       a: Double, _, _)            => CalcLit(ceil(a))
-
-      case ("Round",      a: Float, _, _)             => CalcLit(round(a))
-      case ("Round",      a: Double, _, _)            => CalcLit(round(a))
-
-      case ("Sin",        a: Float, _, _)             => CalcLit(sin(a.toDouble))
-      case ("Sin",        a: Double, _, _)            => CalcLit(sin(a))
-
-      case ("Cos",        a: Float, _, _)             => CalcLit(cos(a.toDouble))
-      case ("Cos",        a: Double, _, _)            => CalcLit(cos(a))
-
-      case ("Tan",        a: Float, _, _)             => CalcLit(tan(a.toDouble))
-      case ("Tan",        a: Double, _, _)            => CalcLit(tan(a))
-
-      case ("Sqrt",       a: Float, _, _)             => CalcLit(sqrt(a.toDouble))
-      case ("Sqrt",       a: Double, _, _)            => CalcLit(sqrt(a))
-
-      case ("Log",        a: Float, _, _)             => CalcLit(log(a.toDouble))
-      case ("Log",        a: Double, _, _)            => CalcLit(log(a))
-
-      case ("Log10",      a: Float, _, _)             => CalcLit(log10(a.toDouble))
-      case ("Log10",      a: Double, _, _)            => CalcLit(log10(a))
-
-      case ("Reverse",    a: String, _, _)            => CalcLit(a.reverse)
-      case ("!",          a: Boolean, _, _)           => CalcLit(!a)
-      case ("Require",    a: Boolean, b: String, _)   =>
-        if (!a)
-          abort(b)
-        else
-          CalcLit(a)
-      case ("==>",        _,          b,          _)  => CalcLit(b)
-
-      case ("+",          a: Char,    b: Char,    _)  => CalcLit(a + b)
-      case ("+",          a: Char,    b: Int,     _)  => CalcLit(a + b)
-      case ("+",          a: Char,    b: Long,    _)  => CalcLit(a + b)
-      case ("+",          a: Char,    b: Float,   _)  => CalcLit(a + b)
-      case ("+",          a: Char,    b: Double,  _)  => CalcLit(a + b)
-      case ("+",          a: Int,     b: Char,    _)  => CalcLit(a + b)
-      case ("+",          a: Int,     b: Int,     _)  => CalcLit(a + b)
-      case ("+",          a: Int,     b: Long,    _)  => CalcLit(a + b)
-      case ("+",          a: Int,     b: Float,   _)  => CalcLit(a + b)
-      case ("+",          a: Int,     b: Double,  _)  => CalcLit(a + b)
-      case ("+",          a: Long,    b: Char,    _)  => CalcLit(a + b)
-      case ("+",          a: Long,    b: Int,     _)  => CalcLit(a + b)
-      case ("+",          a: Long,    b: Long,    _)  => CalcLit(a + b)
-      case ("+",          a: Long,    b: Float,   _)  => CalcLit(a + b)
-      case ("+",          a: Long,    b: Double,  _)  => CalcLit(a + b)
-      case ("+",          a: Float,   b: Char,    _)  => CalcLit(a + b)
-      case ("+",          a: Float,   b: Int,     _)  => CalcLit(a + b)
-      case ("+",          a: Float,   b: Long,    _)  => CalcLit(a + b)
-      case ("+",          a: Float,   b: Float,   _)  => CalcLit(a + b)
-      case ("+",          a: Float,   b: Double,  _)  => CalcLit(a + b)
-      case ("+",          a: Double,  b: Char,    _)  => CalcLit(a + b)
-      case ("+",          a: Double,  b: Int,     _)  => CalcLit(a + b)
-      case ("+",          a: Double,  b: Long,    _)  => CalcLit(a + b)
-      case ("+",          a: Double,  b: Float,   _)  => CalcLit(a + b)
-      case ("+",          a: Double,  b: Double,  _)  => CalcLit(a + b)
-      case ("+",          a: String,  b: String,  _)  => CalcLit(a + b) //Concat
-      case ("+",          a: Tree,    b: Int,     _)  => CalcNLitTree(q"$a + $b") //Concat
-
-      case ("-",          a: Char,    b: Char,    _)  => CalcLit(a - b)
-      case ("-",          a: Char,    b: Int,     _)  => CalcLit(a - b)
-      case ("-",          a: Char,    b: Long,    _)  => CalcLit(a - b)
-      case ("-",          a: Char,    b: Float,   _)  => CalcLit(a - b)
-      case ("-",          a: Char,    b: Double,  _)  => CalcLit(a - b)
-      case ("-",          a: Int,     b: Char,    _)  => CalcLit(a - b)
-      case ("-",          a: Int,     b: Int,     _)  => CalcLit(a - b)
-      case ("-",          a: Int,     b: Long,    _)  => CalcLit(a - b)
-      case ("-",          a: Int,     b: Float,   _)  => CalcLit(a - b)
-      case ("-",          a: Int,     b: Double,  _)  => CalcLit(a - b)
-      case ("-",          a: Long,    b: Char,    _)  => CalcLit(a - b)
-      case ("-",          a: Long,    b: Int,     _)  => CalcLit(a - b)
-      case ("-",          a: Long,    b: Long,    _)  => CalcLit(a - b)
-      case ("-",          a: Long,    b: Float,   _)  => CalcLit(a - b)
-      case ("-",          a: Long,    b: Double,  _)  => CalcLit(a - b)
-      case ("-",          a: Float,   b: Char,    _)  => CalcLit(a - b)
-      case ("-",          a: Float,   b: Int,     _)  => CalcLit(a - b)
-      case ("-",          a: Float,   b: Long,    _)  => CalcLit(a - b)
-      case ("-",          a: Float,   b: Float,   _)  => CalcLit(a - b)
-      case ("-",          a: Float,   b: Double,  _)  => CalcLit(a - b)
-      case ("-",          a: Double,  b: Char,    _)  => CalcLit(a - b)
-      case ("-",          a: Double,  b: Int,     _)  => CalcLit(a - b)
-      case ("-",          a: Double,  b: Long,    _)  => CalcLit(a - b)
-      case ("-",          a: Double,  b: Float,   _)  => CalcLit(a - b)
-      case ("-",          a: Double,  b: Double,  _)  => CalcLit(a - b)
-
-      case ("*",          a: Char,    b: Char,    _)  => CalcLit(a * b)
-      case ("*",          a: Char,    b: Int,     _)  => CalcLit(a * b)
-      case ("*",          a: Char,    b: Long,    _)  => CalcLit(a * b)
-      case ("*",          a: Char,    b: Float,   _)  => CalcLit(a * b)
-      case ("*",          a: Char,    b: Double,  _)  => CalcLit(a * b)
-      case ("*",          a: Int,     b: Char,    _)  => CalcLit(a * b)
-      case ("*",          a: Int,     b: Int,     _)  => CalcLit(a * b)
-      case ("*",          a: Int,     b: Long,    _)  => CalcLit(a * b)
-      case ("*",          a: Int,     b: Float,   _)  => CalcLit(a * b)
-      case ("*",          a: Int,     b: Double,  _)  => CalcLit(a * b)
-      case ("*",          a: Long,    b: Char,    _)  => CalcLit(a * b)
-      case ("*",          a: Long,    b: Int,     _)  => CalcLit(a * b)
-      case ("*",          a: Long,    b: Long,    _)  => CalcLit(a * b)
-      case ("*",          a: Long,    b: Float,   _)  => CalcLit(a * b)
-      case ("*",          a: Long,    b: Double,  _)  => CalcLit(a * b)
-      case ("*",          a: Float,   b: Char,    _)  => CalcLit(a * b)
-      case ("*",          a: Float,   b: Int,     _)  => CalcLit(a * b)
-      case ("*",          a: Float,   b: Long,    _)  => CalcLit(a * b)
-      case ("*",          a: Float,   b: Float,   _)  => CalcLit(a * b)
-      case ("*",          a: Float,   b: Double,  _)  => CalcLit(a * b)
-      case ("*",          a: Double,  b: Char,    _)  => CalcLit(a * b)
-      case ("*",          a: Double,  b: Int,     _)  => CalcLit(a * b)
-      case ("*",          a: Double,  b: Long,    _)  => CalcLit(a * b)
-      case ("*",          a: Double,  b: Float,   _)  => CalcLit(a * b)
-      case ("*",          a: Double,  b: Double,  _)  => CalcLit(a * b)
-
-      case ("/",          a: Char,    b: Char,    _)  => CalcLit(a / b)
-      case ("/",          a: Char,    b: Int,     _)  => CalcLit(a / b)
-      case ("/",          a: Char,    b: Long,    _)  => CalcLit(a / b)
-      case ("/",          a: Char,    b: Float,   _)  => CalcLit(a / b)
-      case ("/",          a: Char,    b: Double,  _)  => CalcLit(a / b)
-      case ("/",          a: Int,     b: Char,    _)  => CalcLit(a / b)
-      case ("/",          a: Int,     b: Int,     _)  => CalcLit(a / b)
-      case ("/",          a: Int,     b: Long,    _)  => CalcLit(a / b)
-      case ("/",          a: Int,     b: Float,   _)  => CalcLit(a / b)
-      case ("/",          a: Int,     b: Double,  _)  => CalcLit(a / b)
-      case ("/",          a: Long,    b: Char,    _)  => CalcLit(a / b)
-      case ("/",          a: Long,    b: Int,     _)  => CalcLit(a / b)
-      case ("/",          a: Long,    b: Long,    _)  => CalcLit(a / b)
-      case ("/",          a: Long,    b: Float,   _)  => CalcLit(a / b)
-      case ("/",          a: Long,    b: Double,  _)  => CalcLit(a / b)
-      case ("/",          a: Float,   b: Char,    _)  => CalcLit(a / b)
-      case ("/",          a: Float,   b: Int,     _)  => CalcLit(a / b)
-      case ("/",          a: Float,   b: Long,    _)  => CalcLit(a / b)
-      case ("/",          a: Float,   b: Float,   _)  => CalcLit(a / b)
-      case ("/",          a: Float,   b: Double,  _)  => CalcLit(a / b)
-      case ("/",          a: Double,  b: Char,    _)  => CalcLit(a / b)
-      case ("/",          a: Double,  b: Int,     _)  => CalcLit(a / b)
-      case ("/",          a: Double,  b: Long,    _)  => CalcLit(a / b)
-      case ("/",          a: Double,  b: Float,   _)  => CalcLit(a / b)
-      case ("/",          a: Double,  b: Double,  _)  => CalcLit(a / b)
-
-      case ("%",          a: Char,    b: Char,    _)  => CalcLit(a % b)
-      case ("%",          a: Char,    b: Int,     _)  => CalcLit(a % b)
-      case ("%",          a: Char,    b: Long,    _)  => CalcLit(a % b)
-      case ("%",          a: Char,    b: Float,   _)  => CalcLit(a % b)
-      case ("%",          a: Char,    b: Double,  _)  => CalcLit(a % b)
-      case ("%",          a: Int,     b: Char,    _)  => CalcLit(a % b)
-      case ("%",          a: Int,     b: Int,     _)  => CalcLit(a % b)
-      case ("%",          a: Int,     b: Long,    _)  => CalcLit(a % b)
-      case ("%",          a: Int,     b: Float,   _)  => CalcLit(a % b)
-      case ("%",          a: Int,     b: Double,  _)  => CalcLit(a % b)
-      case ("%",          a: Long,    b: Char,    _)  => CalcLit(a % b)
-      case ("%",          a: Long,    b: Int,     _)  => CalcLit(a % b)
-      case ("%",          a: Long,    b: Long,    _)  => CalcLit(a % b)
-      case ("%",          a: Long,    b: Float,   _)  => CalcLit(a % b)
-      case ("%",          a: Long,    b: Double,  _)  => CalcLit(a % b)
-      case ("%",          a: Float,   b: Char,    _)  => CalcLit(a % b)
-      case ("%",          a: Float,   b: Int,     _)  => CalcLit(a % b)
-      case ("%",          a: Float,   b: Long,    _)  => CalcLit(a % b)
-      case ("%",          a: Float,   b: Float,   _)  => CalcLit(a % b)
-      case ("%",          a: Float,   b: Double,  _)  => CalcLit(a % b)
-      case ("%",          a: Double,  b: Char,    _)  => CalcLit(a % b)
-      case ("%",          a: Double,  b: Int,     _)  => CalcLit(a % b)
-      case ("%",          a: Double,  b: Long,    _)  => CalcLit(a % b)
-      case ("%",          a: Double,  b: Float,   _)  => CalcLit(a % b)
-      case ("%",          a: Double,  b: Double,  _)  => CalcLit(a % b)
-
-      case ("Pow",        a: Float,   b: Float,   _)  => CalcLit(pow(a.toDouble,b.toDouble))
-      case ("Pow",        a: Float,   b: Double,  _)  => CalcLit(pow(a.toDouble,b.toDouble))
-      case ("Pow",        a: Double,  b: Float,   _)  => CalcLit(pow(a.toDouble,b.toDouble))
-      case ("Pow",        a: Double,  b: Double,  _)  => CalcLit(pow(a.toDouble,b.toDouble))
-
-      case ("==",         a: Char,    b: Char,    _)  => CalcLit(a == b)
-      case ("==",         a: Char,    b: Int,     _)  => CalcLit(a == b)
-      case ("==",         a: Char,    b: Long,    _)  => CalcLit(a == b)
-      case ("==",         a: Char,    b: Float,   _)  => CalcLit(a == b)
-      case ("==",         a: Char,    b: Double,  _)  => CalcLit(a == b)
-      case ("==",         a: Int,     b: Char,    _)  => CalcLit(a == b)
-      case ("==",         a: Int,     b: Int,     _)  => CalcLit(a == b)
-      case ("==",         a: Int,     b: Long,    _)  => CalcLit(a == b)
-      case ("==",         a: Int,     b: Float,   _)  => CalcLit(a == b)
-      case ("==",         a: Int,     b: Double,  _)  => CalcLit(a == b)
-      case ("==",         a: Long,    b: Char,    _)  => CalcLit(a == b)
-      case ("==",         a: Long,    b: Int,     _)  => CalcLit(a == b)
-      case ("==",         a: Long,    b: Long,    _)  => CalcLit(a == b)
-      case ("==",         a: Long,    b: Float,   _)  => CalcLit(a == b)
-      case ("==",         a: Long,    b: Double,  _)  => CalcLit(a == b)
-      case ("==",         a: Float,   b: Char,    _)  => CalcLit(a == b)
-      case ("==",         a: Float,   b: Int,     _)  => CalcLit(a == b)
-      case ("==",         a: Float,   b: Long,    _)  => CalcLit(a == b)
-      case ("==",         a: Float,   b: Float,   _)  => CalcLit(a == b)
-      case ("==",         a: Float,   b: Double,  _)  => CalcLit(a == b)
-      case ("==",         a: Double,  b: Char,    _)  => CalcLit(a == b)
-      case ("==",         a: Double,  b: Int,     _)  => CalcLit(a == b)
-      case ("==",         a: Double,  b: Long,    _)  => CalcLit(a == b)
-      case ("==",         a: Double,  b: Float,   _)  => CalcLit(a == b)
-      case ("==",         a: Double,  b: Double,  _)  => CalcLit(a == b)
-      case ("==",         a: String,  b: String,  _)  => CalcLit(a == b)
-      case ("==",         a: Boolean, b: Boolean, _)  => CalcLit(a == b)
-
-      case ("!=",         a: Char,    b: Char,    _)  => CalcLit(a != b)
-      case ("!=",         a: Char,    b: Int,     _)  => CalcLit(a != b)
-      case ("!=",         a: Char,    b: Long,    _)  => CalcLit(a != b)
-      case ("!=",         a: Char,    b: Float,   _)  => CalcLit(a != b)
-      case ("!=",         a: Char,    b: Double,  _)  => CalcLit(a != b)
-      case ("!=",         a: Int,     b: Char,    _)  => CalcLit(a != b)
-      case ("!=",         a: Int,     b: Int,     _)  => CalcLit(a != b)
-      case ("!=",         a: Int,     b: Long,    _)  => CalcLit(a != b)
-      case ("!=",         a: Int,     b: Float,   _)  => CalcLit(a != b)
-      case ("!=",         a: Int,     b: Double,  _)  => CalcLit(a != b)
-      case ("!=",         a: Long,    b: Char,    _)  => CalcLit(a != b)
-      case ("!=",         a: Long,    b: Int,     _)  => CalcLit(a != b)
-      case ("!=",         a: Long,    b: Long,    _)  => CalcLit(a != b)
-      case ("!=",         a: Long,    b: Float,   _)  => CalcLit(a != b)
-      case ("!=",         a: Long,    b: Double,  _)  => CalcLit(a != b)
-      case ("!=",         a: Float,   b: Char,    _)  => CalcLit(a != b)
-      case ("!=",         a: Float,   b: Int,     _)  => CalcLit(a != b)
-      case ("!=",         a: Float,   b: Long,    _)  => CalcLit(a != b)
-      case ("!=",         a: Float,   b: Float,   _)  => CalcLit(a != b)
-      case ("!=",         a: Float,   b: Double,  _)  => CalcLit(a != b)
-      case ("!=",         a: Double,  b: Char,    _)  => CalcLit(a != b)
-      case ("!=",         a: Double,  b: Int,     _)  => CalcLit(a != b)
-      case ("!=",         a: Double,  b: Long,    _)  => CalcLit(a != b)
-      case ("!=",         a: Double,  b: Float,   _)  => CalcLit(a != b)
-      case ("!=",         a: Double,  b: Double,  _)  => CalcLit(a != b)
-      case ("!=",         a: String,  b: String,  _)  => CalcLit(a != b)
-      case ("!=",         a: Boolean, b: Boolean, _)  => CalcLit(a != b)
-
-      case ("<",          a: Char,    b: Char,    _)  => CalcLit(a < b)
-      case ("<",          a: Char,    b: Int,     _)  => CalcLit(a < b)
-      case ("<",          a: Char,    b: Long,    _)  => CalcLit(a < b)
-      case ("<",          a: Char,    b: Float,   _)  => CalcLit(a < b)
-      case ("<",          a: Char,    b: Double,  _)  => CalcLit(a < b)
-      case ("<",          a: Int,     b: Char,    _)  => CalcLit(a < b)
-      case ("<",          a: Int,     b: Int,     _)  => CalcLit(a < b)
-      case ("<",          a: Int,     b: Long,    _)  => CalcLit(a < b)
-      case ("<",          a: Int,     b: Float,   _)  => CalcLit(a < b)
-      case ("<",          a: Int,     b: Double,  _)  => CalcLit(a < b)
-      case ("<",          a: Long,    b: Char,    _)  => CalcLit(a < b)
-      case ("<",          a: Long,    b: Int,     _)  => CalcLit(a < b)
-      case ("<",          a: Long,    b: Long,    _)  => CalcLit(a < b)
-      case ("<",          a: Long,    b: Float,   _)  => CalcLit(a < b)
-      case ("<",          a: Long,    b: Double,  _)  => CalcLit(a < b)
-      case ("<",          a: Float,   b: Char,    _)  => CalcLit(a < b)
-      case ("<",          a: Float,   b: Int,     _)  => CalcLit(a < b)
-      case ("<",          a: Float,   b: Long,    _)  => CalcLit(a < b)
-      case ("<",          a: Float,   b: Float,   _)  => CalcLit(a < b)
-      case ("<",          a: Float,   b: Double,  _)  => CalcLit(a < b)
-      case ("<",          a: Double,  b: Char,    _)  => CalcLit(a < b)
-      case ("<",          a: Double,  b: Int,     _)  => CalcLit(a < b)
-      case ("<",          a: Double,  b: Long,    _)  => CalcLit(a < b)
-      case ("<",          a: Double,  b: Float,   _)  => CalcLit(a < b)
-      case ("<",          a: Double,  b: Double,  _)  => CalcLit(a < b)
-
-      case (">",          a: Char,    b: Char,    _)  => CalcLit(a > b)
-      case (">",          a: Char,    b: Int,     _)  => CalcLit(a > b)
-      case (">",          a: Char,    b: Long,    _)  => CalcLit(a > b)
-      case (">",          a: Char,    b: Float,   _)  => CalcLit(a > b)
-      case (">",          a: Char,    b: Double,  _)  => CalcLit(a > b)
-      case (">",          a: Int,     b: Char,    _)  => CalcLit(a > b)
-      case (">",          a: Int,     b: Int,     _)  => CalcLit(a > b)
-      case (">",          a: Int,     b: Long,    _)  => CalcLit(a > b)
-      case (">",          a: Int,     b: Float,   _)  => CalcLit(a > b)
-      case (">",          a: Int,     b: Double,  _)  => CalcLit(a > b)
-      case (">",          a: Long,    b: Char,    _)  => CalcLit(a > b)
-      case (">",          a: Long,    b: Int,     _)  => CalcLit(a > b)
-      case (">",          a: Long,    b: Long,    _)  => CalcLit(a > b)
-      case (">",          a: Long,    b: Float,   _)  => CalcLit(a > b)
-      case (">",          a: Long,    b: Double,  _)  => CalcLit(a > b)
-      case (">",          a: Float,   b: Char,    _)  => CalcLit(a > b)
-      case (">",          a: Float,   b: Int,     _)  => CalcLit(a > b)
-      case (">",          a: Float,   b: Long,    _)  => CalcLit(a > b)
-      case (">",          a: Float,   b: Float,   _)  => CalcLit(a > b)
-      case (">",          a: Float,   b: Double,  _)  => CalcLit(a > b)
-      case (">",          a: Double,  b: Char,    _)  => CalcLit(a > b)
-      case (">",          a: Double,  b: Int,     _)  => CalcLit(a > b)
-      case (">",          a: Double,  b: Long,    _)  => CalcLit(a > b)
-      case (">",          a: Double,  b: Float,   _)  => CalcLit(a > b)
-      case (">",          a: Double,  b: Double,  _)  => CalcLit(a > b)
-
-      case ("<=",         a: Char,    b: Char,    _)  => CalcLit(a <= b)
-      case ("<=",         a: Char,    b: Int,     _)  => CalcLit(a <= b)
-      case ("<=",         a: Char,    b: Long,    _)  => CalcLit(a <= b)
-      case ("<=",         a: Char,    b: Float,   _)  => CalcLit(a <= b)
-      case ("<=",         a: Char,    b: Double,  _)  => CalcLit(a <= b)
-      case ("<=",         a: Int,     b: Char,    _)  => CalcLit(a <= b)
-      case ("<=",         a: Int,     b: Int,     _)  => CalcLit(a <= b)
-      case ("<=",         a: Int,     b: Long,    _)  => CalcLit(a <= b)
-      case ("<=",         a: Int,     b: Float,   _)  => CalcLit(a <= b)
-      case ("<=",         a: Int,     b: Double,  _)  => CalcLit(a <= b)
-      case ("<=",         a: Long,    b: Char,    _)  => CalcLit(a <= b)
-      case ("<=",         a: Long,    b: Int,     _)  => CalcLit(a <= b)
-      case ("<=",         a: Long,    b: Long,    _)  => CalcLit(a <= b)
-      case ("<=",         a: Long,    b: Float,   _)  => CalcLit(a <= b)
-      case ("<=",         a: Long,    b: Double,  _)  => CalcLit(a <= b)
-      case ("<=",         a: Float,   b: Char,    _)  => CalcLit(a <= b)
-      case ("<=",         a: Float,   b: Int,     _)  => CalcLit(a <= b)
-      case ("<=",         a: Float,   b: Long,    _)  => CalcLit(a <= b)
-      case ("<=",         a: Float,   b: Float,   _)  => CalcLit(a <= b)
-      case ("<=",         a: Float,   b: Double,  _)  => CalcLit(a <= b)
-      case ("<=",         a: Double,  b: Char,    _)  => CalcLit(a <= b)
-      case ("<=",         a: Double,  b: Int,     _)  => CalcLit(a <= b)
-      case ("<=",         a: Double,  b: Long,    _)  => CalcLit(a <= b)
-      case ("<=",         a: Double,  b: Float,   _)  => CalcLit(a <= b)
-      case ("<=",         a: Double,  b: Double,  _)  => CalcLit(a <= b)
-
-      case (">=",         a: Char,    b: Char,    _)  => CalcLit(a >= b)
-      case (">=",         a: Char,    b: Int,     _)  => CalcLit(a >= b)
-      case (">=",         a: Char,    b: Long,    _)  => CalcLit(a >= b)
-      case (">=",         a: Char,    b: Float,   _)  => CalcLit(a >= b)
-      case (">=",         a: Char,    b: Double,  _)  => CalcLit(a >= b)
-      case (">=",         a: Int,     b: Char,    _)  => CalcLit(a >= b)
-      case (">=",         a: Int,     b: Int,     _)  => CalcLit(a >= b)
-      case (">=",         a: Int,     b: Long,    _)  => CalcLit(a >= b)
-      case (">=",         a: Int,     b: Float,   _)  => CalcLit(a >= b)
-      case (">=",         a: Int,     b: Double,  _)  => CalcLit(a >= b)
-      case (">=",         a: Long,    b: Char,    _)  => CalcLit(a >= b)
-      case (">=",         a: Long,    b: Int,     _)  => CalcLit(a >= b)
-      case (">=",         a: Long,    b: Long,    _)  => CalcLit(a >= b)
-      case (">=",         a: Long,    b: Float,   _)  => CalcLit(a >= b)
-      case (">=",         a: Long,    b: Double,  _)  => CalcLit(a >= b)
-      case (">=",         a: Float,   b: Char,    _)  => CalcLit(a >= b)
-      case (">=",         a: Float,   b: Int,     _)  => CalcLit(a >= b)
-      case (">=",         a: Float,   b: Long,    _)  => CalcLit(a >= b)
-      case (">=",         a: Float,   b: Float,   _)  => CalcLit(a >= b)
-      case (">=",         a: Float,   b: Double,  _)  => CalcLit(a >= b)
-      case (">=",         a: Double,  b: Char,    _)  => CalcLit(a >= b)
-      case (">=",         a: Double,  b: Int,     _)  => CalcLit(a >= b)
-      case (">=",         a: Double,  b: Long,    _)  => CalcLit(a >= b)
-      case (">=",         a: Double,  b: Float,   _)  => CalcLit(a >= b)
-      case (">=",         a: Double,  b: Double,  _)  => CalcLit(a >= b)
-
-      case ("&&",         a: Boolean, b: Boolean, _)  => CalcLit(a && b)
-      case ("||",         a: Boolean, b: Boolean, _)  => CalcLit(a || b)
-
-      case ("Min",        a: Int,     b: Int,     _)  => CalcLit(min(a, b))
-      case ("Min",        a: Long,    b: Long,    _)  => CalcLit(min(a, b))
-      case ("Min",        a: Float,   b: Float,   _)  => CalcLit(min(a, b))
-      case ("Min",        a: Double,  b: Double,  _)  => CalcLit(min(a, b))
-
-      case ("Max",        a: Int,     b: Int,     _)  => CalcLit(max(a, b))
-      case ("Max",        a: Long,    b: Long,    _)  => CalcLit(max(a, b))
-      case ("Max",        a: Float,   b: Float,   _)  => CalcLit(max(a, b))
-      case ("Max",        a: Double,  b: Double,  _)  => CalcLit(max(a, b))
-
-      case ("Substring",  a: String,  b: Int,     _)  => CalcLit(a.substring(b))
-      case ("Length",     a: String,  _,          _)  => CalcLit(a.length)
-      case ("CharAt",     a: String,  b: Int,     _)  => CalcLit(a.charAt(b))
-
-      case _ => abort(s"Unsupported $funcName[$aValue, $bValue, $cValue]")
+  def opCalc[T1, T2, T3](funcName : String, a : CalcTree, b : CalcTree, c : CalcTree)(implicit annotatedSym : TypeSymbol) : CalcTree = {
+    val aTree = a.t
+    val bTree = b.t
+    val cTree = c.t
+    def aEval : Tree = a match {
+      case CalcLitTree(at) => Literal(evalTyped(aTree))
+      case _ => aTree
     }
-    ret
+    def bEval : Tree = b match {
+      case CalcLitTree(bt) => Literal(evalTyped(bTree))
+      case _ => bTree
+    }
+
+    val outTree = funcName match {
+      case "Id" => aTree
+      case "ToNat" => q"$aTree.toInt" //Has a special case to handle this in MaterializeOpAuxGen
+      case "ToChar" => q"$aTree.toChar"
+      case "ToInt" => q"$aTree.toInt"
+      case "ToLong" => q"$aTree.toLong"
+      case "ToFloat" => q"$aTree.toFloat"
+      case "ToDouble" => q"$aTree.toDouble"
+      case "ToString" => q"$aTree.toString"
+      case "IsNat" => q"$aTree.isInstanceOf[Int] && $aTree >= 0"
+      case "IsChar" => q"$aTree.isInstanceOf[Char]"
+      case "IsInt" => q"$aTree.isInstanceOf[Int]"
+      case "IsLong" => q"$aTree.isInstanceOf[Long]"
+      case "IsFloat" => q"$aTree.isInstanceOf[Float]"
+      case "IsDouble" => q"$aTree.isInstanceOf[Double]"
+      case "IsString" => q"$aTree.isInstanceOf[String]"
+      case "IsBoolean" => q"$aTree.isInstanceOf[Boolean]"
+      case "Negate" => q"-$aTree"
+//      case "Abs" => a match {
+//        case CalcLitTree(at) =>
+//          evalTyped(aTree) match {
+//            case (Constant(t : Int)) =>
+//            case (Constant(t : Long)) =>
+//            case (Constant(t : Float)) =>
+//            case (Constant(t : Double)) =>
+//          }
+//        case CalcNLitTree(at) => aTree
+//      }
+
+//      case ("Id",         a: Char, _, _)              => CalcLit(a)
+//      case ("Id",         a: Int, _, _)               => CalcLit(a)
+//      case ("Id",         a: Long, _, _)              => CalcLit(a)
+//      case ("Id",         a: Float, _, _)             => CalcLit(a)
+//      case ("Id",         a: Double, _, _)            => CalcLit(a)
+//      case ("Id",         a: String, _, _)            => CalcLit(a)
+//      case ("Id",         a: Boolean, _, _)           => CalcLit(a)
+//      case ("Id",         a: Tree, _, _)              => CalcNLitTree(a)
+//
+//      case ("ToNat",      a: Char, _, _)              => CalcLit(a.toInt)
+//      case ("ToNat",      a: Int, _, _)               => CalcLit(a.toInt)
+//      case ("ToNat",      a: Long, _, _)              => CalcLit(a.toInt)
+//      case ("ToNat",      a: Float, _, _)             => CalcLit(a.toInt)
+//      case ("ToNat",      a: Double, _, _)            => CalcLit(a.toInt)
+//      case ("ToNat",      a: String, _, _)            => CalcLit(a.toInt)
+//
+//      case ("ToChar",     a: Char, _, _)              => CalcLit(a.toChar)
+//      case ("ToChar",     a: Int, _, _)               => CalcLit(a.toChar)
+//      case ("ToChar",     a: Long, _, _)              => CalcLit(a.toChar)
+//      case ("ToChar",     a: Float, _, _)             => CalcLit(a.toChar)
+//      case ("ToChar",     a: Double, _, _)            => CalcLit(a.toChar)
+//
+//      case ("ToInt",      a: Char, _, _)              => CalcLit(a.toInt)
+//      case ("ToInt",      a: Int, _, _)               => CalcLit(a.toInt)
+//      case ("ToInt",      a: Long, _, _)              => CalcLit(a.toInt)
+//      case ("ToInt",      a: Float, _, _)             => CalcLit(a.toInt)
+//      case ("ToInt",      a: Double, _, _)            => CalcLit(a.toInt)
+//      case ("ToInt",      a: String, _, _)            => CalcLit(a.toInt)
+//
+//      case ("ToLong",     a: Char, _, _)              => CalcLit(a.toLong)
+//      case ("ToLong",     a: Int, _, _)               => CalcLit(a.toLong)
+//      case ("ToLong",     a: Long, _, _)              => CalcLit(a.toLong)
+//      case ("ToLong",     a: Float, _, _)             => CalcLit(a.toLong)
+//      case ("ToLong",     a: Double, _, _)            => CalcLit(a.toLong)
+//      case ("ToLong",     a: String, _, _)            => CalcLit(a.toLong)
+//
+//      case ("ToFloat",    a: Char, _, _)              => CalcLit(a.toFloat)
+//      case ("ToFloat",    a: Int, _, _)               => CalcLit(a.toFloat)
+//      case ("ToFloat",    a: Long, _, _)              => CalcLit(a.toFloat)
+//      case ("ToFloat",    a: Float, _, _)             => CalcLit(a.toFloat)
+//      case ("ToFloat",    a: Double, _, _)            => CalcLit(a.toFloat)
+//      case ("ToFloat",    a: String, _, _)            => CalcLit(a.toFloat)
+//
+//      case ("ToDouble",   a: Char, _, _)              => CalcLit(a.toDouble)
+//      case ("ToDouble",   a: Int, _, _)               => CalcLit(a.toDouble)
+//      case ("ToDouble",   a: Long, _, _)              => CalcLit(a.toDouble)
+//      case ("ToDouble",   a: Float, _, _)             => CalcLit(a.toDouble)
+//      case ("ToDouble",   a: Double, _, _)            => CalcLit(a.toDouble)
+//      case ("ToDouble",   a: String, _, _)            => CalcLit(a.toDouble)
+//
+//      case ("ToString",   a: Char, _, _)              => CalcLit(a.toString)
+//      case ("ToString",   a: Int, _, _)               => CalcLit(a.toString)
+//      case ("ToString",   a: Long, _, _)              => CalcLit(a.toString)
+//      case ("ToString",   a: Float, _, _)             => CalcLit(a.toString)
+//      case ("ToString",   a: Double, _, _)            => CalcLit(a.toString)
+//      case ("ToString",   a: String, _, _)            => CalcLit(a.toString)
+//      case ("ToString",   a: Boolean, _, _)           => CalcLit(a.toString)
+//
+//      case ("IsNat",      a: Char, _, _)              => CalcLit(false)
+//      case ("IsNat",      a: Int, _, _)               => CalcLit(a >= 0)
+//      case ("IsNat",      a: Long, _, _)              => CalcLit(false)
+//      case ("IsNat",      a: Float, _, _)             => CalcLit(false)
+//      case ("IsNat",      a: Double, _, _)            => CalcLit(false)
+//      case ("IsNat",      a: String, _, _)            => CalcLit(false)
+//      case ("IsNat",      a: Boolean, _, _)           => CalcLit(false)
+//
+//      case ("IsChar",     a: Char, _, _)              => CalcLit(true)
+//      case ("IsChar",     a: Int, _, _)               => CalcLit(false)
+//      case ("IsChar",     a: Long, _, _)              => CalcLit(false)
+//      case ("IsChar",     a: Float, _, _)             => CalcLit(false)
+//      case ("IsChar",     a: Double, _, _)            => CalcLit(false)
+//      case ("IsChar",     a: String, _, _)            => CalcLit(false)
+//      case ("IsChar",     a: Boolean, _, _)           => CalcLit(false)
+//
+//      case ("IsInt",      a: Char, _, _)              => CalcLit(false)
+//      case ("IsInt",      a: Int, _, _)               => CalcLit(true)
+//      case ("IsInt",      a: Long, _, _)              => CalcLit(false)
+//      case ("IsInt",      a: Float, _, _)             => CalcLit(false)
+//      case ("IsInt",      a: Double, _, _)            => CalcLit(false)
+//      case ("IsInt",      a: String, _, _)            => CalcLit(false)
+//      case ("IsInt",      a: Boolean, _, _)           => CalcLit(false)
+//
+//      case ("IsLong",     a: Char, _, _)              => CalcLit(false)
+//      case ("IsLong",     a: Int, _, _)               => CalcLit(false)
+//      case ("IsLong",     a: Long, _, _)              => CalcLit(true)
+//      case ("IsLong",     a: Float, _, _)             => CalcLit(false)
+//      case ("IsLong",     a: Double, _, _)            => CalcLit(false)
+//      case ("IsLong",     a: String, _, _)            => CalcLit(false)
+//      case ("IsLong",     a: Boolean, _, _)           => CalcLit(false)
+//
+//      case ("IsFloat",    a: Char, _, _)              => CalcLit(false)
+//      case ("IsFloat",    a: Int, _, _)               => CalcLit(false)
+//      case ("IsFloat",    a: Long, _, _)              => CalcLit(false)
+//      case ("IsFloat",    a: Float, _, _)             => CalcLit(true)
+//      case ("IsFloat",    a: Double, _, _)            => CalcLit(false)
+//      case ("IsFloat",    a: String, _, _)            => CalcLit(false)
+//      case ("IsFloat",    a: Boolean, _, _)           => CalcLit(false)
+//
+//      case ("IsDouble",   a: Char, _, _)              => CalcLit(false)
+//      case ("IsDouble",   a: Int, _, _)               => CalcLit(false)
+//      case ("IsDouble",   a: Long, _, _)              => CalcLit(false)
+//      case ("IsDouble",   a: Float, _, _)             => CalcLit(false)
+//      case ("IsDouble",   a: Double, _, _)            => CalcLit(true)
+//      case ("IsDouble",   a: String, _, _)            => CalcLit(false)
+//      case ("IsDouble",   a: Boolean, _, _)           => CalcLit(false)
+//
+//      case ("IsString",   a: Char, _, _)              => CalcLit(false)
+//      case ("IsString",   a: Int, _, _)               => CalcLit(false)
+//      case ("IsString",   a: Long, _, _)              => CalcLit(false)
+//      case ("IsString",   a: Float, _, _)             => CalcLit(false)
+//      case ("IsString",   a: Double, _, _)            => CalcLit(false)
+//      case ("IsString",   a: String, _, _)            => CalcLit(true)
+//      case ("IsString",   a: Boolean, _, _)           => CalcLit(false)
+//
+//      case ("IsBoolean",  a: Char, _, _)              => CalcLit(false)
+//      case ("IsBoolean",  a: Int, _, _)               => CalcLit(false)
+//      case ("IsBoolean",  a: Long, _, _)              => CalcLit(false)
+//      case ("IsBoolean",  a: Float, _, _)             => CalcLit(false)
+//      case ("IsBoolean",  a: Double, _, _)            => CalcLit(false)
+//      case ("IsBoolean",  a: String, _, _)            => CalcLit(false)
+//      case ("IsBoolean",  a: Boolean, _, _)           => CalcLit(true)
+//
+//      case ("Negate",     a: Char, _, _)              => CalcLit(-a)
+//      case ("Negate",     a: Int, _, _)               => CalcLit(-a)
+//      case ("Negate",     a: Long, _, _)              => CalcLit(-a)
+//      case ("Negate",     a: Float, _, _)             => CalcLit(-a)
+//      case ("Negate",     a: Double, _, _)            => CalcLit(-a)
+//
+//      case ("Abs",        a: Int, _, _)               => CalcLit(abs(a))
+//      case ("Abs",        a: Long, _, _)              => CalcLit(abs(a))
+//      case ("Abs",        a: Float, _, _)             => CalcLit(abs(a))
+//      case ("Abs",        a: Double, _, _)            => CalcLit(abs(a))
+//
+//      case ("NumberOfLeadingZeros", a: Int, _, _)     => CalcLit(java.lang.Integer.numberOfLeadingZeros(a))
+//      case ("NumberOfLeadingZeros", a: Long, _, _)    => CalcLit(java.lang.Long.numberOfLeadingZeros(a))
+//
+//      case ("Floor",      a: Float, _, _)             => CalcLit(floor(a.toDouble))
+//      case ("Floor",      a: Double, _, _)            => CalcLit(floor(a))
+//
+//      case ("Ceil",       a: Float, _, _)             => CalcLit(ceil(a.toDouble))
+//      case ("Ceil",       a: Double, _, _)            => CalcLit(ceil(a))
+//
+//      case ("Round",      a: Float, _, _)             => CalcLit(round(a))
+//      case ("Round",      a: Double, _, _)            => CalcLit(round(a))
+//
+//      case ("Sin",        a: Float, _, _)             => CalcLit(sin(a.toDouble))
+//      case ("Sin",        a: Double, _, _)            => CalcLit(sin(a))
+//
+//      case ("Cos",        a: Float, _, _)             => CalcLit(cos(a.toDouble))
+//      case ("Cos",        a: Double, _, _)            => CalcLit(cos(a))
+//
+//      case ("Tan",        a: Float, _, _)             => CalcLit(tan(a.toDouble))
+//      case ("Tan",        a: Double, _, _)            => CalcLit(tan(a))
+//
+//      case ("Sqrt",       a: Float, _, _)             => CalcLit(sqrt(a.toDouble))
+//      case ("Sqrt",       a: Double, _, _)            => CalcLit(sqrt(a))
+//
+//      case ("Log",        a: Float, _, _)             => CalcLit(log(a.toDouble))
+//      case ("Log",        a: Double, _, _)            => CalcLit(log(a))
+//
+//      case ("Log10",      a: Float, _, _)             => CalcLit(log10(a.toDouble))
+//      case ("Log10",      a: Double, _, _)            => CalcLit(log10(a))
+//
+//      case ("Reverse",    a: String, _, _)            => CalcLit(a.reverse)
+//      case ("!",          a: Boolean, _, _)           => CalcLit(!a)
+//      case ("Require",    a: Boolean, b: String, _)   =>
+//        if (!a)
+//          abort(b)
+//        else
+//          CalcLit(a)
+//      case ("==>",        _,          b,          _)  => CalcLit(b)
+//
+//      case ("+",          a: Char,    b: Char,    _)  => CalcLit(a + b)
+//      case ("+",          a: Char,    b: Int,     _)  => CalcLit(a + b)
+//      case ("+",          a: Char,    b: Long,    _)  => CalcLit(a + b)
+//      case ("+",          a: Char,    b: Float,   _)  => CalcLit(a + b)
+//      case ("+",          a: Char,    b: Double,  _)  => CalcLit(a + b)
+//      case ("+",          a: Int,     b: Char,    _)  => CalcLit(a + b)
+//      case ("+",          a: Int,     b: Int,     _)  => CalcLit(a + b)
+//      case ("+",          a: Int,     b: Long,    _)  => CalcLit(a + b)
+//      case ("+",          a: Int,     b: Float,   _)  => CalcLit(a + b)
+//      case ("+",          a: Int,     b: Double,  _)  => CalcLit(a + b)
+//      case ("+",          a: Long,    b: Char,    _)  => CalcLit(a + b)
+//      case ("+",          a: Long,    b: Int,     _)  => CalcLit(a + b)
+//      case ("+",          a: Long,    b: Long,    _)  => CalcLit(a + b)
+//      case ("+",          a: Long,    b: Float,   _)  => CalcLit(a + b)
+//      case ("+",          a: Long,    b: Double,  _)  => CalcLit(a + b)
+//      case ("+",          a: Float,   b: Char,    _)  => CalcLit(a + b)
+//      case ("+",          a: Float,   b: Int,     _)  => CalcLit(a + b)
+//      case ("+",          a: Float,   b: Long,    _)  => CalcLit(a + b)
+//      case ("+",          a: Float,   b: Float,   _)  => CalcLit(a + b)
+//      case ("+",          a: Float,   b: Double,  _)  => CalcLit(a + b)
+//      case ("+",          a: Double,  b: Char,    _)  => CalcLit(a + b)
+//      case ("+",          a: Double,  b: Int,     _)  => CalcLit(a + b)
+//      case ("+",          a: Double,  b: Long,    _)  => CalcLit(a + b)
+//      case ("+",          a: Double,  b: Float,   _)  => CalcLit(a + b)
+//      case ("+",          a: Double,  b: Double,  _)  => CalcLit(a + b)
+//      case ("+",          a: String,  b: String,  _)  => CalcLit(a + b) //Concat
+//      case ("+",          a: Tree,    b: Int,     _)  => CalcNLitTree(q"$a + $b") //Concat
+//
+//      case ("-",          a: Char,    b: Char,    _)  => CalcLit(a - b)
+//      case ("-",          a: Char,    b: Int,     _)  => CalcLit(a - b)
+//      case ("-",          a: Char,    b: Long,    _)  => CalcLit(a - b)
+//      case ("-",          a: Char,    b: Float,   _)  => CalcLit(a - b)
+//      case ("-",          a: Char,    b: Double,  _)  => CalcLit(a - b)
+//      case ("-",          a: Int,     b: Char,    _)  => CalcLit(a - b)
+//      case ("-",          a: Int,     b: Int,     _)  => CalcLit(a - b)
+//      case ("-",          a: Int,     b: Long,    _)  => CalcLit(a - b)
+//      case ("-",          a: Int,     b: Float,   _)  => CalcLit(a - b)
+//      case ("-",          a: Int,     b: Double,  _)  => CalcLit(a - b)
+//      case ("-",          a: Long,    b: Char,    _)  => CalcLit(a - b)
+//      case ("-",          a: Long,    b: Int,     _)  => CalcLit(a - b)
+//      case ("-",          a: Long,    b: Long,    _)  => CalcLit(a - b)
+//      case ("-",          a: Long,    b: Float,   _)  => CalcLit(a - b)
+//      case ("-",          a: Long,    b: Double,  _)  => CalcLit(a - b)
+//      case ("-",          a: Float,   b: Char,    _)  => CalcLit(a - b)
+//      case ("-",          a: Float,   b: Int,     _)  => CalcLit(a - b)
+//      case ("-",          a: Float,   b: Long,    _)  => CalcLit(a - b)
+//      case ("-",          a: Float,   b: Float,   _)  => CalcLit(a - b)
+//      case ("-",          a: Float,   b: Double,  _)  => CalcLit(a - b)
+//      case ("-",          a: Double,  b: Char,    _)  => CalcLit(a - b)
+//      case ("-",          a: Double,  b: Int,     _)  => CalcLit(a - b)
+//      case ("-",          a: Double,  b: Long,    _)  => CalcLit(a - b)
+//      case ("-",          a: Double,  b: Float,   _)  => CalcLit(a - b)
+//      case ("-",          a: Double,  b: Double,  _)  => CalcLit(a - b)
+//
+//      case ("*",          a: Char,    b: Char,    _)  => CalcLit(a * b)
+//      case ("*",          a: Char,    b: Int,     _)  => CalcLit(a * b)
+//      case ("*",          a: Char,    b: Long,    _)  => CalcLit(a * b)
+//      case ("*",          a: Char,    b: Float,   _)  => CalcLit(a * b)
+//      case ("*",          a: Char,    b: Double,  _)  => CalcLit(a * b)
+//      case ("*",          a: Int,     b: Char,    _)  => CalcLit(a * b)
+//      case ("*",          a: Int,     b: Int,     _)  => CalcLit(a * b)
+//      case ("*",          a: Int,     b: Long,    _)  => CalcLit(a * b)
+//      case ("*",          a: Int,     b: Float,   _)  => CalcLit(a * b)
+//      case ("*",          a: Int,     b: Double,  _)  => CalcLit(a * b)
+//      case ("*",          a: Long,    b: Char,    _)  => CalcLit(a * b)
+//      case ("*",          a: Long,    b: Int,     _)  => CalcLit(a * b)
+//      case ("*",          a: Long,    b: Long,    _)  => CalcLit(a * b)
+//      case ("*",          a: Long,    b: Float,   _)  => CalcLit(a * b)
+//      case ("*",          a: Long,    b: Double,  _)  => CalcLit(a * b)
+//      case ("*",          a: Float,   b: Char,    _)  => CalcLit(a * b)
+//      case ("*",          a: Float,   b: Int,     _)  => CalcLit(a * b)
+//      case ("*",          a: Float,   b: Long,    _)  => CalcLit(a * b)
+//      case ("*",          a: Float,   b: Float,   _)  => CalcLit(a * b)
+//      case ("*",          a: Float,   b: Double,  _)  => CalcLit(a * b)
+//      case ("*",          a: Double,  b: Char,    _)  => CalcLit(a * b)
+//      case ("*",          a: Double,  b: Int,     _)  => CalcLit(a * b)
+//      case ("*",          a: Double,  b: Long,    _)  => CalcLit(a * b)
+//      case ("*",          a: Double,  b: Float,   _)  => CalcLit(a * b)
+//      case ("*",          a: Double,  b: Double,  _)  => CalcLit(a * b)
+//
+//      case ("/",          a: Char,    b: Char,    _)  => CalcLit(a / b)
+//      case ("/",          a: Char,    b: Int,     _)  => CalcLit(a / b)
+//      case ("/",          a: Char,    b: Long,    _)  => CalcLit(a / b)
+//      case ("/",          a: Char,    b: Float,   _)  => CalcLit(a / b)
+//      case ("/",          a: Char,    b: Double,  _)  => CalcLit(a / b)
+//      case ("/",          a: Int,     b: Char,    _)  => CalcLit(a / b)
+//      case ("/",          a: Int,     b: Int,     _)  => CalcLit(a / b)
+//      case ("/",          a: Int,     b: Long,    _)  => CalcLit(a / b)
+//      case ("/",          a: Int,     b: Float,   _)  => CalcLit(a / b)
+//      case ("/",          a: Int,     b: Double,  _)  => CalcLit(a / b)
+//      case ("/",          a: Long,    b: Char,    _)  => CalcLit(a / b)
+//      case ("/",          a: Long,    b: Int,     _)  => CalcLit(a / b)
+//      case ("/",          a: Long,    b: Long,    _)  => CalcLit(a / b)
+//      case ("/",          a: Long,    b: Float,   _)  => CalcLit(a / b)
+//      case ("/",          a: Long,    b: Double,  _)  => CalcLit(a / b)
+//      case ("/",          a: Float,   b: Char,    _)  => CalcLit(a / b)
+//      case ("/",          a: Float,   b: Int,     _)  => CalcLit(a / b)
+//      case ("/",          a: Float,   b: Long,    _)  => CalcLit(a / b)
+//      case ("/",          a: Float,   b: Float,   _)  => CalcLit(a / b)
+//      case ("/",          a: Float,   b: Double,  _)  => CalcLit(a / b)
+//      case ("/",          a: Double,  b: Char,    _)  => CalcLit(a / b)
+//      case ("/",          a: Double,  b: Int,     _)  => CalcLit(a / b)
+//      case ("/",          a: Double,  b: Long,    _)  => CalcLit(a / b)
+//      case ("/",          a: Double,  b: Float,   _)  => CalcLit(a / b)
+//      case ("/",          a: Double,  b: Double,  _)  => CalcLit(a / b)
+//
+//      case ("%",          a: Char,    b: Char,    _)  => CalcLit(a % b)
+//      case ("%",          a: Char,    b: Int,     _)  => CalcLit(a % b)
+//      case ("%",          a: Char,    b: Long,    _)  => CalcLit(a % b)
+//      case ("%",          a: Char,    b: Float,   _)  => CalcLit(a % b)
+//      case ("%",          a: Char,    b: Double,  _)  => CalcLit(a % b)
+//      case ("%",          a: Int,     b: Char,    _)  => CalcLit(a % b)
+//      case ("%",          a: Int,     b: Int,     _)  => CalcLit(a % b)
+//      case ("%",          a: Int,     b: Long,    _)  => CalcLit(a % b)
+//      case ("%",          a: Int,     b: Float,   _)  => CalcLit(a % b)
+//      case ("%",          a: Int,     b: Double,  _)  => CalcLit(a % b)
+//      case ("%",          a: Long,    b: Char,    _)  => CalcLit(a % b)
+//      case ("%",          a: Long,    b: Int,     _)  => CalcLit(a % b)
+//      case ("%",          a: Long,    b: Long,    _)  => CalcLit(a % b)
+//      case ("%",          a: Long,    b: Float,   _)  => CalcLit(a % b)
+//      case ("%",          a: Long,    b: Double,  _)  => CalcLit(a % b)
+//      case ("%",          a: Float,   b: Char,    _)  => CalcLit(a % b)
+//      case ("%",          a: Float,   b: Int,     _)  => CalcLit(a % b)
+//      case ("%",          a: Float,   b: Long,    _)  => CalcLit(a % b)
+//      case ("%",          a: Float,   b: Float,   _)  => CalcLit(a % b)
+//      case ("%",          a: Float,   b: Double,  _)  => CalcLit(a % b)
+//      case ("%",          a: Double,  b: Char,    _)  => CalcLit(a % b)
+//      case ("%",          a: Double,  b: Int,     _)  => CalcLit(a % b)
+//      case ("%",          a: Double,  b: Long,    _)  => CalcLit(a % b)
+//      case ("%",          a: Double,  b: Float,   _)  => CalcLit(a % b)
+//      case ("%",          a: Double,  b: Double,  _)  => CalcLit(a % b)
+//
+//      case ("Pow",        a: Float,   b: Float,   _)  => CalcLit(pow(a.toDouble,b.toDouble))
+//      case ("Pow",        a: Float,   b: Double,  _)  => CalcLit(pow(a.toDouble,b.toDouble))
+//      case ("Pow",        a: Double,  b: Float,   _)  => CalcLit(pow(a.toDouble,b.toDouble))
+//      case ("Pow",        a: Double,  b: Double,  _)  => CalcLit(pow(a.toDouble,b.toDouble))
+//
+//      case ("==",         a: Char,    b: Char,    _)  => CalcLit(a == b)
+//      case ("==",         a: Char,    b: Int,     _)  => CalcLit(a == b)
+//      case ("==",         a: Char,    b: Long,    _)  => CalcLit(a == b)
+//      case ("==",         a: Char,    b: Float,   _)  => CalcLit(a == b)
+//      case ("==",         a: Char,    b: Double,  _)  => CalcLit(a == b)
+//      case ("==",         a: Int,     b: Char,    _)  => CalcLit(a == b)
+//      case ("==",         a: Int,     b: Int,     _)  => CalcLit(a == b)
+//      case ("==",         a: Int,     b: Long,    _)  => CalcLit(a == b)
+//      case ("==",         a: Int,     b: Float,   _)  => CalcLit(a == b)
+//      case ("==",         a: Int,     b: Double,  _)  => CalcLit(a == b)
+//      case ("==",         a: Long,    b: Char,    _)  => CalcLit(a == b)
+//      case ("==",         a: Long,    b: Int,     _)  => CalcLit(a == b)
+//      case ("==",         a: Long,    b: Long,    _)  => CalcLit(a == b)
+//      case ("==",         a: Long,    b: Float,   _)  => CalcLit(a == b)
+//      case ("==",         a: Long,    b: Double,  _)  => CalcLit(a == b)
+//      case ("==",         a: Float,   b: Char,    _)  => CalcLit(a == b)
+//      case ("==",         a: Float,   b: Int,     _)  => CalcLit(a == b)
+//      case ("==",         a: Float,   b: Long,    _)  => CalcLit(a == b)
+//      case ("==",         a: Float,   b: Float,   _)  => CalcLit(a == b)
+//      case ("==",         a: Float,   b: Double,  _)  => CalcLit(a == b)
+//      case ("==",         a: Double,  b: Char,    _)  => CalcLit(a == b)
+//      case ("==",         a: Double,  b: Int,     _)  => CalcLit(a == b)
+//      case ("==",         a: Double,  b: Long,    _)  => CalcLit(a == b)
+//      case ("==",         a: Double,  b: Float,   _)  => CalcLit(a == b)
+//      case ("==",         a: Double,  b: Double,  _)  => CalcLit(a == b)
+//      case ("==",         a: String,  b: String,  _)  => CalcLit(a == b)
+//      case ("==",         a: Boolean, b: Boolean, _)  => CalcLit(a == b)
+//
+//      case ("!=",         a: Char,    b: Char,    _)  => CalcLit(a != b)
+//      case ("!=",         a: Char,    b: Int,     _)  => CalcLit(a != b)
+//      case ("!=",         a: Char,    b: Long,    _)  => CalcLit(a != b)
+//      case ("!=",         a: Char,    b: Float,   _)  => CalcLit(a != b)
+//      case ("!=",         a: Char,    b: Double,  _)  => CalcLit(a != b)
+//      case ("!=",         a: Int,     b: Char,    _)  => CalcLit(a != b)
+//      case ("!=",         a: Int,     b: Int,     _)  => CalcLit(a != b)
+//      case ("!=",         a: Int,     b: Long,    _)  => CalcLit(a != b)
+//      case ("!=",         a: Int,     b: Float,   _)  => CalcLit(a != b)
+//      case ("!=",         a: Int,     b: Double,  _)  => CalcLit(a != b)
+//      case ("!=",         a: Long,    b: Char,    _)  => CalcLit(a != b)
+//      case ("!=",         a: Long,    b: Int,     _)  => CalcLit(a != b)
+//      case ("!=",         a: Long,    b: Long,    _)  => CalcLit(a != b)
+//      case ("!=",         a: Long,    b: Float,   _)  => CalcLit(a != b)
+//      case ("!=",         a: Long,    b: Double,  _)  => CalcLit(a != b)
+//      case ("!=",         a: Float,   b: Char,    _)  => CalcLit(a != b)
+//      case ("!=",         a: Float,   b: Int,     _)  => CalcLit(a != b)
+//      case ("!=",         a: Float,   b: Long,    _)  => CalcLit(a != b)
+//      case ("!=",         a: Float,   b: Float,   _)  => CalcLit(a != b)
+//      case ("!=",         a: Float,   b: Double,  _)  => CalcLit(a != b)
+//      case ("!=",         a: Double,  b: Char,    _)  => CalcLit(a != b)
+//      case ("!=",         a: Double,  b: Int,     _)  => CalcLit(a != b)
+//      case ("!=",         a: Double,  b: Long,    _)  => CalcLit(a != b)
+//      case ("!=",         a: Double,  b: Float,   _)  => CalcLit(a != b)
+//      case ("!=",         a: Double,  b: Double,  _)  => CalcLit(a != b)
+//      case ("!=",         a: String,  b: String,  _)  => CalcLit(a != b)
+//      case ("!=",         a: Boolean, b: Boolean, _)  => CalcLit(a != b)
+//
+//      case ("<",          a: Char,    b: Char,    _)  => CalcLit(a < b)
+//      case ("<",          a: Char,    b: Int,     _)  => CalcLit(a < b)
+//      case ("<",          a: Char,    b: Long,    _)  => CalcLit(a < b)
+//      case ("<",          a: Char,    b: Float,   _)  => CalcLit(a < b)
+//      case ("<",          a: Char,    b: Double,  _)  => CalcLit(a < b)
+//      case ("<",          a: Int,     b: Char,    _)  => CalcLit(a < b)
+//      case ("<",          a: Int,     b: Int,     _)  => CalcLit(a < b)
+//      case ("<",          a: Int,     b: Long,    _)  => CalcLit(a < b)
+//      case ("<",          a: Int,     b: Float,   _)  => CalcLit(a < b)
+//      case ("<",          a: Int,     b: Double,  _)  => CalcLit(a < b)
+//      case ("<",          a: Long,    b: Char,    _)  => CalcLit(a < b)
+//      case ("<",          a: Long,    b: Int,     _)  => CalcLit(a < b)
+//      case ("<",          a: Long,    b: Long,    _)  => CalcLit(a < b)
+//      case ("<",          a: Long,    b: Float,   _)  => CalcLit(a < b)
+//      case ("<",          a: Long,    b: Double,  _)  => CalcLit(a < b)
+//      case ("<",          a: Float,   b: Char,    _)  => CalcLit(a < b)
+//      case ("<",          a: Float,   b: Int,     _)  => CalcLit(a < b)
+//      case ("<",          a: Float,   b: Long,    _)  => CalcLit(a < b)
+//      case ("<",          a: Float,   b: Float,   _)  => CalcLit(a < b)
+//      case ("<",          a: Float,   b: Double,  _)  => CalcLit(a < b)
+//      case ("<",          a: Double,  b: Char,    _)  => CalcLit(a < b)
+//      case ("<",          a: Double,  b: Int,     _)  => CalcLit(a < b)
+//      case ("<",          a: Double,  b: Long,    _)  => CalcLit(a < b)
+//      case ("<",          a: Double,  b: Float,   _)  => CalcLit(a < b)
+//      case ("<",          a: Double,  b: Double,  _)  => CalcLit(a < b)
+//
+//      case (">",          a: Char,    b: Char,    _)  => CalcLit(a > b)
+//      case (">",          a: Char,    b: Int,     _)  => CalcLit(a > b)
+//      case (">",          a: Char,    b: Long,    _)  => CalcLit(a > b)
+//      case (">",          a: Char,    b: Float,   _)  => CalcLit(a > b)
+//      case (">",          a: Char,    b: Double,  _)  => CalcLit(a > b)
+//      case (">",          a: Int,     b: Char,    _)  => CalcLit(a > b)
+//      case (">",          a: Int,     b: Int,     _)  => CalcLit(a > b)
+//      case (">",          a: Int,     b: Long,    _)  => CalcLit(a > b)
+//      case (">",          a: Int,     b: Float,   _)  => CalcLit(a > b)
+//      case (">",          a: Int,     b: Double,  _)  => CalcLit(a > b)
+//      case (">",          a: Long,    b: Char,    _)  => CalcLit(a > b)
+//      case (">",          a: Long,    b: Int,     _)  => CalcLit(a > b)
+//      case (">",          a: Long,    b: Long,    _)  => CalcLit(a > b)
+//      case (">",          a: Long,    b: Float,   _)  => CalcLit(a > b)
+//      case (">",          a: Long,    b: Double,  _)  => CalcLit(a > b)
+//      case (">",          a: Float,   b: Char,    _)  => CalcLit(a > b)
+//      case (">",          a: Float,   b: Int,     _)  => CalcLit(a > b)
+//      case (">",          a: Float,   b: Long,    _)  => CalcLit(a > b)
+//      case (">",          a: Float,   b: Float,   _)  => CalcLit(a > b)
+//      case (">",          a: Float,   b: Double,  _)  => CalcLit(a > b)
+//      case (">",          a: Double,  b: Char,    _)  => CalcLit(a > b)
+//      case (">",          a: Double,  b: Int,     _)  => CalcLit(a > b)
+//      case (">",          a: Double,  b: Long,    _)  => CalcLit(a > b)
+//      case (">",          a: Double,  b: Float,   _)  => CalcLit(a > b)
+//      case (">",          a: Double,  b: Double,  _)  => CalcLit(a > b)
+//
+//      case ("<=",         a: Char,    b: Char,    _)  => CalcLit(a <= b)
+//      case ("<=",         a: Char,    b: Int,     _)  => CalcLit(a <= b)
+//      case ("<=",         a: Char,    b: Long,    _)  => CalcLit(a <= b)
+//      case ("<=",         a: Char,    b: Float,   _)  => CalcLit(a <= b)
+//      case ("<=",         a: Char,    b: Double,  _)  => CalcLit(a <= b)
+//      case ("<=",         a: Int,     b: Char,    _)  => CalcLit(a <= b)
+//      case ("<=",         a: Int,     b: Int,     _)  => CalcLit(a <= b)
+//      case ("<=",         a: Int,     b: Long,    _)  => CalcLit(a <= b)
+//      case ("<=",         a: Int,     b: Float,   _)  => CalcLit(a <= b)
+//      case ("<=",         a: Int,     b: Double,  _)  => CalcLit(a <= b)
+//      case ("<=",         a: Long,    b: Char,    _)  => CalcLit(a <= b)
+//      case ("<=",         a: Long,    b: Int,     _)  => CalcLit(a <= b)
+//      case ("<=",         a: Long,    b: Long,    _)  => CalcLit(a <= b)
+//      case ("<=",         a: Long,    b: Float,   _)  => CalcLit(a <= b)
+//      case ("<=",         a: Long,    b: Double,  _)  => CalcLit(a <= b)
+//      case ("<=",         a: Float,   b: Char,    _)  => CalcLit(a <= b)
+//      case ("<=",         a: Float,   b: Int,     _)  => CalcLit(a <= b)
+//      case ("<=",         a: Float,   b: Long,    _)  => CalcLit(a <= b)
+//      case ("<=",         a: Float,   b: Float,   _)  => CalcLit(a <= b)
+//      case ("<=",         a: Float,   b: Double,  _)  => CalcLit(a <= b)
+//      case ("<=",         a: Double,  b: Char,    _)  => CalcLit(a <= b)
+//      case ("<=",         a: Double,  b: Int,     _)  => CalcLit(a <= b)
+//      case ("<=",         a: Double,  b: Long,    _)  => CalcLit(a <= b)
+//      case ("<=",         a: Double,  b: Float,   _)  => CalcLit(a <= b)
+//      case ("<=",         a: Double,  b: Double,  _)  => CalcLit(a <= b)
+//
+//      case (">=",         a: Char,    b: Char,    _)  => CalcLit(a >= b)
+//      case (">=",         a: Char,    b: Int,     _)  => CalcLit(a >= b)
+//      case (">=",         a: Char,    b: Long,    _)  => CalcLit(a >= b)
+//      case (">=",         a: Char,    b: Float,   _)  => CalcLit(a >= b)
+//      case (">=",         a: Char,    b: Double,  _)  => CalcLit(a >= b)
+//      case (">=",         a: Int,     b: Char,    _)  => CalcLit(a >= b)
+//      case (">=",         a: Int,     b: Int,     _)  => CalcLit(a >= b)
+//      case (">=",         a: Int,     b: Long,    _)  => CalcLit(a >= b)
+//      case (">=",         a: Int,     b: Float,   _)  => CalcLit(a >= b)
+//      case (">=",         a: Int,     b: Double,  _)  => CalcLit(a >= b)
+//      case (">=",         a: Long,    b: Char,    _)  => CalcLit(a >= b)
+//      case (">=",         a: Long,    b: Int,     _)  => CalcLit(a >= b)
+//      case (">=",         a: Long,    b: Long,    _)  => CalcLit(a >= b)
+//      case (">=",         a: Long,    b: Float,   _)  => CalcLit(a >= b)
+//      case (">=",         a: Long,    b: Double,  _)  => CalcLit(a >= b)
+//      case (">=",         a: Float,   b: Char,    _)  => CalcLit(a >= b)
+//      case (">=",         a: Float,   b: Int,     _)  => CalcLit(a >= b)
+//      case (">=",         a: Float,   b: Long,    _)  => CalcLit(a >= b)
+//      case (">=",         a: Float,   b: Float,   _)  => CalcLit(a >= b)
+//      case (">=",         a: Float,   b: Double,  _)  => CalcLit(a >= b)
+//      case (">=",         a: Double,  b: Char,    _)  => CalcLit(a >= b)
+//      case (">=",         a: Double,  b: Int,     _)  => CalcLit(a >= b)
+//      case (">=",         a: Double,  b: Long,    _)  => CalcLit(a >= b)
+//      case (">=",         a: Double,  b: Float,   _)  => CalcLit(a >= b)
+//      case (">=",         a: Double,  b: Double,  _)  => CalcLit(a >= b)
+//
+//      case ("&&",         a: Boolean, b: Boolean, _)  => CalcLit(a && b)
+//      case ("||",         a: Boolean, b: Boolean, _)  => CalcLit(a || b)
+//
+//      case ("Min",        a: Int,     b: Int,     _)  => CalcLit(min(a, b))
+//      case ("Min",        a: Long,    b: Long,    _)  => CalcLit(min(a, b))
+//      case ("Min",        a: Float,   b: Float,   _)  => CalcLit(min(a, b))
+//      case ("Min",        a: Double,  b: Double,  _)  => CalcLit(min(a, b))
+//
+//      case ("Max",        a: Int,     b: Int,     _)  => CalcLit(max(a, b))
+//      case ("Max",        a: Long,    b: Long,    _)  => CalcLit(max(a, b))
+//      case ("Max",        a: Float,   b: Float,   _)  => CalcLit(max(a, b))
+//      case ("Max",        a: Double,  b: Double,  _)  => CalcLit(max(a, b))
+//
+//      case ("Substring",  a: String,  b: Int,     _)  => CalcLit(a.substring(b))
+//      case ("Length",     a: String,  _,          _)  => CalcLit(a.length)
+//      case ("CharAt",     a: String,  b: Int,     _)  => CalcLit(a.charAt(b))
+
+      case _ => abort(s"Unsupported $funcName[$aTree, $bTree, $cTree]")
+    }
+    (a, b, c) match {
+      //result is literal if all inputs are literal
+      case (CalcLitTree(at), CalcLitTree(bt), CalcLitTree(ct)) => CalcLitTree(outTree)
+      //result is non-literal if not all inputs are literal
+      case _ => CalcNLitTree(outTree)
+    }
   }
 
   final class MaterializeOpAuxGen(opTpe: Type, nTpe: Type) {
@@ -867,16 +919,17 @@ trait GeneralMacros {
       val opResult = extractSingletonValue(opTpe)
 
       val genTree = (funcName, opResult) match {
-        case (CalcLit("ToNat"), CalcLit(t : Int)) => genOpTreeNat(opTpe, t)
-        case (CalcLit(s : String), CalcLit(t)) =>  genOpTreeLit(opTpe, t)
+        case (CalcLit("ToNat"), CalcLitTree(t)) =>
+          evalTyped(t) match {
+            case (Constant(lit : Int)) => genOpTreeNat(opTpe, lit)
+            case _ => abort(s"Cannot evaluate ToNat[$t]")
+          }
+        case (_, CalcLitTree(t)) =>
+            genOpTreeLit(opTpe, evalTyped(t).value)
         case (_, CalcNLitTree(t : Tree)) =>
-//          val msg = c.eval(c.Expr(c.typecheck(
-//            q"""
-//               1.0
-//             """))).asInstanceOf[Double]
           genOpTreeWitness(opTpe, t)
-        case (CalcLit("AcceptNonLiteral"), CalcNLit(t)) => genOpTreeNLit(opTpe, t)
-        case (CalcLit("AcceptNonLiteral"), CalcUnknown(t)) => genOpTreeUnknown(opTpe, t)
+//        case (CalcLit("AcceptNonLiteral"), CalcNLit(t)) => genOpTreeNLit(opTpe, t)
+//        case (CalcLit("AcceptNonLiteral"), CalcUnknown(t)) => genOpTreeUnknown(opTpe, t)
         case _ => extractionFailed(opTpe)
       }
 
