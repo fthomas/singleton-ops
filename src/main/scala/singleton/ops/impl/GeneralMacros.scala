@@ -79,6 +79,11 @@ trait GeneralMacros {
     *  available known-at-compile-time values.
     */
   object Const {
+    ////////////////////////////////////////////////////////////////////////
+    // For Shapeless Nat
+    // -----------------
+    // Calculates the integer value of Nat
+    ////////////////////////////////////////////////////////////////////////
     def calcNat(tp: Type)(implicit annotatedSym : TypeSymbol): Int = {
       tp match {
         case TypeRef(_, sym, args) if sym == symbolOf[shapeless.Succ[_]] =>
@@ -89,6 +94,7 @@ trait GeneralMacros {
           abort(s"Given Nat type is defective: $tp, raw: ${showRaw(tp)}")
       }
     }
+    ////////////////////////////////////////////////////////////////////////
     def unapply(tp: Type)(implicit annotatedSym : TypeSymbol): Option[Calc] = {
       val g = c.universe.asInstanceOf[SymbolTable]
       implicit def fixSymbolOps(sym: Symbol): g.Symbol = sym.asInstanceOf[g.Symbol]
