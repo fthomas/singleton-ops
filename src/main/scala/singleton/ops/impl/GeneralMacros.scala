@@ -99,7 +99,7 @@ trait GeneralMacros {
     def unapplyOpArg(tp: Type)(implicit annotatedSym : TypeSymbol): Option[Calc] = {
       unapply(tp) match {
         case Some(CalcLit(t)) =>
-          Some(CalcLitTree(Literal(Constant(t))))
+          Some(CalcLit(t))//Some(CalcLitTree(Literal(Constant(t))))
         case Some(CalcNLit(t)) =>
           Some(CalcNLitTree(q"_root_.shapeless.Witness[$tp].value"))
         case Some(CalcLitTree(t)) =>
@@ -117,10 +117,10 @@ trait GeneralMacros {
 
       //If function is set/get variable we keep the original string,
       //otherwise we get the variable's value
-      val aValue = unapply(args(1))
+      val aValue = unapplyOpArg(args(1))
       val retVal = (funcName, aValue) match {
-        case (Some(CalcLit("NL")), _) => //Getting non-literal type
-          Some(CalcNLit(q"_root_.shapeless.Witness[${args(1)}].value"))
+//        case (Some(CalcLit("NL")), _) => //Getting non-literal type
+//          Some(CalcNLit(q"_root_.shapeless.Witness[${args(1)}].value"))
         case (Some(CalcLit("AcceptNonLiteral")), _) => //Getting non-literal type
           aValue match {
             case None => Some(CalcUnknown(args(1)))
@@ -134,30 +134,32 @@ trait GeneralMacros {
           }
         case (Some(CalcLit("ITE")), Some(CalcLit(cond : Boolean))) => //Special control case: ITE (If-Then-Else)
           if (cond)
-            unapply(args(2)) //true (then) part of the IF
+            unapplyOpArg(args(2)) //true (then) part of the IF
           else
-            unapply(args(3)) //false (else) part of the IF
+            unapplyOpArg(args(3)) //false (else) part of the IF
         case (Some(CalcLit("ITE")), Some(CalcNLBoolean)) => //Non-literal condition will return non-literal type
-          val bValue = unapply(args(2)) //used to take the type from the true clause of the If
+          val bValue = unapplyOpArg(args(2)) //used to take the type from the true clause of the If
           bValue match {
             case Some(Calc(t)) => Some(CalcNLit(t)) //forcing non-literal type
             case _ => None
           }
         case _ => //regular cases
-          val bValue = unapply(args(2))
-          val cValue = unapply(args(3))
+          val bValue = unapplyOpArg(args(2))
+          val cValue = unapplyOpArg(args(3))
           (funcName, aValue, bValue, cValue) match {
             case (Some(CalcLit("Require")), Some(CalcLit(a)), Some(CalcLit(b)), None) =>
               implicit val annotatedSym : TypeSymbol = args(3).typeSymbol.asType
               Some(opCalc("Require", a, b, c))
             case (Some(CalcLit(f : String)), Some(Calc(a)), Some(Calc(b)), Some(Calc(c))) =>
-              val calc = opCalc(f, a, b, c)
-              (aValue, bValue, cValue) match {
-                //All parameters are literals, so the result is a literal
-                case (Some(CalcLit(a0)), Some(CalcLit(b0)), Some(CalcLit(c0))) => Some(calc)
-                //One or more of the paramters is non-literal, so the result is non-literal
-                case _ => Some(CalcNLit(calc.t))
-              }
+              Some(opCalc(f, a, b, c))
+//              val calc = opCalc(f, a, b, c)
+//              (aValue, bValue, cValue) match {
+//                //All parameters are literals, so the result is a literal
+//                case (Some(CalcLit(a0)), Some(CalcLit(b0)), Some(CalcLit(c0))) => Some(calc)
+//                //One or more of the paramters is non-literal, so the result is non-literal
+//                case Some(CalcNLitTree(t)) => Some(CalcNLitTree(calc.t))
+//                case _ => None
+//              }
             case _ => None
           }
       }
@@ -374,7 +376,7 @@ trait GeneralMacros {
       case ("Id",         a: Double, _, _)            => CalcLit(a)
       case ("Id",         a: String, _, _)            => CalcLit(a)
       case ("Id",         a: Boolean, _, _)           => CalcLit(a)
-      case ("Id",         a: Tree, _, _)              => CalcNLit(a)
+      case ("Id",         a: Tree, _, _)              => CalcNLitTree(a)
 
       case ("ToNat",      a: Char, _, _)              => CalcLit(a.toInt)
       case ("ToNat",      a: Int, _, _)               => CalcLit(a.toInt)
@@ -565,7 +567,7 @@ trait GeneralMacros {
       case ("+",          a: Double,  b: Float,   _)  => CalcLit(a + b)
       case ("+",          a: Double,  b: Double,  _)  => CalcLit(a + b)
       case ("+",          a: String,  b: String,  _)  => CalcLit(a + b) //Concat
-      case ("+",          a: Tree,    b: Int,     _)  => CalcNLit(q"$a + $b") //Concat
+      case ("+",          a: Tree,    b: Int,     _)  => CalcNLitTree(q"$a + $b") //Concat
 
       case ("-",          a: Char,    b: Char,    _)  => CalcLit(a - b)
       case ("-",          a: Char,    b: Int,     _)  => CalcLit(a - b)
@@ -867,12 +869,12 @@ trait GeneralMacros {
       val genTree = (funcName, opResult) match {
         case (CalcLit("ToNat"), CalcLit(t : Int)) => genOpTreeNat(opTpe, t)
         case (CalcLit(s : String), CalcLit(t)) =>  genOpTreeLit(opTpe, t)
-        case (_, CalcNLit(t : Tree)) =>
-          val msg = c.eval(c.Expr(c.typecheck(
-            q"""
-               1.0
-             """))).asInstanceOf[Double]
-          abort(math.sin(msg).toString)
+        case (_, CalcNLitTree(t : Tree)) =>
+//          val msg = c.eval(c.Expr(c.typecheck(
+//            q"""
+//               1.0
+//             """))).asInstanceOf[Double]
+          genOpTreeWitness(opTpe, t)
         case (CalcLit("AcceptNonLiteral"), CalcNLit(t)) => genOpTreeNLit(opTpe, t)
         case (CalcLit("AcceptNonLiteral"), CalcUnknown(t)) => genOpTreeUnknown(opTpe, t)
         case _ => extractionFailed(opTpe)
