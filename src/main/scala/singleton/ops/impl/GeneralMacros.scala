@@ -126,6 +126,8 @@ trait GeneralMacros {
           //otherwise we get the variable's value
           val aValue = unapply(args(1))
           val retVal = (funcName, aValue) match {
+            case (Some(CalcLit("NL")), _) => //Getting non-literal type
+              Some(CalcNLit(q"_root_.shapeless.Witness[${args(1)}].value"))
             case (Some(CalcLit("AcceptNonLiteral")), _) => //Getting non-literal type
               aValue match {
                 case None => Some(CalcUnknown(args(1)))
@@ -211,13 +213,15 @@ trait GeneralMacros {
     val outTypeName = TypeName("Out" + outWideTpe.typeSymbol.name.toString)
     val outTpe = constantTypeOf(t)
     val outTree = constantTreeOf(t)
+    val dummy = TermName(c.freshName())
     q"""
       new $opTpe {
+        final val $dummy = $outWideLiteral
         type OutWide = $outWideTpe
-        type Out = $outTpe
-        type Value = $outTpe
-        type $outTypeName = $outTpe
-        final val value: $outTpe = $outTree
+        type Out = $dummy.type
+        type Value = Out
+        type $outTypeName = Out
+        final val value: Value = $outWideLiteral
         final val isLiteral = true
         final val valueWide: $outWideTpe = $outWideLiteral
       }
@@ -239,6 +243,21 @@ trait GeneralMacros {
         final val value: $outTpe = $outTree
         final val isLiteral = true
         final val valueWide: $outWideTpe = $outWideLiteral
+      }
+      """
+  }
+
+  def genOpTreeWitness(opTpe : Type, t : Tree)(implicit annotatedSym : TypeSymbol) : Tree = {
+    val dummy = TermName(c.freshName())
+    q"""
+      new $opTpe {
+        final val $dummy = $t
+        type OutWide = $dummy.type
+        type Out = $dummy.type
+        type Value = $dummy.type
+        final val value: Value = $dummy
+        final val isLiteral = false
+        final val valueWide: $dummy.type = $dummy
       }
       """
   }
@@ -325,6 +344,7 @@ trait GeneralMacros {
       case ("Id",         a: Double, _, _)            => CalcLit(a)
       case ("Id",         a: String, _, _)            => CalcLit(a)
       case ("Id",         a: Boolean, _, _)           => CalcLit(a)
+      case ("Id",         a: Tree, _, _)              => CalcNLit(a)
 
       case ("ToNat",      a: Char, _, _)              => CalcLit(a.toInt)
       case ("ToNat",      a: Int, _, _)               => CalcLit(a.toInt)
@@ -515,6 +535,7 @@ trait GeneralMacros {
       case ("+",          a: Double,  b: Float,   _)  => CalcLit(a + b)
       case ("+",          a: Double,  b: Double,  _)  => CalcLit(a + b)
       case ("+",          a: String,  b: String,  _)  => CalcLit(a + b) //Concat
+      case ("+",          a: Tree,    b: Int,     _)  => CalcNLit(q"$a + $b") //Concat
 
       case ("-",          a: Char,    b: Char,    _)  => CalcLit(a - b)
       case ("-",          a: Char,    b: Int,     _)  => CalcLit(a - b)
@@ -816,6 +837,13 @@ trait GeneralMacros {
       val genTree = (funcName, opResult) match {
         case (CalcLit("ToNat"), CalcLit(t : Int)) => genOpTreeNat(opTpe, t)
         case (CalcLit(s : String), CalcLit(t)) =>  genOpTreeLit(opTpe, t)
+        case (_, CalcNLit(t : Tree)) =>
+//          val msg = c.eval(c.Expr(c.typecheck(
+//            q"""
+//               "Boom shagaboom"
+//             """))).asInstanceOf[String]
+//          abort(msg)
+          genOpTreeWitness(opTpe, t)
         case (CalcLit("AcceptNonLiteral"), CalcNLit(t)) => genOpTreeNLit(opTpe, t)
         case (CalcLit("AcceptNonLiteral"), CalcUnknown(t)) => genOpTreeUnknown(opTpe, t)
         case _ => extractionFailed(opTpe)
