@@ -193,9 +193,6 @@ trait GeneralMacros {
           val bValue = unapplyOpArg(args(2))
           val cValue = unapplyOpArg(args(3))
           (aValue, bValue, cValue) match {
-//            case (Some(CalcLit("Require")), Some(CalcLit(a)), Some(CalcLit(b)), None) =>
-//              implicit val annotatedSym : TypeSymbol = args(3).typeSymbol.asType
-//              Some(opCalc("Require", a, b, c))
             case (Some(a : Calc), Some(b: Calc), Some(c : Calc)) =>
               Some(opCalc(funcName, a, b, c))
             case _ => None
@@ -420,15 +417,6 @@ trait GeneralMacros {
         case t : CalcNLit => t
         case _ => unsupported()
       }
-      case "Negate" => a match {
-        case CalcLit.Char(t) => CalcLit(-t)
-        case CalcLit.Int(t) => CalcLit(-t)
-        case CalcLit.Long(t) => CalcLit(-t)
-        case CalcLit.Float(t) => CalcLit(-t)
-        case CalcLit.Double(t) => CalcLit(-t)
-        case nl : CalcNLit => CalcNLit(q"-$nl")
-        case _ => unsupported()
-      }
       case "ToNat" => a match { //Has a special case to handle this in MaterializeOpAuxGen
         case CalcLit.Char(t) => CalcLit(t.toInt)
         case CalcLit.Int(t) => CalcLit(t.toInt)
@@ -495,133 +483,159 @@ trait GeneralMacros {
         case _ => unsupported()
       }
 
-//      case "IsNat" => q"$aTree.isInstanceOf[Int] && $aTree >= 0"
-//      case "IsChar" => q"$aTree.isInstanceOf[Char]"
-//      case "IsInt" => q"$aTree.isInstanceOf[Int]"
-//      case "IsLong" => q"$aTree.isInstanceOf[Long]"
-//      case "IsFloat" => q"$aTree.isInstanceOf[Float]"
-//      case "IsDouble" => q"$aTree.isInstanceOf[Double]"
-//      case "IsString" => q"$aTree.isInstanceOf[String]"
-//      case "IsBoolean" => q"$aTree.isInstanceOf[Boolean]"
-//      case "Negate" => q"-$aTree"
-//      case "Abs" => a match {
-//        case CalcLitTree(at) =>
-//          evalTyped(aTree) match {
-//            case (Constant(t : Int)) =>
-//            case (Constant(t : Long)) =>
-//            case (Constant(t : Float)) =>
-//            case (Constant(t : Double)) =>
-//          }
-//        case CalcNLitTree(at) => aTree
-//      }
-
-//      case ("IsNat",      a: Char, _, _)              => CalcLit(false)
-//      case ("IsNat",      a: Int, _, _)               => CalcLit(a >= 0)
-//      case ("IsNat",      a: Long, _, _)              => CalcLit(false)
-//      case ("IsNat",      a: Float, _, _)             => CalcLit(false)
-//      case ("IsNat",      a: Double, _, _)            => CalcLit(false)
-//      case ("IsNat",      a: String, _, _)            => CalcLit(false)
-//      case ("IsNat",      a: Boolean, _, _)           => CalcLit(false)
-//
-//      case ("IsChar",     a: Char, _, _)              => CalcLit(true)
-//      case ("IsChar",     a: Int, _, _)               => CalcLit(false)
-//      case ("IsChar",     a: Long, _, _)              => CalcLit(false)
-//      case ("IsChar",     a: Float, _, _)             => CalcLit(false)
-//      case ("IsChar",     a: Double, _, _)            => CalcLit(false)
-//      case ("IsChar",     a: String, _, _)            => CalcLit(false)
-//      case ("IsChar",     a: Boolean, _, _)           => CalcLit(false)
-//
-//      case ("IsInt",      a: Char, _, _)              => CalcLit(false)
-//      case ("IsInt",      a: Int, _, _)               => CalcLit(true)
-//      case ("IsInt",      a: Long, _, _)              => CalcLit(false)
-//      case ("IsInt",      a: Float, _, _)             => CalcLit(false)
-//      case ("IsInt",      a: Double, _, _)            => CalcLit(false)
-//      case ("IsInt",      a: String, _, _)            => CalcLit(false)
-//      case ("IsInt",      a: Boolean, _, _)           => CalcLit(false)
-//
-//      case ("IsLong",     a: Char, _, _)              => CalcLit(false)
-//      case ("IsLong",     a: Int, _, _)               => CalcLit(false)
-//      case ("IsLong",     a: Long, _, _)              => CalcLit(true)
-//      case ("IsLong",     a: Float, _, _)             => CalcLit(false)
-//      case ("IsLong",     a: Double, _, _)            => CalcLit(false)
-//      case ("IsLong",     a: String, _, _)            => CalcLit(false)
-//      case ("IsLong",     a: Boolean, _, _)           => CalcLit(false)
-//
-//      case ("IsFloat",    a: Char, _, _)              => CalcLit(false)
-//      case ("IsFloat",    a: Int, _, _)               => CalcLit(false)
-//      case ("IsFloat",    a: Long, _, _)              => CalcLit(false)
-//      case ("IsFloat",    a: Float, _, _)             => CalcLit(true)
-//      case ("IsFloat",    a: Double, _, _)            => CalcLit(false)
-//      case ("IsFloat",    a: String, _, _)            => CalcLit(false)
-//      case ("IsFloat",    a: Boolean, _, _)           => CalcLit(false)
-//
-//      case ("IsDouble",   a: Char, _, _)              => CalcLit(false)
-//      case ("IsDouble",   a: Int, _, _)               => CalcLit(false)
-//      case ("IsDouble",   a: Long, _, _)              => CalcLit(false)
-//      case ("IsDouble",   a: Float, _, _)             => CalcLit(false)
-//      case ("IsDouble",   a: Double, _, _)            => CalcLit(true)
-//      case ("IsDouble",   a: String, _, _)            => CalcLit(false)
-//      case ("IsDouble",   a: Boolean, _, _)           => CalcLit(false)
-//
-//      case ("IsString",   a: Char, _, _)              => CalcLit(false)
-//      case ("IsString",   a: Int, _, _)               => CalcLit(false)
-//      case ("IsString",   a: Long, _, _)              => CalcLit(false)
-//      case ("IsString",   a: Float, _, _)             => CalcLit(false)
-//      case ("IsString",   a: Double, _, _)            => CalcLit(false)
-//      case ("IsString",   a: String, _, _)            => CalcLit(true)
-//      case ("IsString",   a: Boolean, _, _)           => CalcLit(false)
-//
-//      case ("IsBoolean",  a: Char, _, _)              => CalcLit(false)
-//      case ("IsBoolean",  a: Int, _, _)               => CalcLit(false)
-//      case ("IsBoolean",  a: Long, _, _)              => CalcLit(false)
-//      case ("IsBoolean",  a: Float, _, _)             => CalcLit(false)
-//      case ("IsBoolean",  a: Double, _, _)            => CalcLit(false)
-//      case ("IsBoolean",  a: String, _, _)            => CalcLit(false)
-//      case ("IsBoolean",  a: Boolean, _, _)           => CalcLit(true)
-//
-//      case ("Negate",     a: Char, _, _)              => CalcLit(-a)
-//      case ("Negate",     a: Int, _, _)               => CalcLit(-a)
-//      case ("Negate",     a: Long, _, _)              => CalcLit(-a)
-//      case ("Negate",     a: Float, _, _)             => CalcLit(-a)
-//      case ("Negate",     a: Double, _, _)            => CalcLit(-a)
-//
-//      case ("Abs",        a: Int, _, _)               => CalcLit(abs(a))
-//      case ("Abs",        a: Long, _, _)              => CalcLit(abs(a))
-//      case ("Abs",        a: Float, _, _)             => CalcLit(abs(a))
-//      case ("Abs",        a: Double, _, _)            => CalcLit(abs(a))
-//
-//      case ("NumberOfLeadingZeros", a: Int, _, _)     => CalcLit(java.lang.Integer.numberOfLeadingZeros(a))
-//      case ("NumberOfLeadingZeros", a: Long, _, _)    => CalcLit(java.lang.Long.numberOfLeadingZeros(a))
-//
-//      case ("Floor",      a: Float, _, _)             => CalcLit(floor(a.toDouble))
-//      case ("Floor",      a: Double, _, _)            => CalcLit(floor(a))
-//
-//      case ("Ceil",       a: Float, _, _)             => CalcLit(ceil(a.toDouble))
-//      case ("Ceil",       a: Double, _, _)            => CalcLit(ceil(a))
-//
-//      case ("Round",      a: Float, _, _)             => CalcLit(round(a))
-//      case ("Round",      a: Double, _, _)            => CalcLit(round(a))
-//
-//      case ("Sin",        a: Float, _, _)             => CalcLit(sin(a.toDouble))
-//      case ("Sin",        a: Double, _, _)            => CalcLit(sin(a))
-//
-//      case ("Cos",        a: Float, _, _)             => CalcLit(cos(a.toDouble))
-//      case ("Cos",        a: Double, _, _)            => CalcLit(cos(a))
-//
-//      case ("Tan",        a: Float, _, _)             => CalcLit(tan(a.toDouble))
-//      case ("Tan",        a: Double, _, _)            => CalcLit(tan(a))
-//
-//      case ("Sqrt",       a: Float, _, _)             => CalcLit(sqrt(a.toDouble))
-//      case ("Sqrt",       a: Double, _, _)            => CalcLit(sqrt(a))
-//
-//      case ("Log",        a: Float, _, _)             => CalcLit(log(a.toDouble))
-//      case ("Log",        a: Double, _, _)            => CalcLit(log(a))
-//
-//      case ("Log10",      a: Float, _, _)             => CalcLit(log10(a.toDouble))
-//      case ("Log10",      a: Double, _, _)            => CalcLit(log10(a))
-//
-//      case ("Reverse",    a: String, _, _)            => CalcLit(a.reverse)
-//      case ("!",          a: Boolean, _, _)           => CalcLit(!a)
+      case "IsNat" => a match {
+        case CalcLit.Int(t) => CalcLit(t >= 0)
+        case cl : CalcLit => CalcLit(false)
+        case nl : CalcNLit => CalcNLit(q"if ($nl.isInstanceOf[Int]) $nl.asInstanceOf[Int] >= 0 else false")
+        case _ => unsupported()
+      }
+      case "IsChar" => a match {
+        case CalcLit.Char(t) => CalcLit(true)
+        case cl : CalcLit => CalcLit(false)
+        case nl : CalcNLit => CalcNLit(q"$nl.isInstanceOf[Char]")
+        case _ => unsupported()
+      }
+      case "IsInt" => a match {
+        case CalcLit.Int(t) => CalcLit(true)
+        case cl : CalcLit => CalcLit(false)
+        case nl : CalcNLit => CalcNLit(q"$nl.isInstanceOf[Int]")
+        case _ => unsupported()
+      }
+      case "IsLong" => a match {
+        case CalcLit.Long(t) => CalcLit(true)
+        case cl : CalcLit => CalcLit(false)
+        case nl : CalcNLit => CalcNLit(q"$nl.isInstanceOf[Long]")
+        case _ => unsupported()
+      }
+      case "IsFloat" => a match {
+        case CalcLit.Float(t) => CalcLit(true)
+        case cl : CalcLit => CalcLit(false)
+        case nl : CalcNLit => CalcNLit(q"$nl.isInstanceOf[Float]")
+        case _ => unsupported()
+      }
+      case "IsDouble" => a match {
+        case CalcLit.Double(t) => CalcLit(true)
+        case cl : CalcLit => CalcLit(false)
+        case nl : CalcNLit => CalcNLit(q"$nl.isInstanceOf[Double]")
+        case _ => unsupported()
+      }
+      case "IsString" => a match {
+        case CalcLit.String(t) => CalcLit(true)
+        case cl : CalcLit => CalcLit(false)
+        case nl : CalcNLit => CalcNLit(q"$nl.isInstanceOf[String]")
+        case _ => unsupported()
+      }
+      case "IsBoolean" => a match {
+        case CalcLit.Boolean(t) => CalcLit(true)
+        case cl : CalcLit => CalcLit(false)
+        case nl : CalcNLit => CalcNLit(q"$nl.isInstanceOf[Boolean]")
+        case _ => unsupported()
+      }
+      case "Negate" => a match {
+        case CalcLit.Char(t) => CalcLit(-t)
+        case CalcLit.Int(t) => CalcLit(-t)
+        case CalcLit.Long(t) => CalcLit(-t)
+        case CalcLit.Float(t) => CalcLit(-t)
+        case CalcLit.Double(t) => CalcLit(-t)
+        case nl : CalcNLit => CalcNLit(q"-$nl")
+        case _ => unsupported()
+      }
+      case "Abs" => a match {
+        case CalcLit.Int(t) => CalcLit(math.abs(t))
+        case CalcLit.Long(t) => CalcLit(math.abs(t))
+        case CalcLit.Float(t) => CalcLit(math.abs(t))
+        case CalcLit.Double(t) => CalcLit(math.abs(t))
+        case nl : CalcNLit => CalcNLit(q"_root_.scala.math.abs($nl)")
+        case _ => unsupported()
+      }
+      case "NumberOfLeadingZeros" => a match {
+        case CalcLit.Int(t) => CalcLit(nlz(t))
+        case CalcLit.Long(t) => CalcLit(nlz(t))
+        case nl : CalcNLit => CalcNLit(q"_root_.singleton.ops.impl.nlz($nl)")
+        case _ => unsupported()
+      }
+      case "Floor" => a match {
+        case CalcLit.Float(t) => CalcLit(math.floor(t.toDouble))
+        case CalcLit.Double(t) => CalcLit(math.floor(t))
+        case nl : CalcNLit => CalcNLit(q"_root_.scala.math.floor($nl.toDouble)")
+        case _ => unsupported()
+      }
+      case "Ceil" => a match {
+        case CalcLit.Float(t) => CalcLit(math.ceil(t.toDouble))
+        case CalcLit.Double(t) => CalcLit(math.ceil(t))
+        case nl : CalcNLit => CalcNLit(q"_root_.scala.math.ceil($nl.toDouble)")
+        case _ => unsupported()
+      }
+      case "Round" => a match {
+        case CalcLit.Float(t) => CalcLit(math.round(t.toDouble))
+        case CalcLit.Double(t) => CalcLit(math.round(t))
+        case nl : CalcNLit => CalcNLit(q"_root_.scala.math.round($nl.toDouble)")
+        case _ => unsupported()
+      }
+      case "Sin" => a match {
+        case CalcLit.Float(t) => CalcLit(math.sin(t.toDouble))
+        case CalcLit.Double(t) => CalcLit(math.sin(t))
+        case nl : CalcNLit => CalcNLit(q"_root_.scala.math.sin($nl.toDouble)")
+        case _ => unsupported()
+      }
+      case "Cos" => a match {
+        case CalcLit.Float(t) => CalcLit(math.cos(t.toDouble))
+        case CalcLit.Double(t) => CalcLit(math.cos(t))
+        case nl : CalcNLit => CalcNLit(q"_root_.scala.math.cos($nl.toDouble)")
+        case _ => unsupported()
+      }
+      case "Tan" => a match {
+        case CalcLit.Float(t) => CalcLit(math.tan(t.toDouble))
+        case CalcLit.Double(t) => CalcLit(math.tan(t))
+        case nl : CalcNLit => CalcNLit(q"_root_.scala.math.tan($nl.toDouble)")
+        case _ => unsupported()
+      }
+      case "Sqrt" => a match {
+        case CalcLit.Float(t) => CalcLit(math.sqrt(t.toDouble))
+        case CalcLit.Double(t) => CalcLit(math.sqrt(t))
+        case nl : CalcNLit => CalcNLit(q"_root_.scala.math.sqrt($nl.toDouble)")
+        case _ => unsupported()
+      }
+      case "Log" => a match {
+        case CalcLit.Float(t) => CalcLit(math.log(t.toDouble))
+        case CalcLit.Double(t) => CalcLit(math.log(t))
+        case nl : CalcNLit => CalcNLit(q"_root_.scala.math.log($nl.toDouble)")
+        case _ => unsupported()
+      }
+      case "Log10" => a match {
+        case CalcLit.Float(t) => CalcLit(math.log10(t.toDouble))
+        case CalcLit.Double(t) => CalcLit(math.log10(t))
+        case nl : CalcNLit => CalcNLit(q"_root_.scala.math.log10($nl.toDouble)")
+        case _ => unsupported()
+      }
+      case "Reverse" => a match {
+        case CalcLit.String(t) => CalcLit(t.reverse)
+        case nl : CalcNLit => CalcNLit(q"$nl.reverse")
+        case _ => unsupported()
+      }
+      case "!" => a match {
+        case CalcLit.Boolean(t) => CalcLit(!t)
+        case nl : CalcNLit => CalcNLit(q"!$nl")
+        case _ => unsupported()
+      }
+      case "Require" => a match {
+        case CalcLit.Boolean(true) => CalcLit(true)
+        case CalcLit.Boolean(false) => b match {
+          case CalcLit.String(msg) => c match {
+            case CalcUnknown(t) => //redirection of implicit not found annotation is required to the given symbol
+              implicit val annotatedSym : TypeSymbol = t.typeSymbol.asType
+              abort(msg)
+            case _ => abort(msg)
+          }
+          case msg : CalcNLit => CalcNLit(q"require(false, $msg); false")
+          case _ => unsupported()
+        }
+        case cond : CalcNLit => b match {
+          case msg : CalcVal => CalcNLit(q"require($cond, $msg); true")
+          case _ => unsupported()
+        }
+        case _ => unsupported()
+      }
 //      case ("Require",    a: Boolean, b: String, _)   =>
 //        if (!a)
 //          abort(b)
