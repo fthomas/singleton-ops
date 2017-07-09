@@ -329,33 +329,6 @@ trait GeneralMacros {
       """
   }
 
-  def genOpTreeNLit[T](opTpe : Type, t : T)(implicit annotatedSym : TypeSymbol) : Tree = {
-    val outTpe = runtimeTypeOf(t)
-    q"""
-      new $opTpe {
-        type OutWide = Option[$outTpe]
-        type Out = $outTpe
-        type Value = Option[$outTpe]
-        final val value: Option[$outTpe] = None
-        final val isLiteral = false
-        final val valueWide: Option[$outTpe] = None
-      }
-      """
-  }
-
-  def genOpTreeUnknown(opTpe : Type, t : Type)(implicit annotatedSym : TypeSymbol) : Tree = {
-    q"""
-      new $opTpe {
-        type OutWide = Option[$t]
-        type Out = $t
-        type Value = Option[$t]
-        final val value: Option[$t] = None
-        final val isLiteral = false
-        final val valueWide: Option[$t] = None
-      }
-      """
-  }
-
   def extractionFailed(tpe: Type)(implicit annotatedSym : TypeSymbol) = {
     val msg = s"Cannot extract value from $tpe\n" + "showRaw==> " + showRaw(tpe)
     abort(msg)
@@ -410,539 +383,618 @@ trait GeneralMacros {
 
   def opCalc[T1, T2, T3](funcName : String, a : Calc, b : Calc, c : Calc)(implicit annotatedSym : TypeSymbol) : Calc = {
     def unsupported() = abort(s"Unsupported $funcName[$a, $b, $c]")
+    def Id = a match {
+      case t : CalcLit => t
+      case t : CalcNLit => t
+      case _ => unsupported()
+    }
+    def ToNat = a match { //Has a special case to handle this in MaterializeOpAuxGen
+      case CalcLit.Char(t) => CalcLit(t.toInt)
+      case CalcLit.Int(t) => CalcLit(t.toInt)
+      case CalcLit.Long(t) => CalcLit(t.toInt)
+      case CalcLit.Float(t) => CalcLit(t.toInt)
+      case CalcLit.Double(t) => CalcLit(t.toInt)
+      case nl : CalcNLit => CalcNLit(q"$nl.toInt")
+      case _ => unsupported()
+    }
+    def ToChar = a match {
+      case CalcLit.Char(t) => CalcLit(t.toChar)
+      case CalcLit.Int(t) => CalcLit(t.toChar)
+      case CalcLit.Long(t) => CalcLit(t.toChar)
+      case CalcLit.Float(t) => CalcLit(t.toChar)
+      case CalcLit.Double(t) => CalcLit(t.toChar)
+      case nl : CalcNLit => CalcNLit(q"$nl.toChar")
+      case _ => unsupported()
+    }
+    def ToInt = a match {
+      case CalcLit.Char(t) => CalcLit(t.toInt)
+      case CalcLit.Int(t) => CalcLit(t.toInt)
+      case CalcLit.Long(t) => CalcLit(t.toInt)
+      case CalcLit.Float(t) => CalcLit(t.toInt)
+      case CalcLit.Double(t) => CalcLit(t.toInt)
+      case nl : CalcNLit => CalcNLit(q"$nl.toInt")
+      case _ => unsupported()
+    }
+    def ToLong = a match {
+      case CalcLit.Char(t) => CalcLit(t.toLong)
+      case CalcLit.Int(t) => CalcLit(t.toLong)
+      case CalcLit.Long(t) => CalcLit(t.toLong)
+      case CalcLit.Float(t) => CalcLit(t.toLong)
+      case CalcLit.Double(t) => CalcLit(t.toLong)
+      case nl : CalcNLit => CalcNLit(q"$nl.toLong")
+      case _ => unsupported()
+    }
+    def ToFloat = a match {
+      case CalcLit.Char(t) => CalcLit(t.toFloat)
+      case CalcLit.Int(t) => CalcLit(t.toFloat)
+      case CalcLit.Long(t) => CalcLit(t.toFloat)
+      case CalcLit.Float(t) => CalcLit(t.toFloat)
+      case CalcLit.Double(t) => CalcLit(t.toFloat)
+      case nl : CalcNLit => CalcNLit(q"$nl.toFloat")
+      case _ => unsupported()
+    }
+    def ToDouble = a match {
+      case CalcLit.Char(t) => CalcLit(t.toDouble)
+      case CalcLit.Int(t) => CalcLit(t.toDouble)
+      case CalcLit.Long(t) => CalcLit(t.toDouble)
+      case CalcLit.Float(t) => CalcLit(t.toDouble)
+      case CalcLit.Double(t) => CalcLit(t.toDouble)
+      case nl : CalcNLit => CalcNLit(q"$nl.toDouble")
+      case _ => unsupported()
+    }
+    def ToString = a match {
+      case CalcLit.Char(t) => CalcLit(t.toString)
+      case CalcLit.Int(t) => CalcLit(t.toString)
+      case CalcLit.Long(t) => CalcLit(t.toString)
+      case CalcLit.Float(t) => CalcLit(t.toString)
+      case CalcLit.Double(t) => CalcLit(t.toString)
+      case CalcLit.String(t) => CalcLit(t.toString)
+      case CalcLit.Boolean(t) => CalcLit(t.toString)
+      case nl : CalcNLit => CalcNLit(q"$nl.toString")
+      case _ => unsupported()
+    }
+    def IsNat = a match {
+      case CalcLit.Int(t) => CalcLit(t >= 0)
+      case cl : CalcLit => CalcLit(false)
+      case nl : CalcNLit => CalcNLit(q"if ($nl.isInstanceOf[Int]) $nl.asInstanceOf[Int] >= 0 else false")
+      case _ => unsupported()
+    }
+    def IsChar = a match {
+      case CalcLit.Char(t) => CalcLit(true)
+      case cl : CalcLit => CalcLit(false)
+      case nl : CalcNLit => CalcNLit(q"$nl.isInstanceOf[Char]")
+      case _ => unsupported()
+    }
+    def IsInt = a match {
+      case CalcLit.Int(t) => CalcLit(true)
+      case cl : CalcLit => CalcLit(false)
+      case nl : CalcNLit => CalcNLit(q"$nl.isInstanceOf[Int]")
+      case _ => unsupported()
+    }
+    def IsLong = a match {
+      case CalcLit.Long(t) => CalcLit(true)
+      case cl : CalcLit => CalcLit(false)
+      case nl : CalcNLit => CalcNLit(q"$nl.isInstanceOf[Long]")
+      case _ => unsupported()
+    }
+    def IsFloat = a match {
+      case CalcLit.Float(t) => CalcLit(true)
+      case cl : CalcLit => CalcLit(false)
+      case nl : CalcNLit => CalcNLit(q"$nl.isInstanceOf[Float]")
+      case _ => unsupported()
+    }
+    def IsDouble = a match {
+      case CalcLit.Double(t) => CalcLit(true)
+      case cl : CalcLit => CalcLit(false)
+      case nl : CalcNLit => CalcNLit(q"$nl.isInstanceOf[Double]")
+      case _ => unsupported()
+    }
+    def IsString = a match {
+      case CalcLit.String(t) => CalcLit(true)
+      case cl : CalcLit => CalcLit(false)
+      case nl : CalcNLit => CalcNLit(q"$nl.isInstanceOf[String]")
+      case _ => unsupported()
+    }
+    def IsBoolean = a match {
+      case CalcLit.Boolean(t) => CalcLit(true)
+      case cl : CalcLit => CalcLit(false)
+      case nl : CalcNLit => CalcNLit(q"$nl.isInstanceOf[Boolean]")
+      case _ => unsupported()
+    }
+    def Negate = a match {
+      case CalcLit.Char(t) => CalcLit(-t)
+      case CalcLit.Int(t) => CalcLit(-t)
+      case CalcLit.Long(t) => CalcLit(-t)
+      case CalcLit.Float(t) => CalcLit(-t)
+      case CalcLit.Double(t) => CalcLit(-t)
+      case nl : CalcNLit => CalcNLit(q"-$nl")
+      case _ => unsupported()
+    }
+    def Abs = a match {
+      case CalcLit.Int(t) => CalcLit(math.abs(t))
+      case CalcLit.Long(t) => CalcLit(math.abs(t))
+      case CalcLit.Float(t) => CalcLit(math.abs(t))
+      case CalcLit.Double(t) => CalcLit(math.abs(t))
+      case nl : CalcNLit => CalcNLit(q"_root_.scala.math.abs($nl)")
+      case _ => unsupported()
+    }
+    def NumberOfLeadingZeros = a match {
+      case CalcLit.Int(t) => CalcLit(nlz(t))
+      case CalcLit.Long(t) => CalcLit(nlz(t))
+      case nl : CalcNLit => CalcNLit(q"_root_.singleton.ops.impl.nlz($nl)")
+      case _ => unsupported()
+    }
+    def Floor = a match {
+      case CalcLit.Float(t) => CalcLit(math.floor(t.toDouble))
+      case CalcLit.Double(t) => CalcLit(math.floor(t))
+      case nl : CalcNLit => CalcNLit(q"_root_.scala.math.floor($nl.toDouble)")
+      case _ => unsupported()
+    }
+    def Ceil = a match {
+      case CalcLit.Float(t) => CalcLit(math.ceil(t.toDouble))
+      case CalcLit.Double(t) => CalcLit(math.ceil(t))
+      case nl : CalcNLit => CalcNLit(q"_root_.scala.math.ceil($nl.toDouble)")
+      case _ => unsupported()
+    }
+    def Round = a match {
+      case CalcLit.Float(t) => CalcLit(math.round(t.toDouble))
+      case CalcLit.Double(t) => CalcLit(math.round(t))
+      case nl : CalcNLit => CalcNLit(q"_root_.scala.math.round($nl.toDouble)")
+      case _ => unsupported()
+    }
+    def Sin = a match {
+      case CalcLit.Float(t) => CalcLit(math.sin(t.toDouble))
+      case CalcLit.Double(t) => CalcLit(math.sin(t))
+      case nl : CalcNLit => CalcNLit(q"_root_.scala.math.sin($nl.toDouble)")
+      case _ => unsupported()
+    }
+    def Cos = a match {
+      case CalcLit.Float(t) => CalcLit(math.cos(t.toDouble))
+      case CalcLit.Double(t) => CalcLit(math.cos(t))
+      case nl : CalcNLit => CalcNLit(q"_root_.scala.math.cos($nl.toDouble)")
+      case _ => unsupported()
+    }
+    def Tan = a match {
+      case CalcLit.Float(t) => CalcLit(math.tan(t.toDouble))
+      case CalcLit.Double(t) => CalcLit(math.tan(t))
+      case nl : CalcNLit => CalcNLit(q"_root_.scala.math.tan($nl.toDouble)")
+      case _ => unsupported()
+    }
+    def Sqrt = a match {
+      case CalcLit.Float(t) => CalcLit(math.sqrt(t.toDouble))
+      case CalcLit.Double(t) => CalcLit(math.sqrt(t))
+      case nl : CalcNLit => CalcNLit(q"_root_.scala.math.sqrt($nl.toDouble)")
+      case _ => unsupported()
+    }
+    def Log = a match {
+      case CalcLit.Float(t) => CalcLit(math.log(t.toDouble))
+      case CalcLit.Double(t) => CalcLit(math.log(t))
+      case nl : CalcNLit => CalcNLit(q"_root_.scala.math.log($nl.toDouble)")
+      case _ => unsupported()
+    }
+    def Log10 = a match {
+      case CalcLit.Float(t) => CalcLit(math.log10(t.toDouble))
+      case CalcLit.Double(t) => CalcLit(math.log10(t))
+      case nl : CalcNLit => CalcNLit(q"_root_.scala.math.log10($nl.toDouble)")
+      case _ => unsupported()
+    }
+    def Reverse = a match {
+      case CalcLit.String(t) => CalcLit(t.reverse)
+      case nl : CalcNLit => CalcNLit(q"$nl.reverse")
+      case _ => unsupported()
+    }
+    def Not = a match {
+      case CalcLit.Boolean(t) => CalcLit(!t)
+      case nl : CalcNLit => CalcNLit(q"!$nl")
+      case _ => unsupported()
+    }
+    def Require = a match {
+      case CalcLit.Boolean(true) => CalcLit(true)
+      case CalcLit.Boolean(false) => b match {
+        case CalcLit.String(msg) => c match {
+          case CalcUnknown(t) => //redirection of implicit not found annotation is required to the given symbol
+            implicit val annotatedSym : TypeSymbol = t.typeSymbol.asType
+            abort(msg)
+          case _ => abort(msg)
+        }
+        case msg : CalcNLit => CalcNLit(q"require(false, $msg); false")
+        case _ => unsupported()
+      }
+      case cond : CalcNLit => b match {
+        case msg : CalcVal => CalcNLit(q"require($cond, $msg); true")
+        case _ => unsupported()
+      }
+      case _ => unsupported()
+    }
+    def Next = b match {
+      case bv : CalcVal => b
+      case _ => unsupported()
+    }
+    def Plus = (a, b) match {
+      case (CalcLit.Char(at), CalcLit.Char(bt)) => CalcLit(at + bt)
+      case (CalcLit.Char(at), CalcLit.Int(bt)) => CalcLit(at + bt)
+      case (CalcLit.Char(at), CalcLit.Long(bt)) => CalcLit(at + bt)
+      case (CalcLit.Char(at), CalcLit.Float(bt)) => CalcLit(at + bt)
+      case (CalcLit.Char(at), CalcLit.Double(bt)) => CalcLit(at + bt)
+      case (CalcLit.Int(at), CalcLit.Char(bt)) => CalcLit(at + bt)
+      case (CalcLit.Int(at), CalcLit.Int(bt)) => CalcLit(at + bt)
+      case (CalcLit.Int(at), CalcLit.Long(bt)) => CalcLit(at + bt)
+      case (CalcLit.Int(at), CalcLit.Float(bt)) => CalcLit(at + bt)
+      case (CalcLit.Int(at), CalcLit.Double(bt)) => CalcLit(at + bt)
+      case (CalcLit.Long(at), CalcLit.Char(bt)) => CalcLit(at + bt)
+      case (CalcLit.Long(at), CalcLit.Int(bt)) => CalcLit(at + bt)
+      case (CalcLit.Long(at), CalcLit.Long(bt)) => CalcLit(at + bt)
+      case (CalcLit.Long(at), CalcLit.Float(bt)) => CalcLit(at + bt)
+      case (CalcLit.Long(at), CalcLit.Double(bt)) => CalcLit(at + bt)
+      case (CalcLit.Float(at), CalcLit.Char(bt)) => CalcLit(at + bt)
+      case (CalcLit.Float(at), CalcLit.Int(bt)) => CalcLit(at + bt)
+      case (CalcLit.Float(at), CalcLit.Long(bt)) => CalcLit(at + bt)
+      case (CalcLit.Float(at), CalcLit.Float(bt)) => CalcLit(at + bt)
+      case (CalcLit.Float(at), CalcLit.Double(bt)) => CalcLit(at + bt)
+      case (CalcLit.Double(at), CalcLit.Char(bt)) => CalcLit(at + bt)
+      case (CalcLit.Double(at), CalcLit.Int(bt)) => CalcLit(at + bt)
+      case (CalcLit.Double(at), CalcLit.Long(bt)) => CalcLit(at + bt)
+      case (CalcLit.Double(at), CalcLit.Float(bt)) => CalcLit(at + bt)
+      case (CalcLit.Double(at), CalcLit.Double(bt)) => CalcLit(at + bt)
+      case (av : CalcVal, bv : CalcVal) => CalcNLit(q"$av + $bv")
+      case _ => unsupported()
+    }
+    def Minus = (a, b) match {
+      case (CalcLit.Char(at), CalcLit.Char(bt)) => CalcLit(at - bt)
+      case (CalcLit.Char(at), CalcLit.Int(bt)) => CalcLit(at - bt)
+      case (CalcLit.Char(at), CalcLit.Long(bt)) => CalcLit(at - bt)
+      case (CalcLit.Char(at), CalcLit.Float(bt)) => CalcLit(at - bt)
+      case (CalcLit.Char(at), CalcLit.Double(bt)) => CalcLit(at - bt)
+      case (CalcLit.Int(at), CalcLit.Char(bt)) => CalcLit(at - bt)
+      case (CalcLit.Int(at), CalcLit.Int(bt)) => CalcLit(at - bt)
+      case (CalcLit.Int(at), CalcLit.Long(bt)) => CalcLit(at - bt)
+      case (CalcLit.Int(at), CalcLit.Float(bt)) => CalcLit(at - bt)
+      case (CalcLit.Int(at), CalcLit.Double(bt)) => CalcLit(at - bt)
+      case (CalcLit.Long(at), CalcLit.Char(bt)) => CalcLit(at - bt)
+      case (CalcLit.Long(at), CalcLit.Int(bt)) => CalcLit(at - bt)
+      case (CalcLit.Long(at), CalcLit.Long(bt)) => CalcLit(at - bt)
+      case (CalcLit.Long(at), CalcLit.Float(bt)) => CalcLit(at - bt)
+      case (CalcLit.Long(at), CalcLit.Double(bt)) => CalcLit(at - bt)
+      case (CalcLit.Float(at), CalcLit.Char(bt)) => CalcLit(at - bt)
+      case (CalcLit.Float(at), CalcLit.Int(bt)) => CalcLit(at - bt)
+      case (CalcLit.Float(at), CalcLit.Long(bt)) => CalcLit(at - bt)
+      case (CalcLit.Float(at), CalcLit.Float(bt)) => CalcLit(at - bt)
+      case (CalcLit.Float(at), CalcLit.Double(bt)) => CalcLit(at - bt)
+      case (CalcLit.Double(at), CalcLit.Char(bt)) => CalcLit(at - bt)
+      case (CalcLit.Double(at), CalcLit.Int(bt)) => CalcLit(at - bt)
+      case (CalcLit.Double(at), CalcLit.Long(bt)) => CalcLit(at - bt)
+      case (CalcLit.Double(at), CalcLit.Float(bt)) => CalcLit(at - bt)
+      case (CalcLit.Double(at), CalcLit.Double(bt)) => CalcLit(at - bt)
+      case (av : CalcVal, bv : CalcVal) => CalcNLit(q"$av - $bv")
+      case _ => unsupported()
+    }
+    def Mul = (a, b) match {
+      case (CalcLit.Char(at), CalcLit.Char(bt)) => CalcLit(at * bt)
+      case (CalcLit.Char(at), CalcLit.Int(bt)) => CalcLit(at * bt)
+      case (CalcLit.Char(at), CalcLit.Long(bt)) => CalcLit(at * bt)
+      case (CalcLit.Char(at), CalcLit.Float(bt)) => CalcLit(at * bt)
+      case (CalcLit.Char(at), CalcLit.Double(bt)) => CalcLit(at * bt)
+      case (CalcLit.Int(at), CalcLit.Char(bt)) => CalcLit(at * bt)
+      case (CalcLit.Int(at), CalcLit.Int(bt)) => CalcLit(at * bt)
+      case (CalcLit.Int(at), CalcLit.Long(bt)) => CalcLit(at * bt)
+      case (CalcLit.Int(at), CalcLit.Float(bt)) => CalcLit(at * bt)
+      case (CalcLit.Int(at), CalcLit.Double(bt)) => CalcLit(at * bt)
+      case (CalcLit.Long(at), CalcLit.Char(bt)) => CalcLit(at * bt)
+      case (CalcLit.Long(at), CalcLit.Int(bt)) => CalcLit(at * bt)
+      case (CalcLit.Long(at), CalcLit.Long(bt)) => CalcLit(at * bt)
+      case (CalcLit.Long(at), CalcLit.Float(bt)) => CalcLit(at * bt)
+      case (CalcLit.Long(at), CalcLit.Double(bt)) => CalcLit(at * bt)
+      case (CalcLit.Float(at), CalcLit.Char(bt)) => CalcLit(at * bt)
+      case (CalcLit.Float(at), CalcLit.Int(bt)) => CalcLit(at * bt)
+      case (CalcLit.Float(at), CalcLit.Long(bt)) => CalcLit(at * bt)
+      case (CalcLit.Float(at), CalcLit.Float(bt)) => CalcLit(at * bt)
+      case (CalcLit.Float(at), CalcLit.Double(bt)) => CalcLit(at * bt)
+      case (CalcLit.Double(at), CalcLit.Char(bt)) => CalcLit(at * bt)
+      case (CalcLit.Double(at), CalcLit.Int(bt)) => CalcLit(at * bt)
+      case (CalcLit.Double(at), CalcLit.Long(bt)) => CalcLit(at * bt)
+      case (CalcLit.Double(at), CalcLit.Float(bt)) => CalcLit(at * bt)
+      case (CalcLit.Double(at), CalcLit.Double(bt)) => CalcLit(at * bt)
+      case (av : CalcVal, bv : CalcVal) => CalcNLit(q"$av * $bv")
+      case _ => unsupported()
+    }
+    def Div = (a, b) match {
+      case (CalcLit.Char(at), CalcLit.Char(bt)) => CalcLit(at / bt)
+      case (CalcLit.Char(at), CalcLit.Int(bt)) => CalcLit(at / bt)
+      case (CalcLit.Char(at), CalcLit.Long(bt)) => CalcLit(at / bt)
+      case (CalcLit.Char(at), CalcLit.Float(bt)) => CalcLit(at / bt)
+      case (CalcLit.Char(at), CalcLit.Double(bt)) => CalcLit(at / bt)
+      case (CalcLit.Int(at), CalcLit.Char(bt)) => CalcLit(at / bt)
+      case (CalcLit.Int(at), CalcLit.Int(bt)) => CalcLit(at / bt)
+      case (CalcLit.Int(at), CalcLit.Long(bt)) => CalcLit(at / bt)
+      case (CalcLit.Int(at), CalcLit.Float(bt)) => CalcLit(at / bt)
+      case (CalcLit.Int(at), CalcLit.Double(bt)) => CalcLit(at / bt)
+      case (CalcLit.Long(at), CalcLit.Char(bt)) => CalcLit(at / bt)
+      case (CalcLit.Long(at), CalcLit.Int(bt)) => CalcLit(at / bt)
+      case (CalcLit.Long(at), CalcLit.Long(bt)) => CalcLit(at / bt)
+      case (CalcLit.Long(at), CalcLit.Float(bt)) => CalcLit(at / bt)
+      case (CalcLit.Long(at), CalcLit.Double(bt)) => CalcLit(at / bt)
+      case (CalcLit.Float(at), CalcLit.Char(bt)) => CalcLit(at / bt)
+      case (CalcLit.Float(at), CalcLit.Int(bt)) => CalcLit(at / bt)
+      case (CalcLit.Float(at), CalcLit.Long(bt)) => CalcLit(at / bt)
+      case (CalcLit.Float(at), CalcLit.Float(bt)) => CalcLit(at / bt)
+      case (CalcLit.Float(at), CalcLit.Double(bt)) => CalcLit(at / bt)
+      case (CalcLit.Double(at), CalcLit.Char(bt)) => CalcLit(at / bt)
+      case (CalcLit.Double(at), CalcLit.Int(bt)) => CalcLit(at / bt)
+      case (CalcLit.Double(at), CalcLit.Long(bt)) => CalcLit(at / bt)
+      case (CalcLit.Double(at), CalcLit.Float(bt)) => CalcLit(at / bt)
+      case (CalcLit.Double(at), CalcLit.Double(bt)) => CalcLit(at / bt)
+      case (av : CalcVal, bv : CalcVal) => CalcNLit(q"$av / $bv")
+      case _ => unsupported()
+    }
+    def Mod = (a, b) match {
+      case (CalcLit.Char(at), CalcLit.Char(bt)) => CalcLit(at % bt)
+      case (CalcLit.Char(at), CalcLit.Int(bt)) => CalcLit(at % bt)
+      case (CalcLit.Char(at), CalcLit.Long(bt)) => CalcLit(at % bt)
+      case (CalcLit.Char(at), CalcLit.Float(bt)) => CalcLit(at % bt)
+      case (CalcLit.Char(at), CalcLit.Double(bt)) => CalcLit(at % bt)
+      case (CalcLit.Int(at), CalcLit.Char(bt)) => CalcLit(at % bt)
+      case (CalcLit.Int(at), CalcLit.Int(bt)) => CalcLit(at % bt)
+      case (CalcLit.Int(at), CalcLit.Long(bt)) => CalcLit(at % bt)
+      case (CalcLit.Int(at), CalcLit.Float(bt)) => CalcLit(at % bt)
+      case (CalcLit.Int(at), CalcLit.Double(bt)) => CalcLit(at % bt)
+      case (CalcLit.Long(at), CalcLit.Char(bt)) => CalcLit(at % bt)
+      case (CalcLit.Long(at), CalcLit.Int(bt)) => CalcLit(at % bt)
+      case (CalcLit.Long(at), CalcLit.Long(bt)) => CalcLit(at % bt)
+      case (CalcLit.Long(at), CalcLit.Float(bt)) => CalcLit(at % bt)
+      case (CalcLit.Long(at), CalcLit.Double(bt)) => CalcLit(at % bt)
+      case (CalcLit.Float(at), CalcLit.Char(bt)) => CalcLit(at % bt)
+      case (CalcLit.Float(at), CalcLit.Int(bt)) => CalcLit(at % bt)
+      case (CalcLit.Float(at), CalcLit.Long(bt)) => CalcLit(at % bt)
+      case (CalcLit.Float(at), CalcLit.Float(bt)) => CalcLit(at % bt)
+      case (CalcLit.Float(at), CalcLit.Double(bt)) => CalcLit(at % bt)
+      case (CalcLit.Double(at), CalcLit.Char(bt)) => CalcLit(at % bt)
+      case (CalcLit.Double(at), CalcLit.Int(bt)) => CalcLit(at % bt)
+      case (CalcLit.Double(at), CalcLit.Long(bt)) => CalcLit(at % bt)
+      case (CalcLit.Double(at), CalcLit.Float(bt)) => CalcLit(at % bt)
+      case (CalcLit.Double(at), CalcLit.Double(bt)) => CalcLit(at % bt)
+      case (av : CalcVal, bv : CalcVal) => CalcNLit(q"$av % $bv")
+      case _ => unsupported()
+    }
+    def Sml = (a, b) match {
+      case (CalcLit.Char(at), CalcLit.Char(bt)) => CalcLit(at < bt)
+      case (CalcLit.Char(at), CalcLit.Int(bt)) => CalcLit(at < bt)
+      case (CalcLit.Char(at), CalcLit.Long(bt)) => CalcLit(at < bt)
+      case (CalcLit.Char(at), CalcLit.Float(bt)) => CalcLit(at < bt)
+      case (CalcLit.Char(at), CalcLit.Double(bt)) => CalcLit(at < bt)
+      case (CalcLit.Int(at), CalcLit.Char(bt)) => CalcLit(at < bt)
+      case (CalcLit.Int(at), CalcLit.Int(bt)) => CalcLit(at < bt)
+      case (CalcLit.Int(at), CalcLit.Long(bt)) => CalcLit(at < bt)
+      case (CalcLit.Int(at), CalcLit.Float(bt)) => CalcLit(at < bt)
+      case (CalcLit.Int(at), CalcLit.Double(bt)) => CalcLit(at < bt)
+      case (CalcLit.Long(at), CalcLit.Char(bt)) => CalcLit(at < bt)
+      case (CalcLit.Long(at), CalcLit.Int(bt)) => CalcLit(at < bt)
+      case (CalcLit.Long(at), CalcLit.Long(bt)) => CalcLit(at < bt)
+      case (CalcLit.Long(at), CalcLit.Float(bt)) => CalcLit(at < bt)
+      case (CalcLit.Long(at), CalcLit.Double(bt)) => CalcLit(at < bt)
+      case (CalcLit.Float(at), CalcLit.Char(bt)) => CalcLit(at < bt)
+      case (CalcLit.Float(at), CalcLit.Int(bt)) => CalcLit(at < bt)
+      case (CalcLit.Float(at), CalcLit.Long(bt)) => CalcLit(at < bt)
+      case (CalcLit.Float(at), CalcLit.Float(bt)) => CalcLit(at < bt)
+      case (CalcLit.Float(at), CalcLit.Double(bt)) => CalcLit(at < bt)
+      case (CalcLit.Double(at), CalcLit.Char(bt)) => CalcLit(at < bt)
+      case (CalcLit.Double(at), CalcLit.Int(bt)) => CalcLit(at < bt)
+      case (CalcLit.Double(at), CalcLit.Long(bt)) => CalcLit(at < bt)
+      case (CalcLit.Double(at), CalcLit.Float(bt)) => CalcLit(at < bt)
+      case (CalcLit.Double(at), CalcLit.Double(bt)) => CalcLit(at < bt)
+      case (av : CalcVal, bv : CalcVal) => CalcNLit(q"$av < $bv")
+      case _ => unsupported()
+    }
+    def Big = (a, b) match {
+      case (CalcLit.Char(at), CalcLit.Char(bt)) => CalcLit(at > bt)
+      case (CalcLit.Char(at), CalcLit.Int(bt)) => CalcLit(at > bt)
+      case (CalcLit.Char(at), CalcLit.Long(bt)) => CalcLit(at > bt)
+      case (CalcLit.Char(at), CalcLit.Float(bt)) => CalcLit(at > bt)
+      case (CalcLit.Char(at), CalcLit.Double(bt)) => CalcLit(at > bt)
+      case (CalcLit.Int(at), CalcLit.Char(bt)) => CalcLit(at > bt)
+      case (CalcLit.Int(at), CalcLit.Int(bt)) => CalcLit(at > bt)
+      case (CalcLit.Int(at), CalcLit.Long(bt)) => CalcLit(at > bt)
+      case (CalcLit.Int(at), CalcLit.Float(bt)) => CalcLit(at > bt)
+      case (CalcLit.Int(at), CalcLit.Double(bt)) => CalcLit(at > bt)
+      case (CalcLit.Long(at), CalcLit.Char(bt)) => CalcLit(at > bt)
+      case (CalcLit.Long(at), CalcLit.Int(bt)) => CalcLit(at > bt)
+      case (CalcLit.Long(at), CalcLit.Long(bt)) => CalcLit(at > bt)
+      case (CalcLit.Long(at), CalcLit.Float(bt)) => CalcLit(at > bt)
+      case (CalcLit.Long(at), CalcLit.Double(bt)) => CalcLit(at > bt)
+      case (CalcLit.Float(at), CalcLit.Char(bt)) => CalcLit(at > bt)
+      case (CalcLit.Float(at), CalcLit.Int(bt)) => CalcLit(at > bt)
+      case (CalcLit.Float(at), CalcLit.Long(bt)) => CalcLit(at > bt)
+      case (CalcLit.Float(at), CalcLit.Float(bt)) => CalcLit(at > bt)
+      case (CalcLit.Float(at), CalcLit.Double(bt)) => CalcLit(at > bt)
+      case (CalcLit.Double(at), CalcLit.Char(bt)) => CalcLit(at > bt)
+      case (CalcLit.Double(at), CalcLit.Int(bt)) => CalcLit(at > bt)
+      case (CalcLit.Double(at), CalcLit.Long(bt)) => CalcLit(at > bt)
+      case (CalcLit.Double(at), CalcLit.Float(bt)) => CalcLit(at > bt)
+      case (CalcLit.Double(at), CalcLit.Double(bt)) => CalcLit(at > bt)
+      case (av : CalcVal, bv : CalcVal) => CalcNLit(q"$av > $bv")
+      case _ => unsupported()
+    }
+    def SmlEq = (a, b) match {
+      case (CalcLit.Char(at), CalcLit.Char(bt)) => CalcLit(at <= bt)
+      case (CalcLit.Char(at), CalcLit.Int(bt)) => CalcLit(at <= bt)
+      case (CalcLit.Char(at), CalcLit.Long(bt)) => CalcLit(at <= bt)
+      case (CalcLit.Char(at), CalcLit.Float(bt)) => CalcLit(at <= bt)
+      case (CalcLit.Char(at), CalcLit.Double(bt)) => CalcLit(at <= bt)
+      case (CalcLit.Int(at), CalcLit.Char(bt)) => CalcLit(at <= bt)
+      case (CalcLit.Int(at), CalcLit.Int(bt)) => CalcLit(at <= bt)
+      case (CalcLit.Int(at), CalcLit.Long(bt)) => CalcLit(at <= bt)
+      case (CalcLit.Int(at), CalcLit.Float(bt)) => CalcLit(at <= bt)
+      case (CalcLit.Int(at), CalcLit.Double(bt)) => CalcLit(at <= bt)
+      case (CalcLit.Long(at), CalcLit.Char(bt)) => CalcLit(at <= bt)
+      case (CalcLit.Long(at), CalcLit.Int(bt)) => CalcLit(at <= bt)
+      case (CalcLit.Long(at), CalcLit.Long(bt)) => CalcLit(at <= bt)
+      case (CalcLit.Long(at), CalcLit.Float(bt)) => CalcLit(at <= bt)
+      case (CalcLit.Long(at), CalcLit.Double(bt)) => CalcLit(at <= bt)
+      case (CalcLit.Float(at), CalcLit.Char(bt)) => CalcLit(at <= bt)
+      case (CalcLit.Float(at), CalcLit.Int(bt)) => CalcLit(at <= bt)
+      case (CalcLit.Float(at), CalcLit.Long(bt)) => CalcLit(at <= bt)
+      case (CalcLit.Float(at), CalcLit.Float(bt)) => CalcLit(at <= bt)
+      case (CalcLit.Float(at), CalcLit.Double(bt)) => CalcLit(at <= bt)
+      case (CalcLit.Double(at), CalcLit.Char(bt)) => CalcLit(at <= bt)
+      case (CalcLit.Double(at), CalcLit.Int(bt)) => CalcLit(at <= bt)
+      case (CalcLit.Double(at), CalcLit.Long(bt)) => CalcLit(at <= bt)
+      case (CalcLit.Double(at), CalcLit.Float(bt)) => CalcLit(at <= bt)
+      case (CalcLit.Double(at), CalcLit.Double(bt)) => CalcLit(at <= bt)
+      case (av : CalcVal, bv : CalcVal) => CalcNLit(q"$av <= $bv")
+      case _ => unsupported()
+    }
+    def BigEq = (a, b) match {
+      case (CalcLit.Char(at), CalcLit.Char(bt)) => CalcLit(at >= bt)
+      case (CalcLit.Char(at), CalcLit.Int(bt)) => CalcLit(at >= bt)
+      case (CalcLit.Char(at), CalcLit.Long(bt)) => CalcLit(at >= bt)
+      case (CalcLit.Char(at), CalcLit.Float(bt)) => CalcLit(at >= bt)
+      case (CalcLit.Char(at), CalcLit.Double(bt)) => CalcLit(at >= bt)
+      case (CalcLit.Int(at), CalcLit.Char(bt)) => CalcLit(at >= bt)
+      case (CalcLit.Int(at), CalcLit.Int(bt)) => CalcLit(at >= bt)
+      case (CalcLit.Int(at), CalcLit.Long(bt)) => CalcLit(at >= bt)
+      case (CalcLit.Int(at), CalcLit.Float(bt)) => CalcLit(at >= bt)
+      case (CalcLit.Int(at), CalcLit.Double(bt)) => CalcLit(at >= bt)
+      case (CalcLit.Long(at), CalcLit.Char(bt)) => CalcLit(at >= bt)
+      case (CalcLit.Long(at), CalcLit.Int(bt)) => CalcLit(at >= bt)
+      case (CalcLit.Long(at), CalcLit.Long(bt)) => CalcLit(at >= bt)
+      case (CalcLit.Long(at), CalcLit.Float(bt)) => CalcLit(at >= bt)
+      case (CalcLit.Long(at), CalcLit.Double(bt)) => CalcLit(at >= bt)
+      case (CalcLit.Float(at), CalcLit.Char(bt)) => CalcLit(at >= bt)
+      case (CalcLit.Float(at), CalcLit.Int(bt)) => CalcLit(at >= bt)
+      case (CalcLit.Float(at), CalcLit.Long(bt)) => CalcLit(at >= bt)
+      case (CalcLit.Float(at), CalcLit.Float(bt)) => CalcLit(at >= bt)
+      case (CalcLit.Float(at), CalcLit.Double(bt)) => CalcLit(at >= bt)
+      case (CalcLit.Double(at), CalcLit.Char(bt)) => CalcLit(at >= bt)
+      case (CalcLit.Double(at), CalcLit.Int(bt)) => CalcLit(at >= bt)
+      case (CalcLit.Double(at), CalcLit.Long(bt)) => CalcLit(at >= bt)
+      case (CalcLit.Double(at), CalcLit.Float(bt)) => CalcLit(at >= bt)
+      case (CalcLit.Double(at), CalcLit.Double(bt)) => CalcLit(at >= bt)
+      case (av : CalcVal, bv : CalcVal) => CalcNLit(q"$av >= $bv")
+      case _ => unsupported()
+    }
+    def Eq = (a, b) match {
+      case (CalcLit.Char(at), CalcLit.Char(bt)) => CalcLit(at == bt)
+      case (CalcLit.Char(at), CalcLit.Int(bt)) => CalcLit(at == bt)
+      case (CalcLit.Char(at), CalcLit.Long(bt)) => CalcLit(at == bt)
+      case (CalcLit.Char(at), CalcLit.Float(bt)) => CalcLit(at == bt)
+      case (CalcLit.Char(at), CalcLit.Double(bt)) => CalcLit(at == bt)
+      case (CalcLit.Int(at), CalcLit.Char(bt)) => CalcLit(at == bt)
+      case (CalcLit.Int(at), CalcLit.Int(bt)) => CalcLit(at == bt)
+      case (CalcLit.Int(at), CalcLit.Long(bt)) => CalcLit(at == bt)
+      case (CalcLit.Int(at), CalcLit.Float(bt)) => CalcLit(at == bt)
+      case (CalcLit.Int(at), CalcLit.Double(bt)) => CalcLit(at == bt)
+      case (CalcLit.Long(at), CalcLit.Char(bt)) => CalcLit(at == bt)
+      case (CalcLit.Long(at), CalcLit.Int(bt)) => CalcLit(at == bt)
+      case (CalcLit.Long(at), CalcLit.Long(bt)) => CalcLit(at == bt)
+      case (CalcLit.Long(at), CalcLit.Float(bt)) => CalcLit(at == bt)
+      case (CalcLit.Long(at), CalcLit.Double(bt)) => CalcLit(at == bt)
+      case (CalcLit.Float(at), CalcLit.Char(bt)) => CalcLit(at == bt)
+      case (CalcLit.Float(at), CalcLit.Int(bt)) => CalcLit(at == bt)
+      case (CalcLit.Float(at), CalcLit.Long(bt)) => CalcLit(at == bt)
+      case (CalcLit.Float(at), CalcLit.Float(bt)) => CalcLit(at == bt)
+      case (CalcLit.Float(at), CalcLit.Double(bt)) => CalcLit(at == bt)
+      case (CalcLit.Double(at), CalcLit.Char(bt)) => CalcLit(at == bt)
+      case (CalcLit.Double(at), CalcLit.Int(bt)) => CalcLit(at == bt)
+      case (CalcLit.Double(at), CalcLit.Long(bt)) => CalcLit(at == bt)
+      case (CalcLit.Double(at), CalcLit.Float(bt)) => CalcLit(at == bt)
+      case (CalcLit.Double(at), CalcLit.Double(bt)) => CalcLit(at == bt)
+      case (av : CalcVal, bv : CalcVal) => CalcNLit(q"$av == $bv")
+      case _ => unsupported()
+    }
+    def Neq = (a, b) match {
+      case (CalcLit.Char(at), CalcLit.Char(bt)) => CalcLit(at != bt)
+      case (CalcLit.Char(at), CalcLit.Int(bt)) => CalcLit(at != bt)
+      case (CalcLit.Char(at), CalcLit.Long(bt)) => CalcLit(at != bt)
+      case (CalcLit.Char(at), CalcLit.Float(bt)) => CalcLit(at != bt)
+      case (CalcLit.Char(at), CalcLit.Double(bt)) => CalcLit(at != bt)
+      case (CalcLit.Int(at), CalcLit.Char(bt)) => CalcLit(at != bt)
+      case (CalcLit.Int(at), CalcLit.Int(bt)) => CalcLit(at != bt)
+      case (CalcLit.Int(at), CalcLit.Long(bt)) => CalcLit(at != bt)
+      case (CalcLit.Int(at), CalcLit.Float(bt)) => CalcLit(at != bt)
+      case (CalcLit.Int(at), CalcLit.Double(bt)) => CalcLit(at != bt)
+      case (CalcLit.Long(at), CalcLit.Char(bt)) => CalcLit(at != bt)
+      case (CalcLit.Long(at), CalcLit.Int(bt)) => CalcLit(at != bt)
+      case (CalcLit.Long(at), CalcLit.Long(bt)) => CalcLit(at != bt)
+      case (CalcLit.Long(at), CalcLit.Float(bt)) => CalcLit(at != bt)
+      case (CalcLit.Long(at), CalcLit.Double(bt)) => CalcLit(at != bt)
+      case (CalcLit.Float(at), CalcLit.Char(bt)) => CalcLit(at != bt)
+      case (CalcLit.Float(at), CalcLit.Int(bt)) => CalcLit(at != bt)
+      case (CalcLit.Float(at), CalcLit.Long(bt)) => CalcLit(at != bt)
+      case (CalcLit.Float(at), CalcLit.Float(bt)) => CalcLit(at != bt)
+      case (CalcLit.Float(at), CalcLit.Double(bt)) => CalcLit(at != bt)
+      case (CalcLit.Double(at), CalcLit.Char(bt)) => CalcLit(at != bt)
+      case (CalcLit.Double(at), CalcLit.Int(bt)) => CalcLit(at != bt)
+      case (CalcLit.Double(at), CalcLit.Long(bt)) => CalcLit(at != bt)
+      case (CalcLit.Double(at), CalcLit.Float(bt)) => CalcLit(at != bt)
+      case (CalcLit.Double(at), CalcLit.Double(bt)) => CalcLit(at != bt)
+      case (av : CalcVal, bv : CalcVal) => CalcNLit(q"$av != $bv")
+      case _ => unsupported()
+    }
+    def And = (a, b) match {
+      case (CalcLit.Boolean(at), CalcLit.Boolean(bt)) => CalcLit(at && bt)
+      case (av : CalcVal, bv : CalcVal) => CalcNLit(q"$av && $bv")
+      case _ => unsupported()
+    }
+    def Or = (a, b) match {
+      case (CalcLit.Boolean(at), CalcLit.Boolean(bt)) => CalcLit(at || bt)
+      case (av : CalcVal, bv : CalcVal) => CalcNLit(q"$av || $bv")
+      case _ => unsupported()
+    }
+    def Pow = (a, b) match {
+      case (CalcLit.Float(at), CalcLit.Float(bt)) => CalcLit(math.pow(at.toDouble, bt.toDouble))
+      case (CalcLit.Float(at), CalcLit.Double(bt)) => CalcLit(math.pow(at.toDouble, bt.toDouble))
+      case (CalcLit.Double(at), CalcLit.Float(bt)) => CalcLit(math.pow(at.toDouble, bt.toDouble))
+      case (CalcLit.Double(at), CalcLit.Double(bt)) => CalcLit(math.pow(at.toDouble, bt.toDouble))
+      case (av : CalcVal, bv : CalcVal) => CalcNLit(q"_root_.scala.math.pow($av.toDouble, $bv.toDouble)")
+      case _ => unsupported()
+    }
 
     funcName match {
-      case "Id" => a match {
-        case t : CalcLit => t
-        case t : CalcNLit => t
-        case _ => unsupported()
-      }
-      case "ToNat" => a match { //Has a special case to handle this in MaterializeOpAuxGen
-        case CalcLit.Char(t) => CalcLit(t.toInt)
-        case CalcLit.Int(t) => CalcLit(t.toInt)
-        case CalcLit.Long(t) => CalcLit(t.toInt)
-        case CalcLit.Float(t) => CalcLit(t.toInt)
-        case CalcLit.Double(t) => CalcLit(t.toInt)
-        case nl : CalcNLit => CalcNLit(q"$nl.toInt")
-        case _ => unsupported()
-      }
-      case "ToChar" => a match {
-        case CalcLit.Char(t) => CalcLit(t.toChar)
-        case CalcLit.Int(t) => CalcLit(t.toChar)
-        case CalcLit.Long(t) => CalcLit(t.toChar)
-        case CalcLit.Float(t) => CalcLit(t.toChar)
-        case CalcLit.Double(t) => CalcLit(t.toChar)
-        case nl : CalcNLit => CalcNLit(q"$nl.toChar")
-        case _ => unsupported()
-      }
-      case "ToInt" => a match {
-        case CalcLit.Char(t) => CalcLit(t.toInt)
-        case CalcLit.Int(t) => CalcLit(t.toInt)
-        case CalcLit.Long(t) => CalcLit(t.toInt)
-        case CalcLit.Float(t) => CalcLit(t.toInt)
-        case CalcLit.Double(t) => CalcLit(t.toInt)
-        case nl : CalcNLit => CalcNLit(q"$nl.toInt")
-        case _ => unsupported()
-      }
-      case "ToLong" => a match {
-        case CalcLit.Char(t) => CalcLit(t.toLong)
-        case CalcLit.Int(t) => CalcLit(t.toLong)
-        case CalcLit.Long(t) => CalcLit(t.toLong)
-        case CalcLit.Float(t) => CalcLit(t.toLong)
-        case CalcLit.Double(t) => CalcLit(t.toLong)
-        case nl : CalcNLit => CalcNLit(q"$nl.toLong")
-        case _ => unsupported()
-      }
-      case "ToFloat" => a match {
-        case CalcLit.Char(t) => CalcLit(t.toFloat)
-        case CalcLit.Int(t) => CalcLit(t.toFloat)
-        case CalcLit.Long(t) => CalcLit(t.toFloat)
-        case CalcLit.Float(t) => CalcLit(t.toFloat)
-        case CalcLit.Double(t) => CalcLit(t.toFloat)
-        case nl : CalcNLit => CalcNLit(q"$nl.toFloat")
-        case _ => unsupported()
-      }
-      case "ToDouble" => a match {
-        case CalcLit.Char(t) => CalcLit(t.toDouble)
-        case CalcLit.Int(t) => CalcLit(t.toDouble)
-        case CalcLit.Long(t) => CalcLit(t.toDouble)
-        case CalcLit.Float(t) => CalcLit(t.toDouble)
-        case CalcLit.Double(t) => CalcLit(t.toDouble)
-        case nl : CalcNLit => CalcNLit(q"$nl.toDouble")
-        case _ => unsupported()
-      }
-      case "ToString" => a match {
-        case CalcLit.Char(t) => CalcLit(t.toString)
-        case CalcLit.Int(t) => CalcLit(t.toString)
-        case CalcLit.Long(t) => CalcLit(t.toString)
-        case CalcLit.Float(t) => CalcLit(t.toString)
-        case CalcLit.Double(t) => CalcLit(t.toString)
-        case CalcLit.String(t) => CalcLit(t.toString)
-        case CalcLit.Boolean(t) => CalcLit(t.toString)
-        case nl : CalcNLit => CalcNLit(q"$nl.toString")
-        case _ => unsupported()
-      }
-
-      case "IsNat" => a match {
-        case CalcLit.Int(t) => CalcLit(t >= 0)
-        case cl : CalcLit => CalcLit(false)
-        case nl : CalcNLit => CalcNLit(q"if ($nl.isInstanceOf[Int]) $nl.asInstanceOf[Int] >= 0 else false")
-        case _ => unsupported()
-      }
-      case "IsChar" => a match {
-        case CalcLit.Char(t) => CalcLit(true)
-        case cl : CalcLit => CalcLit(false)
-        case nl : CalcNLit => CalcNLit(q"$nl.isInstanceOf[Char]")
-        case _ => unsupported()
-      }
-      case "IsInt" => a match {
-        case CalcLit.Int(t) => CalcLit(true)
-        case cl : CalcLit => CalcLit(false)
-        case nl : CalcNLit => CalcNLit(q"$nl.isInstanceOf[Int]")
-        case _ => unsupported()
-      }
-      case "IsLong" => a match {
-        case CalcLit.Long(t) => CalcLit(true)
-        case cl : CalcLit => CalcLit(false)
-        case nl : CalcNLit => CalcNLit(q"$nl.isInstanceOf[Long]")
-        case _ => unsupported()
-      }
-      case "IsFloat" => a match {
-        case CalcLit.Float(t) => CalcLit(true)
-        case cl : CalcLit => CalcLit(false)
-        case nl : CalcNLit => CalcNLit(q"$nl.isInstanceOf[Float]")
-        case _ => unsupported()
-      }
-      case "IsDouble" => a match {
-        case CalcLit.Double(t) => CalcLit(true)
-        case cl : CalcLit => CalcLit(false)
-        case nl : CalcNLit => CalcNLit(q"$nl.isInstanceOf[Double]")
-        case _ => unsupported()
-      }
-      case "IsString" => a match {
-        case CalcLit.String(t) => CalcLit(true)
-        case cl : CalcLit => CalcLit(false)
-        case nl : CalcNLit => CalcNLit(q"$nl.isInstanceOf[String]")
-        case _ => unsupported()
-      }
-      case "IsBoolean" => a match {
-        case CalcLit.Boolean(t) => CalcLit(true)
-        case cl : CalcLit => CalcLit(false)
-        case nl : CalcNLit => CalcNLit(q"$nl.isInstanceOf[Boolean]")
-        case _ => unsupported()
-      }
-      case "Negate" => a match {
-        case CalcLit.Char(t) => CalcLit(-t)
-        case CalcLit.Int(t) => CalcLit(-t)
-        case CalcLit.Long(t) => CalcLit(-t)
-        case CalcLit.Float(t) => CalcLit(-t)
-        case CalcLit.Double(t) => CalcLit(-t)
-        case nl : CalcNLit => CalcNLit(q"-$nl")
-        case _ => unsupported()
-      }
-      case "Abs" => a match {
-        case CalcLit.Int(t) => CalcLit(math.abs(t))
-        case CalcLit.Long(t) => CalcLit(math.abs(t))
-        case CalcLit.Float(t) => CalcLit(math.abs(t))
-        case CalcLit.Double(t) => CalcLit(math.abs(t))
-        case nl : CalcNLit => CalcNLit(q"_root_.scala.math.abs($nl)")
-        case _ => unsupported()
-      }
-      case "NumberOfLeadingZeros" => a match {
-        case CalcLit.Int(t) => CalcLit(nlz(t))
-        case CalcLit.Long(t) => CalcLit(nlz(t))
-        case nl : CalcNLit => CalcNLit(q"_root_.singleton.ops.impl.nlz($nl)")
-        case _ => unsupported()
-      }
-      case "Floor" => a match {
-        case CalcLit.Float(t) => CalcLit(math.floor(t.toDouble))
-        case CalcLit.Double(t) => CalcLit(math.floor(t))
-        case nl : CalcNLit => CalcNLit(q"_root_.scala.math.floor($nl.toDouble)")
-        case _ => unsupported()
-      }
-      case "Ceil" => a match {
-        case CalcLit.Float(t) => CalcLit(math.ceil(t.toDouble))
-        case CalcLit.Double(t) => CalcLit(math.ceil(t))
-        case nl : CalcNLit => CalcNLit(q"_root_.scala.math.ceil($nl.toDouble)")
-        case _ => unsupported()
-      }
-      case "Round" => a match {
-        case CalcLit.Float(t) => CalcLit(math.round(t.toDouble))
-        case CalcLit.Double(t) => CalcLit(math.round(t))
-        case nl : CalcNLit => CalcNLit(q"_root_.scala.math.round($nl.toDouble)")
-        case _ => unsupported()
-      }
-      case "Sin" => a match {
-        case CalcLit.Float(t) => CalcLit(math.sin(t.toDouble))
-        case CalcLit.Double(t) => CalcLit(math.sin(t))
-        case nl : CalcNLit => CalcNLit(q"_root_.scala.math.sin($nl.toDouble)")
-        case _ => unsupported()
-      }
-      case "Cos" => a match {
-        case CalcLit.Float(t) => CalcLit(math.cos(t.toDouble))
-        case CalcLit.Double(t) => CalcLit(math.cos(t))
-        case nl : CalcNLit => CalcNLit(q"_root_.scala.math.cos($nl.toDouble)")
-        case _ => unsupported()
-      }
-      case "Tan" => a match {
-        case CalcLit.Float(t) => CalcLit(math.tan(t.toDouble))
-        case CalcLit.Double(t) => CalcLit(math.tan(t))
-        case nl : CalcNLit => CalcNLit(q"_root_.scala.math.tan($nl.toDouble)")
-        case _ => unsupported()
-      }
-      case "Sqrt" => a match {
-        case CalcLit.Float(t) => CalcLit(math.sqrt(t.toDouble))
-        case CalcLit.Double(t) => CalcLit(math.sqrt(t))
-        case nl : CalcNLit => CalcNLit(q"_root_.scala.math.sqrt($nl.toDouble)")
-        case _ => unsupported()
-      }
-      case "Log" => a match {
-        case CalcLit.Float(t) => CalcLit(math.log(t.toDouble))
-        case CalcLit.Double(t) => CalcLit(math.log(t))
-        case nl : CalcNLit => CalcNLit(q"_root_.scala.math.log($nl.toDouble)")
-        case _ => unsupported()
-      }
-      case "Log10" => a match {
-        case CalcLit.Float(t) => CalcLit(math.log10(t.toDouble))
-        case CalcLit.Double(t) => CalcLit(math.log10(t))
-        case nl : CalcNLit => CalcNLit(q"_root_.scala.math.log10($nl.toDouble)")
-        case _ => unsupported()
-      }
-      case "Reverse" => a match {
-        case CalcLit.String(t) => CalcLit(t.reverse)
-        case nl : CalcNLit => CalcNLit(q"$nl.reverse")
-        case _ => unsupported()
-      }
-      case "!" => a match {
-        case CalcLit.Boolean(t) => CalcLit(!t)
-        case nl : CalcNLit => CalcNLit(q"!$nl")
-        case _ => unsupported()
-      }
-      case "Require" => a match {
-        case CalcLit.Boolean(true) => CalcLit(true)
-        case CalcLit.Boolean(false) => b match {
-          case CalcLit.String(msg) => c match {
-            case CalcUnknown(t) => //redirection of implicit not found annotation is required to the given symbol
-              implicit val annotatedSym : TypeSymbol = t.typeSymbol.asType
-              abort(msg)
-            case _ => abort(msg)
-          }
-          case msg : CalcNLit => CalcNLit(q"require(false, $msg); false")
-          case _ => unsupported()
-        }
-        case cond : CalcNLit => b match {
-          case msg : CalcVal => CalcNLit(q"require($cond, $msg); true")
-          case _ => unsupported()
-        }
-        case _ => unsupported()
-      }
-//      case ("Require",    a: Boolean, b: String, _)   =>
-//        if (!a)
-//          abort(b)
-//        else
-//          CalcLit(a)
-//      case ("==>",        _,          b,          _)  => CalcLit(b)
-//
-//      case ("+",          a: Char,    b: Char,    _)  => CalcLit(a + b)
-//      case ("+",          a: Char,    b: Int,     _)  => CalcLit(a + b)
-//      case ("+",          a: Char,    b: Long,    _)  => CalcLit(a + b)
-//      case ("+",          a: Char,    b: Float,   _)  => CalcLit(a + b)
-//      case ("+",          a: Char,    b: Double,  _)  => CalcLit(a + b)
-//      case ("+",          a: Int,     b: Char,    _)  => CalcLit(a + b)
-//      case ("+",          a: Int,     b: Int,     _)  => CalcLit(a + b)
-//      case ("+",          a: Int,     b: Long,    _)  => CalcLit(a + b)
-//      case ("+",          a: Int,     b: Float,   _)  => CalcLit(a + b)
-//      case ("+",          a: Int,     b: Double,  _)  => CalcLit(a + b)
-//      case ("+",          a: Long,    b: Char,    _)  => CalcLit(a + b)
-//      case ("+",          a: Long,    b: Int,     _)  => CalcLit(a + b)
-//      case ("+",          a: Long,    b: Long,    _)  => CalcLit(a + b)
-//      case ("+",          a: Long,    b: Float,   _)  => CalcLit(a + b)
-//      case ("+",          a: Long,    b: Double,  _)  => CalcLit(a + b)
-//      case ("+",          a: Float,   b: Char,    _)  => CalcLit(a + b)
-//      case ("+",          a: Float,   b: Int,     _)  => CalcLit(a + b)
-//      case ("+",          a: Float,   b: Long,    _)  => CalcLit(a + b)
-//      case ("+",          a: Float,   b: Float,   _)  => CalcLit(a + b)
-//      case ("+",          a: Float,   b: Double,  _)  => CalcLit(a + b)
-//      case ("+",          a: Double,  b: Char,    _)  => CalcLit(a + b)
-//      case ("+",          a: Double,  b: Int,     _)  => CalcLit(a + b)
-//      case ("+",          a: Double,  b: Long,    _)  => CalcLit(a + b)
-//      case ("+",          a: Double,  b: Float,   _)  => CalcLit(a + b)
-//      case ("+",          a: Double,  b: Double,  _)  => CalcLit(a + b)
-//      case ("+",          a: String,  b: String,  _)  => CalcLit(a + b) //Concat
-//      case ("+",          a: Tree,    b: Int,     _)  => CalcNLitTree(q"$a + $b") //Concat
-//
-//      case ("-",          a: Char,    b: Char,    _)  => CalcLit(a - b)
-//      case ("-",          a: Char,    b: Int,     _)  => CalcLit(a - b)
-//      case ("-",          a: Char,    b: Long,    _)  => CalcLit(a - b)
-//      case ("-",          a: Char,    b: Float,   _)  => CalcLit(a - b)
-//      case ("-",          a: Char,    b: Double,  _)  => CalcLit(a - b)
-//      case ("-",          a: Int,     b: Char,    _)  => CalcLit(a - b)
-//      case ("-",          a: Int,     b: Int,     _)  => CalcLit(a - b)
-//      case ("-",          a: Int,     b: Long,    _)  => CalcLit(a - b)
-//      case ("-",          a: Int,     b: Float,   _)  => CalcLit(a - b)
-//      case ("-",          a: Int,     b: Double,  _)  => CalcLit(a - b)
-//      case ("-",          a: Long,    b: Char,    _)  => CalcLit(a - b)
-//      case ("-",          a: Long,    b: Int,     _)  => CalcLit(a - b)
-//      case ("-",          a: Long,    b: Long,    _)  => CalcLit(a - b)
-//      case ("-",          a: Long,    b: Float,   _)  => CalcLit(a - b)
-//      case ("-",          a: Long,    b: Double,  _)  => CalcLit(a - b)
-//      case ("-",          a: Float,   b: Char,    _)  => CalcLit(a - b)
-//      case ("-",          a: Float,   b: Int,     _)  => CalcLit(a - b)
-//      case ("-",          a: Float,   b: Long,    _)  => CalcLit(a - b)
-//      case ("-",          a: Float,   b: Float,   _)  => CalcLit(a - b)
-//      case ("-",          a: Float,   b: Double,  _)  => CalcLit(a - b)
-//      case ("-",          a: Double,  b: Char,    _)  => CalcLit(a - b)
-//      case ("-",          a: Double,  b: Int,     _)  => CalcLit(a - b)
-//      case ("-",          a: Double,  b: Long,    _)  => CalcLit(a - b)
-//      case ("-",          a: Double,  b: Float,   _)  => CalcLit(a - b)
-//      case ("-",          a: Double,  b: Double,  _)  => CalcLit(a - b)
-//
-//      case ("*",          a: Char,    b: Char,    _)  => CalcLit(a * b)
-//      case ("*",          a: Char,    b: Int,     _)  => CalcLit(a * b)
-//      case ("*",          a: Char,    b: Long,    _)  => CalcLit(a * b)
-//      case ("*",          a: Char,    b: Float,   _)  => CalcLit(a * b)
-//      case ("*",          a: Char,    b: Double,  _)  => CalcLit(a * b)
-//      case ("*",          a: Int,     b: Char,    _)  => CalcLit(a * b)
-//      case ("*",          a: Int,     b: Int,     _)  => CalcLit(a * b)
-//      case ("*",          a: Int,     b: Long,    _)  => CalcLit(a * b)
-//      case ("*",          a: Int,     b: Float,   _)  => CalcLit(a * b)
-//      case ("*",          a: Int,     b: Double,  _)  => CalcLit(a * b)
-//      case ("*",          a: Long,    b: Char,    _)  => CalcLit(a * b)
-//      case ("*",          a: Long,    b: Int,     _)  => CalcLit(a * b)
-//      case ("*",          a: Long,    b: Long,    _)  => CalcLit(a * b)
-//      case ("*",          a: Long,    b: Float,   _)  => CalcLit(a * b)
-//      case ("*",          a: Long,    b: Double,  _)  => CalcLit(a * b)
-//      case ("*",          a: Float,   b: Char,    _)  => CalcLit(a * b)
-//      case ("*",          a: Float,   b: Int,     _)  => CalcLit(a * b)
-//      case ("*",          a: Float,   b: Long,    _)  => CalcLit(a * b)
-//      case ("*",          a: Float,   b: Float,   _)  => CalcLit(a * b)
-//      case ("*",          a: Float,   b: Double,  _)  => CalcLit(a * b)
-//      case ("*",          a: Double,  b: Char,    _)  => CalcLit(a * b)
-//      case ("*",          a: Double,  b: Int,     _)  => CalcLit(a * b)
-//      case ("*",          a: Double,  b: Long,    _)  => CalcLit(a * b)
-//      case ("*",          a: Double,  b: Float,   _)  => CalcLit(a * b)
-//      case ("*",          a: Double,  b: Double,  _)  => CalcLit(a * b)
-//
-//      case ("/",          a: Char,    b: Char,    _)  => CalcLit(a / b)
-//      case ("/",          a: Char,    b: Int,     _)  => CalcLit(a / b)
-//      case ("/",          a: Char,    b: Long,    _)  => CalcLit(a / b)
-//      case ("/",          a: Char,    b: Float,   _)  => CalcLit(a / b)
-//      case ("/",          a: Char,    b: Double,  _)  => CalcLit(a / b)
-//      case ("/",          a: Int,     b: Char,    _)  => CalcLit(a / b)
-//      case ("/",          a: Int,     b: Int,     _)  => CalcLit(a / b)
-//      case ("/",          a: Int,     b: Long,    _)  => CalcLit(a / b)
-//      case ("/",          a: Int,     b: Float,   _)  => CalcLit(a / b)
-//      case ("/",          a: Int,     b: Double,  _)  => CalcLit(a / b)
-//      case ("/",          a: Long,    b: Char,    _)  => CalcLit(a / b)
-//      case ("/",          a: Long,    b: Int,     _)  => CalcLit(a / b)
-//      case ("/",          a: Long,    b: Long,    _)  => CalcLit(a / b)
-//      case ("/",          a: Long,    b: Float,   _)  => CalcLit(a / b)
-//      case ("/",          a: Long,    b: Double,  _)  => CalcLit(a / b)
-//      case ("/",          a: Float,   b: Char,    _)  => CalcLit(a / b)
-//      case ("/",          a: Float,   b: Int,     _)  => CalcLit(a / b)
-//      case ("/",          a: Float,   b: Long,    _)  => CalcLit(a / b)
-//      case ("/",          a: Float,   b: Float,   _)  => CalcLit(a / b)
-//      case ("/",          a: Float,   b: Double,  _)  => CalcLit(a / b)
-//      case ("/",          a: Double,  b: Char,    _)  => CalcLit(a / b)
-//      case ("/",          a: Double,  b: Int,     _)  => CalcLit(a / b)
-//      case ("/",          a: Double,  b: Long,    _)  => CalcLit(a / b)
-//      case ("/",          a: Double,  b: Float,   _)  => CalcLit(a / b)
-//      case ("/",          a: Double,  b: Double,  _)  => CalcLit(a / b)
-//
-//      case ("%",          a: Char,    b: Char,    _)  => CalcLit(a % b)
-//      case ("%",          a: Char,    b: Int,     _)  => CalcLit(a % b)
-//      case ("%",          a: Char,    b: Long,    _)  => CalcLit(a % b)
-//      case ("%",          a: Char,    b: Float,   _)  => CalcLit(a % b)
-//      case ("%",          a: Char,    b: Double,  _)  => CalcLit(a % b)
-//      case ("%",          a: Int,     b: Char,    _)  => CalcLit(a % b)
-//      case ("%",          a: Int,     b: Int,     _)  => CalcLit(a % b)
-//      case ("%",          a: Int,     b: Long,    _)  => CalcLit(a % b)
-//      case ("%",          a: Int,     b: Float,   _)  => CalcLit(a % b)
-//      case ("%",          a: Int,     b: Double,  _)  => CalcLit(a % b)
-//      case ("%",          a: Long,    b: Char,    _)  => CalcLit(a % b)
-//      case ("%",          a: Long,    b: Int,     _)  => CalcLit(a % b)
-//      case ("%",          a: Long,    b: Long,    _)  => CalcLit(a % b)
-//      case ("%",          a: Long,    b: Float,   _)  => CalcLit(a % b)
-//      case ("%",          a: Long,    b: Double,  _)  => CalcLit(a % b)
-//      case ("%",          a: Float,   b: Char,    _)  => CalcLit(a % b)
-//      case ("%",          a: Float,   b: Int,     _)  => CalcLit(a % b)
-//      case ("%",          a: Float,   b: Long,    _)  => CalcLit(a % b)
-//      case ("%",          a: Float,   b: Float,   _)  => CalcLit(a % b)
-//      case ("%",          a: Float,   b: Double,  _)  => CalcLit(a % b)
-//      case ("%",          a: Double,  b: Char,    _)  => CalcLit(a % b)
-//      case ("%",          a: Double,  b: Int,     _)  => CalcLit(a % b)
-//      case ("%",          a: Double,  b: Long,    _)  => CalcLit(a % b)
-//      case ("%",          a: Double,  b: Float,   _)  => CalcLit(a % b)
-//      case ("%",          a: Double,  b: Double,  _)  => CalcLit(a % b)
-//
-//      case ("Pow",        a: Float,   b: Float,   _)  => CalcLit(pow(a.toDouble,b.toDouble))
-//      case ("Pow",        a: Float,   b: Double,  _)  => CalcLit(pow(a.toDouble,b.toDouble))
-//      case ("Pow",        a: Double,  b: Float,   _)  => CalcLit(pow(a.toDouble,b.toDouble))
-//      case ("Pow",        a: Double,  b: Double,  _)  => CalcLit(pow(a.toDouble,b.toDouble))
-//
-//      case ("==",         a: Char,    b: Char,    _)  => CalcLit(a == b)
-//      case ("==",         a: Char,    b: Int,     _)  => CalcLit(a == b)
-//      case ("==",         a: Char,    b: Long,    _)  => CalcLit(a == b)
-//      case ("==",         a: Char,    b: Float,   _)  => CalcLit(a == b)
-//      case ("==",         a: Char,    b: Double,  _)  => CalcLit(a == b)
-//      case ("==",         a: Int,     b: Char,    _)  => CalcLit(a == b)
-//      case ("==",         a: Int,     b: Int,     _)  => CalcLit(a == b)
-//      case ("==",         a: Int,     b: Long,    _)  => CalcLit(a == b)
-//      case ("==",         a: Int,     b: Float,   _)  => CalcLit(a == b)
-//      case ("==",         a: Int,     b: Double,  _)  => CalcLit(a == b)
-//      case ("==",         a: Long,    b: Char,    _)  => CalcLit(a == b)
-//      case ("==",         a: Long,    b: Int,     _)  => CalcLit(a == b)
-//      case ("==",         a: Long,    b: Long,    _)  => CalcLit(a == b)
-//      case ("==",         a: Long,    b: Float,   _)  => CalcLit(a == b)
-//      case ("==",         a: Long,    b: Double,  _)  => CalcLit(a == b)
-//      case ("==",         a: Float,   b: Char,    _)  => CalcLit(a == b)
-//      case ("==",         a: Float,   b: Int,     _)  => CalcLit(a == b)
-//      case ("==",         a: Float,   b: Long,    _)  => CalcLit(a == b)
-//      case ("==",         a: Float,   b: Float,   _)  => CalcLit(a == b)
-//      case ("==",         a: Float,   b: Double,  _)  => CalcLit(a == b)
-//      case ("==",         a: Double,  b: Char,    _)  => CalcLit(a == b)
-//      case ("==",         a: Double,  b: Int,     _)  => CalcLit(a == b)
-//      case ("==",         a: Double,  b: Long,    _)  => CalcLit(a == b)
-//      case ("==",         a: Double,  b: Float,   _)  => CalcLit(a == b)
-//      case ("==",         a: Double,  b: Double,  _)  => CalcLit(a == b)
-//      case ("==",         a: String,  b: String,  _)  => CalcLit(a == b)
-//      case ("==",         a: Boolean, b: Boolean, _)  => CalcLit(a == b)
-//
-//      case ("!=",         a: Char,    b: Char,    _)  => CalcLit(a != b)
-//      case ("!=",         a: Char,    b: Int,     _)  => CalcLit(a != b)
-//      case ("!=",         a: Char,    b: Long,    _)  => CalcLit(a != b)
-//      case ("!=",         a: Char,    b: Float,   _)  => CalcLit(a != b)
-//      case ("!=",         a: Char,    b: Double,  _)  => CalcLit(a != b)
-//      case ("!=",         a: Int,     b: Char,    _)  => CalcLit(a != b)
-//      case ("!=",         a: Int,     b: Int,     _)  => CalcLit(a != b)
-//      case ("!=",         a: Int,     b: Long,    _)  => CalcLit(a != b)
-//      case ("!=",         a: Int,     b: Float,   _)  => CalcLit(a != b)
-//      case ("!=",         a: Int,     b: Double,  _)  => CalcLit(a != b)
-//      case ("!=",         a: Long,    b: Char,    _)  => CalcLit(a != b)
-//      case ("!=",         a: Long,    b: Int,     _)  => CalcLit(a != b)
-//      case ("!=",         a: Long,    b: Long,    _)  => CalcLit(a != b)
-//      case ("!=",         a: Long,    b: Float,   _)  => CalcLit(a != b)
-//      case ("!=",         a: Long,    b: Double,  _)  => CalcLit(a != b)
-//      case ("!=",         a: Float,   b: Char,    _)  => CalcLit(a != b)
-//      case ("!=",         a: Float,   b: Int,     _)  => CalcLit(a != b)
-//      case ("!=",         a: Float,   b: Long,    _)  => CalcLit(a != b)
-//      case ("!=",         a: Float,   b: Float,   _)  => CalcLit(a != b)
-//      case ("!=",         a: Float,   b: Double,  _)  => CalcLit(a != b)
-//      case ("!=",         a: Double,  b: Char,    _)  => CalcLit(a != b)
-//      case ("!=",         a: Double,  b: Int,     _)  => CalcLit(a != b)
-//      case ("!=",         a: Double,  b: Long,    _)  => CalcLit(a != b)
-//      case ("!=",         a: Double,  b: Float,   _)  => CalcLit(a != b)
-//      case ("!=",         a: Double,  b: Double,  _)  => CalcLit(a != b)
-//      case ("!=",         a: String,  b: String,  _)  => CalcLit(a != b)
-//      case ("!=",         a: Boolean, b: Boolean, _)  => CalcLit(a != b)
-//
-//      case ("<",          a: Char,    b: Char,    _)  => CalcLit(a < b)
-//      case ("<",          a: Char,    b: Int,     _)  => CalcLit(a < b)
-//      case ("<",          a: Char,    b: Long,    _)  => CalcLit(a < b)
-//      case ("<",          a: Char,    b: Float,   _)  => CalcLit(a < b)
-//      case ("<",          a: Char,    b: Double,  _)  => CalcLit(a < b)
-//      case ("<",          a: Int,     b: Char,    _)  => CalcLit(a < b)
-//      case ("<",          a: Int,     b: Int,     _)  => CalcLit(a < b)
-//      case ("<",          a: Int,     b: Long,    _)  => CalcLit(a < b)
-//      case ("<",          a: Int,     b: Float,   _)  => CalcLit(a < b)
-//      case ("<",          a: Int,     b: Double,  _)  => CalcLit(a < b)
-//      case ("<",          a: Long,    b: Char,    _)  => CalcLit(a < b)
-//      case ("<",          a: Long,    b: Int,     _)  => CalcLit(a < b)
-//      case ("<",          a: Long,    b: Long,    _)  => CalcLit(a < b)
-//      case ("<",          a: Long,    b: Float,   _)  => CalcLit(a < b)
-//      case ("<",          a: Long,    b: Double,  _)  => CalcLit(a < b)
-//      case ("<",          a: Float,   b: Char,    _)  => CalcLit(a < b)
-//      case ("<",          a: Float,   b: Int,     _)  => CalcLit(a < b)
-//      case ("<",          a: Float,   b: Long,    _)  => CalcLit(a < b)
-//      case ("<",          a: Float,   b: Float,   _)  => CalcLit(a < b)
-//      case ("<",          a: Float,   b: Double,  _)  => CalcLit(a < b)
-//      case ("<",          a: Double,  b: Char,    _)  => CalcLit(a < b)
-//      case ("<",          a: Double,  b: Int,     _)  => CalcLit(a < b)
-//      case ("<",          a: Double,  b: Long,    _)  => CalcLit(a < b)
-//      case ("<",          a: Double,  b: Float,   _)  => CalcLit(a < b)
-//      case ("<",          a: Double,  b: Double,  _)  => CalcLit(a < b)
-//
-//      case (">",          a: Char,    b: Char,    _)  => CalcLit(a > b)
-//      case (">",          a: Char,    b: Int,     _)  => CalcLit(a > b)
-//      case (">",          a: Char,    b: Long,    _)  => CalcLit(a > b)
-//      case (">",          a: Char,    b: Float,   _)  => CalcLit(a > b)
-//      case (">",          a: Char,    b: Double,  _)  => CalcLit(a > b)
-//      case (">",          a: Int,     b: Char,    _)  => CalcLit(a > b)
-//      case (">",          a: Int,     b: Int,     _)  => CalcLit(a > b)
-//      case (">",          a: Int,     b: Long,    _)  => CalcLit(a > b)
-//      case (">",          a: Int,     b: Float,   _)  => CalcLit(a > b)
-//      case (">",          a: Int,     b: Double,  _)  => CalcLit(a > b)
-//      case (">",          a: Long,    b: Char,    _)  => CalcLit(a > b)
-//      case (">",          a: Long,    b: Int,     _)  => CalcLit(a > b)
-//      case (">",          a: Long,    b: Long,    _)  => CalcLit(a > b)
-//      case (">",          a: Long,    b: Float,   _)  => CalcLit(a > b)
-//      case (">",          a: Long,    b: Double,  _)  => CalcLit(a > b)
-//      case (">",          a: Float,   b: Char,    _)  => CalcLit(a > b)
-//      case (">",          a: Float,   b: Int,     _)  => CalcLit(a > b)
-//      case (">",          a: Float,   b: Long,    _)  => CalcLit(a > b)
-//      case (">",          a: Float,   b: Float,   _)  => CalcLit(a > b)
-//      case (">",          a: Float,   b: Double,  _)  => CalcLit(a > b)
-//      case (">",          a: Double,  b: Char,    _)  => CalcLit(a > b)
-//      case (">",          a: Double,  b: Int,     _)  => CalcLit(a > b)
-//      case (">",          a: Double,  b: Long,    _)  => CalcLit(a > b)
-//      case (">",          a: Double,  b: Float,   _)  => CalcLit(a > b)
-//      case (">",          a: Double,  b: Double,  _)  => CalcLit(a > b)
-//
-//      case ("<=",         a: Char,    b: Char,    _)  => CalcLit(a <= b)
-//      case ("<=",         a: Char,    b: Int,     _)  => CalcLit(a <= b)
-//      case ("<=",         a: Char,    b: Long,    _)  => CalcLit(a <= b)
-//      case ("<=",         a: Char,    b: Float,   _)  => CalcLit(a <= b)
-//      case ("<=",         a: Char,    b: Double,  _)  => CalcLit(a <= b)
-//      case ("<=",         a: Int,     b: Char,    _)  => CalcLit(a <= b)
-//      case ("<=",         a: Int,     b: Int,     _)  => CalcLit(a <= b)
-//      case ("<=",         a: Int,     b: Long,    _)  => CalcLit(a <= b)
-//      case ("<=",         a: Int,     b: Float,   _)  => CalcLit(a <= b)
-//      case ("<=",         a: Int,     b: Double,  _)  => CalcLit(a <= b)
-//      case ("<=",         a: Long,    b: Char,    _)  => CalcLit(a <= b)
-//      case ("<=",         a: Long,    b: Int,     _)  => CalcLit(a <= b)
-//      case ("<=",         a: Long,    b: Long,    _)  => CalcLit(a <= b)
-//      case ("<=",         a: Long,    b: Float,   _)  => CalcLit(a <= b)
-//      case ("<=",         a: Long,    b: Double,  _)  => CalcLit(a <= b)
-//      case ("<=",         a: Float,   b: Char,    _)  => CalcLit(a <= b)
-//      case ("<=",         a: Float,   b: Int,     _)  => CalcLit(a <= b)
-//      case ("<=",         a: Float,   b: Long,    _)  => CalcLit(a <= b)
-//      case ("<=",         a: Float,   b: Float,   _)  => CalcLit(a <= b)
-//      case ("<=",         a: Float,   b: Double,  _)  => CalcLit(a <= b)
-//      case ("<=",         a: Double,  b: Char,    _)  => CalcLit(a <= b)
-//      case ("<=",         a: Double,  b: Int,     _)  => CalcLit(a <= b)
-//      case ("<=",         a: Double,  b: Long,    _)  => CalcLit(a <= b)
-//      case ("<=",         a: Double,  b: Float,   _)  => CalcLit(a <= b)
-//      case ("<=",         a: Double,  b: Double,  _)  => CalcLit(a <= b)
-//
-//      case (">=",         a: Char,    b: Char,    _)  => CalcLit(a >= b)
-//      case (">=",         a: Char,    b: Int,     _)  => CalcLit(a >= b)
-//      case (">=",         a: Char,    b: Long,    _)  => CalcLit(a >= b)
-//      case (">=",         a: Char,    b: Float,   _)  => CalcLit(a >= b)
-//      case (">=",         a: Char,    b: Double,  _)  => CalcLit(a >= b)
-//      case (">=",         a: Int,     b: Char,    _)  => CalcLit(a >= b)
-//      case (">=",         a: Int,     b: Int,     _)  => CalcLit(a >= b)
-//      case (">=",         a: Int,     b: Long,    _)  => CalcLit(a >= b)
-//      case (">=",         a: Int,     b: Float,   _)  => CalcLit(a >= b)
-//      case (">=",         a: Int,     b: Double,  _)  => CalcLit(a >= b)
-//      case (">=",         a: Long,    b: Char,    _)  => CalcLit(a >= b)
-//      case (">=",         a: Long,    b: Int,     _)  => CalcLit(a >= b)
-//      case (">=",         a: Long,    b: Long,    _)  => CalcLit(a >= b)
-//      case (">=",         a: Long,    b: Float,   _)  => CalcLit(a >= b)
-//      case (">=",         a: Long,    b: Double,  _)  => CalcLit(a >= b)
-//      case (">=",         a: Float,   b: Char,    _)  => CalcLit(a >= b)
-//      case (">=",         a: Float,   b: Int,     _)  => CalcLit(a >= b)
-//      case (">=",         a: Float,   b: Long,    _)  => CalcLit(a >= b)
-//      case (">=",         a: Float,   b: Float,   _)  => CalcLit(a >= b)
-//      case (">=",         a: Float,   b: Double,  _)  => CalcLit(a >= b)
-//      case (">=",         a: Double,  b: Char,    _)  => CalcLit(a >= b)
-//      case (">=",         a: Double,  b: Int,     _)  => CalcLit(a >= b)
-//      case (">=",         a: Double,  b: Long,    _)  => CalcLit(a >= b)
-//      case (">=",         a: Double,  b: Float,   _)  => CalcLit(a >= b)
-//      case (">=",         a: Double,  b: Double,  _)  => CalcLit(a >= b)
-//
-//      case ("&&",         a: Boolean, b: Boolean, _)  => CalcLit(a && b)
-//      case ("||",         a: Boolean, b: Boolean, _)  => CalcLit(a || b)
-//
+      case "Id" => Id
+      case "ToNat" => ToNat
+      case "ToChar" => ToChar
+      case "ToInt" => ToInt
+      case "ToLong" => ToLong
+      case "ToFloat" => ToFloat
+      case "ToDouble" => ToDouble
+      case "ToString" => ToString
+      case "IsNat" => IsNat
+      case "IsChar" => IsChar
+      case "IsInt" => IsInt
+      case "IsLong" => IsLong
+      case "IsFloat" => IsFloat
+      case "IsDouble" => IsDouble
+      case "IsString" => IsString
+      case "IsBoolean" => IsBoolean
+      case "Negate" => Negate
+      case "Abs" => Abs
+      case "NumberOfLeadingZeros" => NumberOfLeadingZeros
+      case "Floor" => Floor
+      case "Ceil" => Ceil
+      case "Round" => Round
+      case "Sin" => Sin
+      case "Cos" => Cos
+      case "Tan" => Tan
+      case "Sqrt" => Sqrt
+      case "Log" => Log
+      case "Log10" => Log10
+      case "Reverse" => Reverse
+      case "!" => Not
+      case "Require" => Require
+      case "==>" => Next
+      case "+" => Plus
+      case "-" => Minus
+      case "*" => Mul
+      case "/" => Div
+      case "%" => Mod
+      case "<" => Sml
+      case ">" => Big
+      case "<=" => SmlEq
+      case ">=" => BigEq
+      case "==" => Eq
+      case "!=" => Neq
+      case "&&" => And
+      case "||" => Or
+      case "Pow" => Pow
 //      case ("Min",        a: Int,     b: Int,     _)  => CalcLit(min(a, b))
 //      case ("Min",        a: Long,    b: Long,    _)  => CalcLit(min(a, b))
 //      case ("Min",        a: Float,   b: Float,   _)  => CalcLit(min(a, b))
@@ -968,14 +1020,9 @@ trait GeneralMacros {
       val opResult = extractSingletonValue(opTpe)
 
       val genTree = (funcName, opResult) match {
-        case (CalcLit("ToNat"), CalcLit.Int(t)) =>
-          genOpTreeNat(opTpe, t)
-        case (_, CalcLit(t)) =>
-          genOpTreeLit(opTpe, t)
-        case (_, CalcNLit(t)) =>
-          genOpTreeWitness(opTpe, t)
-//        case (CalcLit("AcceptNonLiteral"), CalcNLit(t)) => genOpTreeNLit(opTpe, t)
-//        case (CalcLit("AcceptNonLiteral"), CalcUnknown(t)) => genOpTreeUnknown(opTpe, t)
+        case (CalcLit("ToNat"), CalcLit.Int(t)) => genOpTreeNat(opTpe, t)
+        case (_, CalcLit(t)) => genOpTreeLit(opTpe, t)
+        case (_, CalcNLit(t)) => genOpTreeWitness(opTpe, t)
         case _ => extractionFailed(opTpe)
       }
 
