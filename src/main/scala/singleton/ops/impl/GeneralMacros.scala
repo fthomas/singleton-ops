@@ -46,41 +46,88 @@ trait GeneralMacros {
 
 
   ////////////////////////////////////////////////////////////////////
+  // Calc
+  ////////////////////////////////////////////////////////////////////
+  sealed trait Calc {
+    type T
+  }
+
+  object Calc {
+    sealed trait Char extends Calc{type T = scala.Char}
+    sealed trait Int extends Calc{type T = scala.Int}
+    sealed trait Long extends Calc{type T = scala.Long}
+    sealed trait Float extends Calc{type T = scala.Float}
+    sealed trait Double extends Calc{type T = scala.Double}
+    sealed trait String extends Calc{type T = java.lang.String}
+    sealed trait Boolean extends Calc{type T = scala.Boolean}
+  }
+
+  sealed trait CalcVal extends Calc {
+    type V
+    val t : V
+  }
+  object CalcVal {
+    implicit val lift = Liftable[CalcVal] { p =>
+      p match {
+        case c : CalcLit => Literal(Constant(c.t))
+        case c : CalcNLit => c.t
+        //        case _ => abort("Unsupported lifting for given calculation")
+      }
+    }
+  }
+
+  sealed trait CalcLit extends CalcVal {
+    type V = T
+  }
+
+  object CalcLit {
+    implicit val lift = Liftable[CalcLit] { p => Literal(Constant(p.t)) }
+    case class Char(t : scala.Char) extends CalcLit with Calc.Char
+    case class Int(t : scala.Int) extends CalcLit with Calc.Int
+    case class Long(t : scala.Long) extends CalcLit with Calc.Long
+    case class Float(t : scala.Float) extends CalcLit with Calc.Float
+    case class Double(t : scala.Double) extends CalcLit with Calc.Double
+    case class String(t : java.lang.String) extends CalcLit with Calc.String
+    case class Boolean(t : scala.Boolean) extends CalcLit with Calc.Boolean
+    def apply[T](t : T)(implicit unsupported : TypeSymbol) = t match {
+      case t : scala.Char => Char(t)
+      case t : scala.Int => Int(t)
+      case t : scala.Long => Long(t)
+      case t : scala.Float => Float(t)
+      case t : scala.Double => Double(t)
+      case t : java.lang.String => String(t)
+      case t : scala.Boolean => Boolean(t)
+      case _ => abort("Unsupported type")
+    }
+    def unapply(arg: CalcLit) : Option[arg.T] = Some(arg.t)
+  }
+
+  sealed trait CalcType extends Calc
+  object CalcType {
+    object Char extends CalcType with Calc.Char
+    object Int extends CalcType with Calc.Int
+    object Long extends CalcType with Calc.Long
+    object Float extends CalcType with Calc.Float
+    object Double extends CalcType with Calc.Double
+    object String extends CalcType with Calc.String
+    object Boolean extends CalcType with Calc.Boolean
+  }
+  sealed trait CalcNLit extends CalcVal {
+    type V = Tree
+  }
+  object CalcNLit {
+    implicit val lift = Liftable[CalcNLit] { p => p.t }
+    def apply(_t : Tree) = new CalcNLit{val t = _t}
+    def unapply(arg: CalcNLit) : Option[Tree] = Some(arg.t)
+  }
+  case class CalcUnknown(t: Type) extends Calc
+  ////////////////////////////////////////////////////////////////////
+
+
+  ////////////////////////////////////////////////////////////////////
   // Code thanks to Paul Phillips
   // https://github.com/paulp/psply/blob/master/src/main/scala/PsplyMacros.scala
   ////////////////////////////////////////////////////////////////////
-  sealed trait Calc {
-    type T0
-    val t : T0
-  }
-  object Calc {
-    def apply[T](_t : T) = new Calc{type T0 = T; val t = _t}
-    def unapply(arg: Calc): Option[arg.T0] = Some(arg.t)
-  }
-  case class CalcLit[T](t: T) extends Calc {type T0 = T}
-  case class CalcNLit[T](t: T) extends Calc {type T0 = T}
-  object CalcNLChar extends CalcNLit('\u0001')
-  object CalcNLInt extends CalcNLit(1)
-  object CalcNLLong extends CalcNLit(1L)
-  object CalcNLFloat extends CalcNLit(1.0f)
-  object CalcNLDouble extends CalcNLit(1.0)
-  object CalcNLString extends CalcNLit("1")
-  object CalcNLBoolean extends CalcNLit(true)
-  sealed trait CalcTree extends Calc {type T0 = Tree}
-  object CalcTree {
-    def apply(_t : Tree) = new CalcTree{val t = _t}
-    def unapply(arg: CalcTree): Option[Tree] = Some(arg.t)
-  }
-  case class CalcLitTree(t: Tree) extends CalcTree
-  case class CalcNLitTree(t: Tree) extends CalcTree
-  case class CalcUnknown(t: Type) extends Calc {type T0 = Type}
-
-//  case class Calc(const : Constant)
-//  object Calc {
-//    def apply[T <: Any](t : T) = new Calc(Constant(t))
-//    def unapply(calc: Calc): Option[Constant] = Some(calc.const)
-//  }
-
   import scala.reflect.internal.SymbolTable
 
   /** Typecheck singleton types so as to obtain indirectly
@@ -90,12 +137,12 @@ trait GeneralMacros {
     ////////////////////////////////////////////////////////////////////////
     // Calculates the integer value of Shapeless Nat
     ////////////////////////////////////////////////////////////////////////
-    def calcNat(tp: Type)(implicit annotatedSym : TypeSymbol): CalcLit[Int] = {
+    def calcNat(tp: Type)(implicit annotatedSym : TypeSymbol): CalcLit.Int = {
       tp match {
         case TypeRef(_, sym, args) if sym == symbolOf[shapeless.Succ[_]] =>
-          CalcLit(calcNat(args.head).t + 1)
+          CalcLit.Int(calcNat(args.head).t + 1)
         case TypeRef(_, sym, _) if sym == symbolOf[shapeless._0] =>
-          CalcLit(0)
+          CalcLit.Int(0)
         case _ =>
           abort(s"Given Nat type is defective: $tp, raw: ${showRaw(tp)}")
       }
@@ -104,14 +151,10 @@ trait GeneralMacros {
 
     def unapplyOpArg(tp: Type)(implicit annotatedSym : TypeSymbol): Option[Calc] = {
       unapply(tp) match {
-        case Some(CalcLit(t)) =>
-          Some(CalcLitTree(Literal(Constant(t))))
-        case Some(CalcNLit(t)) =>
-          Some(CalcNLitTree(q"_root_.shapeless.Witness[$tp].value"))
-        case Some(CalcLitTree(t)) =>
-          Some(CalcLitTree(t))
-        case Some(CalcNLitTree(t)) =>
-          Some(CalcNLitTree(t))
+        case Some(t : CalcLit) =>
+          Some(t)
+        case Some(t : CalcType) =>
+          Some(CalcNLit(q"_root_.shapeless.Witness[$tp].value"))
         case _ =>
           Some(CalcUnknown(tp))
       }
@@ -120,7 +163,7 @@ trait GeneralMacros {
     def unapplyOp(tp: Type)(implicit annotatedSym : TypeSymbol): Option[Calc] = {
       val args = tp.typeArgs
       val funcName = unapply(args.head) match {
-        case (Some(CalcLit(f : String))) => f
+        case (Some(CalcLit.String(f))) => f
         case _ => abort(s"Unexpected bad function name: ${args.head}")
       }
 
@@ -128,30 +171,24 @@ trait GeneralMacros {
       //otherwise we get the variable's value
       val aValue = unapplyOpArg(args(1))
       val retVal = (funcName, aValue) match {
-//        case (Some(CalcLit("NL")), _) => //Getting non-literal type
-//          Some(CalcNLit(q"_root_.shapeless.Witness[${args(1)}].value"))
-        case ("AcceptNonLiteral", _) => //Getting non-literal type
-          aValue match {
-            case None => Some(CalcUnknown(args(1)))
-            case _ => aValue
-          }
         case ("IsNonLiteral", _) => //Looking for non literals
           aValue match {
-            case None => Some(CalcLit(true)) //Unknown value
-            case Some(CalcNLit(t)) => Some(CalcLit(true)) //non-literal type (e.g., Int, Long,...)
-            case _ => Some(CalcLit(false))
+            case Some(t : CalcLit) => Some(CalcLit(false))
+            case _ => Some(CalcLit(true)) //non-literal type (e.g., Int, Long,...)
           }
-        case ("ITE", Some(CalcLit(cond : Boolean))) => //Special control case: ITE (If-Then-Else)
+        case ("ITE", Some(CalcLit.Boolean(cond))) => //Special control case: ITE (If-Then-Else)
           if (cond)
             unapplyOpArg(args(2)) //true (then) part of the IF
           else
             unapplyOpArg(args(3)) //false (else) part of the IF
-        case ("ITE", Some(CalcNLBoolean)) => //Non-literal condition will return non-literal type
-          val bValue = unapplyOpArg(args(2)) //used to take the type from the true clause of the If
-          bValue match {
-            case Some(Calc(t)) => Some(CalcNLit(t)) //forcing non-literal type
+        case ("ITE", Some(CalcNLit(cond))) => //Non-literal condition will return non-literal type
+          val thenArg = unapplyOpArg(args(2))
+          val elseArg = unapplyOpArg(args(3))
+          (thenArg, elseArg) match {
+            case (Some(thenArg0 : CalcVal), Some(elseArg0 : CalcVal)) => Some(CalcNLit(q"if ($cond) $thenArg0 else $elseArg0"))
             case _ => None
           }
+
         case _ => //regular cases
           val bValue = unapplyOpArg(args(2))
           val cValue = unapplyOpArg(args(3))
@@ -159,7 +196,7 @@ trait GeneralMacros {
 //            case (Some(CalcLit("Require")), Some(CalcLit(a)), Some(CalcLit(b)), None) =>
 //              implicit val annotatedSym : TypeSymbol = args(3).typeSymbol.asType
 //              Some(opCalc("Require", a, b, c))
-            case (Some(a : CalcTree), Some(b: CalcTree), Some(c : CalcTree)) =>
+            case (Some(a : Calc), Some(b: Calc), Some(c : Calc)) =>
               Some(opCalc(funcName, a, b, c))
             case _ => None
           }
@@ -182,13 +219,13 @@ trait GeneralMacros {
         ////////////////////////////////////////////////////////////////////////
         // Non-literal values
         ////////////////////////////////////////////////////////////////////////
-        case TypeRef(_, sym, _) if sym == symbolOf[Char] => Some(CalcNLChar)
-        case TypeRef(_, sym, _) if sym == symbolOf[Int] => Some(CalcNLInt)
-        case TypeRef(_, sym, _) if sym == symbolOf[Long] => Some(CalcNLLong)
-        case TypeRef(_, sym, _) if sym == symbolOf[Float] => Some(CalcNLFloat)
-        case TypeRef(_, sym, _) if sym == symbolOf[Double] => Some(CalcNLDouble)
-        case TypeRef(_, sym, _) if sym == symbolOf[String] => Some(CalcNLString)
-        case TypeRef(_, sym, _) if sym == symbolOf[Boolean] => Some(CalcNLBoolean)
+        case TypeRef(_, sym, _) if sym == symbolOf[Char] => Some(CalcType.Char)
+        case TypeRef(_, sym, _) if sym == symbolOf[Int] => Some(CalcType.Int)
+        case TypeRef(_, sym, _) if sym == symbolOf[Long] => Some(CalcType.Long)
+        case TypeRef(_, sym, _) if sym == symbolOf[Float] => Some(CalcType.Float)
+        case TypeRef(_, sym, _) if sym == symbolOf[Double] => Some(CalcType.Double)
+        case TypeRef(_, sym, _) if sym == symbolOf[String] => Some(CalcType.String)
+        case TypeRef(_, sym, _) if sym == symbolOf[Boolean] => Some(CalcType.Boolean)
         ////////////////////////////////////////////////////////////////////////
 
         ////////////////////////////////////////////////////////////////////////
@@ -374,37 +411,99 @@ trait GeneralMacros {
   def materializeOpGen[F, N](implicit ev0: c.WeakTypeTag[F], evn: c.WeakTypeTag[N]): MaterializeOpAuxGen =
     new MaterializeOpAuxGen(weakTypeOf[F], weakTypeOf[N])
 
-  def opCalc[T1, T2, T3](funcName : String, a : CalcTree, b : CalcTree, c : CalcTree)(implicit annotatedSym : TypeSymbol) : CalcTree = {
-    val aTree = a.t
-    val bTree = b.t
-    val cTree = c.t
-    def aEval : Tree = a match {
-      case CalcLitTree(at) => Literal(evalTyped(aTree))
-      case _ => aTree
-    }
-    def bEval : Tree = b match {
-      case CalcLitTree(bt) => Literal(evalTyped(bTree))
-      case _ => bTree
-    }
+  def opCalc[T1, T2, T3](funcName : String, a : Calc, b : Calc, c : Calc)(implicit annotatedSym : TypeSymbol) : Calc = {
+    def unsupported() = abort(s"Unsupported $funcName[$a, $b, $c]")
 
-    val outTree = funcName match {
-      case "Id" => aTree
-      case "ToNat" => q"$aTree.toInt" //Has a special case to handle this in MaterializeOpAuxGen
-      case "ToChar" => q"$aTree.toChar"
-      case "ToInt" => q"$aTree.toInt"
-      case "ToLong" => q"$aTree.toLong"
-      case "ToFloat" => q"$aTree.toFloat"
-      case "ToDouble" => q"$aTree.toDouble"
-      case "ToString" => q"$aTree.toString"
-      case "IsNat" => q"$aTree.isInstanceOf[Int] && $aTree >= 0"
-      case "IsChar" => q"$aTree.isInstanceOf[Char]"
-      case "IsInt" => q"$aTree.isInstanceOf[Int]"
-      case "IsLong" => q"$aTree.isInstanceOf[Long]"
-      case "IsFloat" => q"$aTree.isInstanceOf[Float]"
-      case "IsDouble" => q"$aTree.isInstanceOf[Double]"
-      case "IsString" => q"$aTree.isInstanceOf[String]"
-      case "IsBoolean" => q"$aTree.isInstanceOf[Boolean]"
-      case "Negate" => q"-$aTree"
+    funcName match {
+      case "Id" => a match {
+        case t : CalcLit => t
+        case t : CalcNLit => t
+        case _ => unsupported()
+      }
+      case "Negate" => a match {
+        case CalcLit.Char(t) => CalcLit(-t)
+        case CalcLit.Int(t) => CalcLit(-t)
+        case CalcLit.Long(t) => CalcLit(-t)
+        case CalcLit.Float(t) => CalcLit(-t)
+        case CalcLit.Double(t) => CalcLit(-t)
+        case nl : CalcNLit => CalcNLit(q"-$nl")
+        case _ => unsupported()
+      }
+      case "ToNat" => a match { //Has a special case to handle this in MaterializeOpAuxGen
+        case CalcLit.Char(t) => CalcLit(t.toInt)
+        case CalcLit.Int(t) => CalcLit(t.toInt)
+        case CalcLit.Long(t) => CalcLit(t.toInt)
+        case CalcLit.Float(t) => CalcLit(t.toInt)
+        case CalcLit.Double(t) => CalcLit(t.toInt)
+        case nl : CalcNLit => CalcNLit(q"$nl.toInt")
+        case _ => unsupported()
+      }
+      case "ToChar" => a match {
+        case CalcLit.Char(t) => CalcLit(t.toChar)
+        case CalcLit.Int(t) => CalcLit(t.toChar)
+        case CalcLit.Long(t) => CalcLit(t.toChar)
+        case CalcLit.Float(t) => CalcLit(t.toChar)
+        case CalcLit.Double(t) => CalcLit(t.toChar)
+        case nl : CalcNLit => CalcNLit(q"$nl.toChar")
+        case _ => unsupported()
+      }
+      case "ToInt" => a match {
+        case CalcLit.Char(t) => CalcLit(t.toInt)
+        case CalcLit.Int(t) => CalcLit(t.toInt)
+        case CalcLit.Long(t) => CalcLit(t.toInt)
+        case CalcLit.Float(t) => CalcLit(t.toInt)
+        case CalcLit.Double(t) => CalcLit(t.toInt)
+        case nl : CalcNLit => CalcNLit(q"$nl.toInt")
+        case _ => unsupported()
+      }
+      case "ToLong" => a match {
+        case CalcLit.Char(t) => CalcLit(t.toLong)
+        case CalcLit.Int(t) => CalcLit(t.toLong)
+        case CalcLit.Long(t) => CalcLit(t.toLong)
+        case CalcLit.Float(t) => CalcLit(t.toLong)
+        case CalcLit.Double(t) => CalcLit(t.toLong)
+        case nl : CalcNLit => CalcNLit(q"$nl.toLong")
+        case _ => unsupported()
+      }
+      case "ToFloat" => a match {
+        case CalcLit.Char(t) => CalcLit(t.toFloat)
+        case CalcLit.Int(t) => CalcLit(t.toFloat)
+        case CalcLit.Long(t) => CalcLit(t.toFloat)
+        case CalcLit.Float(t) => CalcLit(t.toFloat)
+        case CalcLit.Double(t) => CalcLit(t.toFloat)
+        case nl : CalcNLit => CalcNLit(q"$nl.toFloat")
+        case _ => unsupported()
+      }
+      case "ToDouble" => a match {
+        case CalcLit.Char(t) => CalcLit(t.toDouble)
+        case CalcLit.Int(t) => CalcLit(t.toDouble)
+        case CalcLit.Long(t) => CalcLit(t.toDouble)
+        case CalcLit.Float(t) => CalcLit(t.toDouble)
+        case CalcLit.Double(t) => CalcLit(t.toDouble)
+        case nl : CalcNLit => CalcNLit(q"$nl.toDouble")
+        case _ => unsupported()
+      }
+      case "ToString" => a match {
+        case CalcLit.Char(t) => CalcLit(t.toString)
+        case CalcLit.Int(t) => CalcLit(t.toString)
+        case CalcLit.Long(t) => CalcLit(t.toString)
+        case CalcLit.Float(t) => CalcLit(t.toString)
+        case CalcLit.Double(t) => CalcLit(t.toString)
+        case CalcLit.String(t) => CalcLit(t.toString)
+        case CalcLit.Boolean(t) => CalcLit(t.toString)
+        case nl : CalcNLit => CalcNLit(q"$nl.toString")
+        case _ => unsupported()
+      }
+
+//      case "IsNat" => q"$aTree.isInstanceOf[Int] && $aTree >= 0"
+//      case "IsChar" => q"$aTree.isInstanceOf[Char]"
+//      case "IsInt" => q"$aTree.isInstanceOf[Int]"
+//      case "IsLong" => q"$aTree.isInstanceOf[Long]"
+//      case "IsFloat" => q"$aTree.isInstanceOf[Float]"
+//      case "IsDouble" => q"$aTree.isInstanceOf[Double]"
+//      case "IsString" => q"$aTree.isInstanceOf[String]"
+//      case "IsBoolean" => q"$aTree.isInstanceOf[Boolean]"
+//      case "Negate" => q"-$aTree"
 //      case "Abs" => a match {
 //        case CalcLitTree(at) =>
 //          evalTyped(aTree) match {
@@ -416,64 +515,6 @@ trait GeneralMacros {
 //        case CalcNLitTree(at) => aTree
 //      }
 
-//      case ("Id",         a: Char, _, _)              => CalcLit(a)
-//      case ("Id",         a: Int, _, _)               => CalcLit(a)
-//      case ("Id",         a: Long, _, _)              => CalcLit(a)
-//      case ("Id",         a: Float, _, _)             => CalcLit(a)
-//      case ("Id",         a: Double, _, _)            => CalcLit(a)
-//      case ("Id",         a: String, _, _)            => CalcLit(a)
-//      case ("Id",         a: Boolean, _, _)           => CalcLit(a)
-//      case ("Id",         a: Tree, _, _)              => CalcNLitTree(a)
-//
-//      case ("ToNat",      a: Char, _, _)              => CalcLit(a.toInt)
-//      case ("ToNat",      a: Int, _, _)               => CalcLit(a.toInt)
-//      case ("ToNat",      a: Long, _, _)              => CalcLit(a.toInt)
-//      case ("ToNat",      a: Float, _, _)             => CalcLit(a.toInt)
-//      case ("ToNat",      a: Double, _, _)            => CalcLit(a.toInt)
-//      case ("ToNat",      a: String, _, _)            => CalcLit(a.toInt)
-//
-//      case ("ToChar",     a: Char, _, _)              => CalcLit(a.toChar)
-//      case ("ToChar",     a: Int, _, _)               => CalcLit(a.toChar)
-//      case ("ToChar",     a: Long, _, _)              => CalcLit(a.toChar)
-//      case ("ToChar",     a: Float, _, _)             => CalcLit(a.toChar)
-//      case ("ToChar",     a: Double, _, _)            => CalcLit(a.toChar)
-//
-//      case ("ToInt",      a: Char, _, _)              => CalcLit(a.toInt)
-//      case ("ToInt",      a: Int, _, _)               => CalcLit(a.toInt)
-//      case ("ToInt",      a: Long, _, _)              => CalcLit(a.toInt)
-//      case ("ToInt",      a: Float, _, _)             => CalcLit(a.toInt)
-//      case ("ToInt",      a: Double, _, _)            => CalcLit(a.toInt)
-//      case ("ToInt",      a: String, _, _)            => CalcLit(a.toInt)
-//
-//      case ("ToLong",     a: Char, _, _)              => CalcLit(a.toLong)
-//      case ("ToLong",     a: Int, _, _)               => CalcLit(a.toLong)
-//      case ("ToLong",     a: Long, _, _)              => CalcLit(a.toLong)
-//      case ("ToLong",     a: Float, _, _)             => CalcLit(a.toLong)
-//      case ("ToLong",     a: Double, _, _)            => CalcLit(a.toLong)
-//      case ("ToLong",     a: String, _, _)            => CalcLit(a.toLong)
-//
-//      case ("ToFloat",    a: Char, _, _)              => CalcLit(a.toFloat)
-//      case ("ToFloat",    a: Int, _, _)               => CalcLit(a.toFloat)
-//      case ("ToFloat",    a: Long, _, _)              => CalcLit(a.toFloat)
-//      case ("ToFloat",    a: Float, _, _)             => CalcLit(a.toFloat)
-//      case ("ToFloat",    a: Double, _, _)            => CalcLit(a.toFloat)
-//      case ("ToFloat",    a: String, _, _)            => CalcLit(a.toFloat)
-//
-//      case ("ToDouble",   a: Char, _, _)              => CalcLit(a.toDouble)
-//      case ("ToDouble",   a: Int, _, _)               => CalcLit(a.toDouble)
-//      case ("ToDouble",   a: Long, _, _)              => CalcLit(a.toDouble)
-//      case ("ToDouble",   a: Float, _, _)             => CalcLit(a.toDouble)
-//      case ("ToDouble",   a: Double, _, _)            => CalcLit(a.toDouble)
-//      case ("ToDouble",   a: String, _, _)            => CalcLit(a.toDouble)
-//
-//      case ("ToString",   a: Char, _, _)              => CalcLit(a.toString)
-//      case ("ToString",   a: Int, _, _)               => CalcLit(a.toString)
-//      case ("ToString",   a: Long, _, _)              => CalcLit(a.toString)
-//      case ("ToString",   a: Float, _, _)             => CalcLit(a.toString)
-//      case ("ToString",   a: Double, _, _)            => CalcLit(a.toString)
-//      case ("ToString",   a: String, _, _)            => CalcLit(a.toString)
-//      case ("ToString",   a: Boolean, _, _)           => CalcLit(a.toString)
-//
 //      case ("IsNat",      a: Char, _, _)              => CalcLit(false)
 //      case ("IsNat",      a: Int, _, _)               => CalcLit(a >= 0)
 //      case ("IsNat",      a: Long, _, _)              => CalcLit(false)
@@ -902,13 +943,7 @@ trait GeneralMacros {
 //      case ("Length",     a: String,  _,          _)  => CalcLit(a.length)
 //      case ("CharAt",     a: String,  b: Int,     _)  => CalcLit(a.charAt(b))
 
-      case _ => abort(s"Unsupported $funcName[$aTree, $bTree, $cTree]")
-    }
-    (a, b, c) match {
-      //result is literal if all inputs are literal
-      case (CalcLitTree(at), CalcLitTree(bt), CalcLitTree(ct)) => CalcLitTree(outTree)
-      //result is non-literal if not all inputs are literal
-      case _ => CalcNLitTree(outTree)
+      case _ => abort(s"Unsupported $funcName[$a, $b, $c]")
     }
   }
 
@@ -919,14 +954,11 @@ trait GeneralMacros {
       val opResult = extractSingletonValue(opTpe)
 
       val genTree = (funcName, opResult) match {
-        case (CalcLit("ToNat"), CalcLitTree(t)) =>
-          evalTyped(t) match {
-            case (Constant(lit : Int)) => genOpTreeNat(opTpe, lit)
-            case _ => abort(s"Cannot evaluate ToNat[$t]")
-          }
-        case (_, CalcLitTree(t)) =>
-            genOpTreeLit(opTpe, evalTyped(t).value)
-        case (_, CalcNLitTree(t : Tree)) =>
+        case (CalcLit("ToNat"), CalcLit.Int(t)) =>
+          genOpTreeNat(opTpe, t)
+        case (_, CalcLit(t)) =>
+          genOpTreeLit(opTpe, t)
+        case (_, CalcNLit(t)) =>
           genOpTreeWitness(opTpe, t)
 //        case (CalcLit("AcceptNonLiteral"), CalcNLit(t)) => genOpTreeNLit(opTpe, t)
 //        case (CalcLit("AcceptNonLiteral"), CalcUnknown(t)) => genOpTreeUnknown(opTpe, t)
