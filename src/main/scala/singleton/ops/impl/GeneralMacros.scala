@@ -111,6 +111,7 @@ trait GeneralMacros {
     object Double extends CalcType with Calc.Double
     object String extends CalcType with Calc.String
     object Boolean extends CalcType with Calc.Boolean
+    object TwoFace extends CalcType
   }
   sealed trait CalcNLit extends CalcVal {
     type V = Tree
@@ -155,10 +156,21 @@ trait GeneralMacros {
       unapply(tp) match {
         case Some(t : CalcLit) =>
           Some(t)
+        case Some(t : CalcNLit) =>
+          Some(t)
+        case Some(CalcType.TwoFace) =>
+          Some(CalcNLit(q"_root_.shapeless.Witness[$tp].value.getValue"))
         case Some(t : CalcType) =>
           Some(CalcNLit(q"_root_.shapeless.Witness[$tp].value"))
         case _ =>
           Some(CalcUnknown(tp))
+      }
+    }
+
+    def unapplyOpTwoFace(tp: Type)(implicit annotatedSym : TypeSymbol): Option[Calc] = {
+      unapplyOpArg(tp.typeArgs.head) match {
+        case Some(t : CalcLit) => Some(t)
+        case _ => Some(CalcType.TwoFace)
       }
     }
 
@@ -249,6 +261,13 @@ trait GeneralMacros {
         case TypeRef(_, sym, args) if sym == symbolOf[OpBoolean[_]] => unapplyOpArg(args.head)
         ////////////////////////////////////////////////////////////////////////
 
+        ////////////////////////////////////////////////////////////////////////
+        // TwoFace Values
+        ////////////////////////////////////////////////////////////////////////
+//        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny.Int[_]] => unapplyOpTwoFace(tp)
+        ////////////////////////////////////////////////////////////////////////
+
+
         case TypeRef(_, sym, _) if sym.isAliasType => unapply(tp.dealias)
         case TypeRef(pre, sym, Nil) =>
           unapply(sym.info asSeenFrom (pre, sym.owner))
@@ -295,10 +314,10 @@ trait GeneralMacros {
       new $opTpe {
         final val $dummy = $outWideLiteral
         type OutWide = $outWideTpe
-        type Out = $dummy.type
-        type Value = Out
-        type $outTypeName = Out
-        final val value: Value = $outWideLiteral
+        type Out = $outTpe
+        type Value = $outTpe
+        type $outTypeName = $outTpe
+        final val value: $outTpe = $outWideLiteral
         final val isLiteral = true
         final val valueWide: $outWideTpe = $outWideLiteral
       }
@@ -329,12 +348,12 @@ trait GeneralMacros {
     q"""
       new $opTpe {
         final val $dummy = $t
-        type OutWide = $dummy.type
-        type Out = $dummy.type
-        type Value = $dummy.type
+        type OutWide = Int
+        type Out = Int
+        type Value = Int
         final val value: Value = $dummy
         final val isLiteral = false
-        final val valueWide: $dummy.type = $dummy
+        final val valueWide: Int = $dummy
       }
       """
   }
