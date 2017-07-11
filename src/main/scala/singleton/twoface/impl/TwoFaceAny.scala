@@ -1,27 +1,30 @@
-//package singleton.twoface.impl
-//
-//import singleton.ops._
-//
-//trait TwoFaceAny[Face, T] extends Any {
-//  def isLiteral(implicit rt : RunTime[T]) : scala.Boolean = !rt
-//  @inline def getValue : Face
-//  override def toString = getValue.toString
-//}
-//
-//object TwoFaceAny {
+package singleton.twoface.impl
+
+import singleton.ops._
+import singleton.ops.impl._
+import macrocompat.bundle
+import scala.reflect.macros.whitebox
+
+trait TwoFaceAny[Face, T] extends Any {
+  def isLiteral(implicit rt : RunTime[T]) : scala.Boolean = !rt
+  @inline def getValue : Face
+  override def toString = getValue.toString
+}
+
+object TwoFaceAny {
 //  @inline implicit def fromTwoFaceUnsafe[Face, T](tf : TwoFaceAny[Face, T]) : Face = tf.getValue
 //  @inline implicit def fromTwoFaceSafe[Face, T <: Face with Singleton](tf : TwoFaceAny[Face, T])
 //                                                                      (implicit sc: ValueOf[T]) : T {} = valueOf[T]
 //
-//  trait Builder[TF[_], Face] {
-//    protected[twoface] def create[T](value : Face) : TF[T]
-//    implicit def apply[T <: Face with Singleton](value : T)(implicit tfb : Builder[TF, Face]) : TF[T] =
-//      tfb.create[T](value)
-//    implicit def apply[T <: Face](value : T)(implicit tfb : Builder[TF, Face], di: DummyImplicit) : TF[Face] =
-//      tfb.create[Face](value)
-//    implicit def apply[T](implicit si : Id[T], tfb : Builder[TF, Face]) : TF[T] =
-//      tfb.create[T](si.value.asInstanceOf[Face])
-//  }
+  trait Builder[TF[_], Face] {
+    protected[twoface] def create[T](value : Face) : TF[T]
+    implicit def apply[T <: Face with Singleton](value : T)(implicit tfb : Builder[TF, Face]) : TF[T] =
+      tfb.create[T](value)
+    implicit def apply[T <: Face](value : T)(implicit tfb : Builder[TF, Face], di: DummyImplicit) : TF[Face] =
+      tfb.create[Face](value)
+    implicit def apply[T](implicit si : Id[T], tfb : Builder[TF, Face]) : TF[T] =
+      tfb.create[T](si.value.asInstanceOf[Face])
+  }
 //
 //  sealed trait TwoFaceOp[TF[_], Face, OP] {
 //    type FB <: AcceptNonLiteral[OP]
@@ -181,7 +184,17 @@
 //    protected[twoface] def create[T](value : scala.Char) = new _Char[T](value)
 //  }
 //
-//  trait Int[T] extends Any with TwoFaceAny[scala.Int, T] {
+  @bundle
+  object Builder {
+    final class Macro(val c: whitebox.Context) extends GeneralMacros {
+      def binOp[OP](r : c.Tree)(implicit op : c.WeakTypeTag[OP]) : c.Tree =
+        TwoFaceMaterializer[OP].binOp(c.prefix.tree, r)
+    }
+  }
+
+  trait Int[T] extends Any with TwoFaceAny[scala.Int, T] {
+    def +  [R, O](r : Int[R]) : Int[O] = macro Builder.Macro.binOp[OpId.+]
+
 //    def == [R <: XChar](r : R)(
 //      implicit tfo : Boolean.Return[T == R]
 //    ) = tfo(this.getValue == r)
@@ -321,16 +334,16 @@
 //    def toFloat(implicit tfo : Float.Return[ToFloat[T]])             = tfo(this.getValue.toFloat)
 //    def toDouble(implicit tfo : Double.Return[ToDouble[T]])          = tfo(this.getValue.toDouble)
 //    def toString(implicit tfo : String.Return[ToString[T]])          = tfo(this.getValue.toString)
-//  }
-//  final class _Int[T](val value : scala.Int) extends AnyVal with TwoFaceAny.Int[T] {
-//    @inline def getValue : scala.Int = value
-//  }
-//  implicit object Int extends TwoFaceAny.Builder[Int, scala.Int] {
+  }
+  final class _Int[T](val value : scala.Int) extends AnyVal with TwoFaceAny.Int[T] {
+    @inline def getValue : scala.Int = value
+  }
+  implicit object Int extends TwoFaceAny.Builder[Int, scala.Int] {
 //    type Return[OP] = TwoFaceOp[Int, scala.Int, OP]
-//    protected[twoface] def create[T](value : scala.Int) = new _Int[T](value)
+    protected[twoface] def create[T](value : scala.Int) = new _Int[T](value)
 //    def numberOfLeadingZeros[T](t : Int[T])(implicit tfo : Int.Return[NumberOfLeadingZeros[T]]) =
 //      tfo(Integer.numberOfLeadingZeros(t.getValue))
-//  }
+  }
 //
 //  trait Long[T] extends Any with TwoFaceAny[scala.Long, T] {
 //    def == [R <: XChar](r : R)(
@@ -832,6 +845,4 @@
 //    protected[twoface] def create[T](value : scala.Boolean) = new _Boolean[T](value)
 //  }
 //
-//}
-//
-//
+}

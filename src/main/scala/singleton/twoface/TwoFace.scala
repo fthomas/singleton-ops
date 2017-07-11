@@ -1,13 +1,13 @@
-//package singleton.twoface
-//
-//import impl._
-//
-//object TwoFace {
+package singleton.twoface
+
+import impl._
+
+object TwoFace {
 //  type Char[T] = TwoFaceAny.Char[T]
 //  val Char = TwoFaceAny.Char
 //
-//  type Int[T] = TwoFaceAny.Int[T]
-//  val Int = TwoFaceAny.Int
+  type Int[T] = TwoFaceAny.Int[T]
+  val Int = TwoFaceAny.Int
 //
 //  type Long[T] = TwoFaceAny.Long[T]
 //  val Long = TwoFaceAny.Long
@@ -23,5 +23,4 @@
 //
 //  type Boolean[T] = TwoFaceAny.Boolean[T]
 //  val Boolean = TwoFaceAny.Boolean
-//}
-//
+}

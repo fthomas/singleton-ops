@@ -45,57 +45,58 @@ package object ops {
   type OpAuxBoolean[O <: Op,  Ret_Out <: XBoolean]  = OpBoolean.Aux[O, Ret_Out]
   /////////////////////////////////////////////////
 
+  private type NP = 0
+  private type DefaultRequireMsg = "Cannot prove requirement Require[...]"
   /////////////////////////////////////////////////
   //Special control aliases
   /////////////////////////////////////////////////
-  type ITE[Cond,TBody,EBody]= OpMacro["ITE",Cond, TBody, EBody]
-  type ==>[A,B]             = OpMacro["==>",A, B, 0]
+  type ITE[Cond,TBody,EBody]= OpMacro[OpId.ITE, Cond, TBody, EBody]
+  type ==>[A,B]             = OpMacro[OpId.==>, A, B, NP]
   /////////////////////////////////////////////////
 
-  type Id[P1]               = OpMacro["Id",P1, 0, 0]
-  type ![P1]                = OpMacro["!",P1, 0, 0]
-  type Require[Cond]        = OpMacro["Require",Cond, "Cannot prove requirement Require[...]", 0]
-  type RequireMsg[Cond,Msg] = OpMacro["Require",Cond, Msg, 0]
-  type RequireMsgSym[Cond,Msg,Sym] = OpMacro["Require",Cond, Msg, Sym]
-  type ToNat[P1]            = OpMacro["ToNat",P1, 0, 0]
-  type ToChar[P1]           = OpMacro["ToChar",P1, 0, 0]
-  type ToInt[P1]            = OpMacro["ToInt",P1, 0, 0]
-  type ToLong[P1]           = OpMacro["ToLong",P1, 0, 0]
-  type ToFloat[P1]          = OpMacro["ToFloat",P1, 0, 0]
-  type ToDouble[P1]         = OpMacro["ToDouble",P1, 0, 0]
-  type ToString[P1]         = OpMacro["ToString",P1, 0, 0]
-  type IsNat[P1]            = OpMacro["IsNat",P1, 0, 0]
-  type IsChar[P1]           = OpMacro["IsChar",P1, 0, 0]
-  type IsInt[P1]            = OpMacro["IsInt",P1, 0, 0]
-  type IsLong[P1]           = OpMacro["IsLong",P1, 0, 0]
-  type IsFloat[P1]          = OpMacro["IsFloat",P1, 0, 0]
-  type IsDouble[P1]         = OpMacro["IsDouble",P1, 0, 0]
-  type IsString[P1]         = OpMacro["IsString",P1, 0, 0]
-  type IsBoolean[P1]        = OpMacro["IsBoolean",P1, 0, 0]
-  type IsNonLiteral[P1]     = OpMacro["IsNonLiteral",P1, 0, 0]
-  type NL[P1]               = OpMacro["NL",P1, 0, 0]
-  type Reverse[P1]          = OpMacro["Reverse",P1, 0, 0]
-  type Negate[P1]           = OpMacro["Negate",P1, 0, 0]
-  type NumberOfLeadingZeros[P1] = OpMacro["NumberOfLeadingZeros",P1, 0, 0]
+  type Id[P1]               = OpMacro[OpId.Id, P1, NP, NP]
+  type ![P1]                = OpMacro[OpId.!, P1, NP, NP]
+  type Require[Cond]        = OpMacro[OpId.Require, Cond, DefaultRequireMsg, NP]
+  type RequireMsg[Cond,Msg] = OpMacro[OpId.Require, Cond, Msg, NP]
+  type RequireMsgSym[Cond,Msg,Sym] = OpMacro[OpId.Require, Cond, Msg, Sym]
+  type ToNat[P1]            = OpMacro[OpId.ToNat, P1, NP, NP]
+  type ToChar[P1]           = OpMacro[OpId.ToChar, P1, NP, NP]
+  type ToInt[P1]            = OpMacro[OpId.ToInt, P1, NP, NP]
+  type ToLong[P1]           = OpMacro[OpId.ToLong, P1, NP, NP]
+  type ToFloat[P1]          = OpMacro[OpId.ToFloat, P1, NP, NP]
+  type ToDouble[P1]         = OpMacro[OpId.ToDouble, P1, NP, NP]
+  type ToString[P1]         = OpMacro[OpId.ToString, P1, NP, NP]
+  type IsNat[P1]            = OpMacro[OpId.IsNat, P1, NP, NP]
+  type IsChar[P1]           = OpMacro[OpId.IsChar, P1, NP, NP]
+  type IsInt[P1]            = OpMacro[OpId.IsInt, P1, NP, NP]
+  type IsLong[P1]           = OpMacro[OpId.IsLong, P1, NP, NP]
+  type IsFloat[P1]          = OpMacro[OpId.IsFloat, P1, NP, NP]
+  type IsDouble[P1]         = OpMacro[OpId.IsDouble, P1, NP, NP]
+  type IsString[P1]         = OpMacro[OpId.IsString, P1, NP, NP]
+  type IsBoolean[P1]        = OpMacro[OpId.IsBoolean, P1, NP, NP]
+  type IsNonLiteral[P1]     = OpMacro[OpId.IsNonLiteral, P1, NP, NP]
+  type Reverse[P1]          = OpMacro[OpId.Reverse, P1, NP, NP]
+  type Negate[P1]           = OpMacro[OpId.Negate, P1, NP, NP]
+  type NumberOfLeadingZeros[P1] = OpMacro[OpId.NumberOfLeadingZeros, P1, NP, NP]
 
-  type +[P1, P2]            = OpMacro["+",P1, P2, 0]
-  type -[P1, P2]            = OpMacro["-",P1, P2, 0]
-  type *[P1, P2]            = OpMacro["*",P1, P2, 0]
-  type /[P1, P2]            = OpMacro["/",P1, P2, 0]
-  type %[P1, P2]            = OpMacro["%",P1, P2, 0]
-  type <[P1, P2]            = OpMacro["<",P1, P2, 0]
-  type <=[P1, P2]           = OpMacro["<=",P1, P2, 0]
-  type >=[P1, P2]           = OpMacro[">=",P1, P2, 0]
-  type >[P1, P2]            = OpMacro[">",P1, P2, 0]
-  type ==[P1, P2]           = OpMacro["==",P1, P2, 0]
-  type !=[P1, P2]           = OpMacro["!=",P1, P2, 0]
-  type &&[P1, P2]           = OpMacro["&&",P1, P2, 0]
-  type ||[P1, P2]           = OpMacro["||",P1, P2, 0]
-  type Min[P1, P2]          = OpMacro["Min",P1, P2, 0]
-  type Max[P1, P2]          = OpMacro["Max",P1, P2, 0]
-  type Substring[P1, P2]    = OpMacro["Substring",P1, P2, 0]
-  type Length[P1]           = OpMacro["Length", P1, 0, 0]
-  type CharAt[P1, P2]       = OpMacro["CharAt", P1, P2, 0]
+  type +[P1, P2]            = OpMacro[OpId.+, P1, P2, NP]
+  type -[P1, P2]            = OpMacro[OpId.-, P1, P2, NP]
+  type *[P1, P2]            = OpMacro[OpId.*, P1, P2, NP]
+  type /[P1, P2]            = OpMacro[OpId./, P1, P2, NP]
+  type %[P1, P2]            = OpMacro[OpId.%, P1, P2, NP]
+  type <[P1, P2]            = OpMacro[OpId.<, P1, P2, NP]
+  type <=[P1, P2]           = OpMacro[OpId.<=, P1, P2, NP]
+  type >=[P1, P2]           = OpMacro[OpId.>=, P1, P2, NP]
+  type >[P1, P2]            = OpMacro[OpId.>, P1, P2, NP]
+  type ==[P1, P2]           = OpMacro[OpId.==, P1, P2, NP]
+  type !=[P1, P2]           = OpMacro[OpId.!=, P1, P2, NP]
+  type &&[P1, P2]           = OpMacro[OpId.&&, P1, P2, NP]
+  type ||[P1, P2]           = OpMacro[OpId.||, P1, P2, NP]
+  type Min[P1, P2]          = OpMacro[OpId.Min, P1, P2, NP]
+  type Max[P1, P2]          = OpMacro[OpId.Max, P1, P2, NP]
+  type Substring[P1, P2]    = OpMacro[OpId.Substring, P1, P2, NP]
+  type Length[P1]           = OpMacro[OpId.Length, P1, NP, NP]
+  type CharAt[P1, P2]       = OpMacro[OpId.CharAt, P1, P2, NP]
 
   type CompileTime[C]       = Require[ITE[IsNonLiteral[C], true, C]]
   type RunTime[R]           = SafeBoolean[IsNonLiteral[R]]
@@ -103,17 +104,17 @@ package object ops {
   object math {
     type Pi                 = 3.141592653589793
     type E                  = 2.718281828459045
-    type Abs[P1]            = OpMacro["Abs",P1, 0, 0]
-    type Pow[P1, P2]        = OpMacro["Pow",P1, P2, 0]
-    type Floor[P1]          = OpMacro["Floor",P1, 0, 0]
-    type Ceil[P1]           = OpMacro["Ceil",P1, 0, 0]
-    type Round[P1]          = OpMacro["Round",P1, 0, 0]
-    type Sin[P1]            = OpMacro["Sin",P1, 0, 0]
-    type Cos[P1]            = OpMacro["Cos",P1, 0, 0]
-    type Tan[P1]            = OpMacro["Tan",P1, 0, 0]
-    type Sqrt[P1]           = OpMacro["Sqrt",P1, 0, 0]
-    type Log[P1]            = OpMacro["Log",P1, 0, 0]
-    type Log10[P1]          = OpMacro["Log10",P1, 0, 0]
+    type Abs[P1]            = OpMacro[OpId.Abs, P1, NP, NP]
+    type Pow[P1, P2]        = OpMacro[OpId.Pow, P1, P2, NP]
+    type Floor[P1]          = OpMacro[OpId.Floor, P1, NP, NP]
+    type Ceil[P1]           = OpMacro[OpId.Ceil, P1, NP, NP]
+    type Round[P1]          = OpMacro[OpId.Round, P1, NP, NP]
+    type Sin[P1]            = OpMacro[OpId.Sin, P1, NP, NP]
+    type Cos[P1]            = OpMacro[OpId.Cos, P1, NP, NP]
+    type Tan[P1]            = OpMacro[OpId.Tan, P1, NP, NP]
+    type Sqrt[P1]           = OpMacro[OpId.Sqrt, P1, NP, NP]
+    type Log[P1]            = OpMacro[OpId.Log, P1, NP, NP]
+    type Log10[P1]          = OpMacro[OpId.Log10, P1, NP, NP]
   }
 
 
@@ -123,7 +124,7 @@ package object ops {
   //E.g. val four : 2 + 2 = 4
   /////////////////////////////////////////////////
   implicit def singletonToOp[
-  X <: Singleton, N <: XString, S1, S2, S3, OP_OUT
+  X <: Singleton, N, S1, S2, S3, OP_OUT
   ](x: X)
    (implicit
     v : ValueOf[X],
@@ -140,7 +141,7 @@ package object ops {
   //E.g. val four : 4 = implicitly[2 + 2]
   /////////////////////////////////////////////////
   implicit def opToSingleton[
-  N <: XString, S1, S2, S3, OP_OUT
+  N, S1, S2, S3, OP_OUT
   ](op : OpMacro[N, S1, S2, S3])
    (implicit
     opaux: OpAuxGen[OpMacro[N, S1, S2, S3], OP_OUT],
@@ -155,8 +156,8 @@ package object ops {
   //E.g. val four : 1 + 3 = implicitly[2 + 2]
   /////////////////////////////////////////////////
   implicit def opToOp[
-  NA <: XString, SA1, SA2, SA3,
-  NB <: XString, SB1, SB2, SB3,
+  NA, SA1, SA2, SA3,
+  NB, SB1, SB2, SB3,
   OP_OUTA,
   OP_OUTB
   ](opA : OpMacro[NA, SA1, SA2, SA3])

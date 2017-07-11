@@ -9,6 +9,63 @@ trait GeneralMacros {
 
   import c.universe._
 
+
+  object funcTypes {
+    val Id = symbolOf[OpId.Id]
+    val ToNat = symbolOf[OpId.ToNat]
+    val ToChar = symbolOf[OpId.ToChar]
+    val ToInt = symbolOf[OpId.ToInt]
+    val ToLong = symbolOf[OpId.ToLong]
+    val ToFloat = symbolOf[OpId.ToFloat]
+    val ToDouble = symbolOf[OpId.ToDouble]
+    val ToString = symbolOf[OpId.ToString]
+    val IsNat = symbolOf[OpId.IsNat]
+    val IsChar = symbolOf[OpId.IsChar]
+    val IsInt = symbolOf[OpId.IsInt]
+    val IsLong = symbolOf[OpId.IsLong]
+    val IsFloat = symbolOf[OpId.IsFloat]
+    val IsDouble = symbolOf[OpId.IsDouble]
+    val IsString = symbolOf[OpId.IsString]
+    val IsBoolean = symbolOf[OpId.IsBoolean]
+    val Negate = symbolOf[OpId.Negate]
+    val Abs = symbolOf[OpId.Abs]
+    val NumberOfLeadingZeros = symbolOf[OpId.NumberOfLeadingZeros]
+    val Floor = symbolOf[OpId.Floor]
+    val Ceil = symbolOf[OpId.Ceil]
+    val Round = symbolOf[OpId.Round]
+    val Sin = symbolOf[OpId.Sin]
+    val Cos = symbolOf[OpId.Cos]
+    val Tan = symbolOf[OpId.Tan]
+    val Sqrt = symbolOf[OpId.Sqrt]
+    val Log = symbolOf[OpId.Log]
+    val Log10 = symbolOf[OpId.Log10]
+    val Reverse = symbolOf[OpId.Reverse]
+    val ! = symbolOf[OpId.!]
+    val Require = symbolOf[OpId.Require]
+    val ITE = symbolOf[OpId.ITE]
+    val IsNonLiteral = symbolOf[OpId.IsNonLiteral]
+    val ==> = symbolOf[OpId.==>]
+    val + = symbolOf[OpId.+]
+    val - = symbolOf[OpId.-]
+    val * = symbolOf[OpId.*]
+    val / = symbolOf[OpId./]
+    val % = symbolOf[OpId.%]
+    val < = symbolOf[OpId.<]
+    val > = symbolOf[OpId.>]
+    val <= = symbolOf[OpId.<=]
+    val >= = symbolOf[OpId.>=]
+    val == = symbolOf[OpId.==]
+    val != = symbolOf[OpId.!=]
+    val && = symbolOf[OpId.&&]
+    val || = symbolOf[OpId.||]
+    val Pow = symbolOf[OpId.Pow]
+    val Min = symbolOf[OpId.Min]
+    val Max = symbolOf[OpId.Max]
+    val Substring = symbolOf[OpId.Substring]
+    val CharAt = symbolOf[OpId.CharAt]
+    val Length = symbolOf[OpId.Length]
+  }
+
   ////////////////////////////////////////////////////////////////////
   // Code thanks to Shapeless
   // https://github.com/milessabin/shapeless/blob/master/core/src/main/scala/shapeless/lazy.scala
@@ -176,26 +233,23 @@ trait GeneralMacros {
 
     def unapplyOp(tp: Type)(implicit annotatedSym : TypeSymbol): Option[Calc] = {
       val args = tp.typeArgs
-      val funcName = unapply(args.head) match {
-        case (Some(CalcLit.String(f))) => f
-        case _ => abort(s"Unexpected bad function name: ${args.head}")
-      }
+      val funcType = args.head.typeSymbol.asType
 
       //If function is set/get variable we keep the original string,
       //otherwise we get the variable's value
       val aValue = unapplyOpArg(args(1))
-      val retVal = (funcName, aValue) match {
-        case ("IsNonLiteral", _) => //Looking for non literals
+      val retVal = (funcType, aValue) match {
+        case (funcTypes.IsNonLiteral, _) => //Looking for non literals
           aValue match {
             case Some(t : CalcLit) => Some(CalcLit(false))
             case _ => Some(CalcLit(true)) //non-literal type (e.g., Int, Long,...)
           }
-        case ("ITE", Some(CalcLit.Boolean(cond))) => //Special control case: ITE (If-Then-Else)
+        case (funcTypes.ITE, Some(CalcLit.Boolean(cond))) => //Special control case: ITE (If-Then-Else)
           if (cond)
             unapplyOpArg(args(2)) //true (then) part of the IF
           else
             unapplyOpArg(args(3)) //false (else) part of the IF
-        case ("ITE", Some(CalcNLit(cond))) => //Non-literal condition will return non-literal type
+        case (funcTypes.ITE, Some(CalcNLit(cond))) => //Non-literal condition will return non-literal type
           val thenArg = unapplyOpArg(args(2))
           val elseArg = unapplyOpArg(args(3))
           (thenArg, elseArg) match {
@@ -208,7 +262,7 @@ trait GeneralMacros {
           val cValue = unapplyOpArg(args(3))
           (aValue, bValue, cValue) match {
             case (Some(a : Calc), Some(b: Calc), Some(c : Calc)) =>
-              Some(opCalc(funcName, a, b, c))
+              Some(opCalc(funcType, a, b, c))
             case _ => None
           }
       }
@@ -410,8 +464,8 @@ trait GeneralMacros {
   def materializeOpGen[F, N](implicit ev0: c.WeakTypeTag[F], evn: c.WeakTypeTag[N]): MaterializeOpAuxGen =
     new MaterializeOpAuxGen(weakTypeOf[F], weakTypeOf[N])
 
-  def opCalc[T1, T2, T3](funcName : String, a : Calc, b : Calc, c : Calc)(implicit annotatedSym : TypeSymbol) : Calc = {
-    def unsupported() = abort(s"Unsupported $funcName[$a, $b, $c]")
+  def opCalc[T1, T2, T3](funcType : TypeSymbol, a : Calc, b : Calc, c : Calc)(implicit annotatedSym : TypeSymbol) : Calc = {
+    def unsupported() = abort(s"Unsupported $funcType[$a, $b, $c]")
     def Id = a match {
       case t : CalcLit => t
       case t : CalcNLit => t
@@ -1041,70 +1095,70 @@ trait GeneralMacros {
       case _ => unsupported()
     }
 
-    funcName match {
-      case "Id" => Id
-      case "ToNat" => ToNat
-      case "ToChar" => ToChar
-      case "ToInt" => ToInt
-      case "ToLong" => ToLong
-      case "ToFloat" => ToFloat
-      case "ToDouble" => ToDouble
-      case "ToString" => ToString
-      case "IsNat" => IsNat
-      case "IsChar" => IsChar
-      case "IsInt" => IsInt
-      case "IsLong" => IsLong
-      case "IsFloat" => IsFloat
-      case "IsDouble" => IsDouble
-      case "IsString" => IsString
-      case "IsBoolean" => IsBoolean
-      case "Negate" => Negate
-      case "Abs" => Abs
-      case "NumberOfLeadingZeros" => NumberOfLeadingZeros
-      case "Floor" => Floor
-      case "Ceil" => Ceil
-      case "Round" => Round
-      case "Sin" => Sin
-      case "Cos" => Cos
-      case "Tan" => Tan
-      case "Sqrt" => Sqrt
-      case "Log" => Log
-      case "Log10" => Log10
-      case "Reverse" => Reverse
-      case "!" => Not
-      case "Require" => Require
-      case "==>" => Next
-      case "+" => Plus
-      case "-" => Minus
-      case "*" => Mul
-      case "/" => Div
-      case "%" => Mod
-      case "<" => Sml
-      case ">" => Big
-      case "<=" => SmlEq
-      case ">=" => BigEq
-      case "==" => Eq
-      case "!=" => Neq
-      case "&&" => And
-      case "||" => Or
-      case "Pow" => Pow
-      case "Min" => Min
-      case "Max" => Max
-      case "Substring" => Substring
-      case "CharAt" => CharAt
-      case "Length" => Length
-      case _ => abort(s"Unsupported $funcName[$a, $b, $c]")
+    funcType match {
+      case funcTypes.Id => Id
+      case funcTypes.ToNat => ToNat
+      case funcTypes.ToChar => ToChar
+      case funcTypes.ToInt => ToInt
+      case funcTypes.ToLong => ToLong
+      case funcTypes.ToFloat => ToFloat
+      case funcTypes.ToDouble => ToDouble
+      case funcTypes.ToString => ToString
+      case funcTypes.IsNat => IsNat
+      case funcTypes.IsChar => IsChar
+      case funcTypes.IsInt => IsInt
+      case funcTypes.IsLong => IsLong
+      case funcTypes.IsFloat => IsFloat
+      case funcTypes.IsDouble => IsDouble
+      case funcTypes.IsString => IsString
+      case funcTypes.IsBoolean => IsBoolean
+      case funcTypes.Negate => Negate
+      case funcTypes.Abs => Abs
+      case funcTypes.NumberOfLeadingZeros => NumberOfLeadingZeros
+      case funcTypes.Floor => Floor
+      case funcTypes.Ceil => Ceil
+      case funcTypes.Round => Round
+      case funcTypes.Sin => Sin
+      case funcTypes.Cos => Cos
+      case funcTypes.Tan => Tan
+      case funcTypes.Sqrt => Sqrt
+      case funcTypes.Log => Log
+      case funcTypes.Log10 => Log10
+      case funcTypes.Reverse => Reverse
+      case funcTypes.! => Not
+      case funcTypes.Require => Require
+      case funcTypes.==> => Next
+      case funcTypes.+ => Plus
+      case funcTypes.- => Minus
+      case funcTypes.* => Mul
+      case funcTypes./ => Div
+      case funcTypes.% => Mod
+      case funcTypes.< => Sml
+      case funcTypes.> => Big
+      case funcTypes.<= => SmlEq
+      case funcTypes.>= => BigEq
+      case funcTypes.== => Eq
+      case funcTypes.!= => Neq
+      case funcTypes.&& => And
+      case funcTypes.|| => Or
+      case funcTypes.Pow => Pow
+      case funcTypes.Min => Min
+      case funcTypes.Max => Max
+      case funcTypes.Substring => Substring
+      case funcTypes.CharAt => CharAt
+      case funcTypes.Length => Length
+      case _ => abort(s"Unsupported $funcType[$a, $b, $c]")
     }
   }
 
   final class MaterializeOpAuxGen(opTpe: Type, nTpe: Type) {
     def usingFuncName : Tree = {
       implicit val annotatedSym : TypeSymbol = symbolOf[OpMacro[_,_,_,_]]
-      val funcName = extractSingletonValue(nTpe)
+      val funcType = opTpe.typeArgs.head.typeSymbol.asType
       val opResult = extractSingletonValue(opTpe)
 
-      val genTree = (funcName, opResult) match {
-        case (CalcLit("ToNat"), CalcLit.Int(t)) => genOpTreeNat(opTpe, t)
+      val genTree = (funcType, opResult) match {
+        case (funcTypes.ToNat, CalcLit.Int(t)) => genOpTreeNat(opTpe, t)
         case (_, CalcLit(t)) => genOpTreeLit(opTpe, t)
         case (_, CalcNLit(t)) => genOpTreeWitness(opTpe, t)
         case _ => extractionFailed(opTpe)
@@ -1113,6 +1167,64 @@ trait GeneralMacros {
 //      print(genTree)
       genTree
     }
+  }
+  ///////////////////////////////////////////////////////////////////////////////////////////
+
+
+  ///////////////////////////////////////////////////////////////////////////////////////////
+  // TwoFace
+  ///////////////////////////////////////////////////////////////////////////////////////////
+  def TwoFaceMaterializer[OP](implicit op : c.WeakTypeTag[OP]) :
+  TwoFaceMaterializer[OP] = new TwoFaceMaterializer[OP](symbolOf[OP])
+
+  final class TwoFaceMaterializer[OP](opSym : TypeSymbol) {
+    def binOp(lhs : c.Tree, rhs : c.Tree) : c.Tree = {
+      implicit val annotatedSym : TypeSymbol = symbolOf[OpMacro[_,_,_,_]]
+
+      print(s"head= ${opSym}")
+      print(s"LHS= $lhs\nRHS = $rhs")
+      abort("shit")
+    }
+//    def newChecked(paramNum : Int, valueTree : c.Tree)(implicit annotatedSym : TypeSymbol) : c.Tree = {
+//      paramNum match {
+//        case 0 => q"new $chkSym[$tTpe]($valueTree)"
+//        case 1 => q"new $chkSym[$tTpe,$paramTpe]($valueTree)"
+//        case _ =>
+//          abort("Unsupported number of parameters")
+//      }
+//    }
+//    def impl(paramNum : Int, vc : c.Tree, vm : c.Tree) : c.Tree = {
+//      implicit val annotatedSym : TypeSymbol = chkSym
+//      val msgValue = extractValueFromOpTree(vm) match {
+//        case Some(Constant(s : String)) => s
+//        case _ => abort("Invalid error message:\n" + showRaw(vm))
+//      }
+//
+//      extractValueFromOpTree(vc) match {
+//        case Some(Constant(true)) =>                  //condition given to macro must be true
+//        case Some(Constant(false)) => abort(msgValue) //otherwise the given error message is set as the abort message
+//        case _ => abort("Unable to retrieve compile-time value:\n" + showRaw(vm))
+//      }
+//
+//      val chkTerm = TermName(chkSym.name.toString)
+//      val tValue = extractSingletonValue(tTpe) match {
+//        case CalcLit(t) => t
+//        case _ => abort("Unable to retrieve compile-time value:\n" + showRaw(tTpe))
+//      }
+//      val tValueTree = constantTreeOf(tValue)
+//      val genTree = newChecked(paramNum, tValueTree)
+//      genTree
+//    }
+//    def unsafe(paramNum : Int, valueTree : c.Tree) : c.Tree = {
+//      implicit val annotatedSym : TypeSymbol = chkSym
+//      val genTree = newChecked(paramNum, valueTree)
+//      genTree
+//    }
+//    def unsafeTF(paramNum : Int, valueTree : c.Tree) : c.Tree = {
+//      implicit val annotatedSym : TypeSymbol = chkSym
+//      val genTree = newChecked(paramNum, q"$valueTree.getValue")
+//      genTree
+//    }
   }
   ///////////////////////////////////////////////////////////////////////////////////////////
 
