@@ -364,10 +364,8 @@ trait GeneralMacros {
     val outTypeName = TypeName("Out" + outWideTpe.typeSymbol.name.toString)
     val outTpe = constantTypeOf(t)
     val outTree = constantTreeOf(t)
-    val dummy = TermName(c.freshName())
     q"""
       new $opTpe {
-        final val $dummy = $outWideLiteral
         type OutWide = $outWideTpe
         type Out = $outTpe
         type Value = $outTpe
@@ -398,17 +396,16 @@ trait GeneralMacros {
       """
   }
 
-  def genOpTreeWitness(opTpe : Type, t : Tree)(implicit annotatedSym : TypeSymbol) : Tree = {
-    val dummy = TermName(c.freshName())
+  def genOpTreeNLit(opTpe : Type, t : Tree)(implicit annotatedSym : TypeSymbol) : Tree = {
+    val outTpe = c.typecheck(t).tpe
     q"""
       new $opTpe {
-        final val $dummy = $t
-        type OutWide = Int
-        type Out = Int
-        type Value = Int
-        final val value: Value = $dummy
+        type OutWide = $outTpe
+        type Out = $outTpe
+        type Value = $outTpe
+        final val value: $outTpe = $t
         final val isLiteral = false
-        final val valueWide: Int = $dummy
+        final val valueWide: $outTpe = $t
       }
       """
   }
@@ -1170,7 +1167,7 @@ trait GeneralMacros {
       val genTree = (funcType, opResult) match {
         case (funcTypes.ToNat, CalcLit.Int(t)) => genOpTreeNat(opTpe, t)
         case (_, CalcLit(t)) => genOpTreeLit(opTpe, t)
-        case (_, CalcNLit(t)) => genOpTreeWitness(opTpe, t)
+        case (_, CalcNLit(t)) => genOpTreeNLit(opTpe, t)
         case _ => extractionFailed(opTpe)
       }
 
