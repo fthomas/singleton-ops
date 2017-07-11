@@ -13,18 +13,18 @@ trait TwoFaceAny[Face] extends Any {
 }
 
 object TwoFaceAny {
-  type Aux[Face, T] = TwoFaceAny[Face] {type T0 = T}
 //  @inline implicit def fromTwoFaceUnsafe[Face, T](tf : TwoFaceAny[Face, T]) : Face = tf.getValue
 //  @inline implicit def fromTwoFaceSafe[Face, T <: Face with Singleton](tf : TwoFaceAny[Face, T])
 //                                                                      (implicit sc: ValueOf[T]) : T {} = valueOf[T]
 //
-  trait Builder[TF[_], Face] {
-    protected[twoface] def create[T](value : Face) : TF[T]
-    implicit def apply[T <: Face with Singleton](value : T)(implicit tfb : Builder[TF, Face]) : TF[T] =
+  trait Builder[TF, Face] {
+    type Aux[T] = TF {type T0 = T}
+    protected[twoface] def create[T](value : Face) : Aux[T]
+    implicit def apply[T <: Face with Singleton](value : T)(implicit tfb : Builder[TF, Face]) : Aux[T] =
       tfb.create[T](value)
-    implicit def apply[T <: Face](value : T)(implicit tfb : Builder[TF, Face], di: DummyImplicit) : TF[Face] =
+    implicit def apply[T <: Face](value : T)(implicit tfb : Builder[TF, Face], di: DummyImplicit) : Aux[Face] =
       tfb.create[Face](value)
-    implicit def apply[T](implicit si : Id[T], tfb : Builder[TF, Face]) : TF[T] =
+    implicit def apply[T](implicit si : Id[T], tfb : Builder[TF, Face]) : Aux[T] =
       tfb.create[T](si.value.asInstanceOf[Face])
   }
 //
@@ -194,7 +194,6 @@ object TwoFaceAny {
     }
   }
 
-  type AuxInt[T] = Int {type T0 = T}
   trait Int extends Any with TwoFaceAny[scala.Int] {
     def +  (r : Int) : Int = macro Builder.Macro.binOp[OpId.+]
 
@@ -342,7 +341,7 @@ object TwoFaceAny {
     type T0 = T
     @inline def getValue : scala.Int = value
   }
-  implicit object Int extends TwoFaceAny.Builder[AuxInt, scala.Int] {
+  implicit object Int extends TwoFaceAny.Builder[Int, scala.Int] {
 //    type Return[OP] = TwoFaceOp[Int, scala.Int, OP]
     protected[twoface] def create[T](value : scala.Int) = new _Int[T](value)
 //    def numberOfLeadingZeros[T](t : Int[T])(implicit tfo : Int.Return[NumberOfLeadingZeros[T]]) =
