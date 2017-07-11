@@ -20,7 +20,7 @@ object OpMacro {
         S2: c.WeakTypeTag,
         S3: c.WeakTypeTag
     ]: c.Tree =
-      materializeOpGen[OpMacro[N, S1, S2, S3], N].usingFuncName
+      materializeOpGen[OpMacro[N, S1, S2, S3]].usingFuncName
   }
 
   implicit def valueOfOp[N, S1 : ValueOf, S2 : ValueOf, S3 : ValueOf]

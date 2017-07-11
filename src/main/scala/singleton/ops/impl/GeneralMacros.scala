@@ -461,8 +461,8 @@ trait GeneralMacros {
   ///////////////////////////////////////////////////////////////////////////////////////////
   // Three operands (Generic)
   ///////////////////////////////////////////////////////////////////////////////////////////
-  def materializeOpGen[F, N](implicit ev0: c.WeakTypeTag[F], evn: c.WeakTypeTag[N]): MaterializeOpAuxGen =
-    new MaterializeOpAuxGen(weakTypeOf[F], weakTypeOf[N])
+  def materializeOpGen[F](implicit ev0: c.WeakTypeTag[F]): MaterializeOpAuxGen =
+    new MaterializeOpAuxGen(weakTypeOf[F])
 
   def opCalc[T1, T2, T3](funcType : TypeSymbol, a : Calc, b : Calc, c : Calc)(implicit annotatedSym : TypeSymbol) : Calc = {
     def unsupported() = abort(s"Unsupported $funcType[$a, $b, $c]")
@@ -1151,7 +1151,7 @@ trait GeneralMacros {
     }
   }
 
-  final class MaterializeOpAuxGen(opTpe: Type, nTpe: Type) {
+  final class MaterializeOpAuxGen(opTpe: Type) {
     def usingFuncName : Tree = {
       implicit val annotatedSym : TypeSymbol = symbolOf[OpMacro[_,_,_,_]]
       val funcType = opTpe.typeArgs.head.typeSymbol.asType
