@@ -217,9 +217,9 @@ trait GeneralMacros {
         case Some(t : CalcNLit) =>
           Some(t)
         case Some(CalcType.TwoFace) =>
-          Some(CalcNLit(q"_root_.shapeless.Witness[$tp].value.getValue"))
+          Some(CalcNLit(q"valueOf[$tp].getValue"))
         case Some(t : CalcType) =>
-          Some(CalcNLit(q"_root_.shapeless.Witness[$tp].value"))
+          Some(CalcNLit(q"valueOf[$tp]"))
         case _ =>
           Some(CalcUnknown(tp))
       }
