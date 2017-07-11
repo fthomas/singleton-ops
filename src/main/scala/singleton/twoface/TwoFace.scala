@@ -6,7 +6,7 @@ object TwoFace {
 //  type Char[T] = TwoFaceAny.Char[T]
 //  val Char = TwoFaceAny.Char
 //
-  type Int[T] = TwoFaceAny.Int[T]
+  type Int[T] = TwoFaceAny.AuxInt[T]
   val Int = TwoFaceAny.Int
 //
 //  type Long[T] = TwoFaceAny.Long[T]

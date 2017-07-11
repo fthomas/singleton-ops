@@ -1,5 +1,6 @@
 package singleton.ops.impl
 import macrocompat.bundle
+import singleton.twoface.impl.TwoFaceAny
 
 import scala.reflect.macros.whitebox
 import scala.reflect.macros.TypecheckException
@@ -318,7 +319,7 @@ trait GeneralMacros {
         ////////////////////////////////////////////////////////////////////////
         // TwoFace Values
         ////////////////////////////////////////////////////////////////////////
-//        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny.Int[_]] => unapplyOpTwoFace(tp)
+        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny.AuxInt[_]] => unapplyOpTwoFace(tp)
         ////////////////////////////////////////////////////////////////////////
 
 
@@ -448,6 +449,15 @@ trait GeneralMacros {
     }
   }
 
+  def extractValueFromTwoFace[T](tfTree : c.Tree)(implicit annotatedSym : TypeSymbol) : Calc = {
+//    CalcLit(7)
+    val typedTree = c.typecheck(tfTree)
+    extractSingletonValue(typedTree.tpe) match {
+      case t : CalcLit => t
+      case _ => CalcNLit(q"$tfTree.getValue")
+    }
+  }
+
   def evalTyped[T](tree: Tree)(implicit annotatedSym : TypeSymbol): Constant = {
     try {
       Constant(c.eval(c.Expr(c.untypecheck(tree))))
@@ -464,7 +474,7 @@ trait GeneralMacros {
   def materializeOpGen[F](implicit ev0: c.WeakTypeTag[F]): MaterializeOpAuxGen =
     new MaterializeOpAuxGen(weakTypeOf[F])
 
-  def opCalc[T1, T2, T3](funcType : TypeSymbol, a : Calc, b : Calc, c : Calc)(implicit annotatedSym : TypeSymbol) : Calc = {
+  def opCalc(funcType : TypeSymbol, a : Calc, b : Calc, c : Calc)(implicit annotatedSym : TypeSymbol) : CalcVal = {
     def unsupported() = abort(s"Unsupported $funcType[$a, $b, $c]")
     def Id = a match {
       case t : CalcLit => t
@@ -700,7 +710,7 @@ trait GeneralMacros {
       case _ => unsupported()
     }
     def Next = b match {
-      case bv : CalcVal => b
+      case bv : CalcVal => bv
       case _ => unsupported()
     }
     def Plus = (a, b) match {
@@ -1177,13 +1187,16 @@ trait GeneralMacros {
   def TwoFaceMaterializer[OP](implicit op : c.WeakTypeTag[OP]) :
   TwoFaceMaterializer[OP] = new TwoFaceMaterializer[OP](symbolOf[OP])
 
-  final class TwoFaceMaterializer[OP](opSym : TypeSymbol) {
+  final class TwoFaceMaterializer[OP](opType : TypeSymbol) {
     def binOp(lhs : c.Tree, rhs : c.Tree) : c.Tree = {
       implicit val annotatedSym : TypeSymbol = symbolOf[OpMacro[_,_,_,_]]
 
-      print(s"head= ${opSym}")
-      print(s"LHS= $lhs\nRHS = $rhs")
-      abort("shit")
+      val lCalc = extractValueFromTwoFace(lhs)
+      val rCalc = extractValueFromTwoFace(rhs)
+      val resultCalc = opCalc(opType, lCalc, rCalc, CalcLit(0))
+
+//      print(rCalc)
+      q"_root_.singleton.twoface.TwoFace.Int($resultCalc)"
     }
 //    def newChecked(paramNum : Int, valueTree : c.Tree)(implicit annotatedSym : TypeSymbol) : c.Tree = {
 //      paramNum match {

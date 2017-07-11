@@ -5,13 +5,15 @@ import singleton.ops.impl._
 import macrocompat.bundle
 import scala.reflect.macros.whitebox
 
-trait TwoFaceAny[Face, T] extends Any {
-  def isLiteral(implicit rt : RunTime[T]) : scala.Boolean = !rt
+trait TwoFaceAny[Face] extends Any {
+  type T0
+  def isLiteral(implicit rt : RunTime[T0]) : scala.Boolean = !rt
   @inline def getValue : Face
   override def toString = getValue.toString
 }
 
 object TwoFaceAny {
+  type Aux[Face, T] = TwoFaceAny[Face] {type T0 = T}
 //  @inline implicit def fromTwoFaceUnsafe[Face, T](tf : TwoFaceAny[Face, T]) : Face = tf.getValue
 //  @inline implicit def fromTwoFaceSafe[Face, T <: Face with Singleton](tf : TwoFaceAny[Face, T])
 //                                                                      (implicit sc: ValueOf[T]) : T {} = valueOf[T]
@@ -192,8 +194,9 @@ object TwoFaceAny {
     }
   }
 
-  trait Int[T] extends Any with TwoFaceAny[scala.Int, T] {
-    def +  [R, O](r : Int[R]) : Int[O] = macro Builder.Macro.binOp[OpId.+]
+  type AuxInt[T] = Int {type T0 = T}
+  trait Int extends Any with TwoFaceAny[scala.Int] {
+    def +  (r : Int) : Int = macro Builder.Macro.binOp[OpId.+]
 
 //    def == [R <: XChar](r : R)(
 //      implicit tfo : Boolean.Return[T == R]
@@ -335,10 +338,11 @@ object TwoFaceAny {
 //    def toDouble(implicit tfo : Double.Return[ToDouble[T]])          = tfo(this.getValue.toDouble)
 //    def toString(implicit tfo : String.Return[ToString[T]])          = tfo(this.getValue.toString)
   }
-  final class _Int[T](val value : scala.Int) extends AnyVal with TwoFaceAny.Int[T] {
+  final class _Int[T](val value : scala.Int) extends AnyVal with TwoFaceAny.Int {
+    type T0 = T
     @inline def getValue : scala.Int = value
   }
-  implicit object Int extends TwoFaceAny.Builder[Int, scala.Int] {
+  implicit object Int extends TwoFaceAny.Builder[AuxInt, scala.Int] {
 //    type Return[OP] = TwoFaceOp[Int, scala.Int, OP]
     protected[twoface] def create[T](value : scala.Int) = new _Int[T](value)
 //    def numberOfLeadingZeros[T](t : Int[T])(implicit tfo : Int.Return[NumberOfLeadingZeros[T]]) =
