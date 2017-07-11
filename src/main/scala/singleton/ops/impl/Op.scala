@@ -3,9 +3,8 @@ package singleton.ops.impl
 import shapeless.Nat
 
 trait Op extends Serializable {
-  type Out
   type OutWide
-  type Value
+  type Out
   type OutNat <: Nat
   type OutChar <: Char with Singleton
   type OutInt <: Int with Singleton
@@ -14,7 +13,7 @@ trait Op extends Serializable {
   type OutDouble <: Double with Singleton
   type OutString <: String with Singleton
   type OutBoolean <: Boolean with Singleton
-  val value: Value
+  val value: Out
   val isLiteral : Boolean
   val valueWide: OutWide
 }

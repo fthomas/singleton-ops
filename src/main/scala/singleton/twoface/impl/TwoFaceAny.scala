@@ -25,7 +25,7 @@ object TwoFaceAny {
     implicit def apply[T <: Face](value : T)(implicit tfb : Builder[TF, Face], di: DummyImplicit) : Aux[Face] =
       tfb.create[Face](value)
     implicit def apply[T](implicit si : Id[T], tfb : Builder[TF, Face]) : Aux[T] =
-      tfb.create[T](si.value.asInstanceOf[Face])
+      tfb.create[T](si.valueWide.asInstanceOf[Face])
   }
 
   trait Char extends Any with TwoFaceAny[scala.Char] {
@@ -331,7 +331,7 @@ object TwoFaceAny {
     @inline def getValue : scala.Int = value
   }
   implicit object Int extends TwoFaceAny.Builder[Int, scala.Int] {
-    protected[twoface] def create[T](value : scala.Int) = new _Int[T](value)
+    protected[twoface] def create[T](value : scala.Int) : Aux[T] = new _Int[T](value)
 //    def numberOfLeadingZeros[T](t : Int[T])(implicit tfo : Int.Return[NumberOfLeadingZeros[T]]) =
 //      tfo(Integer.numberOfLeadingZeros(t.getValue))
   }

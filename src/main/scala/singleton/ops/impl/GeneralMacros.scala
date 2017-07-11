@@ -368,7 +368,6 @@ trait GeneralMacros {
       new $opTpe {
         type OutWide = $outWideTpe
         type Out = $outTpe
-        type Value = $outTpe
         type $outTypeName = $outTpe
         final val value: $outTpe = $outWideLiteral
         final val isLiteral = true
@@ -387,7 +386,6 @@ trait GeneralMacros {
       new $opTpe {
         type OutWide = $outWideTpe
         type Out = $outTpe
-        type Value = $outTpe
         type $outTypeName = $outTpe
         final val value: $outTpe = $outTree
         final val isLiteral = true
@@ -402,7 +400,6 @@ trait GeneralMacros {
       new $opTpe {
         type OutWide = $outTpe
         type Out = $outTpe
-        type Value = $outTpe
         final val value: $outTpe = $t
         final val isLiteral = false
         final val valueWide: $outTpe = $t
