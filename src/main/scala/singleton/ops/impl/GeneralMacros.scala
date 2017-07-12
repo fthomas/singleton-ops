@@ -319,7 +319,13 @@ trait GeneralMacros {
         ////////////////////////////////////////////////////////////////////////
         // TwoFace Values
         ////////////////////////////////////////////////////////////////////////
+        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny.Char.Aux[_]] => unapplyOpTwoFace(tp)
         case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny.Int.Aux[_]] => unapplyOpTwoFace(tp)
+        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny.Long.Aux[_]] => unapplyOpTwoFace(tp)
+        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny.Float.Aux[_]] => unapplyOpTwoFace(tp)
+        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny.Double.Aux[_]] => unapplyOpTwoFace(tp)
+        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny.String.Aux[_]] => unapplyOpTwoFace(tp)
+        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny.Boolean.Aux[_]] => unapplyOpTwoFace(tp)
         ////////////////////////////////////////////////////////////////////////
 
 
@@ -1189,49 +1195,19 @@ trait GeneralMacros {
       val rCalc = extractValueFromTwoFace(rhs)
       val resultCalc = opCalc(opType, lCalc, rCalc, CalcLit(0))
 
-//      print(rCalc)
-      q"_root_.singleton.twoface.TwoFace.Int($resultCalc)"
+      val valueTree = c.typecheck(q"$resultCalc")
+      valueTree.tpe.widen.toString match {
+        case "Char" => q"_root_.singleton.twoface.TwoFace.Char($resultCalc)"
+        case "Int" => q"_root_.singleton.twoface.TwoFace.Int($resultCalc)"
+        case "Long" => q"_root_.singleton.twoface.TwoFace.Long($resultCalc)"
+        case "Float" => q"_root_.singleton.twoface.TwoFace.Float($resultCalc)"
+        case "Double" => q"_root_.singleton.twoface.TwoFace.Double($resultCalc)"
+        case "String" => q"_root_.singleton.twoface.TwoFace.String($resultCalc)"
+        case "Boolean" => q"_root_.singleton.twoface.TwoFace.Boolean($resultCalc)"
+        case t => abort(s"Unsupported type $t")
+      }
+
     }
-//    def newChecked(paramNum : Int, valueTree : c.Tree)(implicit annotatedSym : TypeSymbol) : c.Tree = {
-//      paramNum match {
-//        case 0 => q"new $chkSym[$tTpe]($valueTree)"
-//        case 1 => q"new $chkSym[$tTpe,$paramTpe]($valueTree)"
-//        case _ =>
-//          abort("Unsupported number of parameters")
-//      }
-//    }
-//    def impl(paramNum : Int, vc : c.Tree, vm : c.Tree) : c.Tree = {
-//      implicit val annotatedSym : TypeSymbol = chkSym
-//      val msgValue = extractValueFromOpTree(vm) match {
-//        case Some(Constant(s : String)) => s
-//        case _ => abort("Invalid error message:\n" + showRaw(vm))
-//      }
-//
-//      extractValueFromOpTree(vc) match {
-//        case Some(Constant(true)) =>                  //condition given to macro must be true
-//        case Some(Constant(false)) => abort(msgValue) //otherwise the given error message is set as the abort message
-//        case _ => abort("Unable to retrieve compile-time value:\n" + showRaw(vm))
-//      }
-//
-//      val chkTerm = TermName(chkSym.name.toString)
-//      val tValue = extractSingletonValue(tTpe) match {
-//        case CalcLit(t) => t
-//        case _ => abort("Unable to retrieve compile-time value:\n" + showRaw(tTpe))
-//      }
-//      val tValueTree = constantTreeOf(tValue)
-//      val genTree = newChecked(paramNum, tValueTree)
-//      genTree
-//    }
-//    def unsafe(paramNum : Int, valueTree : c.Tree) : c.Tree = {
-//      implicit val annotatedSym : TypeSymbol = chkSym
-//      val genTree = newChecked(paramNum, valueTree)
-//      genTree
-//    }
-//    def unsafeTF(paramNum : Int, valueTree : c.Tree) : c.Tree = {
-//      implicit val annotatedSym : TypeSymbol = chkSym
-//      val genTree = newChecked(paramNum, q"$valueTree.getValue")
-//      genTree
-//    }
   }
   ///////////////////////////////////////////////////////////////////////////////////////////
 

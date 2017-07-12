@@ -13,19 +13,20 @@ trait TwoFaceAny[Face] extends Any {
 }
 
 object TwoFaceAny {
-//  @inline implicit def fromTwoFaceUnsafe[Face, T](tf : TwoFaceAny[Face, T]) : Face = tf.getValue
-//  @inline implicit def fromTwoFaceSafe[Face, T <: Face with Singleton](tf : TwoFaceAny[Face, T])
-//                                                                      (implicit sc: ValueOf[T]) : T {} = valueOf[T]
-//
+  type Aux[Face, T] = TwoFaceAny[Face] {type T0 = T}
+  @inline implicit def fromTwoFaceUnsafe[Face, T](tf : Aux[Face, T]) : Face = tf.getValue
+  @inline implicit def fromTwoFaceSafe[Face, T <: Face with Singleton](tf : Aux[Face, T])
+                                                                      (implicit sc: ValueOf[T]) : T {} = valueOf[T]
+
   trait Builder[TF, Face] {
     type Aux[T] = TF {type T0 = T}
     protected[twoface] def create[T](value : Face) : Aux[T]
-    implicit def apply[T <: Face with Singleton](value : T)(implicit tfb : Builder[TF, Face]) : Aux[T] =
-      tfb.create[T](value)
-    implicit def apply[T <: Face](value : T)(implicit tfb : Builder[TF, Face], di: DummyImplicit) : Aux[Face] =
-      tfb.create[Face](value)
-    implicit def apply[T](implicit si : Id[T], tfb : Builder[TF, Face]) : Aux[T] =
-      tfb.create[T](si.valueWide.asInstanceOf[Face])
+    implicit def apply[T <: Face with Singleton](value : T)(implicit tfb : Builder[TF, Face])
+    : Aux[T] =  tfb.create[T](value)
+    implicit def apply(value : Face)(implicit tfb : Builder[TF, Face], di: DummyImplicit)
+    : Aux[Face] = tfb.create[Face](value)
+    implicit def apply[T](implicit id : ValueOf[T], tfb : Builder[TF, Face], di: DummyImplicit, di2 : DummyImplicit)
+    : Aux[T] = tfb.create[T](valueOf[T].asInstanceOf[Face])
   }
 
   trait Char extends Any with TwoFaceAny[scala.Char] {
@@ -184,7 +185,11 @@ object TwoFaceAny {
   }
 
   trait Int extends Any with TwoFaceAny[scala.Int] {
+    def +  (r : Char) : Int = macro Builder.Macro.binOp[OpId.+]
     def +  (r : Int) : Int = macro Builder.Macro.binOp[OpId.+]
+    def +  (r : Long) : Long = macro Builder.Macro.binOp[OpId.+]
+    def +  (r : Float) : Float = macro Builder.Macro.binOp[OpId.+]
+    def +  (r : Double) : Double = macro Builder.Macro.binOp[OpId.+]
 
 //    def == [R <: XChar](r : R)(
 //      implicit tfo : Boolean.Return[T == R]
