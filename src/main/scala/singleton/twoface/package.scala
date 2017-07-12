@@ -6,38 +6,35 @@ import twoface.impl._
 package object twoface {
   import TwoFaceAny._
 
-//  def ifThenElse[I,T,E](cond: Boolean[I], trueVal : Char[T], elseVal : Char[E])
-//                       (implicit tfo : Char.Return[ITE[I, T, E]]) =
-//    tfo(if (cond.getValue) trueVal.getValue else elseVal.getValue)
-  def ifThenElse[I,T,E](arg1: Boolean, arg2 : Int, arg3 : Int) : Int = macro Builder.Macro.triOp[OpId.ITE]
-//    tfo(if (cond.getValue) trueVal.getValue else elseVal.getValue)
-//  def ifThenElse[I,T,E](cond: Boolean[I], trueVal : Long[T], elseVal : Long[E])
-//                       (implicit tfo : Long.Return[ITE[I, T, E]]) =
-//    tfo(if (cond.getValue) trueVal.getValue else elseVal.getValue)
-//  def ifThenElse[I,T,E](cond: Boolean[I], trueVal : Float[T], elseVal : Float[E])
-//                       (implicit tfo : Float.Return[ITE[I, T, E]]) =
-//    tfo(if (cond.getValue) trueVal.getValue else elseVal.getValue)
-//  def ifThenElse[I,T,E](cond: Boolean[I], trueVal : Double[T], elseVal : Double[E])
-//                       (implicit tfo : Double.Return[ITE[I, T, E]]) =
-//    tfo(if (cond.getValue) trueVal.getValue else elseVal.getValue)
-//  def ifThenElse[I,T,E](cond: Boolean[I], trueVal : String[T], elseVal : String[E])
-//                       (implicit tfo : String.Return[ITE[I, T, E]]) =
-//    tfo(if (cond.getValue) trueVal.getValue else elseVal.getValue)
-//  def ifThenElse[I,T,E](cond: Boolean[I], trueVal : Boolean[T], elseVal : Boolean[E])
-//                       (implicit tfo : Boolean.Return[ITE[I, T, E]]) =
-//    tfo(if (cond.getValue) trueVal.getValue else elseVal.getValue)
+  def ifThenElse(arg1: Boolean, arg2 : Char, arg3 : Char) : Char = macro Builder.Macro.triOp[OpId.ITE]
+  def ifThenElse(arg1: Boolean, arg2 : Int, arg3 : Int) : Int = macro Builder.Macro.triOp[OpId.ITE]
+  def ifThenElse(arg1: Boolean, arg2 : Long, arg3 : Long) : Long = macro Builder.Macro.triOp[OpId.ITE]
+  def ifThenElse(arg1: Boolean, arg2 : Float, arg3 : Float) : Float = macro Builder.Macro.triOp[OpId.ITE]
+  def ifThenElse(arg1: Boolean, arg2 : Double, arg3 : Double) : Double = macro Builder.Macro.triOp[OpId.ITE]
+  def ifThenElse(arg1: Boolean, arg2 : String, arg3 : String) : String = macro Builder.Macro.triOp[OpId.ITE]
+  def ifThenElse(arg1: Boolean, arg2 : Boolean, arg3 : Boolean) : Boolean = macro Builder.Macro.triOp[OpId.ITE]
 
-//  object math {
-//    import singleton.ops.math._
-//    val Pi = new _Double[Pi](scala.math.Pi)
-//    val E = new _Double[E](scala.math.E)
-//
-//    def abs[T](x : Int[T])(implicit tfo : Int.Return[Abs[T]]) = tfo(scala.math.abs(x.getValue))
-//    def abs[T](x : Long[T])(implicit tfo : Long.Return[Abs[T]]) = tfo(scala.math.abs(x.getValue))
-//    def abs[T](x : Float[T])(implicit tfo : Float.Return[Abs[T]]) = tfo(scala.math.abs(x.getValue))
-//    def abs[T](x : Double[T])(implicit tfo : Double.Return[Abs[T]]) = tfo(scala.math.abs(x.getValue))
-//
-//    def pow[TX, TY](x : Float[TX], y : Float[TY])(implicit tfo : Double.Return[Pow[TX, TY]]) =
+  object math {
+    import singleton.ops.math._
+    val Pi = new _Double[Pi](scala.math.Pi)
+    val E = new _Double[E](scala.math.E)
+
+    def abs(r : Int) : Int = macro Builder.Macro.unaryOp[OpId.Abs]
+    def abs(r : Long) : Long = macro Builder.Macro.unaryOp[OpId.Abs]
+    def abs(r : Float) : Float = macro Builder.Macro.unaryOp[OpId.Abs]
+    def abs(r : Double) : Double = macro Builder.Macro.unaryOp[OpId.Abs]
+
+    def min(l : Int, r : Int) : Int = macro Builder.Macro.binOp[OpId.Min]
+    def min(l : Long, r : Long) : Long = macro Builder.Macro.binOp[OpId.Min]
+    def min(l : Float, r : Float) : Float = macro Builder.Macro.binOp[OpId.Min]
+    def min(l : Double, r : Double) : Double = macro Builder.Macro.binOp[OpId.Min]
+
+    def max(l : Int, r : Int) : Int = macro Builder.Macro.binOp[OpId.Max]
+    def max(l : Long, r : Long) : Long = macro Builder.Macro.binOp[OpId.Max]
+    def max(l : Float, r : Float) : Float = macro Builder.Macro.binOp[OpId.Max]
+    def max(l : Double, r : Double) : Double = macro Builder.Macro.binOp[OpId.Max]
+
+    //    def pow[TX, TY](x : Float[TX], y : Float[TY])(implicit tfo : Double.Return[Pow[TX, TY]]) =
 //      tfo(scala.math.pow(x.getValue.toDouble, y.getValue.toDouble))
 //    def pow[TX, TY](x : Float[TX], y : Double[TY])(implicit tfo : Double.Return[Pow[TX, TY]]) =
 //      tfo(scala.math.pow(x.getValue.toDouble, y.getValue))
@@ -90,5 +87,5 @@ package object twoface {
 //      tfo(scala.math.log10(x.getValue.toDouble))
 //    def log10[T](x : Double[T])(implicit tfo : Double.Return[Log10[T]]) =
 //      tfo(scala.math.log10(x.getValue))
-//  }
+  }
 }

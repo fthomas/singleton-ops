@@ -3,7 +3,7 @@ package singleton.twoface
 import singleton.twoface.math._
 import org.scalacheck.Properties
 import singleton.TestUtils._
-import shapeless.test.illTyped
+//import shapeless.test.illTyped
 
 class TwoFaceIntSpec extends Properties("TwoFace.Int") {
   property("Implicit Creation[]") = {
@@ -24,7 +24,8 @@ class TwoFaceIntSpec extends Properties("TwoFace.Int") {
   }
 
   property("Safe ifThenElse") = verifyTF(ifThenElse(true, 1, 2), 1)
-  property("Unsafe ifThenElse") = verifyTF(ifThenElse(us(false), 1, 2), us(2))
+  var unsafeBool = false //Strangely us(false) doesn't cut it.
+  property("Unsafe ifThenElse") = verifyTF(ifThenElse(unsafeBool, 1, 2), us(2))
 
   property("Safe Int + Safe Char") = verifyTF(TwoFace.Int(2) + TwoFace.Char('\u0001'), 3)
   property("Safe Int + Unsafe Char") = verifyTF(TwoFace.Int(2) + TwoFace.Char(us('\u0001')), us(3))
@@ -278,36 +279,36 @@ class TwoFaceIntSpec extends Properties("TwoFace.Int") {
   property("Unsafe Int != Safe Double") = verifyTF(TwoFace.Int(us(7)) != TwoFace.Double(7.0), us(false))
   property("Unsafe Int != Unsafe Double") = verifyTF(TwoFace.Int(us(7)) != TwoFace.Double(us(7.0)), us(false))
 
-  property("Safe Int min Safe Int") = verifyTF(TwoFace.Int(2) min TwoFace.Int(1), 1)
-  property("Safe Int min Unsafe Int") = verifyTF(TwoFace.Int(2) min TwoFace.Int(us(1)), us(1))
-  property("Unsafe Int min Safe Int") = verifyTF(TwoFace.Int(us(2)) min TwoFace.Int(1), us(1))
-  property("Unsafe Int min Unsafe Int") = verifyTF(TwoFace.Int(us(2)) min TwoFace.Int(us(1)), us(1))
+  property("Safe Int min Safe Int") = verifyTF(min(TwoFace.Int(2), TwoFace.Int(1)), 1)
+  property("Safe Int min Unsafe Int") = verifyTF(min(TwoFace.Int(2), TwoFace.Int(us(1))), us(1))
+  property("Unsafe Int min Safe Int") = verifyTF(min(TwoFace.Int(us(2)), TwoFace.Int(1)), us(1))
+  property("Unsafe Int min Unsafe Int") = verifyTF(min(TwoFace.Int(us(2)), TwoFace.Int(us(1))), us(1))
 
-  property("Safe Int max Safe Int") = verifyTF(TwoFace.Int(2) max TwoFace.Int(1), 2)
-  property("Safe Int max Unsafe Int") = verifyTF(TwoFace.Int(2) max TwoFace.Int(us(1)), us(2))
-  property("Unsafe Int max Safe Int") = verifyTF(TwoFace.Int(us(2)) max TwoFace.Int(1), us(2))
-  property("Unsafe Int max Unsafe Int") = verifyTF(TwoFace.Int(us(2)) max TwoFace.Int(us(1)), us(2))
+  property("Safe Int max Safe Int") = verifyTF(max(TwoFace.Int(2), TwoFace.Int(1)), 2)
+  property("Safe Int max Unsafe Int") = verifyTF(max(TwoFace.Int(2), TwoFace.Int(us(1))), us(2))
+  property("Unsafe Int max Safe Int") = verifyTF(max(TwoFace.Int(us(2)), TwoFace.Int(1)), us(2))
+  property("Unsafe Int max Unsafe Int") = verifyTF(max(TwoFace.Int(us(2)), TwoFace.Int(us(1))), us(2))
 
   property("Safe Negate") = verifyTF(-TwoFace.Int(-1), 1)
   property("Unsafe Negate") = verifyTF(-TwoFace.Int(us(1)), us(-1))
 
-//  property("Safe toChar") = verifyTF(TwoFace.Int(1).toChar, '\u0001')
-//  property("Unsafe toChar") = verifyTF(TwoFace.Int(us(1)).toChar, us('\u0001'))
-//  property("Safe toLong") = verifyTF(TwoFace.Int(1).toLong, 1L)
-//  property("Unsafe toLong") = verifyTF(TwoFace.Int(us(1)).toLong, us(1L))
-//  property("Safe toFloat") = verifyTF(TwoFace.Int(1).toFloat, 1.0f)
-//  property("Unsafe toFloat") = verifyTF(TwoFace.Int(us(1)).toFloat, us(1.0f))
-//  property("Safe toDouble") = verifyTF(TwoFace.Int(1).toDouble, 1.0)
-//  property("Unsafe toDouble") = verifyTF(TwoFace.Int(us(1)).toDouble, us(1.0))
-//  property("Safe toString") = verifyTF(TwoFace.Int(1).toString, "1")
-//  property("Unsafe toString") = verifyTF(TwoFace.Int(us(1)).toString, us("1"))
-//
-//  property("Safe abs") = verifyTF(abs(TwoFace.Int(-1)), 1)
-//  property("Unsafe abs") = verifyTF(abs(TwoFace.Int(us(-1))), us(1))
-//
-//  property("Safe numberOfLeadingZeros") = verifyTF(TwoFace.Int.numberOfLeadingZeros(TwoFace.Int(1)), 31)
-//  property("Unsafe numberOfLeadingZeros") = verifyTF(TwoFace.Int.numberOfLeadingZeros(TwoFace.Int(us(1))), us(31))
-//
+  property("Safe toChar") = verifyTF(TwoFace.Int(1).toChar, '\u0001')
+  property("Unsafe toChar") = verifyTF(TwoFace.Int(us(1)).toChar, us('\u0001'))
+  property("Safe toLong") = verifyTF(TwoFace.Int(1).toLong, 1L)
+  property("Unsafe toLong") = verifyTF(TwoFace.Int(us(1)).toLong, us(1L))
+  property("Safe toFloat") = verifyTF(TwoFace.Int(1).toFloat, 1.0f)
+  property("Unsafe toFloat") = verifyTF(TwoFace.Int(us(1)).toFloat, us(1.0f))
+  property("Safe toDouble") = verifyTF(TwoFace.Int(1).toDouble, 1.0)
+  property("Unsafe toDouble") = verifyTF(TwoFace.Int(us(1)).toDouble, us(1.0))
+  property("Safe toStringTF") = verifyTF(TwoFace.Int(1).toStringTF, "1")
+  property("Unsafe toStringTF") = verifyTF(TwoFace.Int(us(1)).toStringTF, us("1"))
+
+  property("Safe abs") = verifyTF(abs(TwoFace.Int(-1)), 1)
+  property("Unsafe abs") = verifyTF(abs(TwoFace.Int(us(-1))), us(1))
+
+  property("Safe numberOfLeadingZeros") = verifyTF(TwoFace.Int.numberOfLeadingZeros(TwoFace.Int(1)), 31)
+  property("Unsafe numberOfLeadingZeros") = verifyTF(TwoFace.Int.numberOfLeadingZeros(TwoFace.Int(us(1))), us(31))
+
 //  property("Implicit Conversions") = wellTyped {
 //    import singleton.ops._
 //    val a : TwoFace.Int[3] = implicitly[TwoFace.Int[2 + 1]]
@@ -324,8 +325,8 @@ class TwoFaceIntSpec extends Properties("TwoFace.Int") {
 //    illTyped("""val c : TwoFace.Int[3 + 0] = implicitly[TwoFace.Int[4]]""")
 //    true
 //  }
-//
-//  property("ToString") = {
-//    TwoFace.Int[1].toString() == "1"
-//  }
+
+  property("ToString") = {
+    TwoFace.Int[1].toString() == "1"
+  }
 }

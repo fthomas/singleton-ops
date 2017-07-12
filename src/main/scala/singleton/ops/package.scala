@@ -92,8 +92,6 @@ package object ops {
   type !=[P1, P2]           = OpMacro[OpId.!=, P1, P2, NP]
   type &&[P1, P2]           = OpMacro[OpId.&&, P1, P2, NP]
   type ||[P1, P2]           = OpMacro[OpId.||, P1, P2, NP]
-  type Min[P1, P2]          = OpMacro[OpId.Min, P1, P2, NP]
-  type Max[P1, P2]          = OpMacro[OpId.Max, P1, P2, NP]
   type Substring[P1, P2]    = OpMacro[OpId.Substring, P1, P2, NP]
   type Length[P1]           = OpMacro[OpId.Length, P1, NP, NP]
   type CharAt[P1, P2]       = OpMacro[OpId.CharAt, P1, P2, NP]
@@ -105,6 +103,8 @@ package object ops {
     type Pi                 = 3.141592653589793
     type E                  = 2.718281828459045
     type Abs[P1]            = OpMacro[OpId.Abs, P1, NP, NP]
+    type Min[P1, P2]        = OpMacro[OpId.Min, P1, P2, NP]
+    type Max[P1, P2]        = OpMacro[OpId.Max, P1, P2, NP]
     type Pow[P1, P2]        = OpMacro[OpId.Pow, P1, P2, NP]
     type Floor[P1]          = OpMacro[OpId.Floor, P1, NP, NP]
     type Ceil[P1]           = OpMacro[OpId.Ceil, P1, NP, NP]

@@ -34,38 +34,40 @@ object TwoFaceAny {
     final class Macro(val c: whitebox.Context) extends GeneralMacros {
       def unaryOp[OP](r : c.Tree)(implicit op : c.WeakTypeTag[OP]) : c.Tree =
         TwoFaceMaterializer[OP].unaryOp(r)
-      def prefixOp[OP](implicit op : c.WeakTypeTag[OP]) : c.Tree =
-        TwoFaceMaterializer[OP].unaryOp(c.prefix.tree)
-      def binOp[OP](r : c.Tree)(implicit op : c.WeakTypeTag[OP]) : c.Tree =
-        TwoFaceMaterializer[OP].binOp(c.prefix.tree, r)
+      def binOp[OP](l : c.Tree, r : c.Tree)(implicit op : c.WeakTypeTag[OP]) : c.Tree =
+        TwoFaceMaterializer[OP].binOp(l, r)
       def triOp[OP](arg1 : c.Tree, arg2 : c.Tree, arg3 : c.Tree)(implicit op : c.WeakTypeTag[OP]) : c.Tree =
         TwoFaceMaterializer[OP].triOp(arg1, arg2, arg3)
-      def binOpDI1[OP](r : c.Tree)(
+      def prefixOp[OP](implicit op : c.WeakTypeTag[OP]) : c.Tree =
+        TwoFaceMaterializer[OP].unaryOp(c.prefix.tree)
+      def infixOp[OP](r : c.Tree)(implicit op : c.WeakTypeTag[OP]) : c.Tree =
+        TwoFaceMaterializer[OP].binOp(c.prefix.tree, r)
+      def infixOpDI1[OP](r : c.Tree)(
         di1 : c.Tree,
       )(implicit op : c.WeakTypeTag[OP]) : c.Tree = TwoFaceMaterializer[OP].binOp(c.prefix.tree, r)
-      def binOpDI2[OP](r : c.Tree)(
+      def infixOpDI2[OP](r : c.Tree)(
         di1 : c.Tree,
         di2 : c.Tree,
       )(implicit op : c.WeakTypeTag[OP]) : c.Tree = TwoFaceMaterializer[OP].binOp(c.prefix.tree, r)
-      def binOpDI3[OP](r : c.Tree)(
+      def infixOpDI3[OP](r : c.Tree)(
         di1 : c.Tree,
         di2 : c.Tree,
         di3 : c.Tree,
       )(implicit op : c.WeakTypeTag[OP]) : c.Tree = TwoFaceMaterializer[OP].binOp(c.prefix.tree, r)
-      def binOpDI4[OP](r : c.Tree)(
+      def infixOpDI4[OP](r : c.Tree)(
         di1 : c.Tree,
         di2 : c.Tree,
         di3 : c.Tree,
         di4 : c.Tree,
       )(implicit op : c.WeakTypeTag[OP]) : c.Tree = TwoFaceMaterializer[OP].binOp(c.prefix.tree, r)
-      def binOpDI5[OP](r : c.Tree)(
+      def infixOpDI5[OP](r : c.Tree)(
         di1 : c.Tree,
         di2 : c.Tree,
         di3 : c.Tree,
         di4 : c.Tree,
         di5 : c.Tree,
       )(implicit op : c.WeakTypeTag[OP]) : c.Tree = TwoFaceMaterializer[OP].binOp(c.prefix.tree, r)
-      def binOpDI6[OP](r : c.Tree)(
+      def infixOpDI6[OP](r : c.Tree)(
         di1 : c.Tree,
         di2 : c.Tree,
         di3 : c.Tree,
@@ -73,7 +75,7 @@ object TwoFaceAny {
         di5 : c.Tree,
         di6 : c.Tree,
       )(implicit op : c.WeakTypeTag[OP]) : c.Tree = TwoFaceMaterializer[OP].binOp(c.prefix.tree, r)
-      def binOpDI7[OP](r : c.Tree)(
+      def infixOpDI7[OP](r : c.Tree)(
         di1 : c.Tree,
         di2 : c.Tree,
         di3 : c.Tree,
@@ -82,7 +84,7 @@ object TwoFaceAny {
         di6 : c.Tree,
         di7 : c.Tree,
       )(implicit op : c.WeakTypeTag[OP]) : c.Tree = TwoFaceMaterializer[OP].binOp(c.prefix.tree, r)
-      def binOpDI8[OP](r : c.Tree)(
+      def infixOpDI8[OP](r : c.Tree)(
         di1 : c.Tree,
         di2 : c.Tree,
         di3 : c.Tree,
@@ -92,7 +94,7 @@ object TwoFaceAny {
         di7 : c.Tree,
         di8 : c.Tree,
       )(implicit op : c.WeakTypeTag[OP]) : c.Tree = TwoFaceMaterializer[OP].binOp(c.prefix.tree, r)
-      def binOpDI9[OP](r : c.Tree)(
+      def infixOpDI9[OP](r : c.Tree)(
         di1 : c.Tree,
         di2 : c.Tree,
         di3 : c.Tree,
@@ -255,29 +257,29 @@ object TwoFaceAny {
 
   trait Int extends Any with TwoFaceAny[scala.Int] {
     def == [R <: XChar](r : R)
-    : Boolean = macro Builder.Macro.binOp[OpId.==]
+    : Boolean = macro Builder.Macro.infixOp[OpId.==]
     def == (r : scala.Char)(
       implicit
       di1 : DummyImplicit
-    ) : Boolean =  macro Builder.Macro.binOpDI1[OpId.==]
+    ) : Boolean =  macro Builder.Macro.infixOpDI1[OpId.==]
     def == [R <: XInt](r : R)(
       implicit
       di1 : DummyImplicit,
       di2 : DummyImplicit
-    ) : Boolean = macro Builder.Macro.binOpDI2[OpId.==]
+    ) : Boolean = macro Builder.Macro.infixOpDI2[OpId.==]
     def == (r : scala.Int)(
       implicit
       di1 : DummyImplicit,
       di2 : DummyImplicit,
       di3 : DummyImplicit
-    ) : Boolean = macro Builder.Macro.binOpDI3[OpId.==]
+    ) : Boolean = macro Builder.Macro.infixOpDI3[OpId.==]
     def == [R <: XLong](r : R)(
       implicit
       di1 : DummyImplicit,
       di2 : DummyImplicit,
       di3 : DummyImplicit,
       di4 : DummyImplicit,
-    ) : Boolean = macro Builder.Macro.binOpDI4[OpId.==]
+    ) : Boolean = macro Builder.Macro.infixOpDI4[OpId.==]
     def == (r : scala.Long)(
       implicit
       di1 : DummyImplicit,
@@ -285,7 +287,7 @@ object TwoFaceAny {
       di3 : DummyImplicit,
       di4 : DummyImplicit,
       di5 : DummyImplicit,
-    ) : Boolean = macro Builder.Macro.binOpDI5[OpId.==]
+    ) : Boolean = macro Builder.Macro.infixOpDI5[OpId.==]
     def == [R <: XFloat](r : R)(
       implicit
       di1 : DummyImplicit,
@@ -294,7 +296,7 @@ object TwoFaceAny {
       di4 : DummyImplicit,
       di5 : DummyImplicit,
       di6 : DummyImplicit,
-    ) : Boolean = macro Builder.Macro.binOpDI6[OpId.==]
+    ) : Boolean = macro Builder.Macro.infixOpDI6[OpId.==]
     def == (r : scala.Float)(
       implicit
       di1 : DummyImplicit,
@@ -304,7 +306,7 @@ object TwoFaceAny {
       di5 : DummyImplicit,
       di6 : DummyImplicit,
       di7 : DummyImplicit,
-    ) : Boolean = macro Builder.Macro.binOpDI7[OpId.==]
+    ) : Boolean = macro Builder.Macro.infixOpDI7[OpId.==]
     def == [R <: XDouble](r : R)(
       implicit
       di1 : DummyImplicit,
@@ -315,7 +317,7 @@ object TwoFaceAny {
       di6 : DummyImplicit,
       di7 : DummyImplicit,
       di8 : DummyImplicit,
-    ) : Boolean = macro Builder.Macro.binOpDI8[OpId.==]
+    ) : Boolean = macro Builder.Macro.infixOpDI8[OpId.==]
     def == (r : scala.Double)(
       implicit
       di1 : DummyImplicit,
@@ -327,72 +329,70 @@ object TwoFaceAny {
       di7 : DummyImplicit,
       di8 : DummyImplicit,
       di9 : DummyImplicit,
-    ) : Boolean = macro Builder.Macro.binOpDI9[OpId.==]
+    ) : Boolean = macro Builder.Macro.infixOpDI9[OpId.==]
 
-    def +  (r : Char) : Int = macro Builder.Macro.binOp[OpId.+]
-    def +  (r : Int) : Int = macro Builder.Macro.binOp[OpId.+]
-    def +  (r : Long) : Long = macro Builder.Macro.binOp[OpId.+]
-    def +  (r : Float) : Float = macro Builder.Macro.binOp[OpId.+]
-    def +  (r : Double) : Double = macro Builder.Macro.binOp[OpId.+]
-    def -  (r : Char) : Int = macro Builder.Macro.binOp[OpId.-]
-    def -  (r : Int) : Int = macro Builder.Macro.binOp[OpId.-]
-    def -  (r : Long) : Long = macro Builder.Macro.binOp[OpId.-]
-    def -  (r : Float) : Float = macro Builder.Macro.binOp[OpId.-]
-    def -  (r : Double) : Double = macro Builder.Macro.binOp[OpId.-]
-    def *  (r : Char) : Int = macro Builder.Macro.binOp[OpId.*]
-    def *  (r : Int) : Int = macro Builder.Macro.binOp[OpId.*]
-    def *  (r : Long) : Long = macro Builder.Macro.binOp[OpId.*]
-    def *  (r : Float) : Float = macro Builder.Macro.binOp[OpId.*]
-    def *  (r : Double) : Double = macro Builder.Macro.binOp[OpId.*]
-    def /  (r : Char) : Int = macro Builder.Macro.binOp[OpId./]
-    def /  (r : Int) : Int = macro Builder.Macro.binOp[OpId./]
-    def /  (r : Long) : Long = macro Builder.Macro.binOp[OpId./]
-    def /  (r : Float) : Float = macro Builder.Macro.binOp[OpId./]
-    def /  (r : Double) : Double = macro Builder.Macro.binOp[OpId./]
-    def %  (r : Char) : Int = macro Builder.Macro.binOp[OpId.%]
-    def %  (r : Int) : Int = macro Builder.Macro.binOp[OpId.%]
-    def %  (r : Long) : Long = macro Builder.Macro.binOp[OpId.%]
-    def %  (r : Float) : Float = macro Builder.Macro.binOp[OpId.%]
-    def %  (r : Double) : Double = macro Builder.Macro.binOp[OpId.%]
-    def <  (r : Char) : Boolean = macro Builder.Macro.binOp[OpId.<]
-    def <  (r : Int) : Boolean = macro Builder.Macro.binOp[OpId.<]
-    def <  (r : Long) : Boolean = macro Builder.Macro.binOp[OpId.<]
-    def <  (r : Float) : Boolean = macro Builder.Macro.binOp[OpId.<]
-    def <  (r : Double) : Boolean = macro Builder.Macro.binOp[OpId.<]
-    def >  (r : Char) : Boolean = macro Builder.Macro.binOp[OpId.>]
-    def >  (r : Int) : Boolean = macro Builder.Macro.binOp[OpId.>]
-    def >  (r : Long) : Boolean = macro Builder.Macro.binOp[OpId.>]
-    def >  (r : Float) : Boolean = macro Builder.Macro.binOp[OpId.>]
-    def >  (r : Double) : Boolean = macro Builder.Macro.binOp[OpId.>]
-    def <= (r : Char) : Boolean = macro Builder.Macro.binOp[OpId.<=]
-    def <= (r : Int) : Boolean = macro Builder.Macro.binOp[OpId.<=]
-    def <= (r : Long) : Boolean = macro Builder.Macro.binOp[OpId.<=]
-    def <= (r : Float) : Boolean = macro Builder.Macro.binOp[OpId.<=]
-    def <= (r : Double) : Boolean = macro Builder.Macro.binOp[OpId.<=]
-    def >= (r : Char) : Boolean = macro Builder.Macro.binOp[OpId.>=]
-    def >= (r : Int) : Boolean = macro Builder.Macro.binOp[OpId.>=]
-    def >= (r : Long) : Boolean = macro Builder.Macro.binOp[OpId.>=]
-    def >= (r : Float) : Boolean = macro Builder.Macro.binOp[OpId.>=]
-    def >= (r : Double) : Boolean = macro Builder.Macro.binOp[OpId.>=]
-    def == (r : Char) : Boolean = macro Builder.Macro.binOp[OpId.==]
-    def == (r : Int) : Boolean = macro Builder.Macro.binOp[OpId.==]
-    def == (r : Long) : Boolean = macro Builder.Macro.binOp[OpId.==]
-    def == (r : Float) : Boolean = macro Builder.Macro.binOp[OpId.==]
-    def == (r : Double) : Boolean = macro Builder.Macro.binOp[OpId.==]
-    def != (r : Char) : Boolean = macro Builder.Macro.binOp[OpId.!=]
-    def != (r : Int) : Boolean = macro Builder.Macro.binOp[OpId.!=]
-    def != (r : Long) : Boolean = macro Builder.Macro.binOp[OpId.!=]
-    def != (r : Float) : Boolean = macro Builder.Macro.binOp[OpId.!=]
-    def != (r : Double) : Boolean = macro Builder.Macro.binOp[OpId.!=]
-    def min(r : Int) : Int = macro Builder.Macro.binOp[OpId.Min]
-    def max(r : Int) : Int = macro Builder.Macro.binOp[OpId.Max]
+    def +  (r : Char) : Int = macro Builder.Macro.infixOp[OpId.+]
+    def +  (r : Int) : Int = macro Builder.Macro.infixOp[OpId.+]
+    def +  (r : Long) : Long = macro Builder.Macro.infixOp[OpId.+]
+    def +  (r : Float) : Float = macro Builder.Macro.infixOp[OpId.+]
+    def +  (r : Double) : Double = macro Builder.Macro.infixOp[OpId.+]
+    def -  (r : Char) : Int = macro Builder.Macro.infixOp[OpId.-]
+    def -  (r : Int) : Int = macro Builder.Macro.infixOp[OpId.-]
+    def -  (r : Long) : Long = macro Builder.Macro.infixOp[OpId.-]
+    def -  (r : Float) : Float = macro Builder.Macro.infixOp[OpId.-]
+    def -  (r : Double) : Double = macro Builder.Macro.infixOp[OpId.-]
+    def *  (r : Char) : Int = macro Builder.Macro.infixOp[OpId.*]
+    def *  (r : Int) : Int = macro Builder.Macro.infixOp[OpId.*]
+    def *  (r : Long) : Long = macro Builder.Macro.infixOp[OpId.*]
+    def *  (r : Float) : Float = macro Builder.Macro.infixOp[OpId.*]
+    def *  (r : Double) : Double = macro Builder.Macro.infixOp[OpId.*]
+    def /  (r : Char) : Int = macro Builder.Macro.infixOp[OpId./]
+    def /  (r : Int) : Int = macro Builder.Macro.infixOp[OpId./]
+    def /  (r : Long) : Long = macro Builder.Macro.infixOp[OpId./]
+    def /  (r : Float) : Float = macro Builder.Macro.infixOp[OpId./]
+    def /  (r : Double) : Double = macro Builder.Macro.infixOp[OpId./]
+    def %  (r : Char) : Int = macro Builder.Macro.infixOp[OpId.%]
+    def %  (r : Int) : Int = macro Builder.Macro.infixOp[OpId.%]
+    def %  (r : Long) : Long = macro Builder.Macro.infixOp[OpId.%]
+    def %  (r : Float) : Float = macro Builder.Macro.infixOp[OpId.%]
+    def %  (r : Double) : Double = macro Builder.Macro.infixOp[OpId.%]
+    def <  (r : Char) : Boolean = macro Builder.Macro.infixOp[OpId.<]
+    def <  (r : Int) : Boolean = macro Builder.Macro.infixOp[OpId.<]
+    def <  (r : Long) : Boolean = macro Builder.Macro.infixOp[OpId.<]
+    def <  (r : Float) : Boolean = macro Builder.Macro.infixOp[OpId.<]
+    def <  (r : Double) : Boolean = macro Builder.Macro.infixOp[OpId.<]
+    def >  (r : Char) : Boolean = macro Builder.Macro.infixOp[OpId.>]
+    def >  (r : Int) : Boolean = macro Builder.Macro.infixOp[OpId.>]
+    def >  (r : Long) : Boolean = macro Builder.Macro.infixOp[OpId.>]
+    def >  (r : Float) : Boolean = macro Builder.Macro.infixOp[OpId.>]
+    def >  (r : Double) : Boolean = macro Builder.Macro.infixOp[OpId.>]
+    def <= (r : Char) : Boolean = macro Builder.Macro.infixOp[OpId.<=]
+    def <= (r : Int) : Boolean = macro Builder.Macro.infixOp[OpId.<=]
+    def <= (r : Long) : Boolean = macro Builder.Macro.infixOp[OpId.<=]
+    def <= (r : Float) : Boolean = macro Builder.Macro.infixOp[OpId.<=]
+    def <= (r : Double) : Boolean = macro Builder.Macro.infixOp[OpId.<=]
+    def >= (r : Char) : Boolean = macro Builder.Macro.infixOp[OpId.>=]
+    def >= (r : Int) : Boolean = macro Builder.Macro.infixOp[OpId.>=]
+    def >= (r : Long) : Boolean = macro Builder.Macro.infixOp[OpId.>=]
+    def >= (r : Float) : Boolean = macro Builder.Macro.infixOp[OpId.>=]
+    def >= (r : Double) : Boolean = macro Builder.Macro.infixOp[OpId.>=]
+    def == (r : Char) : Boolean = macro Builder.Macro.infixOp[OpId.==]
+    def == (r : Int) : Boolean = macro Builder.Macro.infixOp[OpId.==]
+    def == (r : Long) : Boolean = macro Builder.Macro.infixOp[OpId.==]
+    def == (r : Float) : Boolean = macro Builder.Macro.infixOp[OpId.==]
+    def == (r : Double) : Boolean = macro Builder.Macro.infixOp[OpId.==]
+    def != (r : Char) : Boolean = macro Builder.Macro.infixOp[OpId.!=]
+    def != (r : Int) : Boolean = macro Builder.Macro.infixOp[OpId.!=]
+    def != (r : Long) : Boolean = macro Builder.Macro.infixOp[OpId.!=]
+    def != (r : Float) : Boolean = macro Builder.Macro.infixOp[OpId.!=]
+    def != (r : Double) : Boolean = macro Builder.Macro.infixOp[OpId.!=]
 
     def unary_- : Int = macro Builder.Macro.prefixOp[OpId.Negate]
-//    def toChar(implicit tfo : Char.Return[ToChar[T]])                = tfo(this.getValue.toChar)
-//    def toLong(implicit tfo : Long.Return[ToLong[T]])                = tfo(this.getValue.toLong)
-//    def toFloat(implicit tfo : Float.Return[ToFloat[T]])             = tfo(this.getValue.toFloat)
-//    def toDouble(implicit tfo : Double.Return[ToDouble[T]])          = tfo(this.getValue.toDouble)
-//    def toString(implicit tfo : String.Return[ToString[T]])          = tfo(this.getValue.toString)
+    def toChar : Char = macro Builder.Macro.prefixOp[OpId.ToChar]
+    def toLong : Long = macro Builder.Macro.prefixOp[OpId.ToLong]
+    def toFloat : Float = macro Builder.Macro.prefixOp[OpId.ToFloat]
+    def toDouble : Double = macro Builder.Macro.prefixOp[OpId.ToDouble]
+    def toStringTF : String = macro Builder.Macro.prefixOp[OpId.ToString]
   }
   final class _Int[T](val value : scala.Int) extends AnyVal with TwoFaceAny.Int {
     type T0 = T
@@ -400,10 +400,9 @@ object TwoFaceAny {
   }
   implicit object Int extends TwoFaceAny.Builder[Int, scala.Int] {
     protected[twoface] def create[T](value : scala.Int) : Aux[T] = new _Int[T](value)
-//    def numberOfLeadingZeros[T](t : Int[T])(implicit tfo : Int.Return[NumberOfLeadingZeros[T]]) =
-//      tfo(Integer.numberOfLeadingZeros(t.getValue))
+    def numberOfLeadingZeros[T](r : Int) : Int = macro Builder.Macro.unaryOp[OpId.NumberOfLeadingZeros]
   }
-//
+
   trait Long extends Any with TwoFaceAny[scala.Long] {
 //    def == [R <: XChar](r : R)(
 //      implicit tfo : Boolean.Return[T == R]

@@ -72,5 +72,8 @@ object TestUtils {
   }
 
   //nf = unsafe. used to force a not-final value. e.g., nf(3) returns a non-literal 3
-  def us[T](t : T) : T = t
+  def us[T](t : T) : T = {
+    var ret = t
+    ret
+  }
 }
