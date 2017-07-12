@@ -23,8 +23,8 @@ class TwoFaceIntSpec extends Properties("TwoFace.Int") {
     a.getValue == 2 && !a.isLiteral
   }
 
-//  property("Safe ifThenElse") = verifyTF(ifThenElse(true, 1, 2), 1)
-//  property("Unsafe ifThenElse") = verifyTF(ifThenElse(us(false), 1, 2), us(2))
+  property("Safe ifThenElse") = verifyTF(ifThenElse(true, 1, 2), 1)
+  property("Unsafe ifThenElse") = verifyTF(ifThenElse(us(false), 1, 2), us(2))
 
   property("Safe Int + Safe Char") = verifyTF(TwoFace.Int(2) + TwoFace.Char('\u0001'), 3)
   property("Safe Int + Unsafe Char") = verifyTF(TwoFace.Int(2) + TwoFace.Char(us('\u0001')), us(3))
@@ -287,10 +287,10 @@ class TwoFaceIntSpec extends Properties("TwoFace.Int") {
   property("Safe Int max Unsafe Int") = verifyTF(TwoFace.Int(2) max TwoFace.Int(us(1)), us(2))
   property("Unsafe Int max Safe Int") = verifyTF(TwoFace.Int(us(2)) max TwoFace.Int(1), us(2))
   property("Unsafe Int max Unsafe Int") = verifyTF(TwoFace.Int(us(2)) max TwoFace.Int(us(1)), us(2))
-//
-//  property("Safe Negate") = verifyTF(-TwoFace.Int(-1), 1)
-//  property("Unsafe Negate") = verifyTF(-TwoFace.Int(us(1)), us(-1))
-//
+
+  property("Safe Negate") = verifyTF(-TwoFace.Int(-1), 1)
+  property("Unsafe Negate") = verifyTF(-TwoFace.Int(us(1)), us(-1))
+
 //  property("Safe toChar") = verifyTF(TwoFace.Int(1).toChar, '\u0001')
 //  property("Unsafe toChar") = verifyTF(TwoFace.Int(us(1)).toChar, us('\u0001'))
 //  property("Safe toLong") = verifyTF(TwoFace.Int(1).toLong, 1L)

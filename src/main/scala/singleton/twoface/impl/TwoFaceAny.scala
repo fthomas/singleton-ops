@@ -29,6 +29,83 @@ object TwoFaceAny {
     : Aux[T] = tfb.create[T](valueOf[T].asInstanceOf[Face])
   }
 
+  @bundle
+  object Builder {
+    final class Macro(val c: whitebox.Context) extends GeneralMacros {
+      def unaryOp[OP](r : c.Tree)(implicit op : c.WeakTypeTag[OP]) : c.Tree =
+        TwoFaceMaterializer[OP].unaryOp(r)
+      def prefixOp[OP](implicit op : c.WeakTypeTag[OP]) : c.Tree =
+        TwoFaceMaterializer[OP].unaryOp(c.prefix.tree)
+      def binOp[OP](r : c.Tree)(implicit op : c.WeakTypeTag[OP]) : c.Tree =
+        TwoFaceMaterializer[OP].binOp(c.prefix.tree, r)
+      def triOp[OP](arg1 : c.Tree, arg2 : c.Tree, arg3 : c.Tree)(implicit op : c.WeakTypeTag[OP]) : c.Tree =
+        TwoFaceMaterializer[OP].triOp(arg1, arg2, arg3)
+      def binOpDI1[OP](r : c.Tree)(
+        di1 : c.Tree,
+      )(implicit op : c.WeakTypeTag[OP]) : c.Tree = TwoFaceMaterializer[OP].binOp(c.prefix.tree, r)
+      def binOpDI2[OP](r : c.Tree)(
+        di1 : c.Tree,
+        di2 : c.Tree,
+      )(implicit op : c.WeakTypeTag[OP]) : c.Tree = TwoFaceMaterializer[OP].binOp(c.prefix.tree, r)
+      def binOpDI3[OP](r : c.Tree)(
+        di1 : c.Tree,
+        di2 : c.Tree,
+        di3 : c.Tree,
+      )(implicit op : c.WeakTypeTag[OP]) : c.Tree = TwoFaceMaterializer[OP].binOp(c.prefix.tree, r)
+      def binOpDI4[OP](r : c.Tree)(
+        di1 : c.Tree,
+        di2 : c.Tree,
+        di3 : c.Tree,
+        di4 : c.Tree,
+      )(implicit op : c.WeakTypeTag[OP]) : c.Tree = TwoFaceMaterializer[OP].binOp(c.prefix.tree, r)
+      def binOpDI5[OP](r : c.Tree)(
+        di1 : c.Tree,
+        di2 : c.Tree,
+        di3 : c.Tree,
+        di4 : c.Tree,
+        di5 : c.Tree,
+      )(implicit op : c.WeakTypeTag[OP]) : c.Tree = TwoFaceMaterializer[OP].binOp(c.prefix.tree, r)
+      def binOpDI6[OP](r : c.Tree)(
+        di1 : c.Tree,
+        di2 : c.Tree,
+        di3 : c.Tree,
+        di4 : c.Tree,
+        di5 : c.Tree,
+        di6 : c.Tree,
+      )(implicit op : c.WeakTypeTag[OP]) : c.Tree = TwoFaceMaterializer[OP].binOp(c.prefix.tree, r)
+      def binOpDI7[OP](r : c.Tree)(
+        di1 : c.Tree,
+        di2 : c.Tree,
+        di3 : c.Tree,
+        di4 : c.Tree,
+        di5 : c.Tree,
+        di6 : c.Tree,
+        di7 : c.Tree,
+      )(implicit op : c.WeakTypeTag[OP]) : c.Tree = TwoFaceMaterializer[OP].binOp(c.prefix.tree, r)
+      def binOpDI8[OP](r : c.Tree)(
+        di1 : c.Tree,
+        di2 : c.Tree,
+        di3 : c.Tree,
+        di4 : c.Tree,
+        di5 : c.Tree,
+        di6 : c.Tree,
+        di7 : c.Tree,
+        di8 : c.Tree,
+      )(implicit op : c.WeakTypeTag[OP]) : c.Tree = TwoFaceMaterializer[OP].binOp(c.prefix.tree, r)
+      def binOpDI9[OP](r : c.Tree)(
+        di1 : c.Tree,
+        di2 : c.Tree,
+        di3 : c.Tree,
+        di4 : c.Tree,
+        di5 : c.Tree,
+        di6 : c.Tree,
+        di7 : c.Tree,
+        di8 : c.Tree,
+        di9 : c.Tree,
+      )(implicit op : c.WeakTypeTag[OP]) : c.Tree = TwoFaceMaterializer[OP].binOp(c.prefix.tree, r)
+    }
+  }
+
   trait Char extends Any with TwoFaceAny[scala.Char] {
 //    def == [R <: XChar](r : R)(
 //      implicit tfo : Boolean.Return[T == R]
@@ -176,15 +253,82 @@ object TwoFaceAny {
     protected[twoface] def create[T](value : scala.Char) = new _Char[T](value)
   }
 
-  @bundle
-  object Builder {
-    final class Macro(val c: whitebox.Context) extends GeneralMacros {
-      def binOp[OP](r : c.Tree)(implicit op : c.WeakTypeTag[OP]) : c.Tree =
-        TwoFaceMaterializer[OP].binOp(c.prefix.tree, r)
-    }
-  }
-
   trait Int extends Any with TwoFaceAny[scala.Int] {
+    def == [R <: XChar](r : R)
+    : Boolean = macro Builder.Macro.binOp[OpId.==]
+    def == (r : scala.Char)(
+      implicit
+      di1 : DummyImplicit
+    ) : Boolean =  macro Builder.Macro.binOpDI1[OpId.==]
+    def == [R <: XInt](r : R)(
+      implicit
+      di1 : DummyImplicit,
+      di2 : DummyImplicit
+    ) : Boolean = macro Builder.Macro.binOpDI2[OpId.==]
+    def == (r : scala.Int)(
+      implicit
+      di1 : DummyImplicit,
+      di2 : DummyImplicit,
+      di3 : DummyImplicit
+    ) : Boolean = macro Builder.Macro.binOpDI3[OpId.==]
+    def == [R <: XLong](r : R)(
+      implicit
+      di1 : DummyImplicit,
+      di2 : DummyImplicit,
+      di3 : DummyImplicit,
+      di4 : DummyImplicit,
+    ) : Boolean = macro Builder.Macro.binOpDI4[OpId.==]
+    def == (r : scala.Long)(
+      implicit
+      di1 : DummyImplicit,
+      di2 : DummyImplicit,
+      di3 : DummyImplicit,
+      di4 : DummyImplicit,
+      di5 : DummyImplicit,
+    ) : Boolean = macro Builder.Macro.binOpDI5[OpId.==]
+    def == [R <: XFloat](r : R)(
+      implicit
+      di1 : DummyImplicit,
+      di2 : DummyImplicit,
+      di3 : DummyImplicit,
+      di4 : DummyImplicit,
+      di5 : DummyImplicit,
+      di6 : DummyImplicit,
+    ) : Boolean = macro Builder.Macro.binOpDI6[OpId.==]
+    def == (r : scala.Float)(
+      implicit
+      di1 : DummyImplicit,
+      di2 : DummyImplicit,
+      di3 : DummyImplicit,
+      di4 : DummyImplicit,
+      di5 : DummyImplicit,
+      di6 : DummyImplicit,
+      di7 : DummyImplicit,
+    ) : Boolean = macro Builder.Macro.binOpDI7[OpId.==]
+    def == [R <: XDouble](r : R)(
+      implicit
+      di1 : DummyImplicit,
+      di2 : DummyImplicit,
+      di3 : DummyImplicit,
+      di4 : DummyImplicit,
+      di5 : DummyImplicit,
+      di6 : DummyImplicit,
+      di7 : DummyImplicit,
+      di8 : DummyImplicit,
+    ) : Boolean = macro Builder.Macro.binOpDI8[OpId.==]
+    def == (r : scala.Double)(
+      implicit
+      di1 : DummyImplicit,
+      di2 : DummyImplicit,
+      di3 : DummyImplicit,
+      di4 : DummyImplicit,
+      di5 : DummyImplicit,
+      di6 : DummyImplicit,
+      di7 : DummyImplicit,
+      di8 : DummyImplicit,
+      di9 : DummyImplicit,
+    ) : Boolean = macro Builder.Macro.binOpDI9[OpId.==]
+
     def +  (r : Char) : Int = macro Builder.Macro.binOp[OpId.+]
     def +  (r : Int) : Int = macro Builder.Macro.binOp[OpId.+]
     def +  (r : Long) : Long = macro Builder.Macro.binOp[OpId.+]
@@ -243,140 +387,7 @@ object TwoFaceAny {
     def min(r : Int) : Int = macro Builder.Macro.binOp[OpId.Min]
     def max(r : Int) : Int = macro Builder.Macro.binOp[OpId.Max]
 
-//    def == [R <: XChar](r : R)(
-//      implicit tfo : Boolean.Return[T == R]
-//    ) = tfo(this.getValue == r)
-//    def == (r : scala.Char)(
-//      implicit tfo : Boolean.Return[scala.Boolean],
-//      di1 : DummyImplicit
-//    ) = tfo(this.getValue == r)
-//    def == [R <: XInt](r : R)(
-//      implicit tfo : Boolean.Return[T == R],
-//      di1 : DummyImplicit,
-//      di2 : DummyImplicit
-//    ) = tfo(this.getValue == r)
-//    def == (r : scala.Int)(
-//      implicit tfo : Boolean.Return[scala.Boolean],
-//      di1 : DummyImplicit,
-//      di2 : DummyImplicit,
-//      di3 : DummyImplicit
-//    ) = tfo(this.getValue == r)
-//    def == [R <: XLong](r : R)(
-//      implicit tfo : Boolean.Return[T == R],
-//      di1 : DummyImplicit,
-//      di2 : DummyImplicit,
-//      di3 : DummyImplicit,
-//      di4 : DummyImplicit,
-//    ) = tfo(this.getValue == r)
-//    def == (r : scala.Long)(
-//      implicit tfo : Boolean.Return[scala.Boolean],
-//      di1 : DummyImplicit,
-//      di2 : DummyImplicit,
-//      di3 : DummyImplicit,
-//      di4 : DummyImplicit,
-//      di5 : DummyImplicit,
-//    ) = tfo(this.getValue == r)
-//    def == [R <: XFloat](r : R)(
-//      implicit tfo : Boolean.Return[T == R],
-//      di1 : DummyImplicit,
-//      di2 : DummyImplicit,
-//      di3 : DummyImplicit,
-//      di4 : DummyImplicit,
-//      di5 : DummyImplicit,
-//      di6 : DummyImplicit,
-//    ) = tfo(this.getValue == r)
-//    def == (r : scala.Float)(
-//      implicit tfo : Boolean.Return[scala.Boolean],
-//      di1 : DummyImplicit,
-//      di2 : DummyImplicit,
-//      di3 : DummyImplicit,
-//      di4 : DummyImplicit,
-//      di5 : DummyImplicit,
-//      di6 : DummyImplicit,
-//      di7 : DummyImplicit,
-//    ) = tfo(this.getValue == r)
-//    def == [R <: XDouble](r : R)(
-//      implicit tfo : Boolean.Return[T == R],
-//      di1 : DummyImplicit,
-//      di2 : DummyImplicit,
-//      di3 : DummyImplicit,
-//      di4 : DummyImplicit,
-//      di5 : DummyImplicit,
-//      di6 : DummyImplicit,
-//      di7 : DummyImplicit,
-//      di8 : DummyImplicit,
-//    ) = tfo(this.getValue == r)
-//    def == (r : scala.Double)(
-//      implicit tfo : Boolean.Return[scala.Boolean],
-//      di1 : DummyImplicit,
-//      di2 : DummyImplicit,
-//      di3 : DummyImplicit,
-//      di4 : DummyImplicit,
-//      di5 : DummyImplicit,
-//      di6 : DummyImplicit,
-//      di7 : DummyImplicit,
-//      di8 : DummyImplicit,
-//      di9 : DummyImplicit,
-//    ) = tfo(this.getValue == r)
-//
-//    def +  [R](r : Char[R])(implicit tfo : Int.Return[T + R])        = tfo(this.getValue +  r.getValue)
-//    def -  [R](r : Char[R])(implicit tfo : Int.Return[T - R])        = tfo(this.getValue -  r.getValue)
-//    def *  [R](r : Char[R])(implicit tfo : Int.Return[T * R])        = tfo(this.getValue *  r.getValue)
-//    def /  [R](r : Char[R])(implicit tfo : Int.Return[T / R])        = tfo(this.getValue /  r.getValue)
-//    def %  [R](r : Char[R])(implicit tfo : Int.Return[T % R])        = tfo(this.getValue %  r.getValue)
-//    def == [R](r : Char[R])(implicit tfo : Boolean.Return[T == R])   = tfo(this.getValue == r.getValue)
-//    def != [R](r : Char[R])(implicit tfo : Boolean.Return[T != R])   = tfo(this.getValue != r.getValue)
-//    def <  [R](r : Char[R])(implicit tfo : Boolean.Return[T <  R])   = tfo(this.getValue <  r.getValue)
-//    def >  [R](r : Char[R])(implicit tfo : Boolean.Return[T >  R])   = tfo(this.getValue >  r.getValue)
-//    def <= [R](r : Char[R])(implicit tfo : Boolean.Return[T <= R])   = tfo(this.getValue <= r.getValue)
-//    def >= [R](r : Char[R])(implicit tfo : Boolean.Return[T >= R])   = tfo(this.getValue >= r.getValue)
-//    def +  [R](r : Int[R])(implicit tfo : Int.Return[T + R])         = tfo(this.getValue +  r.getValue)
-//    def -  [R](r : Int[R])(implicit tfo : Int.Return[T - R])         = tfo(this.getValue -  r.getValue)
-//    def *  [R](r : Int[R])(implicit tfo : Int.Return[T * R])         = tfo(this.getValue *  r.getValue)
-//    def /  [R](r : Int[R])(implicit tfo : Int.Return[T / R])         = tfo(this.getValue /  r.getValue)
-//    def %  [R](r : Int[R])(implicit tfo : Int.Return[T % R])         = tfo(this.getValue %  r.getValue)
-//    def == [R](r : Int[R])(implicit tfo : Boolean.Return[T == R])    = tfo(this.getValue == r.getValue)
-//    def != [R](r : Int[R])(implicit tfo : Boolean.Return[T != R])    = tfo(this.getValue != r.getValue)
-//    def <  [R](r : Int[R])(implicit tfo : Boolean.Return[T <  R])    = tfo(this.getValue <  r.getValue)
-//    def >  [R](r : Int[R])(implicit tfo : Boolean.Return[T >  R])    = tfo(this.getValue >  r.getValue)
-//    def <= [R](r : Int[R])(implicit tfo : Boolean.Return[T <= R])    = tfo(this.getValue <= r.getValue)
-//    def >= [R](r : Int[R])(implicit tfo : Boolean.Return[T >= R])    = tfo(this.getValue >= r.getValue)
-//    def +  [R](r : Long[R])(implicit tfo : Long.Return[T + R])       = tfo(this.getValue +  r.getValue)
-//    def -  [R](r : Long[R])(implicit tfo : Long.Return[T - R])       = tfo(this.getValue -  r.getValue)
-//    def *  [R](r : Long[R])(implicit tfo : Long.Return[T * R])       = tfo(this.getValue *  r.getValue)
-//    def /  [R](r : Long[R])(implicit tfo : Long.Return[T / R])       = tfo(this.getValue /  r.getValue)
-//    def %  [R](r : Long[R])(implicit tfo : Long.Return[T % R])       = tfo(this.getValue %  r.getValue)
-//    def == [R](r : Long[R])(implicit tfo : Boolean.Return[T == R])   = tfo(this.getValue == r.getValue)
-//    def != [R](r : Long[R])(implicit tfo : Boolean.Return[T != R])   = tfo(this.getValue != r.getValue)
-//    def <  [R](r : Long[R])(implicit tfo : Boolean.Return[T <  R])   = tfo(this.getValue <  r.getValue)
-//    def >  [R](r : Long[R])(implicit tfo : Boolean.Return[T >  R])   = tfo(this.getValue >  r.getValue)
-//    def <= [R](r : Long[R])(implicit tfo : Boolean.Return[T <= R])   = tfo(this.getValue <= r.getValue)
-//    def >= [R](r : Long[R])(implicit tfo : Boolean.Return[T >= R])   = tfo(this.getValue >= r.getValue)
-//    def +  [R](r : Float[R])(implicit tfo : Float.Return[T + R])     = tfo(this.getValue +  r.getValue)
-//    def -  [R](r : Float[R])(implicit tfo : Float.Return[T - R])     = tfo(this.getValue -  r.getValue)
-//    def *  [R](r : Float[R])(implicit tfo : Float.Return[T * R])     = tfo(this.getValue *  r.getValue)
-//    def /  [R](r : Float[R])(implicit tfo : Float.Return[T / R])     = tfo(this.getValue /  r.getValue)
-//    def %  [R](r : Float[R])(implicit tfo : Float.Return[T % R])     = tfo(this.getValue %  r.getValue)
-//    def == [R](r : Float[R])(implicit tfo : Boolean.Return[T == R])  = tfo(this.getValue == r.getValue)
-//    def != [R](r : Float[R])(implicit tfo : Boolean.Return[T != R])  = tfo(this.getValue != r.getValue)
-//    def <  [R](r : Float[R])(implicit tfo : Boolean.Return[T <  R])  = tfo(this.getValue <  r.getValue)
-//    def >  [R](r : Float[R])(implicit tfo : Boolean.Return[T >  R])  = tfo(this.getValue >  r.getValue)
-//    def <= [R](r : Float[R])(implicit tfo : Boolean.Return[T <= R])  = tfo(this.getValue <= r.getValue)
-//    def >= [R](r : Float[R])(implicit tfo : Boolean.Return[T >= R])  = tfo(this.getValue >= r.getValue)
-//    def +  [R](r : Double[R])(implicit tfo : Double.Return[T + R])   = tfo(this.getValue +  r.getValue)
-//    def -  [R](r : Double[R])(implicit tfo : Double.Return[T - R])   = tfo(this.getValue -  r.getValue)
-//    def *  [R](r : Double[R])(implicit tfo : Double.Return[T * R])   = tfo(this.getValue *  r.getValue)
-//    def /  [R](r : Double[R])(implicit tfo : Double.Return[T / R])   = tfo(this.getValue /  r.getValue)
-//    def %  [R](r : Double[R])(implicit tfo : Double.Return[T % R])   = tfo(this.getValue %  r.getValue)
-//    def == [R](r : Double[R])(implicit tfo : Boolean.Return[T == R]) = tfo(this.getValue == r.getValue)
-//    def != [R](r : Double[R])(implicit tfo : Boolean.Return[T != R]) = tfo(this.getValue != r.getValue)
-//    def <  [R](r : Double[R])(implicit tfo : Boolean.Return[T <  R]) = tfo(this.getValue <  r.getValue)
-//    def >  [R](r : Double[R])(implicit tfo : Boolean.Return[T >  R]) = tfo(this.getValue >  r.getValue)
-//    def <= [R](r : Double[R])(implicit tfo : Boolean.Return[T <= R]) = tfo(this.getValue <= r.getValue)
-//    def >= [R](r : Double[R])(implicit tfo : Boolean.Return[T >= R]) = tfo(this.getValue >= r.getValue)
-//    def min [R](r : Int[R])(implicit tfo : Int.Return[T Min R])      = tfo(this.getValue min r.getValue)
-//    def max [R](r : Int[R])(implicit tfo : Int.Return[T Max R])      = tfo(this.getValue max r.getValue)
-//    def unary_-            (implicit tfo : Int.Return[Negate[T]])    = tfo(-this.getValue)
+    def unary_- : Int = macro Builder.Macro.prefixOp[OpId.Negate]
 //    def toChar(implicit tfo : Char.Return[ToChar[T]])                = tfo(this.getValue.toChar)
 //    def toLong(implicit tfo : Long.Return[ToLong[T]])                = tfo(this.getValue.toLong)
 //    def toFloat(implicit tfo : Float.Return[ToFloat[T]])             = tfo(this.getValue.toFloat)

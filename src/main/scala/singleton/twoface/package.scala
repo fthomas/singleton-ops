@@ -1,16 +1,15 @@
-//package singleton
-//
-//import twoface.impl._
-//
-//package object twoface {
-//  import TwoFaceAny._
-//
-//  import singleton.ops.ITE
+package singleton
+
+import singleton.ops.impl.OpId
+import twoface.impl._
+
+package object twoface {
+  import TwoFaceAny._
+
 //  def ifThenElse[I,T,E](cond: Boolean[I], trueVal : Char[T], elseVal : Char[E])
 //                       (implicit tfo : Char.Return[ITE[I, T, E]]) =
 //    tfo(if (cond.getValue) trueVal.getValue else elseVal.getValue)
-//  def ifThenElse[I,T,E](cond: Boolean[I], trueVal : Int[T], elseVal : Int[E])
-//                       (implicit tfo : Int.Return[ITE[I, T, E]]) =
+  def ifThenElse[I,T,E](arg1: Boolean, arg2 : Int, arg3 : Int) : Int = macro Builder.Macro.triOp[OpId.ITE]
 //    tfo(if (cond.getValue) trueVal.getValue else elseVal.getValue)
 //  def ifThenElse[I,T,E](cond: Boolean[I], trueVal : Long[T], elseVal : Long[E])
 //                       (implicit tfo : Long.Return[ITE[I, T, E]]) =
@@ -27,7 +26,7 @@
 //  def ifThenElse[I,T,E](cond: Boolean[I], trueVal : Boolean[T], elseVal : Boolean[E])
 //                       (implicit tfo : Boolean.Return[ITE[I, T, E]]) =
 //    tfo(if (cond.getValue) trueVal.getValue else elseVal.getValue)
-//
+
 //  object math {
 //    import singleton.ops.math._
 //    val Pi = new _Double[Pi](scala.math.Pi)
@@ -92,4 +91,4 @@
 //    def log10[T](x : Double[T])(implicit tfo : Double.Return[Log10[T]]) =
 //      tfo(scala.math.log10(x.getValue))
 //  }
-//}
+}
