@@ -3,24 +3,24 @@ package singleton.twoface
 import impl._
 
 object TwoFace {
-  type Char[T] = TwoFaceAny.Char.Aux[T]
+  type Char = TwoFaceAny.Char
   val Char = TwoFaceAny.Char
 
-  type Int[T] = TwoFaceAny.Int.Aux[T]
+  type Int = TwoFaceAny.Int
   val Int = TwoFaceAny.Int
 
-  type Long[T] = TwoFaceAny.Long.Aux[T]
+  type Long = TwoFaceAny.Long
   val Long = TwoFaceAny.Long
 
-  type Float[T] = TwoFaceAny.Float.Aux[T]
+  type Float = TwoFaceAny.Float
   val Float = TwoFaceAny.Float
 
-  type Double[T] = TwoFaceAny.Double.Aux[T]
+  type Double = TwoFaceAny.Double
   val Double = TwoFaceAny.Double
 
-  type String[T] = TwoFaceAny.String.Aux[T]
+  type String = TwoFaceAny.String
   val String = TwoFaceAny.String
 
-  type Boolean[T] = TwoFaceAny.Boolean.Aux[T]
+  type Boolean = TwoFaceAny.Boolean
   val Boolean = TwoFaceAny.Boolean
 }

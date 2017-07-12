@@ -42,31 +42,31 @@ object TestUtils {
 
   type VerifyTF[OP, Expected] = Require[ITE[IsNonLiteral[Expected], IsNonLiteral[OP], OP == Expected]]
 
-  def verifyTF[OP, Expected](opResult : TwoFace.Char[OP], expectedResult : TwoFace.Char[Expected])
+  def verifyTF[OP, Expected](opResult : TwoFace.Char.Aux[OP], expectedResult : TwoFace.Char.Aux[Expected])
                             (implicit verify : VerifyTF[OP, Expected]) : Prop = {
     opResult.getValue == expectedResult.getValue
   }
-  def verifyTF[OP, Expected](opResult : TwoFace.Int[OP], expectedResult : TwoFace.Int[Expected])
+  def verifyTF[OP, Expected](opResult : TwoFace.Int.Aux[OP], expectedResult : TwoFace.Int.Aux[Expected])
                                (implicit verify : VerifyTF[OP, Expected]) : Prop = {
     opResult.getValue == expectedResult.getValue
   }
-  def verifyTF[OP, Expected](opResult : TwoFace.Long[OP], expectedResult : TwoFace.Long[Expected])
+  def verifyTF[OP, Expected](opResult : TwoFace.Long.Aux[OP], expectedResult : TwoFace.Long.Aux[Expected])
                                (implicit verify : VerifyTF[OP, Expected]) : Prop = {
     opResult.getValue == expectedResult.getValue
   }
-  def verifyTF[OP, Expected](opResult : TwoFace.Float[OP], expectedResult : TwoFace.Float[Expected])
+  def verifyTF[OP, Expected](opResult : TwoFace.Float.Aux[OP], expectedResult : TwoFace.Float.Aux[Expected])
                                 (implicit verify : VerifyTF[OP, Expected]) : Prop = {
     opResult.getValue == expectedResult.getValue
   }
-  def verifyTF[OP, Expected](opResult : TwoFace.Double[OP], expectedResult : TwoFace.Double[Expected])
+  def verifyTF[OP, Expected](opResult : TwoFace.Double.Aux[OP], expectedResult : TwoFace.Double.Aux[Expected])
                             (implicit verify : VerifyTF[OP, Expected]) : Prop = {
     opResult.getValue == expectedResult.getValue
   }
-  def verifyTF[OP, Expected](opResult : TwoFace.String[OP], expectedResult : TwoFace.String[Expected])
+  def verifyTF[OP, Expected](opResult : TwoFace.String.Aux[OP], expectedResult : TwoFace.String.Aux[Expected])
                             (implicit verify : VerifyTF[OP, Expected]) : Prop = {
     opResult.getValue == expectedResult.getValue
   }
-  def verifyTF[OP, Expected](opResult : TwoFace.Boolean[OP], expectedResult : TwoFace.Boolean[Expected])
+  def verifyTF[OP, Expected](opResult : TwoFace.Boolean.Aux[OP], expectedResult : TwoFace.Boolean.Aux[Expected])
                             (implicit verify : VerifyTF[OP, Expected]) : Prop = {
     opResult.getValue == expectedResult.getValue
   }

@@ -3,7 +3,7 @@ package singleton.twoface
 import singleton.twoface.math._
 import org.scalacheck.Properties
 import singleton.TestUtils._
-//import shapeless.test.illTyped
+import shapeless.test.illTyped
 
 class TwoFaceIntSpec extends Properties("TwoFace.Int") {
   property("Implicit Creation[]") = {
@@ -309,24 +309,25 @@ class TwoFaceIntSpec extends Properties("TwoFace.Int") {
   property("Safe numberOfLeadingZeros") = verifyTF(TwoFace.Int.numberOfLeadingZeros(TwoFace.Int(1)), 31)
   property("Unsafe numberOfLeadingZeros") = verifyTF(TwoFace.Int.numberOfLeadingZeros(TwoFace.Int(us(1))), us(31))
 
-//  property("Implicit Conversions") = wellTyped {
-//    import singleton.ops._
-//    val a : TwoFace.Int[3] = implicitly[TwoFace.Int[2 + 1]]
-//    val b : TwoFace.Int[3 + 0] = implicitly[TwoFace.Int[2 + 1]]
-//    val c : TwoFace.Int[3 + 0] = implicitly[TwoFace.Int[3]]
-//    val d : 3 = TwoFace.Int(3)
-//    val e : Int = TwoFace.Int(us(3))
-//  }
-//
-//  property("Wrong Implicit Conversions") = {
-//    import singleton.ops._
-//    illTyped("""val a : TwoFace.Int[3] = implicitly[TwoFace.Int[2 + 2]]""")
-//    illTyped("""val b : TwoFace.Int[3 + 0] = implicitly[TwoFace.Int[2 + 2]]""")
-//    illTyped("""val c : TwoFace.Int[3 + 0] = implicitly[TwoFace.Int[4]]""")
-//    true
-//  }
+  property("Implicit Conversions") = wellTyped {
+    import singleton.ops._
+    val a : TwoFace.Int.Aux[3] = implicitly[TwoFace.Int.Aux[2 + 1]]
+    val b : TwoFace.Int.Aux[3 + 0] = implicitly[TwoFace.Int.Aux[2 + 1]]
+    val c : TwoFace.Int.Aux[3 + 0] = implicitly[TwoFace.Int.Aux[3]]
+    val d : 3 = TwoFace.Int(3)
+    val e : Int = TwoFace.Int(us(3))
+  }
+
+  property("Wrong Implicit Conversions") = {
+    import singleton.ops._
+    illTyped("""val a : TwoFace.Int.Aux[3] = implicitly[TwoFace.Int.Aux[2 + 2]]""")
+    illTyped("""val b : TwoFace.Int.Aux[3 + 0] = implicitly[TwoFace.Int.Aux[2 + 2]]""")
+    illTyped("""val c : TwoFace.Int.Aux[3 + 0] = implicitly[TwoFace.Int.Aux[4]]""")
+    true
+  }
 
   property("ToString") = {
-    TwoFace.Int[1].toString() == "1"
+    TwoFace.Int
+      [1].toString() == "1"
   }
 }
