@@ -1171,6 +1171,30 @@ trait GeneralMacros {
   ///////////////////////////////////////////////////////////////////////////////////////////
   // TwoFace
   ///////////////////////////////////////////////////////////////////////////////////////////
+  def TwoFaceShellMaterializer[Shell, FuncApply, Func[_,_], Arg1, Arg2] (
+   implicit
+   shell : c.WeakTypeTag[Shell], funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[Func[_,_]],
+   arg1 : c.WeakTypeTag[Arg1], arg2 : c.WeakTypeTag[Arg2]
+  ) : TwoFaceShellMaterializer[Shell, FuncApply, Func, Arg1, Arg2] =
+  new TwoFaceShellMaterializer[Shell, FuncApply, Func, Arg1, Arg2](
+    weakTypeOf[Shell], weakTypeOf[FuncApply], weakTypeOf[Func[_,_]], weakTypeOf[Arg1], weakTypeOf[Arg2]
+  )
+
+  final class TwoFaceShellMaterializer[Shell, FuncApply, Func[_,_], Arg1, Arg2]
+  (shellTpe : Type, funcApplyTpe : Type, funcTpe : Type, arg1Tpe : Type, arg2Tpe : Type) {
+    def impl() : c.Tree = {
+      implicit val annotatedSym : TypeSymbol = shellTpe.typeSymbol.asType
+      print(showRaw(funcApplyTpe))
+      print(showRaw(funcTpe))
+      abort("bla")
+    }
+  }
+  ///////////////////////////////////////////////////////////////////////////////////////////
+
+
+  ///////////////////////////////////////////////////////////////////////////////////////////
+  // TwoFace
+  ///////////////////////////////////////////////////////////////////////////////////////////
   def TwoFaceMaterializer[OP](implicit op : c.WeakTypeTag[OP]) :
   TwoFaceMaterializer[OP] = new TwoFaceMaterializer[OP](symbolOf[OP])
 

@@ -18,8 +18,42 @@ object TwoFaceAny {
   @inline implicit def fromTwoFaceSafe[Face, T <: Face with Singleton](tf : Aux[Face, T])
                                                                       (implicit sc: ValueOf[T]) : T {} = valueOf[T]
 
+  @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
+  trait Shell2[TF[_], Face, Func[_,_] <: Op, Arg1, Arg2] {
+    type Out
+    def apply(arg1 : Arg1, arg2 : Arg2) : TF[Out]
+  }
+  @bundle
+  object Shell2 {
+    implicit def ev[TF[_], Face, Func[_, _] <: Op, Arg1, Arg2]:
+    Shell2[TF, Face, Func, Arg1, Arg2] =
+    macro Macro.impl[Shell2[TF, Face, Func, Arg1, Arg2], Func, Arg1, Arg2]
+
+    final class Macro(val c: whitebox.Context) extends GeneralMacros {
+      def impl[
+        Shell,
+        Func[_, _] <: Op,
+        Arg1,
+        Arg2
+      ](implicit
+        shell : c.WeakTypeTag[Shell],
+        funcApply : c.WeakTypeTag[Func[Arg1, Arg2]],
+        func : c.WeakTypeTag[Func[_,_]],
+        arg1 : c.WeakTypeTag[Arg1],
+        arg2 : c.WeakTypeTag[Arg2]
+      ) : c.Tree = TwoFaceShellMaterializer[
+        Shell,
+        Func[Arg1, Arg2],
+        Func,
+        Arg1,
+        Arg2
+      ].impl()
+    }
+  }
+
   trait Builder[TF, Face] {
     type Aux[T] = TF {type T0 = T}
+    type Shell2[Func[_,_] <: Op, Arg1, Arg2] = TwoFaceAny.Shell2[Aux, Face, Func, Arg1, Arg2]
     protected[twoface] def create[T](value : Face) : Aux[T]
     implicit def apply[T <: Face with Singleton](value : T)(implicit tfb : Builder[TF, Face])
     : Aux[T] =  tfb.create[T](value)
