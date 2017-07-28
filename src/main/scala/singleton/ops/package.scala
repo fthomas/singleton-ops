@@ -17,9 +17,6 @@ package object ops {
 
   /////////////////////////////////////////////////
   //Short aliases for casting operation type value
-  //Used as upper operation only.
-  //E.g. SafeInt[Something[Nice] + 1] OK
-  //     Something[SafeInt[Nice] + 1] BAD
   /////////////////////////////////////////////////
   type SafeNat[P1]          = impl.OpNat[ToNat[Require[IsNat[P1]] ==> P1]]
   type SafeChar[P1]         = impl.OpChar[Require[IsChar[P1]] ==> P1]
@@ -54,7 +51,7 @@ package object ops {
   type ==>[A,B]             = OpMacro[OpId.==>, A, B, NP]
   /////////////////////////////////////////////////
 
-  type Arg[Num, T]          = OpMacro[OpId.Arg, Num, T, NP] //Argument for real-time function creation
+  protected[singleton] type Arg[Num, T] = OpMacro[OpId.Arg, Num, T, NP] //Argument for real-time function creation
   type Id[P1]               = OpMacro[OpId.Id, P1, NP, NP]
   type ![P1]                = OpMacro[OpId.!, P1, NP, NP]
   type Require[Cond]        = OpMacro[OpId.Require, Cond, DefaultRequireMsg, NP]
