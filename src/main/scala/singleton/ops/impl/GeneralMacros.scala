@@ -12,6 +12,7 @@ trait GeneralMacros {
 
 
   object funcTypes {
+    val Arg = symbolOf[OpId.Arg]
     val Id = symbolOf[OpId.Id]
     val ToNat = symbolOf[OpId.ToNat]
     val ToChar = symbolOf[OpId.ToChar]
@@ -257,6 +258,15 @@ trait GeneralMacros {
             case (Some(thenArg0 : CalcVal), Some(elseArg0 : CalcVal)) => Some(CalcNLit(q"if ($cond) $thenArg0 else $elseArg0"))
             case _ => None
           }
+        case (funcTypes.Arg, Some(CalcLit.Int(argNum))) =>
+          unapplyOpArg(args(2)) match { //Checking the argument type
+            case (Some(t : CalcLit)) => Some(t) //Literal argument is just a literal
+            case (Some(t)) => //Got a type, so returning argument name
+              val term = TermName(s"arg$argNum")
+              Some(CalcNLit(q"$term"))
+            case _ =>
+              None
+          }
 
         case _ => //regular cases
           val bValue = unapplyOpArg(args(2))
@@ -329,7 +339,12 @@ trait GeneralMacros {
         ////////////////////////////////////////////////////////////////////////
 
 
-        case TypeRef(_, sym, _) if sym.isAliasType => unapply(tp.dealias)
+        case TypeRef(_, sym, _) if sym.isAliasType =>
+          val tpDealias = tp.dealias
+          if (tpDealias == tp)
+            abort("Unable to dealias type: " + showRaw(tp))
+          else
+            unapply(tpDealias)
         case TypeRef(pre, sym, Nil) =>
           unapply(sym.info asSeenFrom (pre, sym.owner))
         case SingleType(pre, sym) =>
@@ -1171,22 +1186,37 @@ trait GeneralMacros {
   ///////////////////////////////////////////////////////////////////////////////////////////
   // TwoFace
   ///////////////////////////////////////////////////////////////////////////////////////////
-  def TwoFaceShellMaterializer[Shell, FuncApply, Func[_,_], Arg1, Arg2] (
-   implicit
-   shell : c.WeakTypeTag[Shell], funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[Func[_,_]],
-   arg1 : c.WeakTypeTag[Arg1], arg2 : c.WeakTypeTag[Arg2]
-  ) : TwoFaceShellMaterializer[Shell, FuncApply, Func, Arg1, Arg2] =
-  new TwoFaceShellMaterializer[Shell, FuncApply, Func, Arg1, Arg2](
-    weakTypeOf[Shell], weakTypeOf[FuncApply], weakTypeOf[Func[_,_]], weakTypeOf[Arg1], weakTypeOf[Arg2]
-  )
+  def TwoFaceShellMaterializer[Shell](implicit shell : c.WeakTypeTag[Shell])
+  : TwoFaceShellMaterializer[Shell] = new TwoFaceShellMaterializer[Shell](weakTypeOf[Shell])
 
-  final class TwoFaceShellMaterializer[Shell, FuncApply, Func[_,_], Arg1, Arg2]
-  (shellTpe : Type, funcApplyTpe : Type, funcTpe : Type, arg1Tpe : Type, arg2Tpe : Type) {
+  final class TwoFaceShellMaterializer[Shell](shellTpe : Type) {
     def impl() : c.Tree = {
       implicit val annotatedSym : TypeSymbol = shellTpe.typeSymbol.asType
-      print(showRaw(funcApplyTpe))
-      print(showRaw(funcTpe))
-      abort("bla")
+//      print("before")
+      val funcApplyTpe = shellTpe.typeArgs(1)
+      val funcArgsTpe = shellTpe.typeArgs(2)
+//      print(showRaw(funcApplyTpe))
+//      print(showRaw(funcApplyTpe))
+//      extractSingletonValue(funcApplyTpe)
+      val r = extractSingletonValue(funcArgsTpe)
+      val genTree = r match {
+        case (t : CalcVal) =>
+          q"""
+             new $shellTpe {
+               type Out = _root_.singleton.twoface.TwoFace.Int.Aux[Int]
+               type Arg1Wide = Int
+               type Arg2Wide = Int
+               def apply(arg1 : Arg1Wide, arg2 : Arg2Wide) : _root_.singleton.twoface.TwoFace.Int.Aux[Int] = {
+                 _root_.singleton.twoface.TwoFace.Int.create[Int]($t)
+               }
+             }
+           """
+        case _ =>
+          abort("Unexpected return value")
+      }
+//      print(showCode(genTree))
+//      abort("bla")
+      genTree
     }
   }
   ///////////////////////////////////////////////////////////////////////////////////////////

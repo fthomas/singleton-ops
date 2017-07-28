@@ -2,7 +2,8 @@ package singleton.ops.impl
 
 sealed trait OpId
 object OpId {
-  sealed trait ITE extends OpId
+  sealed trait Arg extends OpId //Argument
+  sealed trait ITE extends OpId //If-Then-Else
   sealed trait ==> extends OpId
   sealed trait Id extends OpId
   sealed trait ! extends OpId

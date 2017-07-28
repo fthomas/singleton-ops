@@ -54,6 +54,7 @@ package object ops {
   type ==>[A,B]             = OpMacro[OpId.==>, A, B, NP]
   /////////////////////////////////////////////////
 
+  type Arg[Num, T]          = OpMacro[OpId.Arg, Num, T, NP] //Argument for real-time function creation
   type Id[P1]               = OpMacro[OpId.Id, P1, NP, NP]
   type ![P1]                = OpMacro[OpId.!, P1, NP, NP]
   type Require[Cond]        = OpMacro[OpId.Require, Cond, DefaultRequireMsg, NP]
