@@ -23,7 +23,7 @@ object TwoFaceAny {
     type Out
     type Arg1Wide >: Arg1
     type Arg2Wide >: Arg2
-    def apply(arg1 : Arg1Wide, arg2 : Arg2Wide) : Out
+    def apply(arg1 : scala.Int, arg2 : scala.Int) : Out
   }
   @bundle
   object Shell2 {
