@@ -1262,7 +1262,7 @@ trait GeneralMacros {
         case (t : CalcVal) =>
           q"""
              new $shellTpe {
-               type Out = _root_.singleton.twoface.TwoFace.$tfTerm.Aux[$outTpe]
+               type Out = $outTpe
                def apply(arg1 : $arg1WideTpe, arg2 : $arg2WideTpe) : _root_.singleton.twoface.TwoFace.$tfTerm.Aux[$outTpe] = {
                  _root_.singleton.twoface.TwoFace.$tfTerm($t)
                }
