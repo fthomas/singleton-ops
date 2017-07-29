@@ -25,28 +25,15 @@ object TwoFaceAny {
   object Shell2 {
     implicit def ev[Face, FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]:
     Shell2[Face, FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] =
-    macro Macro.impl[Face, FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
+    macro Macro.shell2Int[Face, FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
 
     final class Macro(val c: whitebox.Context) extends GeneralMacros {
-      def impl[
-        Face,
-        FuncApply,
-        FuncArgs,
-        Arg1,
-        Arg1Wide,
-        Arg2,
-        Arg2Wide
-      ](implicit
-        face : c.WeakTypeTag[Face],
-        funcApply : c.WeakTypeTag[FuncApply],
-        func : c.WeakTypeTag[FuncArgs],
-        arg1 : c.WeakTypeTag[Arg1],
-        arg1Wide : c.WeakTypeTag[Arg1Wide],
-        arg2 : c.WeakTypeTag[Arg2],
-        arg2Wide : c.WeakTypeTag[Arg2Wide]
-      ) : c.Tree = TwoFaceShellMaterializer[
+      def shell2Int[Face, FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
+      (implicit face : c.WeakTypeTag[Face], funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
+        arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide], arg2 : c.WeakTypeTag[Arg2],
+        arg2Wide : c.WeakTypeTag[Arg2Wide]) : c.Tree = TwoFaceShellMaterializer[
         Shell2[Face, FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
-      ].impl()
+      ].shell2()
     }
   }
 

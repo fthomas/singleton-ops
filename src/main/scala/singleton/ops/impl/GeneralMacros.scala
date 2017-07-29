@@ -1247,7 +1247,7 @@ trait GeneralMacros {
   : TwoFaceShellMaterializer[Shell] = new TwoFaceShellMaterializer[Shell](weakTypeOf[Shell])
 
   final class TwoFaceShellMaterializer[Shell](shellTpe : Type) {
-    def impl() : c.Tree = {
+    def shell2() : c.Tree = {
       implicit val annotatedSym : TypeSymbol = shellTpe.typeSymbol.asType
 //      print("before")
       val funcApplyTpe = shellTpe.typeArgs(1)
