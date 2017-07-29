@@ -19,17 +19,15 @@ object TwoFaceAny {
                                                                       (implicit sc: ValueOf[T]) : T {} = valueOf[T]
 
   @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
-  trait Shell2[Face, FuncApply, FuncArgs, Arg1, Arg2] {
+  trait Shell2[Face, FuncApply, FuncArgs, Arg1, Arg1Wide <: scala.Int, Arg2, Arg2Wide <: scala.Int] {
     type Out
-    type Arg1Wide <: Int
-    type Arg2Wide <: Int
     def apply(arg1 : Arg1Wide, arg2 : Arg2Wide) : Out
   }
   @bundle
   object Shell2 {
-    implicit def ev[Face, FuncApply, FuncArgs, Arg1, Arg2]:
-    Shell2[Face, FuncApply, FuncArgs, Arg1, Arg2] =
-    macro Macro.impl[Face, FuncApply, FuncArgs, Arg1, Arg2]
+    implicit def ev[Face, FuncApply, FuncArgs, Arg1, Arg1Wide <: scala.Int, Arg2, Arg2Wide <: scala.Int]:
+    Shell2[Face, FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] =
+    macro Macro.impl[Face, FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
 
     final class Macro(val c: whitebox.Context) extends GeneralMacros {
       def impl[
@@ -37,22 +35,26 @@ object TwoFaceAny {
         FuncApply,
         FuncArgs,
         Arg1,
-        Arg2
+        Arg1Wide <: scala.Int,
+        Arg2,
+        Arg2Wide <: scala.Int
       ](implicit
         face : c.WeakTypeTag[Face],
         funcApply : c.WeakTypeTag[FuncApply],
         func : c.WeakTypeTag[FuncArgs],
         arg1 : c.WeakTypeTag[Arg1],
-        arg2 : c.WeakTypeTag[Arg2]
+        arg1Wide : c.WeakTypeTag[Arg1Wide],
+        arg2 : c.WeakTypeTag[Arg2],
+        arg2Wide : c.WeakTypeTag[Arg2Wide]
       ) : c.Tree = TwoFaceShellMaterializer[
-        Shell2[Face, FuncApply, FuncArgs, Arg1, Arg2]
+        Shell2[Face, FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
       ].impl()
     }
   }
 
   trait Builder[TF, Face] {
     type Aux[T] = TF {type T0 = T}
-    type Shell2[Func[_,_], Arg1, Arg2] = TwoFaceAny.Shell2[Face, Func[Arg1, Arg2], Func[Arg[1, Arg1], Arg[2, Arg2]], Arg1, Arg2]
+    type Shell2[Func[_,_], Arg1, Arg1Wide<:scala.Int, Arg2, Arg2Wide<:scala.Int] = TwoFaceAny.Shell2[Face, Func[Arg1, Arg2], Func[Arg[1, Arg1], Arg[2, Arg2]], Arg1, Arg1Wide, Arg2, Arg2Wide]
     protected[singleton] def create[T](value : Face) : Aux[T]
     implicit def apply[T <: Face with Singleton](value : T)(implicit tfb : Builder[TF, Face])
     : Aux[T] =  tfb.create[T](value)
