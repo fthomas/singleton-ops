@@ -418,13 +418,13 @@ trait GeneralMacros {
         ////////////////////////////////////////////////////////////////////////
         // TwoFace Values
         ////////////////////////////////////////////////////////////////////////
-        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny.Char.Aux[_]] => unapplyOpTwoFace(tp)
-        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny.Int.Aux[_]] => unapplyOpTwoFace(tp)
-        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny.Long.Aux[_]] => unapplyOpTwoFace(tp)
-        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny.Float.Aux[_]] => unapplyOpTwoFace(tp)
-        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny.Double.Aux[_]] => unapplyOpTwoFace(tp)
-        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny.String.Aux[_]] => unapplyOpTwoFace(tp)
-        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny.Boolean.Aux[_]] => unapplyOpTwoFace(tp)
+        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny.Char[_]] => unapplyOpTwoFace(tp)
+        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny.Int[_]] => unapplyOpTwoFace(tp)
+        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny.Long[_]] => unapplyOpTwoFace(tp)
+        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny.Float[_]] => unapplyOpTwoFace(tp)
+        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny.Double[_]] => unapplyOpTwoFace(tp)
+        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny.String[_]] => unapplyOpTwoFace(tp)
+        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny.Boolean[_]] => unapplyOpTwoFace(tp)
         ////////////////////////////////////////////////////////////////////////
 
 
@@ -1258,12 +1258,13 @@ trait GeneralMacros {
       val arg2WideTpe = shellTpe.typeArgs(6)
       val outTpe = extractSingletonValue(funcApplyTpe).tpe
       val tfTerm = TermName(outTpe.widen.typeSymbol.name.toString)
+      val tfType = TypeName(outTpe.widen.typeSymbol.name.toString)
       val genTree = extractSingletonValue(funcArgsTpe) match {
         case (t : CalcVal) =>
           q"""
              new $shellTpe {
                type Out = $outTpe
-               def apply(arg1 : $arg1WideTpe, arg2 : $arg2WideTpe) : _root_.singleton.twoface.TwoFace.$tfTerm.Aux[$outTpe] = {
+               def apply(arg1 : $arg1WideTpe, arg2 : $arg2WideTpe) : _root_.singleton.twoface.TwoFace.$tfType[$outTpe] = {
                  _root_.singleton.twoface.TwoFace.$tfTerm($t)
                }
              }

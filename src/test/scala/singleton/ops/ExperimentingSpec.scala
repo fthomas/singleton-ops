@@ -190,20 +190,20 @@ object FixedSizedVectorDemo {
 //  }
 }
 
-object NonLiteralTest {
-  import singleton.twoface._
-
-  def smallerThan50(t : TwoFace.Int)
-                      (implicit r: Require[t.type < 50]) : Unit = {}
-
-  val forty = 40
-  val sixty = 60
-
-//  smallerThan50(forty) //passes run-time check
-  smallerThan50(40)    //passes compile-time check
-//  smallerThan50(sixty) //fails run-time check
-//  smallerThan50(60)    //fails compile-time check
-}
+//object NonLiteralTest {
+//  import singleton.twoface._
+//
+//  def smallerThan50(t : TwoFace.Int)
+//                      (implicit r: Require[t.type < 50]) : Unit = {}
+//
+//  val forty = 40
+//  val sixty = 60
+//
+////  smallerThan50(forty) //passes run-time check
+//  smallerThan50(40)    //passes compile-time check
+////  smallerThan50(sixty) //fails run-time check
+////  smallerThan50(60)    //fails compile-time check
+//}
 
 
 //

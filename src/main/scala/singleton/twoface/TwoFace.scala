@@ -3,24 +3,24 @@ package singleton.twoface
 import impl._
 
 object TwoFace {
-  type Char = TwoFaceAny.Char
+  type Char[T <: scala.Char] = TwoFaceAny.Char[T]
   val Char = TwoFaceAny.Char
 
-  type Int = TwoFaceAny.Int
+  type Int[T <: scala.Int] = TwoFaceAny.Int[T]
   val Int = TwoFaceAny.Int
 
-  type Long = TwoFaceAny.Long
+  type Long[T <: scala.Long] = TwoFaceAny.Long[T]
   val Long = TwoFaceAny.Long
 
-  type Float = TwoFaceAny.Float
+  type Float[T <: scala.Float] = TwoFaceAny.Float[T]
   val Float = TwoFaceAny.Float
 
-  type Double = TwoFaceAny.Double
+  type Double[T <: scala.Double] = TwoFaceAny.Double[T]
   val Double = TwoFaceAny.Double
 
-  type String = TwoFaceAny.String
+  type String[T <: java.lang.String] = TwoFaceAny.String[T]
   val String = TwoFaceAny.String
 
-  type Boolean = TwoFaceAny.Boolean
+  type Boolean[T <: scala.Boolean] = TwoFaceAny.Boolean[T]
   val Boolean = TwoFaceAny.Boolean
 }
