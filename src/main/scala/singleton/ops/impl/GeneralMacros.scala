@@ -1252,15 +1252,15 @@ trait GeneralMacros {
 //      print("before")
       val funcApplyTpe = shellTpe.typeArgs(1)
       val funcArgsTpe = shellTpe.typeArgs(2)
-      val arg1Tpe = shellTpe.typeArgs(3).widen
-      val arg2Tpe = shellTpe.typeArgs(4).widen
+      val arg1Tpe = extractSingletonValue(shellTpe.typeArgs(3)).tpe.widen
+      val arg2Tpe = extractSingletonValue(shellTpe.typeArgs(4)).tpe.widen
       val outTpe = extractSingletonValue(funcApplyTpe).tpe
       val tfTerm = TermName(outTpe.widen.typeSymbol.name.toString)
       val genTree = extractSingletonValue(funcArgsTpe) match {
         case (t : CalcVal) =>
           q"""
              new $shellTpe {
-               type Out = _root_.singleton.twoface.TwoFace.$tfTerm.Aux[$outTpe]
+               type Out = $outTpe
                type Arg1Wide = $arg1Tpe
                type Arg2Wide = $arg2Tpe
                def apply(arg1 : $arg1Tpe, arg2 : $arg2Tpe) : _root_.singleton.twoface.TwoFace.$tfTerm.Aux[$outTpe] = {
