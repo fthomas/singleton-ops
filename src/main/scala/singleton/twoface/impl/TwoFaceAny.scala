@@ -23,7 +23,7 @@ object TwoFaceAny {
     type Out
     type Arg1Wide >: Arg1
     type Arg2Wide >: Arg2
-    def apply(arg1 : Arg1Wide, arg2 : Arg2Wide) : Int.Aux[Out] {}
+    def apply(arg1 : Arg1Wide, arg2 : Arg2Wide) : Out
   }
   @bundle
   object Shell2 {
