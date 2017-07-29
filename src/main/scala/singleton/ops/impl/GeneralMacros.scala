@@ -1252,8 +1252,8 @@ trait GeneralMacros {
 //      print("before")
       val funcApplyTpe = shellTpe.typeArgs(1)
       val funcArgsTpe = shellTpe.typeArgs(2)
-      val arg1Tpe = extractSingletonValue(shellTpe.typeArgs(3)).tpe.widen
-      val arg2Tpe = extractSingletonValue(shellTpe.typeArgs(4)).tpe.widen
+      val arg1Tpe = shellTpe.typeArgs(3)
+      val arg2Tpe = shellTpe.typeArgs(4)
       val outTpe = extractSingletonValue(funcApplyTpe).tpe
       val tfTerm = TermName(outTpe.widen.typeSymbol.name.toString)
       val genTree = extractSingletonValue(funcArgsTpe) match {

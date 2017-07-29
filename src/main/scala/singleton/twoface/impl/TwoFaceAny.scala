@@ -21,9 +21,9 @@ object TwoFaceAny {
   @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
   trait Shell2[Face, FuncApply, FuncArgs, Arg1, Arg2] {
     type Out
-    type Arg1Wide >: Arg1
-    type Arg2Wide >: Arg2
-    def apply(arg1 : scala.Int, arg2 : scala.Int) : Out
+    type Arg1Wide <: Int
+    type Arg2Wide <: Int
+    def apply(arg1 : Arg1Wide, arg2 : Arg2Wide) : Out
   }
   @bundle
   object Shell2 {
