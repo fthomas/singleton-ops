@@ -52,6 +52,7 @@ package object ops {
   /////////////////////////////////////////////////
 
   protected[singleton] type Arg[Num, T] = OpMacro[OpId.Arg, Num, T, NP] //Argument for real-time function creation
+  type AcceptNonLiteral[P1] = OpMacro[OpId.AcceptNonLiteral, P1, NP, NP]
   type Id[P1]               = OpMacro[OpId.Id, P1, NP, NP]
   type ![P1]                = OpMacro[OpId.!, P1, NP, NP]
   type Require[Cond]        = OpMacro[OpId.Require, Cond, DefaultRequireMsg, NP]
