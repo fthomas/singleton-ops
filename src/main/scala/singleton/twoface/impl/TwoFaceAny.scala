@@ -6,6 +6,7 @@ import macrocompat.bundle
 import scala.reflect.macros.whitebox
 
 trait TwoFaceAny[Face, T] extends Any {
+  type ShellArg = Tuple2[T, Face]
   def isLiteral(implicit rt : RunTime[T]) : scala.Boolean = !rt
   @inline def getValue : Face
   override def toString = getValue.toString
@@ -332,7 +333,7 @@ object TwoFaceAny {
 //    ) : Boolean = macro Builder.Macro.infixOpDI9[OpId.==]
 //
 //    def +  (r : Char) : Int = macro Builder.Macro.infixOp[OpId.+]
-//    def +  (r : Int) : Int = macro Builder.Macro.infixOp[OpId.+]
+    def +  [R](r : Int[R])(implicit tfs : Int.Shell2[+, T, scala.Int, R, scala.Int]) = tfs(this, r)
 //    def +  (r : Long) : Long = macro Builder.Macro.infixOp[OpId.+]
 //    def +  (r : Float) : Float = macro Builder.Macro.infixOp[OpId.+]
 //    def +  (r : Double) : Double = macro Builder.Macro.infixOp[OpId.+]
