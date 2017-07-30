@@ -570,24 +570,24 @@ object TwoFaceAny {
   }
 
   trait String[T] extends Any with TwoFaceAny[java.lang.String, T] {
-//    def +  [R](r : String[R])(implicit tfo : String.Return[T + R])   = tfo(this.getValue +  r.getValue)
-//    def == [R](r : String[R])(implicit tfo : Boolean.Return[T == R]) = tfo(this.getValue == r.getValue)
-//    def != [R](r : String[R])(implicit tfo : Boolean.Return[T != R]) = tfo(this.getValue != r.getValue)
-//    def == [R <: XString](r : R)(
-//      implicit tfo : Boolean.Return[T == R]
-//    ) = tfo(this.getValue == r)
-//    def == (r : java.lang.String)(
-//      implicit tfo : Boolean.Return[scala.Boolean],
-//      di1 : DummyImplicit
-//    ) = tfo(this.getValue == r)
-//    def reverse(implicit tfo : String.Return[Reverse[T]])            = tfo(this.getValue.reverse)
-//    def substring[R](r : Int[R])(implicit tfo : String.Return[Substring[T,R]])= tfo(this.getValue substring r.getValue)
-//    def length(implicit tfo : Int.Return[Length[T]])                 = tfo(this.getValue.length)
-//    def charAt[R](r : Int[R])(implicit tfo : Char.Return[CharAt[T,R]])= tfo(this.getValue charAt r.getValue)
-//    def toInt(implicit tfo : Int.Return[ToInt[T]])                   = tfo(this.getValue.toInt)
-//    def toLong(implicit tfo : Long.Return[ToLong[T]])                = tfo(this.getValue.toLong)
-//    def toFloat(implicit tfo : Float.Return[ToFloat[T]])             = tfo(this.getValue.toFloat)
-//    def toDouble(implicit tfo : Double.Return[ToDouble[T]])          = tfo(this.getValue.toDouble)
+    def == (r : java.lang.String) = Boolean(this.getValue == r)
+    def == [R <: XString](r : R)(
+      implicit
+      tfs : Boolean.Shell2[==, T, java.lang.String, R, java.lang.String]
+    ) = tfs(this, r)
+
+    def +  [R](r : String[R])(implicit tfs : String.Shell2[+, T, java.lang.String, R, java.lang.String]) = tfs(this, r)
+    def == [R](r : String[R])(implicit tfs : Boolean.Shell2[==, T, java.lang.String, R, java.lang.String]) = tfs(this, r)
+    def != [R](r : String[R])(implicit tfs : Boolean.Shell2[!=, T, java.lang.String, R, java.lang.String]) = tfs(this, r)
+
+    def reverse(implicit tfs : String.Shell1[Reverse, T, java.lang.String]) = tfs(this)
+    def substring[R](r : Int[R])(implicit tfs : String.Shell2[Substring, T, java.lang.String, R, scala.Int]) = tfs(this, r)
+    def length(implicit tfs : Int.Shell1[Length, T, java.lang.String]) = tfs(this)
+    def charAt[R](r : Int[R])(implicit tfs : Char.Shell2[CharAt, T, java.lang.String, R, scala.Int]) = tfs(this, r)
+    def toInt(implicit tfs : Int.Shell1[ToInt, T, java.lang.String]) = tfs(this)
+    def toLong(implicit tfs : Long.Shell1[ToLong, T, java.lang.String]) = tfs(this)
+    def toFloat(implicit tfs : Float.Shell1[ToFloat, T, java.lang.String]) = tfs(this)
+    def toDouble(implicit tfs : Double.Shell1[ToDouble, T, java.lang.String]) = tfs(this)
   }
   final class _String[T](val value : java.lang.String) extends AnyVal with TwoFaceAny.String[T] {
     @inline def getValue : java.lang.String = value
@@ -597,19 +597,17 @@ object TwoFaceAny {
   }
 
   trait Boolean[T] extends Any with TwoFaceAny[scala.Boolean, T] {
-//    def == [R](r : Boolean[R])(implicit tfo : Boolean.Return[T == R])= tfo(this.getValue == r.getValue)
-//    def != [R](r : Boolean[R])(implicit tfo : Boolean.Return[T != R])= tfo(this.getValue != r.getValue)
-//    def && [R](r : Boolean[R])(implicit tfo : Boolean.Return[T && R])= tfo(this.getValue && r.getValue)
-//    def || [R](r : Boolean[R])(implicit tfo : Boolean.Return[T || R])= tfo(this.getValue || r.getValue)
-//    def unary_!(implicit tfo : Boolean.Return[![T]])= tfo(!this.getValue)
-//    def == [R <: XBoolean](r : R)(
-//      implicit tfo : Boolean.Return[T == R]
-//    ) = tfo(this.getValue == r)
-//    def == (r : scala.Boolean)(
-//      implicit tfo : Boolean.Return[scala.Boolean],
-//      di1 : DummyImplicit
-//    ) = tfo(this.getValue == r)
-//    def toString(implicit tfo : String.Return[ToString[T]])          = tfo(this.getValue.toString)
+    def == (r : scala.Boolean) = Boolean(this.getValue == r)
+    def == [R <: XBoolean](r : R)(
+      implicit
+      tfs : Boolean.Shell2[==, T, scala.Boolean, R, scala.Boolean]
+    ) = tfs(this, r)
+    def == [R](r : Boolean[R])(implicit tfs : Boolean.Shell2[==, T, scala.Boolean, R, scala.Boolean]) = tfs(this, r)
+    def != [R](r : Boolean[R])(implicit tfs : Boolean.Shell2[!=, T, scala.Boolean, R, scala.Boolean]) = tfs(this, r)
+    def && [R](r : Boolean[R])(implicit tfs : Boolean.Shell2[&&, T, scala.Boolean, R, scala.Boolean]) = tfs(this, r)
+    def || [R](r : Boolean[R])(implicit tfs : Boolean.Shell2[||, T, scala.Boolean, R, scala.Boolean]) = tfs(this, r)
+    def unary_!(implicit tfs : Int.Shell1[!, T, scala.Boolean]) = tfs(this)
+    def toStringTF(implicit tfs : String.Shell1[ToString, T, scala.Boolean]) = tfs(this)
   }
   final class _Boolean[T](val value : scala.Boolean) extends AnyVal with TwoFaceAny.Boolean[T] {
     @inline def getValue : scala.Boolean = value

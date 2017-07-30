@@ -382,7 +382,7 @@ trait GeneralMacros {
         case TypeRef(_, sym, _) if sym == symbolOf[Long] => Some(CalcType.Long)
         case TypeRef(_, sym, _) if sym == symbolOf[Float] => Some(CalcType.Float)
         case TypeRef(_, sym, _) if sym == symbolOf[Double] => Some(CalcType.Double)
-        case TypeRef(_, sym, _) if sym == symbolOf[String] => Some(CalcType.String)
+        case TypeRef(_, sym, _) if sym == symbolOf[java.lang.String] => Some(CalcType.String)
         case TypeRef(_, sym, _) if sym == symbolOf[Boolean] => Some(CalcType.Boolean)
         ////////////////////////////////////////////////////////////////////////
 
@@ -1146,11 +1146,13 @@ trait GeneralMacros {
       case _ => unsupported()
     }
     def Substring = (a, b) match {
-      case (CalcVal.String(at, att), CalcVal.Int(bt, btt)) => CalcVal(at.substring(bt), q"$att.substring($btt)")
+      case (CalcLit.String(at), CalcLit.Int(bt)) => CalcLit(at.substring(bt))
+      case (CalcVal.String(at, att), CalcVal.Int(bt, btt)) => CalcNLit.String(q"$att.substring($btt)")
       case _ => unsupported()
     }
     def CharAt = (a, b) match {
-      case (CalcVal.String(at, att), CalcVal.Int(bt, btt)) => CalcVal(at.charAt(bt), q"$att.charAt($btt)")
+      case (CalcLit.String(at), CalcLit.Int(bt)) => CalcLit(at.charAt(bt))
+      case (CalcVal.String(at, att), CalcVal.Int(bt, btt)) => CalcNLit.Char(q"$att.charAt($btt)")
       case _ => unsupported()
     }
     def Length = a match {
