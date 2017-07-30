@@ -1333,57 +1333,6 @@ trait GeneralMacros {
 
 
   ///////////////////////////////////////////////////////////////////////////////////////////
-  // TwoFace
-  ///////////////////////////////////////////////////////////////////////////////////////////
-  def TwoFaceMaterializer[OP](implicit op : c.WeakTypeTag[OP]) :
-  TwoFaceMaterializer[OP] = new TwoFaceMaterializer[OP](symbolOf[OP])
-
-  final class TwoFaceMaterializer[OP](opType : TypeSymbol) {
-    def newTwoFace(resultCalc : CalcVal)(implicit annotatedSym : TypeSymbol) : Tree = {
-      val valueTree = c.typecheck(q"$resultCalc")
-      valueTree.tpe.widen.toString match {
-        case "Char" => q"_root_.singleton.twoface.TwoFace.Char($resultCalc)"
-        case "Int" => q"_root_.singleton.twoface.TwoFace.Int($resultCalc)"
-        case "Long" => q"_root_.singleton.twoface.TwoFace.Long($resultCalc)"
-        case "Float" => q"_root_.singleton.twoface.TwoFace.Float($resultCalc)"
-        case "Double" => q"_root_.singleton.twoface.TwoFace.Double($resultCalc)"
-        case "String" => q"_root_.singleton.twoface.TwoFace.String($resultCalc)"
-        case "Boolean" => q"_root_.singleton.twoface.TwoFace.Boolean($resultCalc)"
-        case t => abort(s"Unsupported type $t")
-      }
-    }
-    def unaryOp(arg : c.Tree) : c.Tree = {
-      implicit val annotatedSym : TypeSymbol = symbolOf[OpMacro[_,_,_,_]]
-
-      val argCalc = extractValueFromTwoFace(arg)
-      val resultCalc = opCalc(opType, argCalc, CalcLit(0), CalcLit(0))
-
-      newTwoFace(resultCalc)
-    }
-    def binOp(lhs : c.Tree, rhs : c.Tree) : c.Tree = {
-      implicit val annotatedSym : TypeSymbol = symbolOf[OpMacro[_,_,_,_]]
-
-      val lCalc = extractValueFromTwoFace(lhs)
-      val rCalc = extractValueFromTwoFace(rhs)
-      val resultCalc = opCalc(opType, lCalc, rCalc, CalcLit(0))
-
-      newTwoFace(resultCalc)
-    }
-    def triOp(arg1 : c.Tree, arg2 : c.Tree, arg3 : c.Tree) : c.Tree = {
-      implicit val annotatedSym : TypeSymbol = symbolOf[OpMacro[_,_,_,_]]
-
-      val arg1Calc = extractValueFromTwoFace(arg1)
-      val arg2Calc = extractValueFromTwoFace(arg2)
-      val arg3Calc = extractValueFromTwoFace(arg3)
-      val resultCalc = opCalc(opType, arg1Calc, arg2Calc, arg3Calc)
-
-      newTwoFace(resultCalc)
-    }
-  }
-  ///////////////////////////////////////////////////////////////////////////////////////////
-
-
-  ///////////////////////////////////////////////////////////////////////////////////////////
   // Checked TwoFace
   ///////////////////////////////////////////////////////////////////////////////////////////
   def CheckedImplMaterializer[T, Param, Chk](implicit t : c.WeakTypeTag[T], param : c.WeakTypeTag[Param], chk : c.WeakTypeTag[Chk]) :

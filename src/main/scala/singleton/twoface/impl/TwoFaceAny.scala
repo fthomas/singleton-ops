@@ -1,9 +1,6 @@
 package singleton.twoface.impl
 
 import singleton.ops._
-import singleton.ops.impl._
-import macrocompat.bundle
-import scala.reflect.macros.whitebox
 
 trait TwoFaceAny[Face, T] extends Any {
   type ShellArg = Tuple2[T, Face]
@@ -31,85 +28,6 @@ object TwoFaceAny {
     : TF[Face] = tfb.create[Face](value)
     implicit def apply[T](implicit id : ValueOf[T], tfb : Builder[TF, Face], di: DummyImplicit, di2 : DummyImplicit)
     : TF[T] = tfb.create[T](valueOf[T].asInstanceOf[Face])
-  }
-
-  @bundle
-  object Builder {
-    final class Macro(val c: whitebox.Context) extends GeneralMacros {
-      def unaryOp[OP](r : c.Tree)(implicit op : c.WeakTypeTag[OP]) : c.Tree =
-        TwoFaceMaterializer[OP].unaryOp(r)
-      def binOp[OP](l : c.Tree, r : c.Tree)(implicit op : c.WeakTypeTag[OP]) : c.Tree =
-        TwoFaceMaterializer[OP].binOp(l, r)
-      def triOp[OP](arg1 : c.Tree, arg2 : c.Tree, arg3 : c.Tree)(implicit op : c.WeakTypeTag[OP]) : c.Tree =
-        TwoFaceMaterializer[OP].triOp(arg1, arg2, arg3)
-      def prefixOp[OP](implicit op : c.WeakTypeTag[OP]) : c.Tree =
-        TwoFaceMaterializer[OP].unaryOp(c.prefix.tree)
-      def infixOp[OP](r : c.Tree)(implicit op : c.WeakTypeTag[OP]) : c.Tree =
-        TwoFaceMaterializer[OP].binOp(c.prefix.tree, r)
-      def infixOpDI1[OP](r : c.Tree)(
-        di1 : c.Tree,
-      )(implicit op : c.WeakTypeTag[OP]) : c.Tree = TwoFaceMaterializer[OP].binOp(c.prefix.tree, r)
-      def infixOpDI2[OP](r : c.Tree)(
-        di1 : c.Tree,
-        di2 : c.Tree,
-      )(implicit op : c.WeakTypeTag[OP]) : c.Tree = TwoFaceMaterializer[OP].binOp(c.prefix.tree, r)
-      def infixOpDI3[OP](r : c.Tree)(
-        di1 : c.Tree,
-        di2 : c.Tree,
-        di3 : c.Tree,
-      )(implicit op : c.WeakTypeTag[OP]) : c.Tree = TwoFaceMaterializer[OP].binOp(c.prefix.tree, r)
-      def infixOpDI4[OP](r : c.Tree)(
-        di1 : c.Tree,
-        di2 : c.Tree,
-        di3 : c.Tree,
-        di4 : c.Tree,
-      )(implicit op : c.WeakTypeTag[OP]) : c.Tree = TwoFaceMaterializer[OP].binOp(c.prefix.tree, r)
-      def infixOpDI5[OP](r : c.Tree)(
-        di1 : c.Tree,
-        di2 : c.Tree,
-        di3 : c.Tree,
-        di4 : c.Tree,
-        di5 : c.Tree,
-      )(implicit op : c.WeakTypeTag[OP]) : c.Tree = TwoFaceMaterializer[OP].binOp(c.prefix.tree, r)
-      def infixOpDI6[OP](r : c.Tree)(
-        di1 : c.Tree,
-        di2 : c.Tree,
-        di3 : c.Tree,
-        di4 : c.Tree,
-        di5 : c.Tree,
-        di6 : c.Tree,
-      )(implicit op : c.WeakTypeTag[OP]) : c.Tree = TwoFaceMaterializer[OP].binOp(c.prefix.tree, r)
-      def infixOpDI7[OP](r : c.Tree)(
-        di1 : c.Tree,
-        di2 : c.Tree,
-        di3 : c.Tree,
-        di4 : c.Tree,
-        di5 : c.Tree,
-        di6 : c.Tree,
-        di7 : c.Tree,
-      )(implicit op : c.WeakTypeTag[OP]) : c.Tree = TwoFaceMaterializer[OP].binOp(c.prefix.tree, r)
-      def infixOpDI8[OP](r : c.Tree)(
-        di1 : c.Tree,
-        di2 : c.Tree,
-        di3 : c.Tree,
-        di4 : c.Tree,
-        di5 : c.Tree,
-        di6 : c.Tree,
-        di7 : c.Tree,
-        di8 : c.Tree,
-      )(implicit op : c.WeakTypeTag[OP]) : c.Tree = TwoFaceMaterializer[OP].binOp(c.prefix.tree, r)
-      def infixOpDI9[OP](r : c.Tree)(
-        di1 : c.Tree,
-        di2 : c.Tree,
-        di3 : c.Tree,
-        di4 : c.Tree,
-        di5 : c.Tree,
-        di6 : c.Tree,
-        di7 : c.Tree,
-        di8 : c.Tree,
-        di9 : c.Tree,
-      )(implicit op : c.WeakTypeTag[OP]) : c.Tree = TwoFaceMaterializer[OP].binOp(c.prefix.tree, r)
-    }
   }
 
   trait Char[T] extends Any with TwoFaceAny[scala.Char, T] {
