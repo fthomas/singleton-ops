@@ -340,13 +340,6 @@ trait GeneralMacros {
             unapplyOpArg(args(2)) //true (then) part of the IF
           else
             unapplyOpArg(args(3)) //false (else) part of the IF
-        case (funcTypes.ITE, Some(CalcNLit(cond))) => //Non-literal condition will return non-literal type
-          val thenArg = unapplyOpArg(args(2))
-          val elseArg = unapplyOpArg(args(3))
-          (thenArg, elseArg) match {
-            case (Some(thenArg0 : CalcVal), Some(elseArg0 : CalcVal)) => Some(CalcNLit(thenArg, q"if ($cond) $thenArg0 else $elseArg0"))
-            case _ => None
-          }
         case (funcTypes.Arg, Some(CalcLit.Int(argNum))) =>
           unapplyOpArg(args(2)) match { //Checking the argument type
             case (Some(t : CalcLit)) => Some(t) //Literal argument is just a literal
@@ -778,15 +771,20 @@ trait GeneralMacros {
     }
     def ITE = (a, b, c) match {
       //Also has special case handling inside unapply
-      case (CalcLit.Boolean(cond), CalcLit.Char(thenVal), CalcLit.Char(elseVal)) => CalcLit(if(cond) thenVal else elseVal)
-      case (CalcLit.Boolean(cond), CalcLit.Int(thenVal), CalcLit.Int(elseVal)) => CalcLit(if(cond) thenVal else elseVal)
-      case (CalcLit.Boolean(cond), CalcLit.Long(thenVal), CalcLit.Long(elseVal)) => CalcLit(if(cond) thenVal else elseVal)
-      case (CalcLit.Boolean(cond), CalcLit.Float(thenVal), CalcLit.Float(elseVal)) => CalcLit(if(cond) thenVal else elseVal)
-      case (CalcLit.Boolean(cond), CalcLit.Double(thenVal), CalcLit.Double(elseVal)) => CalcLit(if(cond) thenVal else elseVal)
-      case (CalcLit.Boolean(cond), CalcLit.String(thenVal), CalcLit.String(elseVal)) => CalcLit(if(cond) thenVal else elseVal)
-      case (CalcLit.Boolean(cond), CalcLit.Boolean(thenVal), CalcLit.Boolean(elseVal)) => CalcLit(if(cond) thenVal else elseVal)
-      case (av : CalcLit, bv : CalcLit, cv : CalcLit) => unsupported()
-      case (av : CalcVal, bv : CalcVal, cv : CalcVal) => CalcNLit(bv, q"if ($av) $bv else $cv")
+      case (CalcVal.Boolean(it,itt), CalcVal.Char(tt,ttt), CalcVal.Char(et,ett)) =>
+        CalcVal(if(it) tt else et, q"if ($itt) $ttt else $ett")
+      case (CalcVal.Boolean(it,itt), CalcVal.Int(tt,ttt), CalcVal.Int(et,ett)) =>
+        CalcVal(if(it) tt else et, q"if ($itt) $ttt else $ett")
+      case (CalcVal.Boolean(it,itt), CalcVal.Long(tt,ttt), CalcVal.Long(et,ett)) =>
+        CalcVal(if(it) tt else et, q"if ($itt) $ttt else $ett")
+      case (CalcVal.Boolean(it,itt), CalcVal.Float(tt,ttt), CalcVal.Float(et,ett)) =>
+        CalcVal(if(it) tt else et, q"if ($itt) $ttt else $ett")
+      case (CalcVal.Boolean(it,itt), CalcVal.Double(tt,ttt), CalcVal.Double(et,ett)) =>
+        CalcVal(if(it) tt else et, q"if ($itt) $ttt else $ett")
+      case (CalcVal.Boolean(it,itt), CalcVal.String(tt,ttt), CalcVal.String(et,ett)) =>
+        CalcVal(if(it) tt else et, q"if ($itt) $ttt else $ett")
+      case (CalcVal.Boolean(it,itt), CalcVal.Boolean(tt,ttt), CalcVal.Boolean(et,ett)) =>
+        CalcVal(if(it) tt else et, q"if ($itt) $ttt else $ett")
       case _ => unsupported()
     }
     def Next = b match {

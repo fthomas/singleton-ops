@@ -247,79 +247,112 @@ object TwoFaceAny {
   }
 
   trait Long[T] extends Any with TwoFaceAny[scala.Long, T] {
+    def == (r : scala.Char) = Boolean(this.getValue == r)
+    def == (r : scala.Int) = Boolean(this.getValue == r)
+    def == (r : scala.Long) = Boolean(this.getValue == r)
+    def == (r : scala.Float) = Boolean(this.getValue == r)
+    def == (r : scala.Double) = Boolean(this.getValue == r)
+    def == [R <: XChar](r : R)(
+      implicit
+      tfs : Boolean.Shell2[==, T, scala.Long, R, scala.Char]
+    ) = tfs(this, r)
+    def == [R <: XInt](r : R)(
+      implicit
+      tfs : Boolean.Shell2[==, T, scala.Long, R, scala.Int],
+      di1 : DummyImplicit,
+    ) = tfs(this, r)
+    def == [R <: XLong](r : R)(
+      implicit
+      tfs : Boolean.Shell2[==, T, scala.Long, R, scala.Long],
+      di1 : DummyImplicit,
+      di2 : DummyImplicit,
+    ) = tfs(this, r)
+    def == [R <: XFloat](r : R)(
+      implicit
+      tfs : Boolean.Shell2[==, T, scala.Long, R, scala.Float],
+      di1 : DummyImplicit,
+      di2 : DummyImplicit,
+      di3 : DummyImplicit,
+    ) = tfs(this, r)
+    def == [R <: XDouble](r : R)(
+      implicit
+      tfs : Boolean.Shell2[==, T, scala.Long, R, scala.Double],
+      di1 : DummyImplicit,
+      di2 : DummyImplicit,
+      di3 : DummyImplicit,
+      di4 : DummyImplicit,
+    ) = tfs(this, r)
 
-//
-//    def +  [R](r : Char[R])(implicit tfo : Long.Return[T + R])       = tfo(this.getValue +  r.getValue)
-//    def -  [R](r : Char[R])(implicit tfo : Long.Return[T - R])       = tfo(this.getValue -  r.getValue)
-//    def *  [R](r : Char[R])(implicit tfo : Long.Return[T * R])       = tfo(this.getValue *  r.getValue)
-//    def /  [R](r : Char[R])(implicit tfo : Long.Return[T / R])       = tfo(this.getValue /  r.getValue)
-//    def %  [R](r : Char[R])(implicit tfo : Long.Return[T % R])       = tfo(this.getValue %  r.getValue)
-//    def == [R](r : Char[R])(implicit tfo : Boolean.Return[T == R])   = tfo(this.getValue == r.getValue)
-//    def != [R](r : Char[R])(implicit tfo : Boolean.Return[T != R])   = tfo(this.getValue != r.getValue)
-//    def <  [R](r : Char[R])(implicit tfo : Boolean.Return[T <  R])   = tfo(this.getValue <  r.getValue)
-//    def >  [R](r : Char[R])(implicit tfo : Boolean.Return[T >  R])   = tfo(this.getValue >  r.getValue)
-//    def <= [R](r : Char[R])(implicit tfo : Boolean.Return[T <= R])   = tfo(this.getValue <= r.getValue)
-//    def >= [R](r : Char[R])(implicit tfo : Boolean.Return[T >= R])   = tfo(this.getValue >= r.getValue)
-//    def +  [R](r : Int[R])(implicit tfo : Long.Return[T + R])        = tfo(this.getValue +  r.getValue)
-//    def -  [R](r : Int[R])(implicit tfo : Long.Return[T - R])        = tfo(this.getValue -  r.getValue)
-//    def *  [R](r : Int[R])(implicit tfo : Long.Return[T * R])        = tfo(this.getValue *  r.getValue)
-//    def /  [R](r : Int[R])(implicit tfo : Long.Return[T / R])        = tfo(this.getValue /  r.getValue)
-//    def %  [R](r : Int[R])(implicit tfo : Long.Return[T % R])        = tfo(this.getValue %  r.getValue)
-//    def == [R](r : Int[R])(implicit tfo : Boolean.Return[T == R])    = tfo(this.getValue == r.getValue)
-//    def != [R](r : Int[R])(implicit tfo : Boolean.Return[T != R])    = tfo(this.getValue != r.getValue)
-//    def <  [R](r : Int[R])(implicit tfo : Boolean.Return[T <  R])    = tfo(this.getValue <  r.getValue)
-//    def >  [R](r : Int[R])(implicit tfo : Boolean.Return[T >  R])    = tfo(this.getValue >  r.getValue)
-//    def <= [R](r : Int[R])(implicit tfo : Boolean.Return[T <= R])    = tfo(this.getValue <= r.getValue)
-//    def >= [R](r : Int[R])(implicit tfo : Boolean.Return[T >= R])    = tfo(this.getValue >= r.getValue)
-//    def +  [R](r : Long[R])(implicit tfo : Long.Return[T + R])       = tfo(this.getValue +  r.getValue)
-//    def -  [R](r : Long[R])(implicit tfo : Long.Return[T - R])       = tfo(this.getValue -  r.getValue)
-//    def *  [R](r : Long[R])(implicit tfo : Long.Return[T * R])       = tfo(this.getValue *  r.getValue)
-//    def /  [R](r : Long[R])(implicit tfo : Long.Return[T / R])       = tfo(this.getValue /  r.getValue)
-//    def %  [R](r : Long[R])(implicit tfo : Long.Return[T % R])       = tfo(this.getValue %  r.getValue)
-//    def == [R](r : Long[R])(implicit tfo : Boolean.Return[T == R])   = tfo(this.getValue == r.getValue)
-//    def != [R](r : Long[R])(implicit tfo : Boolean.Return[T != R])   = tfo(this.getValue != r.getValue)
-//    def <  [R](r : Long[R])(implicit tfo : Boolean.Return[T <  R])   = tfo(this.getValue <  r.getValue)
-//    def >  [R](r : Long[R])(implicit tfo : Boolean.Return[T >  R])   = tfo(this.getValue >  r.getValue)
-//    def <= [R](r : Long[R])(implicit tfo : Boolean.Return[T <= R])   = tfo(this.getValue <= r.getValue)
-//    def >= [R](r : Long[R])(implicit tfo : Boolean.Return[T >= R])   = tfo(this.getValue >= r.getValue)
-//    def +  [R](r : Float[R])(implicit tfo : Float.Return[T + R])     = tfo(this.getValue +  r.getValue)
-//    def -  [R](r : Float[R])(implicit tfo : Float.Return[T - R])     = tfo(this.getValue -  r.getValue)
-//    def *  [R](r : Float[R])(implicit tfo : Float.Return[T * R])     = tfo(this.getValue *  r.getValue)
-//    def /  [R](r : Float[R])(implicit tfo : Float.Return[T / R])     = tfo(this.getValue /  r.getValue)
-//    def %  [R](r : Float[R])(implicit tfo : Float.Return[T % R])     = tfo(this.getValue %  r.getValue)
-//    def == [R](r : Float[R])(implicit tfo : Boolean.Return[T == R])  = tfo(this.getValue == r.getValue)
-//    def != [R](r : Float[R])(implicit tfo : Boolean.Return[T != R])  = tfo(this.getValue != r.getValue)
-//    def <  [R](r : Float[R])(implicit tfo : Boolean.Return[T <  R])  = tfo(this.getValue <  r.getValue)
-//    def >  [R](r : Float[R])(implicit tfo : Boolean.Return[T >  R])  = tfo(this.getValue >  r.getValue)
-//    def <= [R](r : Float[R])(implicit tfo : Boolean.Return[T <= R])  = tfo(this.getValue <= r.getValue)
-//    def >= [R](r : Float[R])(implicit tfo : Boolean.Return[T >= R])  = tfo(this.getValue >= r.getValue)
-//    def +  [R](r : Double[R])(implicit tfo : Double.Return[T + R])   = tfo(this.getValue +  r.getValue)
-//    def -  [R](r : Double[R])(implicit tfo : Double.Return[T - R])   = tfo(this.getValue -  r.getValue)
-//    def *  [R](r : Double[R])(implicit tfo : Double.Return[T * R])   = tfo(this.getValue *  r.getValue)
-//    def /  [R](r : Double[R])(implicit tfo : Double.Return[T / R])   = tfo(this.getValue /  r.getValue)
-//    def %  [R](r : Double[R])(implicit tfo : Double.Return[T % R])   = tfo(this.getValue %  r.getValue)
-//    def == [R](r : Double[R])(implicit tfo : Boolean.Return[T == R]) = tfo(this.getValue == r.getValue)
-//    def != [R](r : Double[R])(implicit tfo : Boolean.Return[T != R]) = tfo(this.getValue != r.getValue)
-//    def <  [R](r : Double[R])(implicit tfo : Boolean.Return[T <  R]) = tfo(this.getValue <  r.getValue)
-//    def >  [R](r : Double[R])(implicit tfo : Boolean.Return[T >  R]) = tfo(this.getValue >  r.getValue)
-//    def <= [R](r : Double[R])(implicit tfo : Boolean.Return[T <= R]) = tfo(this.getValue <= r.getValue)
-//    def >= [R](r : Double[R])(implicit tfo : Boolean.Return[T >= R]) = tfo(this.getValue >= r.getValue)
-//    def min [R](r : Long[R])(implicit tfo : Long.Return[T Min R])    = tfo(this.getValue min r.getValue)
-//    def max [R](r : Long[R])(implicit tfo : Long.Return[T Max R])    = tfo(this.getValue max r.getValue)
-//    def unary_-            (implicit tfo : Long.Return[Negate[T]])   = tfo(-this.getValue)
-//    def toChar(implicit tfo : Char.Return[ToChar[T]])                = tfo(this.getValue.toChar)
-//    def toInt(implicit tfo : Int.Return[ToInt[T]])                   = tfo(this.getValue.toInt)
-//    def toFloat(implicit tfo : Float.Return[ToFloat[T]])             = tfo(this.getValue.toFloat)
-//    def toDouble(implicit tfo : Double.Return[ToDouble[T]])          = tfo(this.getValue.toDouble)
-//    def toString(implicit tfo : String.Return[ToString[T]])          = tfo(this.getValue.toString)
+    def +  [R](r : Char[R])(implicit tfs : Long.Shell2[+, T, scala.Long, R, scala.Char]) = tfs(this, r)
+    def +  [R](r : Int[R])(implicit tfs : Long.Shell2[+, T, scala.Long, R, scala.Int]) = tfs(this, r)
+    def +  [R](r : Long[R])(implicit tfs : Long.Shell2[+, T, scala.Long, R, scala.Long]) = tfs(this, r)
+    def +  [R](r : Float[R])(implicit tfs : Float.Shell2[+, T, scala.Long, R, scala.Float]) = tfs(this, r)
+    def +  [R](r : Double[R])(implicit tfs : Double.Shell2[+, T, scala.Long, R, scala.Double]) = tfs(this, r)
+    def -  [R](r : Char[R])(implicit tfs : Long.Shell2[-, T, scala.Long, R, scala.Char]) = tfs(this, r)
+    def -  [R](r : Int[R])(implicit tfs : Long.Shell2[-, T, scala.Long, R, scala.Int]) = tfs(this, r)
+    def -  [R](r : Long[R])(implicit tfs : Long.Shell2[-, T, scala.Long, R, scala.Long]) = tfs(this, r)
+    def -  [R](r : Float[R])(implicit tfs : Float.Shell2[-, T, scala.Long, R, scala.Float]) = tfs(this, r)
+    def -  [R](r : Double[R])(implicit tfs : Double.Shell2[-, T, scala.Long, R, scala.Double]) = tfs(this, r)
+    def *  [R](r : Char[R])(implicit tfs : Long.Shell2[*, T, scala.Long, R, scala.Char]) = tfs(this, r)
+    def *  [R](r : Int[R])(implicit tfs : Long.Shell2[*, T, scala.Long, R, scala.Int]) = tfs(this, r)
+    def *  [R](r : Long[R])(implicit tfs : Long.Shell2[*, T, scala.Long, R, scala.Long]) = tfs(this, r)
+    def *  [R](r : Float[R])(implicit tfs : Float.Shell2[*, T, scala.Long, R, scala.Float]) = tfs(this, r)
+    def *  [R](r : Double[R])(implicit tfs : Double.Shell2[*, T, scala.Long, R, scala.Double]) = tfs(this, r)
+    def /  [R](r : Char[R])(implicit tfs : Long.Shell2[/, T, scala.Long, R, scala.Char]) = tfs(this, r)
+    def /  [R](r : Int[R])(implicit tfs : Long.Shell2[/, T, scala.Long, R, scala.Int]) = tfs(this, r)
+    def /  [R](r : Long[R])(implicit tfs : Long.Shell2[/, T, scala.Long, R, scala.Long]) = tfs(this, r)
+    def /  [R](r : Float[R])(implicit tfs : Float.Shell2[/, T, scala.Long, R, scala.Float]) = tfs(this, r)
+    def /  [R](r : Double[R])(implicit tfs : Double.Shell2[/, T, scala.Long, R, scala.Double]) = tfs(this, r)
+    def %  [R](r : Char[R])(implicit tfs : Long.Shell2[%, T, scala.Long, R, scala.Char]) = tfs(this, r)
+    def %  [R](r : Int[R])(implicit tfs : Long.Shell2[%, T, scala.Long, R, scala.Int]) = tfs(this, r)
+    def %  [R](r : Long[R])(implicit tfs : Long.Shell2[%, T, scala.Long, R, scala.Long]) = tfs(this, r)
+    def %  [R](r : Float[R])(implicit tfs : Float.Shell2[%, T, scala.Long, R, scala.Float]) = tfs(this, r)
+    def %  [R](r : Double[R])(implicit tfs : Double.Shell2[%, T, scala.Long, R, scala.Double]) = tfs(this, r)
+    def <  [R](r : Char[R])(implicit tfs : Boolean.Shell2[<, T, scala.Long, R, scala.Char]) = tfs(this, r)
+    def <  [R](r : Int[R])(implicit tfs : Boolean.Shell2[<, T, scala.Long, R, scala.Int]) = tfs(this, r)
+    def <  [R](r : Long[R])(implicit tfs : Boolean.Shell2[<, T, scala.Long, R, scala.Long]) = tfs(this, r)
+    def <  [R](r : Float[R])(implicit tfs : Boolean.Shell2[<, T, scala.Long, R, scala.Float]) = tfs(this, r)
+    def <  [R](r : Double[R])(implicit tfs : Boolean.Shell2[<, T, scala.Long, R, scala.Double]) = tfs(this, r)
+    def >  [R](r : Char[R])(implicit tfs : Boolean.Shell2[>, T, scala.Long, R, scala.Char]) = tfs(this, r)
+    def >  [R](r : Int[R])(implicit tfs : Boolean.Shell2[>, T, scala.Long, R, scala.Int]) = tfs(this, r)
+    def >  [R](r : Long[R])(implicit tfs : Boolean.Shell2[>, T, scala.Long, R, scala.Long]) = tfs(this, r)
+    def >  [R](r : Float[R])(implicit tfs : Boolean.Shell2[>, T, scala.Long, R, scala.Float]) = tfs(this, r)
+    def >  [R](r : Double[R])(implicit tfs : Boolean.Shell2[>, T, scala.Long, R, scala.Double]) = tfs(this, r)
+    def <= [R](r : Char[R])(implicit tfs : Boolean.Shell2[<=, T, scala.Long, R, scala.Char]) = tfs(this, r)
+    def <= [R](r : Int[R])(implicit tfs : Boolean.Shell2[<=, T, scala.Long, R, scala.Int]) = tfs(this, r)
+    def <= [R](r : Long[R])(implicit tfs : Boolean.Shell2[<=, T, scala.Long, R, scala.Long]) = tfs(this, r)
+    def <= [R](r : Float[R])(implicit tfs : Boolean.Shell2[<=, T, scala.Long, R, scala.Float]) = tfs(this, r)
+    def <= [R](r : Double[R])(implicit tfs : Boolean.Shell2[<=, T, scala.Long, R, scala.Double]) = tfs(this, r)
+    def >= [R](r : Char[R])(implicit tfs : Boolean.Shell2[>=, T, scala.Long, R, scala.Char]) = tfs(this, r)
+    def >= [R](r : Int[R])(implicit tfs : Boolean.Shell2[>=, T, scala.Long, R, scala.Int]) = tfs(this, r)
+    def >= [R](r : Long[R])(implicit tfs : Boolean.Shell2[>=, T, scala.Long, R, scala.Long]) = tfs(this, r)
+    def >= [R](r : Float[R])(implicit tfs : Boolean.Shell2[>=, T, scala.Long, R, scala.Float]) = tfs(this, r)
+    def >= [R](r : Double[R])(implicit tfs : Boolean.Shell2[>=, T, scala.Long, R, scala.Double]) = tfs(this, r)
+    def == [R](r : Char[R])(implicit tfs : Boolean.Shell2[==, T, scala.Long, R, scala.Char]) = tfs(this, r)
+    def == [R](r : Int[R])(implicit tfs : Boolean.Shell2[==, T, scala.Long, R, scala.Int]) = tfs(this, r)
+    def == [R](r : Long[R])(implicit tfs : Boolean.Shell2[==, T, scala.Long, R, scala.Long]) = tfs(this, r)
+    def == [R](r : Float[R])(implicit tfs : Boolean.Shell2[==, T, scala.Long, R, scala.Float]) = tfs(this, r)
+    def == [R](r : Double[R])(implicit tfs : Boolean.Shell2[==, T, scala.Long, R, scala.Double]) = tfs(this, r)
+    def != [R](r : Char[R])(implicit tfs : Boolean.Shell2[!=, T, scala.Long, R, scala.Char]) = tfs(this, r)
+    def != [R](r : Int[R])(implicit tfs : Boolean.Shell2[!=, T, scala.Long, R, scala.Int]) = tfs(this, r)
+    def != [R](r : Long[R])(implicit tfs : Boolean.Shell2[!=, T, scala.Long, R, scala.Long]) = tfs(this, r)
+    def != [R](r : Float[R])(implicit tfs : Boolean.Shell2[!=, T, scala.Long, R, scala.Float]) = tfs(this, r)
+    def != [R](r : Double[R])(implicit tfs : Boolean.Shell2[!=, T, scala.Long, R, scala.Double]) = tfs(this, r)
+
+    def unary_-(implicit tfs : Int.Shell1[Negate, T, scala.Long]) = tfs(this)
+    def toChar(implicit tfs : Char.Shell1[ToChar, T, scala.Long]) = tfs(this)
+    def toInt(implicit tfs : Int.Shell1[ToInt, T, scala.Long]) = tfs(this)
+    def toFloat(implicit tfs : Float.Shell1[ToFloat, T, scala.Long]) = tfs(this)
+    def toDouble(implicit tfs : Double.Shell1[ToDouble, T, scala.Long]) = tfs(this)
+    def toStringTF(implicit tfs : String.Shell1[ToString, T, scala.Long]) = tfs(this)
   }
+
   final class _Long[T](val value : scala.Long) extends AnyVal with TwoFaceAny.Long[T] {
     @inline def getValue : scala.Long = value
   }
   implicit object Long extends TwoFaceAny.Builder[Long, scala.Long] {
     protected[singleton] def create[T](value : scala.Long) = new _Long[T](value)
-//    def numberOfLeadingZeros[T](t : Long[T])(implicit tfo : Int.Return[NumberOfLeadingZeros[T]]) =
-//      tfo(java.lang.Long.numberOfLeadingZeros(t.getValue))
+    def numberOfLeadingZeros[T](t : Long[T])(implicit tfs : Int.Shell1[NumberOfLeadingZeros, T, scala.Long]) = tfs(t)
   }
 
   trait Float[T] extends Any with TwoFaceAny[scala.Float, T] {

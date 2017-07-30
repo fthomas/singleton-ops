@@ -21,8 +21,8 @@ class TwoFaceCharSpec extends Properties("TwoFace.Char") {
     a.getValue == '\u0002' && !a.isLiteral
   }
 
-//  property("Safe ifThenElse") = verifyTF(ifThenElse(true, '\u0001', '\u0002'), '\u0001')
-//  property("Unsafe ifThenElse") = verifyTF(ifThenElse(us(false), '\u0001', '\u0002'), us('\u0002'))
+  property("Safe ifThenElse") = verifyTF(ifThenElse(true, '\u0001', '\u0002'), '\u0001')
+  property("Unsafe ifThenElse") = verifyTF(ifThenElse(us(false), '\u0001', '\u0002'), us('\u0002'))
 
   property("Safe Char + Safe Char") = verifyTF(TwoFace.Char('\u0002') + TwoFace.Char('\u0001'), 3)
   property("Safe Char + Unsafe Char") = verifyTF(TwoFace.Char('\u0002') + TwoFace.Char(us('\u0001')), us(3))
