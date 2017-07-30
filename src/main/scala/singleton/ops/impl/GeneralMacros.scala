@@ -1261,6 +1261,7 @@ trait GeneralMacros {
           q"""
              new $shellTpe {
                type Out = $outTpe
+               type TF[T] = _root_.singleton.twoface.TwoFace.$tfType[T]
                def apply(arg1 : $arg1WideTpe) : _root_.singleton.twoface.TwoFace.$tfType[$outTpe] = {
                  _root_.singleton.twoface.TwoFace.$tfTerm($t)
                }
@@ -1287,6 +1288,7 @@ trait GeneralMacros {
           q"""
              new $shellTpe {
                type Out = $outTpe
+               type TF[T] = _root_.singleton.twoface.TwoFace.$tfType[T]
                def apply(arg1 : $arg1WideTpe, arg2 : $arg2WideTpe) : _root_.singleton.twoface.TwoFace.$tfType[$outTpe] = {
                  _root_.singleton.twoface.TwoFace.$tfTerm($t)
                }
@@ -1295,6 +1297,35 @@ trait GeneralMacros {
         case _ => extractionFailed(shellTpe)
       }
 //      print(showCode(genTree))
+      genTree
+    }
+    def shell3() : c.Tree = {
+      implicit val annotatedSym : TypeSymbol = shellTpe.typeSymbol.asType
+      val funcApplyTpe = shellTpe.typeArgs(0)
+      val funcArgsTpe = shellTpe.typeArgs(1)
+      val arg1Tpe = shellTpe.typeArgs(2)
+      val arg1WideTpe = shellTpe.typeArgs(3)
+      val arg2Tpe = shellTpe.typeArgs(4)
+      val arg2WideTpe = shellTpe.typeArgs(5)
+      val arg3Tpe = shellTpe.typeArgs(6)
+      val arg3WideTpe = shellTpe.typeArgs(7)
+      val outTpe = extractSingletonValue(funcApplyTpe).tpe
+      val tfTerm = TermName(outTpe.widen.typeSymbol.name.toString)
+      val tfType = TypeName(outTpe.widen.typeSymbol.name.toString)
+      val genTree = extractSingletonValue(funcArgsTpe) match {
+        case (t : CalcVal) =>
+          q"""
+             new $shellTpe {
+               type Out = $outTpe
+               type TF[T] = _root_.singleton.twoface.TwoFace.$tfType[T]
+               def apply(arg1 : $arg1WideTpe, arg2 : $arg2WideTpe, arg3 : $arg3WideTpe) : _root_.singleton.twoface.TwoFace.$tfType[$outTpe] = {
+                 _root_.singleton.twoface.TwoFace.$tfTerm($t)
+               }
+             }
+           """
+        case _ => extractionFailed(shellTpe)
+      }
+      //      print(showCode(genTree))
       genTree
     }
   }
