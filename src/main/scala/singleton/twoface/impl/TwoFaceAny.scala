@@ -5,27 +5,27 @@ import singleton.ops.impl._
 import macrocompat.bundle
 import scala.reflect.macros.whitebox
 
-trait TwoFaceAny[Face, T <: Face] extends Any {
+trait TwoFaceAny[Face, T] extends Any {
   def isLiteral(implicit rt : RunTime[T]) : scala.Boolean = !rt
   @inline def getValue : Face
   override def toString = getValue.toString
 }
 
 object TwoFaceAny {
-  @inline implicit def fromTwoFaceUnsafe[Face, T <: Face](tf : TwoFaceAny[Face, T]) : Face = tf.getValue
+  @inline implicit def fromTwoFaceUnsafe[Face, T](tf : TwoFaceAny[Face, T]) : Face = tf.getValue
   @inline implicit def fromTwoFaceSafe[Face, T <: Face with Singleton](tf : TwoFaceAny[Face, T])
                                                                       (implicit sc: ValueOf[T]) : T {} = valueOf[T]
 
-  trait Builder[TF[T <: Face], Face, Shl2[_,_,_,_,_,_]] {
+  trait Builder[TF[T], Face, Shl2[_,_,_,_,_,_]] {
     type Shell2[Func[_,_], Arg1, Arg1Wide, Arg2, Arg2Wide] =
       Shl2[Func[Arg1, Arg2], Func[Arg[1, Arg1], Arg[2, Arg2]], Arg1, Arg1Wide, Arg2, Arg2Wide]
-    protected[singleton] def create[T <: Face](value : Face) : TF[T]
+    protected[singleton] def create[T](value : Face) : TF[T]
     implicit def apply[T <: Face with Singleton](value : T)(implicit tfb : Builder[TF, Face, Shl2])
     : TF[T] =  tfb.create[T](value)
     implicit def apply(value : Face)(implicit tfb : Builder[TF, Face, Shl2], di: DummyImplicit)
     : TF[Face] = tfb.create[Face](value)
-    implicit def apply[T <: Face](implicit id : ValueOf[T], tfb : Builder[TF, Face, Shl2], di: DummyImplicit, di2 : DummyImplicit)
-    : TF[T] = tfb.create[T](valueOf[T])
+    implicit def apply[T](implicit id : ValueOf[T], tfb : Builder[TF, Face, Shl2], di: DummyImplicit, di2 : DummyImplicit)
+    : TF[T] = tfb.create[T](valueOf[T].asInstanceOf[Face])
   }
 
   @bundle
@@ -107,7 +107,7 @@ object TwoFaceAny {
     }
   }
 
-  trait Char[T <: scala.Char] extends Any with TwoFaceAny[scala.Char, T] {
+  trait Char[T] extends Any with TwoFaceAny[scala.Char, T] {
 //    def == [R <: XChar](r : R)(
 //      implicit tfo : Boolean.Return[T == R]
 //    ) = tfo(this.getValue == r)
@@ -246,14 +246,14 @@ object TwoFaceAny {
 //    def toDouble(implicit tfo : Double.Return[ToDouble[T]])          = tfo(this.getValue.toDouble)
 //    def toString(implicit tfo : String.Return[ToString[T]])          = tfo(this.getValue.toString)
   }
-  final class _Char[T <: scala.Char](val value : scala.Char) extends AnyVal with TwoFaceAny.Char[T] {
+  final class _Char[T](val value : scala.Char) extends AnyVal with TwoFaceAny.Char[T] {
     @inline def getValue : scala.Char = value
   }
   implicit object Char extends TwoFaceAny.Builder[Char, scala.Char, Shell.Two.Char] {
-    protected[singleton] def create[T <: scala.Char](value : scala.Char) = new _Char[T](value)
+    protected[singleton] def create[T](value : scala.Char) = new _Char[T](value)
   }
 
-  trait Int[T <: scala.Int] extends Any with TwoFaceAny[scala.Int, T] {
+  trait Int[T] extends Any with TwoFaceAny[scala.Int, T] {
 //    def == [R <: XChar](r : R)
 //    : Boolean = macro Builder.Macro.infixOp[OpId.==]
 //    def == (r : scala.Char)(
@@ -392,15 +392,15 @@ object TwoFaceAny {
 //    def toDouble : Double = macro Builder.Macro.prefixOp[OpId.ToDouble]
 //    def toStringTF : String = macro Builder.Macro.prefixOp[OpId.ToString]
   }
-  final class _Int[T <: scala.Int](val value : scala.Int) extends AnyVal with TwoFaceAny.Int[T] {
+  final class _Int[T](val value : scala.Int) extends AnyVal with TwoFaceAny.Int[T] {
     @inline def getValue : scala.Int = value
   }
   implicit object Int extends TwoFaceAny.Builder[Int, scala.Int, Shell.Two.Int] {
-    protected[singleton] def create[T <: scala.Int](value : scala.Int) : Int[T] = new _Int[T](value)
+    protected[singleton] def create[T](value : scala.Int) : Int[T] = new _Int[T](value)
 //    def numberOfLeadingZeros[T](r : Int) : Int = macro Builder.Macro.unaryOp[OpId.NumberOfLeadingZeros]
   }
 
-  trait Long[T <: scala.Long] extends Any with TwoFaceAny[scala.Long, T] {
+  trait Long[T] extends Any with TwoFaceAny[scala.Long, T] {
 //    def == [R <: XChar](r : R)(
 //      implicit tfo : Boolean.Return[T == R]
 //    ) = tfo(this.getValue == r)
@@ -541,16 +541,16 @@ object TwoFaceAny {
 //    def toDouble(implicit tfo : Double.Return[ToDouble[T]])          = tfo(this.getValue.toDouble)
 //    def toString(implicit tfo : String.Return[ToString[T]])          = tfo(this.getValue.toString)
   }
-  final class _Long[T <: scala.Long](val value : scala.Long) extends AnyVal with TwoFaceAny.Long[T] {
+  final class _Long[T](val value : scala.Long) extends AnyVal with TwoFaceAny.Long[T] {
     @inline def getValue : scala.Long = value
   }
   implicit object Long extends TwoFaceAny.Builder[Long, scala.Long, Shell.Two.Long] {
-    protected[singleton] def create[T <: scala.Long](value : scala.Long) = new _Long[T](value)
+    protected[singleton] def create[T](value : scala.Long) = new _Long[T](value)
 //    def numberOfLeadingZeros[T](t : Long[T])(implicit tfo : Int.Return[NumberOfLeadingZeros[T]]) =
 //      tfo(java.lang.Long.numberOfLeadingZeros(t.getValue))
   }
 
-  trait Float[T <: scala.Float] extends Any with TwoFaceAny[scala.Float, T] {
+  trait Float[T] extends Any with TwoFaceAny[scala.Float, T] {
 //    def == [R <: XChar](r : R)(
 //      implicit tfo : Boolean.Return[T == R]
 //    ) = tfo(this.getValue == r)
@@ -691,14 +691,14 @@ object TwoFaceAny {
 //    def toDouble(implicit tfo : Double.Return[ToDouble[T]])          = tfo(this.getValue.toDouble)
 //    def toString(implicit tfo : String.Return[ToString[T]])          = tfo(this.getValue.toString)
   }
-  final class _Float[T <: scala.Float](val value : scala.Float) extends AnyVal with TwoFaceAny.Float[T] {
+  final class _Float[T](val value : scala.Float) extends AnyVal with TwoFaceAny.Float[T] {
     @inline def getValue : scala.Float = value
   }
   implicit object Float extends TwoFaceAny.Builder[Float, scala.Float, Shell.Two.Float] {
-    protected[singleton] def create[T <: scala.Float](value : scala.Float) = new _Float[T](value)
+    protected[singleton] def create[T](value : scala.Float) = new _Float[T](value)
   }
 
-  trait Double[T <: scala.Double] extends Any with TwoFaceAny[scala.Double, T] {
+  trait Double[T] extends Any with TwoFaceAny[scala.Double, T] {
 //    def == [R <: XChar](r : R)(
 //      implicit tfo : Boolean.Return[T == R]
 //    ) = tfo(this.getValue == r)
@@ -839,14 +839,14 @@ object TwoFaceAny {
 //    def toFloat(implicit tfo : Float.Return[ToFloat[T]])             = tfo(this.getValue.toFloat)
 //    def toString(implicit tfo : String.Return[ToString[T]])          = tfo(this.getValue.toString)
   }
-  final class _Double[T <: scala.Double](val value : scala.Double) extends AnyVal with TwoFaceAny.Double[T] {
+  final class _Double[T](val value : scala.Double) extends AnyVal with TwoFaceAny.Double[T] {
     @inline def getValue : scala.Double = value
   }
   implicit object Double extends TwoFaceAny.Builder[Double, scala.Double, Shell.Two.Double] {
-    protected[singleton] def create[T <: scala.Double](value : scala.Double) = new _Double[T](value)
+    protected[singleton] def create[T](value : scala.Double) = new _Double[T](value)
   }
 
-  trait String[T <: java.lang.String] extends Any with TwoFaceAny[java.lang.String, T] {
+  trait String[T] extends Any with TwoFaceAny[java.lang.String, T] {
 //    def +  [R](r : String[R])(implicit tfo : String.Return[T + R])   = tfo(this.getValue +  r.getValue)
 //    def == [R](r : String[R])(implicit tfo : Boolean.Return[T == R]) = tfo(this.getValue == r.getValue)
 //    def != [R](r : String[R])(implicit tfo : Boolean.Return[T != R]) = tfo(this.getValue != r.getValue)
@@ -866,14 +866,14 @@ object TwoFaceAny {
 //    def toFloat(implicit tfo : Float.Return[ToFloat[T]])             = tfo(this.getValue.toFloat)
 //    def toDouble(implicit tfo : Double.Return[ToDouble[T]])          = tfo(this.getValue.toDouble)
   }
-  final class _String[T <: java.lang.String](val value : java.lang.String) extends AnyVal with TwoFaceAny.String[T] {
+  final class _String[T](val value : java.lang.String) extends AnyVal with TwoFaceAny.String[T] {
     @inline def getValue : java.lang.String = value
   }
   implicit object String extends TwoFaceAny.Builder[String, java.lang.String, Shell.Two.String] {
-    protected[singleton] def create[T <: java.lang.String](value : java.lang.String) = new _String[T](value)
+    protected[singleton] def create[T](value : java.lang.String) = new _String[T](value)
   }
 
-  trait Boolean[T <: scala.Boolean] extends Any with TwoFaceAny[scala.Boolean, T] {
+  trait Boolean[T] extends Any with TwoFaceAny[scala.Boolean, T] {
 //    def == [R](r : Boolean[R])(implicit tfo : Boolean.Return[T == R])= tfo(this.getValue == r.getValue)
 //    def != [R](r : Boolean[R])(implicit tfo : Boolean.Return[T != R])= tfo(this.getValue != r.getValue)
 //    def && [R](r : Boolean[R])(implicit tfo : Boolean.Return[T && R])= tfo(this.getValue && r.getValue)
@@ -888,11 +888,11 @@ object TwoFaceAny {
 //    ) = tfo(this.getValue == r)
 //    def toString(implicit tfo : String.Return[ToString[T]])          = tfo(this.getValue.toString)
   }
-  final class _Boolean[T <: scala.Boolean](val value : scala.Boolean) extends AnyVal with TwoFaceAny.Boolean[T] {
+  final class _Boolean[T](val value : scala.Boolean) extends AnyVal with TwoFaceAny.Boolean[T] {
     @inline def getValue : scala.Boolean = value
   }
   implicit object Boolean extends TwoFaceAny.Builder[Boolean, scala.Boolean, Shell.Two.Boolean] {
-    protected[singleton] def create[T <: scala.Boolean](value : scala.Boolean) = new _Boolean[T](value)
+    protected[singleton] def create[T](value : scala.Boolean) = new _Boolean[T](value)
   }
 
 }
