@@ -1247,9 +1247,32 @@ trait GeneralMacros {
   : TwoFaceShellMaterializer[Shell] = new TwoFaceShellMaterializer[Shell](weakTypeOf[Shell])
 
   final class TwoFaceShellMaterializer[Shell](shellTpe : Type) {
+    def shell1() : c.Tree = {
+      implicit val annotatedSym : TypeSymbol = shellTpe.typeSymbol.asType
+      val funcApplyTpe = shellTpe.typeArgs(0)
+      val funcArgsTpe = shellTpe.typeArgs(1)
+      val arg1Tpe = shellTpe.typeArgs(2)
+      val arg1WideTpe = shellTpe.typeArgs(3)
+      val outTpe = extractSingletonValue(funcApplyTpe).tpe
+      val tfTerm = TermName(outTpe.widen.typeSymbol.name.toString)
+      val tfType = TypeName(outTpe.widen.typeSymbol.name.toString)
+      val genTree = extractSingletonValue(funcArgsTpe) match {
+        case (t : CalcVal) =>
+          q"""
+             new $shellTpe {
+               type Out = $outTpe
+               def apply(arg1 : $arg1WideTpe) : _root_.singleton.twoface.TwoFace.$tfType[$outTpe] = {
+                 _root_.singleton.twoface.TwoFace.$tfTerm($t)
+               }
+             }
+           """
+        case _ => extractionFailed(shellTpe)
+      }
+      //      print(showCode(genTree))
+      genTree
+    }
     def shell2() : c.Tree = {
       implicit val annotatedSym : TypeSymbol = shellTpe.typeSymbol.asType
-//      print("before")
       val funcApplyTpe = shellTpe.typeArgs(0)
       val funcArgsTpe = shellTpe.typeArgs(1)
       val arg1Tpe = shellTpe.typeArgs(2)
@@ -1271,7 +1294,7 @@ trait GeneralMacros {
            """
         case _ => extractionFailed(shellTpe)
       }
-      print(showCode(genTree))
+//      print(showCode(genTree))
       genTree
     }
   }
