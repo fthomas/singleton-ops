@@ -709,7 +709,7 @@ trait GeneralMacros {
       case _ => unsupported()
     }
     def Round = a match {
-      case CalcVal.Float(t, tt) => CalcVal(math.round(t.toDouble), q"_root_.scala.math.round($tt.toDouble)")
+      case CalcVal.Float(t, tt) => CalcVal(math.round(t), q"_root_.scala.math.round($tt)")
       case CalcVal.Double(t, tt) => CalcVal(math.round(t), q"_root_.scala.math.round($tt)")
       case _ => unsupported()
     }
