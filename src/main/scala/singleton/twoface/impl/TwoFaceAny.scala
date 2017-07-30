@@ -16,35 +16,176 @@ object TwoFaceAny {
   @inline implicit def fromTwoFaceSafe[Face, T <: Face with Singleton](tf : TwoFaceAny[Face, T])
                                                                       (implicit sc: ValueOf[T]) : T {} = valueOf[T]
 
-  @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
-  trait Shell2[Face, FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] {
-    type Out <: scala.Int
-    def apply(arg1 : Arg1Wide, arg2 : Arg2Wide) : Int[Out]
-  }
-  @bundle
-  object Shell2 {
-    implicit def ev[Face, FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]:
-    Shell2[Face, FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] =
-    macro Macro.shell2Int[Face, FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
 
-    final class Macro(val c: whitebox.Context) extends GeneralMacros {
-      def shell2Int[Face, FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
-      (implicit face : c.WeakTypeTag[Face], funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
-        arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide], arg2 : c.WeakTypeTag[Arg2],
-        arg2Wide : c.WeakTypeTag[Arg2Wide]) : c.Tree = TwoFaceShellMaterializer[
-        Shell2[Face, FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
-      ].shell2()
+  ////////////////////////////////////////////////////////////////////////////////
+  // The code duplication in `Shell` can indeed be reduced.
+  // However, the duplication was favored because it had caused less 'red' in
+  // IntelliJ, when the `apply` in the `Shell` traits has a concrete return type.
+  // Example red code without concrete return type:
+  // def testme[L <: Int,R <: Int](l : TwoFace.Int[L], r : TwoFace.Int[R])
+  //     (implicit tfs : TwoFace.Int.Shell2[+,L,Int,R,Int]) = tfs(l,r)
+  // val tmres = testme(TwoFace.Int(2),testme(TwoFace.Int(2),TwoFace.Int(2)))
+  ////////////////////////////////////////////////////////////////////////////////
+  object Shell {
+    object Two {
+      @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
+      trait Char[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] {
+        type Out <: scala.Char
+        def apply(arg1 : Arg1Wide, arg2 : Arg2Wide) : TwoFaceAny.Char[Out]
+      }
+      @bundle
+      object Char {
+        implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]:
+        Char[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] =
+        macro Macro.shell2[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
+
+        final class Macro(val c: whitebox.Context) extends GeneralMacros {
+          def shell2[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
+          (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
+           arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide], arg2 : c.WeakTypeTag[Arg2],
+           arg2Wide : c.WeakTypeTag[Arg2Wide]) : c.Tree = TwoFaceShellMaterializer[
+            Char[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]].shell2()
+        }
+      }
+
+      @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
+      trait Int[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] {
+        type Out <: scala.Int
+        def apply(arg1 : Arg1Wide, arg2 : Arg2Wide) : TwoFaceAny.Int[Out]
+      }
+      @bundle
+      object Int {
+        implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]:
+        Int[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] =
+        macro Macro.shell2[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
+
+        final class Macro(val c: whitebox.Context) extends GeneralMacros {
+          def shell2[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
+          (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
+           arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide], arg2 : c.WeakTypeTag[Arg2],
+           arg2Wide : c.WeakTypeTag[Arg2Wide]) : c.Tree = TwoFaceShellMaterializer[
+            Int[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]].shell2()
+        }
+      }
+
+      @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
+      trait Long[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] {
+        type Out <: scala.Long
+        def apply(arg1 : Arg1Wide, arg2 : Arg2Wide) : TwoFaceAny.Long[Out]
+      }
+      @bundle
+      object Long {
+        implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]:
+        Long[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] =
+        macro Macro.shell2[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
+
+        final class Macro(val c: whitebox.Context) extends GeneralMacros {
+          def shell2[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
+          (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
+           arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide], arg2 : c.WeakTypeTag[Arg2],
+           arg2Wide : c.WeakTypeTag[Arg2Wide]) : c.Tree = TwoFaceShellMaterializer[
+            Long[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]].shell2()
+        }
+      }
+
+      @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
+      trait Float[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] {
+        type Out <: scala.Float
+        def apply(arg1 : Arg1Wide, arg2 : Arg2Wide) : TwoFaceAny.Float[Out]
+      }
+      @bundle
+      object Float {
+        implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]:
+        Float[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] =
+        macro Macro.shell2[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
+
+        final class Macro(val c: whitebox.Context) extends GeneralMacros {
+          def shell2[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
+          (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
+           arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide], arg2 : c.WeakTypeTag[Arg2],
+           arg2Wide : c.WeakTypeTag[Arg2Wide]) : c.Tree = TwoFaceShellMaterializer[
+            Float[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]].shell2()
+        }
+      }
+
+      @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
+      trait Double[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] {
+        type Out <: scala.Double
+        def apply(arg1 : Arg1Wide, arg2 : Arg2Wide) : TwoFaceAny.Double[Out]
+      }
+      @bundle
+      object Double {
+        implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]:
+        Double[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] =
+        macro Macro.shell2[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
+
+        final class Macro(val c: whitebox.Context) extends GeneralMacros {
+          def shell2[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
+          (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
+           arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide], arg2 : c.WeakTypeTag[Arg2],
+           arg2Wide : c.WeakTypeTag[Arg2Wide]) : c.Tree = TwoFaceShellMaterializer[
+            Double[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]].shell2()
+        }
+      }
+
+      @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
+      trait String[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] {
+        type Out <: java.lang.String
+        def apply(arg1 : Arg1Wide, arg2 : Arg2Wide) : TwoFaceAny.String[Out]
+      }
+      @bundle
+      object String {
+        implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]:
+        String[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] =
+        macro Macro.shell2[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
+
+        final class Macro(val c: whitebox.Context) extends GeneralMacros {
+          def shell2[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
+          (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
+           arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide], arg2 : c.WeakTypeTag[Arg2],
+           arg2Wide : c.WeakTypeTag[Arg2Wide]) : c.Tree = TwoFaceShellMaterializer[
+            String[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]].shell2()
+        }
+      }
+
+      @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
+      trait Boolean[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] {
+        type Out <: scala.Boolean
+        def apply(arg1 : Arg1Wide, arg2 : Arg2Wide) : TwoFaceAny.Boolean[Out]
+      }
+      @bundle
+      object Boolean {
+        implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]:
+        Boolean[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] =
+        macro Macro.shell2[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
+
+        final class Macro(val c: whitebox.Context) extends GeneralMacros {
+          def shell2[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
+          (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
+           arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide], arg2 : c.WeakTypeTag[Arg2],
+           arg2Wide : c.WeakTypeTag[Arg2Wide]) : c.Tree = TwoFaceShellMaterializer[
+            Boolean[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]].shell2()
+        }
+      }
+
     }
   }
 
-  trait Builder[TF[T <: Face], Face] {
-    type Shell2[Func[_,_], Arg1, Arg1Wide, Arg2, Arg2Wide] = TwoFaceAny.Shell2[Face, Func[Arg1, Arg2], Func[Arg[1, Arg1], Arg[2, Arg2]], Arg1, Arg1Wide, Arg2, Arg2Wide]
+//  @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
+//  trait Shell2[Face, FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] {
+//    type Out <: scala.Int
+//    def apply(arg1 : Arg1Wide, arg2 : Arg2Wide) : Int[Out]
+//  }
+
+  trait Builder[TF[T <: Face], Face, Shl2[_,_,_,_,_,_]] {
+    type Shell2[Func[_,_], Arg1, Arg1Wide, Arg2, Arg2Wide] =
+      Shl2[Func[Arg1, Arg2], Func[Arg[1, Arg1], Arg[2, Arg2]], Arg1, Arg1Wide, Arg2, Arg2Wide]
     protected[singleton] def create[T <: Face](value : Face) : TF[T]
-    implicit def apply[T <: Face with Singleton](value : T)(implicit tfb : Builder[TF, Face])
+    implicit def apply[T <: Face with Singleton](value : T)(implicit tfb : Builder[TF, Face, Shl2])
     : TF[T] =  tfb.create[T](value)
-    implicit def apply(value : Face)(implicit tfb : Builder[TF, Face], di: DummyImplicit)
+    implicit def apply(value : Face)(implicit tfb : Builder[TF, Face, Shl2], di: DummyImplicit)
     : TF[Face] = tfb.create[Face](value)
-    implicit def apply[T <: Face](implicit id : ValueOf[T], tfb : Builder[TF, Face], di: DummyImplicit, di2 : DummyImplicit)
+    implicit def apply[T <: Face](implicit id : ValueOf[T], tfb : Builder[TF, Face, Shl2], di: DummyImplicit, di2 : DummyImplicit)
     : TF[T] = tfb.create[T](valueOf[T])
   }
 
@@ -269,7 +410,7 @@ object TwoFaceAny {
   final class _Char[T <: scala.Char](val value : scala.Char) extends AnyVal with TwoFaceAny.Char[T] {
     @inline def getValue : scala.Char = value
   }
-  implicit object Char extends TwoFaceAny.Builder[Char, scala.Char] {
+  implicit object Char extends TwoFaceAny.Builder[Char, scala.Char, Shell.Two.Char] {
     protected[singleton] def create[T <: scala.Char](value : scala.Char) = new _Char[T](value)
   }
 
@@ -415,7 +556,7 @@ object TwoFaceAny {
   final class _Int[T <: scala.Int](val value : scala.Int) extends AnyVal with TwoFaceAny.Int[T] {
     @inline def getValue : scala.Int = value
   }
-  implicit object Int extends TwoFaceAny.Builder[Int, scala.Int] {
+  implicit object Int extends TwoFaceAny.Builder[Int, scala.Int, Shell.Two.Int] {
     protected[singleton] def create[T <: scala.Int](value : scala.Int) : Int[T] = new _Int[T](value)
 //    def numberOfLeadingZeros[T](r : Int) : Int = macro Builder.Macro.unaryOp[OpId.NumberOfLeadingZeros]
   }
@@ -564,7 +705,7 @@ object TwoFaceAny {
   final class _Long[T <: scala.Long](val value : scala.Long) extends AnyVal with TwoFaceAny.Long[T] {
     @inline def getValue : scala.Long = value
   }
-  implicit object Long extends TwoFaceAny.Builder[Long, scala.Long] {
+  implicit object Long extends TwoFaceAny.Builder[Long, scala.Long, Shell.Two.Long] {
     protected[singleton] def create[T <: scala.Long](value : scala.Long) = new _Long[T](value)
 //    def numberOfLeadingZeros[T](t : Long[T])(implicit tfo : Int.Return[NumberOfLeadingZeros[T]]) =
 //      tfo(java.lang.Long.numberOfLeadingZeros(t.getValue))
@@ -714,7 +855,7 @@ object TwoFaceAny {
   final class _Float[T <: scala.Float](val value : scala.Float) extends AnyVal with TwoFaceAny.Float[T] {
     @inline def getValue : scala.Float = value
   }
-  implicit object Float extends TwoFaceAny.Builder[Float, scala.Float] {
+  implicit object Float extends TwoFaceAny.Builder[Float, scala.Float, Shell.Two.Float] {
     protected[singleton] def create[T <: scala.Float](value : scala.Float) = new _Float[T](value)
   }
 
@@ -862,7 +1003,7 @@ object TwoFaceAny {
   final class _Double[T <: scala.Double](val value : scala.Double) extends AnyVal with TwoFaceAny.Double[T] {
     @inline def getValue : scala.Double = value
   }
-  implicit object Double extends TwoFaceAny.Builder[Double, scala.Double] {
+  implicit object Double extends TwoFaceAny.Builder[Double, scala.Double, Shell.Two.Double] {
     protected[singleton] def create[T <: scala.Double](value : scala.Double) = new _Double[T](value)
   }
 
@@ -889,7 +1030,7 @@ object TwoFaceAny {
   final class _String[T <: java.lang.String](val value : java.lang.String) extends AnyVal with TwoFaceAny.String[T] {
     @inline def getValue : java.lang.String = value
   }
-  implicit object String extends TwoFaceAny.Builder[String, java.lang.String] {
+  implicit object String extends TwoFaceAny.Builder[String, java.lang.String, Shell.Two.String] {
     protected[singleton] def create[T <: java.lang.String](value : java.lang.String) = new _String[T](value)
   }
 
@@ -911,7 +1052,7 @@ object TwoFaceAny {
   final class _Boolean[T <: scala.Boolean](val value : scala.Boolean) extends AnyVal with TwoFaceAny.Boolean[T] {
     @inline def getValue : scala.Boolean = value
   }
-  implicit object Boolean extends TwoFaceAny.Builder[Boolean, scala.Boolean] {
+  implicit object Boolean extends TwoFaceAny.Builder[Boolean, scala.Boolean, Shell.Two.Boolean] {
     protected[singleton] def create[T <: scala.Boolean](value : scala.Boolean) = new _Boolean[T](value)
   }
 

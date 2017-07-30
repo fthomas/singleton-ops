@@ -1250,12 +1250,12 @@ trait GeneralMacros {
     def shell2() : c.Tree = {
       implicit val annotatedSym : TypeSymbol = shellTpe.typeSymbol.asType
 //      print("before")
-      val funcApplyTpe = shellTpe.typeArgs(1)
-      val funcArgsTpe = shellTpe.typeArgs(2)
-      val arg1Tpe = shellTpe.typeArgs(3)
-      val arg1WideTpe = shellTpe.typeArgs(4)
-      val arg2Tpe = shellTpe.typeArgs(5)
-      val arg2WideTpe = shellTpe.typeArgs(6)
+      val funcApplyTpe = shellTpe.typeArgs(0)
+      val funcArgsTpe = shellTpe.typeArgs(1)
+      val arg1Tpe = shellTpe.typeArgs(2)
+      val arg1WideTpe = shellTpe.typeArgs(3)
+      val arg2Tpe = shellTpe.typeArgs(4)
+      val arg2WideTpe = shellTpe.typeArgs(5)
       val outTpe = extractSingletonValue(funcApplyTpe).tpe
       val tfTerm = TermName(outTpe.widen.typeSymbol.name.toString)
       val tfType = TypeName(outTpe.widen.typeSymbol.name.toString)
