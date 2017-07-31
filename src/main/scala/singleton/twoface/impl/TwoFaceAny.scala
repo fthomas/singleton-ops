@@ -26,8 +26,8 @@ object TwoFaceAny {
     : TF[T] =  tfb.create[T](value)
     implicit def apply(value : Face)(implicit tfb : Builder[TF, Face], di: DummyImplicit)
     : TF[Face] = tfb.create[Face](value)
-    implicit def apply[T](implicit id : ValueOf[T], tfb : Builder[TF, Face], di: DummyImplicit, di2 : DummyImplicit)
-    : TF[T] = tfb.create[T](valueOf[T].asInstanceOf[Face])
+    implicit def apply[T](implicit id : Id[T], tfb : Builder[TF, Face], di: DummyImplicit, di2 : DummyImplicit)
+    : TF[T] = tfb.create[T](id.valueWide.asInstanceOf[Face])
   }
 
   trait Char[T] extends Any with TwoFaceAny[scala.Char, T] {
