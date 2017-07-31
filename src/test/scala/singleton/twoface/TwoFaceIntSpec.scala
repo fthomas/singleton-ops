@@ -4,6 +4,7 @@ import singleton.twoface.math._
 import org.scalacheck.Properties
 import singleton.TestUtils._
 import shapeless.test.illTyped
+import singleton.ops._
 
 class TwoFaceIntSpec extends Properties("TwoFace.Int") {
   property("Implicit Creation[]") = {
@@ -309,7 +310,6 @@ class TwoFaceIntSpec extends Properties("TwoFace.Int") {
   property("Unsafe numberOfLeadingZeros") = verifyTF(TwoFace.Int.numberOfLeadingZeros(TwoFace.Int(us(1))), us(31))
 
   property("Implicit Conversions") = wellTyped {
-    import singleton.ops._
     val a : TwoFace.Int[3] = implicitly[TwoFace.Int[2 + 1]]
     val b : TwoFace.Int[3 + 0] = implicitly[TwoFace.Int[2 + 1]]
     val c : TwoFace.Int[3 + 0] = implicitly[TwoFace.Int[3]]
@@ -318,7 +318,6 @@ class TwoFaceIntSpec extends Properties("TwoFace.Int") {
   }
 
   property("Wrong Implicit Conversions") = {
-    import singleton.ops._
     illTyped("""val a : TwoFace.Int[3] = implicitly[TwoFace.Int[2 + 2]]""")
     illTyped("""val b : TwoFace.Int[3 + 0] = implicitly[TwoFace.Int[2 + 2]]""")
     illTyped("""val c : TwoFace.Int[3 + 0] = implicitly[TwoFace.Int[4]]""")
@@ -328,4 +327,18 @@ class TwoFaceIntSpec extends Properties("TwoFace.Int") {
   property("ToString") = {
     TwoFace.Int[1].toString() == "1"
   }
+
+  property("Extracting from Safe TwoFace") = {
+    val a = TwoFace.Int(3)
+    val ret = shapeless.the[Id[a.type]]
+    implicitly[ret.Out =:= 3]
+    ret.value == 3
+  }
+
+//  property("Extracting from Unsafe TwoFace") = wellTyped {
+//    val a = TwoFace.Int(us(3))
+//    val ret = shapeless.the[AcceptNonLiteral[Id[a.type]]]
+//    ret.value == 3
+//  }
+
 }
