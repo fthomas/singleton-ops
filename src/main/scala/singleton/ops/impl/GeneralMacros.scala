@@ -3,7 +3,6 @@ import macrocompat.bundle
 import singleton.twoface.impl.TwoFaceAny
 
 import scala.reflect.macros.whitebox
-import scala.reflect.macros.TypecheckException
 @bundle
 trait GeneralMacros {
   val c: whitebox.Context
