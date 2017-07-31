@@ -225,18 +225,6 @@ trait GeneralMacros {
     case class String(override val tree : Tree) extends CalcVal.String("1", tree) with CalcNLit
     case class Boolean(override val tree : Tree) extends CalcVal.Boolean(true, tree) with CalcNLit
 
-//    def apply[T](valueRef : T, tree : Tree)(implicit unsupported : TypeSymbol) : CalcNLit = {
-//      valueRef match {
-//        case t : scala.Char => Char(tree)
-//        case t : scala.Int => Int(tree)
-//        case t : scala.Long => Long(tree)
-//        case t : scala.Float => Float(tree)
-//        case t : scala.Double => Double(tree)
-//        case t : java.lang.String => String(tree)
-//        case t : scala.Boolean => Boolean(tree)
-//        case _ => abort("Unsupported type")
-//      }
-//    }
     def apply[T](valueRef : T, tree : Tree)(implicit unsupported : TypeSymbol) : CalcNLit =
       CalcNLit(CalcLit(valueRef), tree)
     def apply(calcTypeRef : Calc, tree : Tree)(implicit unsupported : TypeSymbol) : CalcNLit = {
