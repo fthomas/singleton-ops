@@ -134,37 +134,30 @@ trait GeneralMacros {
     implicit val lift = Liftable[CalcVal] {p => p.tree}
     class Char(val value : scala.Char, val tree : Tree) extends CalcVal with Calc.Char
     object Char {
-      def apply(value : scala.Char, tree : Tree) : Char = new Char(value, tree)
       def unapply(arg: Char) : Option[(arg.T, Tree)] = Some((arg.value, arg.tree))
     }
     class Int(val value : scala.Int, val tree : Tree) extends CalcVal with Calc.Int
     object Int {
-      def apply(value : scala.Int, tree : Tree) : Int = new Int(value, tree)
       def unapply(arg: Int) : Option[(arg.T, Tree)] = Some((arg.value, arg.tree))
     }
     class Long(val value : scala.Long, val tree : Tree) extends CalcVal with Calc.Long
     object Long {
-      def apply(value : scala.Long, tree : Tree) : Long = new Long(value, tree)
       def unapply(arg: Long) : Option[(arg.T, Tree)] = Some((arg.value, arg.tree))
     }
     class Float(val value : scala.Float, val tree : Tree) extends CalcVal with Calc.Float
     object Float {
-      def apply(value : scala.Float, tree : Tree) : Float = new Float(value, tree)
       def unapply(arg: Float) : Option[(arg.T, Tree)] = Some((arg.value, arg.tree))
     }
     class Double(val value : scala.Double, val tree : Tree) extends CalcVal with Calc.Double
     object Double {
-      def apply(value : scala.Double, tree : Tree) : Double = new Double(value, tree)
       def unapply(arg: Double) : Option[(arg.T, Tree)] = Some((arg.value, arg.tree))
     }
     class String(val value : java.lang.String, val tree : Tree) extends CalcVal with Calc.String
     object String {
-      def apply(value : java.lang.String, tree : Tree) : String = new String(value, tree)
       def unapply(arg: String) : Option[(arg.T, Tree)] = Some((arg.value, arg.tree))
     }
     class Boolean(val value : scala.Boolean, val tree : Tree) extends CalcVal with Calc.Boolean
     object Boolean {
-      def apply(value : scala.Boolean, tree : Tree) : Boolean = new Boolean(value, tree)
       def unapply(arg: Boolean) : Option[(arg.T, Tree)] = Some((arg.value, arg.tree))
     }
     def apply[T](value : T, tree : Tree)(implicit unsupported : TypeSymbol, kind : Kind) = kind match {
