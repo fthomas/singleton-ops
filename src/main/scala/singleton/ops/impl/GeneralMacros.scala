@@ -760,11 +760,11 @@ trait GeneralMacros {
             abort(msg)
           case _ => abort(msg)
         }
-        case msg : CalcNLit => CalcNLit.Boolean(q"require(false, $msg); false")
+        case msg : CalcNLit => CalcNLit.Boolean(q"{require(false, $msg); false}")
         case _ => unsupported()
       }
       case cond : CalcNLit => b match {
-        case msg : CalcVal => CalcNLit.Boolean(q"require($cond, $msg); true")
+        case msg : CalcVal => CalcNLit.Boolean(q"{require($cond, $msg); true}")
         case _ => unsupported()
       }
       case _ => unsupported()

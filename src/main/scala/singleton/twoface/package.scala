@@ -20,7 +20,9 @@ package object twoface {
   (implicit tfs : String.Shell3[ITE, I, scala.Boolean, T, java.lang.String, E, java.lang.String]) = tfs(ifArg, thenArg, elseArg)
   def ifThenElse[I, T, E](ifArg: Boolean[I], thenArg : Boolean[T], elseArg : Boolean[E])
   (implicit tfs : Boolean.Shell3[ITE, I, scala.Boolean, T, scala.Boolean, E, scala.Boolean]) = tfs(ifArg, thenArg, elseArg)
-  
+
+  def require[C, M](cond : Boolean[C], msg : String[M])(implicit tfs : Boolean.Shell2[RequireMsg, C, scala.Boolean, M, java.lang.String]) = tfs(cond, msg)
+
   object math {
     import singleton.ops.math._
     val Pi = Double.create[Pi](scala.math.Pi)
