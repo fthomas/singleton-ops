@@ -2,6 +2,22 @@ package singleton.ops
 
 import org.scalacheck.Properties
 
+class ValueExtractionNatSpec extends Properties("ValueExtractionNatSpec") {
+  type Fin = shapeless.Nat._1
+  final val fin = shapeless.Nat._1
+  property("Extracting from Safe Nat Number") = {
+    val ret = shapeless.the[ToNat[Id[fin.type]]]
+    implicitly[ret.Out =:= Fin]
+    ret.value == fin
+  }
+
+  property("Extracting from Safe Nat Op Wrapper") = {
+    val a = shapeless.the[SafeNat[Fin]]
+    implicitly[a.Out =:= Fin]
+    a.value == fin
+  }
+}
+
 class ValueExtractionCharSpec extends Properties("ValueExtractionCharSpec") {
   type Fin = '\u0003'
   final val fin = '\u0003'

@@ -55,4 +55,6 @@ class UnsupportedSpec extends Properties("UnsupportedSpec") {
   property("Substring") = wellTyped {illTyped("""implicitly[Substring[true, 2]]""")}
   property("CharAt") = wellTyped {illTyped("""implicitly[CharAt[true, 2]]""")}
   property("Length") = wellTyped {illTyped("""implicitly[Length[true]]""")}
+  property("No Extraction from Bad Num") = wellTyped {illTyped("""implicitly[Id[Int]]""")}
+  property("No Extraction from Bad TwoFace") = wellTyped {illTyped("""implicitly[TwoFace.Int[Int]]""")}
 }
