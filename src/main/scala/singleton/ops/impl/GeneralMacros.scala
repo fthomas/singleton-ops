@@ -377,7 +377,6 @@ trait GeneralMacros {
         // Operational Function
         ////////////////////////////////////////////////////////////////////////
         case TypeRef(_, sym, args) if sym == symbolOf[OpMacro[_,_,_,_]] => unapplyOp(tp)
-        case TypeRef(_, sym, args) if sym == symbolOf[OpGen[_]] => unapplyOpArg(args.head)
         case TypeRef(_, sym, args) if sym == symbolOf[OpNat[_]] => unapplyOpArg(args.head)
         case TypeRef(_, sym, args) if sym == symbolOf[OpChar[_]] => unapplyOpArg(args.head)
         case TypeRef(_, sym, args) if sym == symbolOf[OpInt[_]] => unapplyOpArg(args.head)
