@@ -760,11 +760,13 @@ trait GeneralMacros {
             abort(msg)
           case _ => abort(msg)
         }
-        case msg : CalcNLit => CalcNLit.Boolean(q"{require(false, $msg); false}")
+        //directly using the java lib `require` resulted in compiler crash, so we use wrapped require instead
+        case msg : CalcNLit => CalcNLit.Boolean(q"{_root_.singleton.ops.impl._require(false, $msg); false}")
         case _ => unsupported()
       }
       case cond : CalcNLit => b match {
-        case msg : CalcVal => CalcNLit.Boolean(q"{require($cond, $msg); true}")
+        //directly using the java lib `require` resulted in compiler crash, so we use wrapped require instead
+        case msg : CalcVal => CalcNLit.Boolean(q"{_root_.singleton.ops.impl._require($cond, $msg); true}")
         case _ => unsupported()
       }
       case _ => unsupported()
