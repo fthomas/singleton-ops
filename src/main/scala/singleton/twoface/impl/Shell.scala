@@ -23,6 +23,7 @@ object Shell {
 //
 //  @bundle
   object One { //One Parameter Shell
+    type F[_]
 //    type Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Ret_Out, Ret_TF[T]] =
 //      One[FuncApply, FuncArgs, Arg1, Arg1Wide] {
 //        type Out = Ret_Out
@@ -54,7 +55,7 @@ object Shell {
         def shell1[FuncApply, FuncArgs, Arg1, Arg1Wide]
         (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide]) : c.Tree = TwoFaceShellMaterializer[
-          Char[FuncApply, FuncArgs, Arg1, Arg1Wide]].shell1()
+          Char[FuncApply, FuncArgs, Arg1, Arg1Wide]].shell1(c.symbolOf[TwoFaceAny.Char.Shell1[F,_,_]])
       }
     }
 
@@ -73,7 +74,7 @@ object Shell {
         def shell1[FuncApply, FuncArgs, Arg1, Arg1Wide]
         (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide]) : c.Tree = TwoFaceShellMaterializer[
-          Int[FuncApply, FuncArgs, Arg1, Arg1Wide]].shell1()
+          Int[FuncApply, FuncArgs, Arg1, Arg1Wide]].shell1(c.symbolOf[TwoFaceAny.Int.Shell1[F,_,_]])
       }
     }
 
@@ -92,7 +93,7 @@ object Shell {
         def shell1[FuncApply, FuncArgs, Arg1, Arg1Wide]
         (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide]) : c.Tree = TwoFaceShellMaterializer[
-          Long[FuncApply, FuncArgs, Arg1, Arg1Wide]].shell1()
+          Long[FuncApply, FuncArgs, Arg1, Arg1Wide]].shell1(c.symbolOf[TwoFaceAny.Long.Shell1[F,_,_]])
       }
     }
 
@@ -111,7 +112,7 @@ object Shell {
         def shell1[FuncApply, FuncArgs, Arg1, Arg1Wide]
         (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide]) : c.Tree = TwoFaceShellMaterializer[
-          Float[FuncApply, FuncArgs, Arg1, Arg1Wide]].shell1()
+          Float[FuncApply, FuncArgs, Arg1, Arg1Wide]].shell1(c.symbolOf[TwoFaceAny.Float.Shell1[F,_,_]])
       }
     }
 
@@ -130,7 +131,7 @@ object Shell {
         def shell1[FuncApply, FuncArgs, Arg1, Arg1Wide]
         (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide]) : c.Tree = TwoFaceShellMaterializer[
-          Double[FuncApply, FuncArgs, Arg1, Arg1Wide]].shell1()
+          Double[FuncApply, FuncArgs, Arg1, Arg1Wide]].shell1(c.symbolOf[TwoFaceAny.Double.Shell1[F,_,_]])
       }
     }
 
@@ -149,7 +150,7 @@ object Shell {
         def shell1[FuncApply, FuncArgs, Arg1, Arg1Wide]
         (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide]) : c.Tree = TwoFaceShellMaterializer[
-          String[FuncApply, FuncArgs, Arg1, Arg1Wide]].shell1()
+          String[FuncApply, FuncArgs, Arg1, Arg1Wide]].shell1(c.symbolOf[TwoFaceAny.String.Shell1[F,_,_]])
       }
     }
 
@@ -168,7 +169,7 @@ object Shell {
         def shell1[FuncApply, FuncArgs, Arg1, Arg1Wide]
         (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide]) : c.Tree = TwoFaceShellMaterializer[
-          Boolean[FuncApply, FuncArgs, Arg1, Arg1Wide]].shell1()
+          Boolean[FuncApply, FuncArgs, Arg1, Arg1Wide]].shell1(c.symbolOf[TwoFaceAny.Boolean.Shell1[F,_,_]])
       }
     }
   }
@@ -182,6 +183,7 @@ object Shell {
 //  }
 //
   object Two { //Two Parameters Shell
+    type F[_,_]
 //    type Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Ret_Out, Ret_TF[T]] =
 //      Two[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] {
 //        type Out = Ret_Out
@@ -215,7 +217,7 @@ object Shell {
         (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide], arg2 : c.WeakTypeTag[Arg2],
          arg2Wide : c.WeakTypeTag[Arg2Wide]) : c.Tree = TwoFaceShellMaterializer[
-          Char[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]].shell2()
+          Char[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]].shell2(c.symbolOf[TwoFaceAny.Char.Shell2[F,_,_,_,_]])
       }
     }
 
@@ -235,7 +237,7 @@ object Shell {
         (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide], arg2 : c.WeakTypeTag[Arg2],
          arg2Wide : c.WeakTypeTag[Arg2Wide]) : c.Tree = TwoFaceShellMaterializer[
-          Int[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]].shell2()
+          Int[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]].shell2(c.symbolOf[TwoFaceAny.Int.Shell2[F,_,_,_,_]])
       }
     }
 
@@ -255,7 +257,7 @@ object Shell {
         (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide], arg2 : c.WeakTypeTag[Arg2],
          arg2Wide : c.WeakTypeTag[Arg2Wide]) : c.Tree = TwoFaceShellMaterializer[
-          Long[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]].shell2()
+          Long[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]].shell2(c.symbolOf[TwoFaceAny.Long.Shell2[F,_,_,_,_]])
       }
     }
 
@@ -275,7 +277,7 @@ object Shell {
         (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide], arg2 : c.WeakTypeTag[Arg2],
          arg2Wide : c.WeakTypeTag[Arg2Wide]) : c.Tree = TwoFaceShellMaterializer[
-          Float[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]].shell2()
+          Float[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]].shell2(c.symbolOf[TwoFaceAny.Float.Shell2[F,_,_,_,_]])
       }
     }
 
@@ -295,7 +297,7 @@ object Shell {
         (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide], arg2 : c.WeakTypeTag[Arg2],
          arg2Wide : c.WeakTypeTag[Arg2Wide]) : c.Tree = TwoFaceShellMaterializer[
-          Double[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]].shell2()
+          Double[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]].shell2(c.symbolOf[TwoFaceAny.String.Shell2[F,_,_,_,_]])
       }
     }
 
@@ -315,7 +317,7 @@ object Shell {
         (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide], arg2 : c.WeakTypeTag[Arg2],
          arg2Wide : c.WeakTypeTag[Arg2Wide]) : c.Tree = TwoFaceShellMaterializer[
-          String[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]].shell2()
+          String[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]].shell2(c.symbolOf[TwoFaceAny.Boolean.Shell2[F,_,_,_,_]])
       }
     }
 
@@ -335,7 +337,7 @@ object Shell {
         (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide], arg2 : c.WeakTypeTag[Arg2],
          arg2Wide : c.WeakTypeTag[Arg2Wide]) : c.Tree = TwoFaceShellMaterializer[
-          Boolean[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]].shell2()
+          Boolean[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]].shell2(c.symbolOf[TwoFaceAny.Boolean.Shell2[F,_,_,_,_]])
       }
     }
   }
@@ -351,6 +353,7 @@ object Shell {
 
   @bundle
   object Three { //Two Parameters Shell
+    type F[_,_,_]
 //    type Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide, Ret_Out, Ret_TF[T]] =
 //      Three[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide] {
 //        type Out = Ret_Out
@@ -386,7 +389,7 @@ object Shell {
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide], arg2 : c.WeakTypeTag[Arg2],
          arg2Wide : c.WeakTypeTag[Arg2Wide], arg3 : c.WeakTypeTag[Arg3],
          arg3Wide : c.WeakTypeTag[Arg3Wide]) : c.Tree = TwoFaceShellMaterializer[
-          Char[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]].shell3()
+          Char[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]].shell3(c.symbolOf[TwoFaceAny.Char.Shell3[F,_,_,_,_,_,_]])
       }
     }
 
@@ -407,7 +410,7 @@ object Shell {
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide], arg2 : c.WeakTypeTag[Arg2],
          arg2Wide : c.WeakTypeTag[Arg2Wide], arg3 : c.WeakTypeTag[Arg3],
          arg3Wide : c.WeakTypeTag[Arg3Wide]) : c.Tree = TwoFaceShellMaterializer[
-          Int[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]].shell3()
+          Int[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]].shell3(c.symbolOf[TwoFaceAny.Int.Shell3[F,_,_,_,_,_,_]])
       }
     }
 
@@ -428,7 +431,7 @@ object Shell {
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide], arg2 : c.WeakTypeTag[Arg2],
          arg2Wide : c.WeakTypeTag[Arg2Wide], arg3 : c.WeakTypeTag[Arg3],
          arg3Wide : c.WeakTypeTag[Arg3Wide]) : c.Tree = TwoFaceShellMaterializer[
-          Long[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]].shell3()
+          Long[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]].shell3(c.symbolOf[TwoFaceAny.Long.Shell3[F,_,_,_,_,_,_]])
       }
     }
 
@@ -449,7 +452,7 @@ object Shell {
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide], arg2 : c.WeakTypeTag[Arg2],
          arg2Wide : c.WeakTypeTag[Arg2Wide], arg3 : c.WeakTypeTag[Arg3],
          arg3Wide : c.WeakTypeTag[Arg3Wide]) : c.Tree = TwoFaceShellMaterializer[
-          Float[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]].shell3()
+          Float[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]].shell3(c.symbolOf[TwoFaceAny.Float.Shell3[F,_,_,_,_,_,_]])
       }
     }
 
@@ -470,7 +473,7 @@ object Shell {
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide], arg2 : c.WeakTypeTag[Arg2],
          arg2Wide : c.WeakTypeTag[Arg2Wide], arg3 : c.WeakTypeTag[Arg3],
          arg3Wide : c.WeakTypeTag[Arg3Wide]) : c.Tree = TwoFaceShellMaterializer[
-          Double[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]].shell3()
+          Double[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]].shell3(c.symbolOf[TwoFaceAny.Double.Shell3[F,_,_,_,_,_,_]])
       }
     }
 
@@ -491,7 +494,7 @@ object Shell {
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide], arg2 : c.WeakTypeTag[Arg2],
          arg2Wide : c.WeakTypeTag[Arg2Wide], arg3 : c.WeakTypeTag[Arg3],
          arg3Wide : c.WeakTypeTag[Arg3Wide]) : c.Tree = TwoFaceShellMaterializer[
-          String[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]].shell3()
+          String[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]].shell3(c.symbolOf[TwoFaceAny.String.Shell3[F,_,_,_,_,_,_]])
       }
     }
 
@@ -512,7 +515,7 @@ object Shell {
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide], arg2 : c.WeakTypeTag[Arg2],
          arg2Wide : c.WeakTypeTag[Arg2Wide], arg3 : c.WeakTypeTag[Arg3],
          arg3Wide : c.WeakTypeTag[Arg3Wide]) : c.Tree = TwoFaceShellMaterializer[
-          Boolean[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]].shell3()
+          Boolean[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]].shell3(c.symbolOf[TwoFaceAny.Boolean.Shell3[F,_,_,_,_,_,_]])
       }
     }
   }

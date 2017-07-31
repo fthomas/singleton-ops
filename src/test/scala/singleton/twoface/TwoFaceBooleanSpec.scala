@@ -55,6 +55,15 @@ class TwoFaceBooleanSpec extends Properties("TwoFace.Boolean") {
   property("Safe toStringTF") = verifyTF(TwoFace.Boolean(true).toStringTF, "true")
   property("Unsafe toStringTF") = verifyTF(TwoFace.Boolean(us(false)).toStringTF, us("false"))
 
+  property("Safe require") = wellTyped {
+    require(TwoFace.Boolean(true), "something")
+    illTyped("""require(TwoFace.Boolean(false), "something")""","something")
+  }
+  property("Unsafe require") = wellTyped {
+    require(TwoFace.Boolean(us(true)), "something")
+    illRun(require(TwoFace.Boolean(us(false)), "something"))
+  }
+
   property("Implicit Conversions") = wellTyped {
     import singleton.ops._
     val a : TwoFace.Boolean[true] = implicitly[TwoFace.Boolean[true || false]]

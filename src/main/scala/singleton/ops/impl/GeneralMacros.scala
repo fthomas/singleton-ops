@@ -1249,8 +1249,8 @@ trait GeneralMacros {
   : TwoFaceShellMaterializer[Shell] = new TwoFaceShellMaterializer[Shell](weakTypeOf[Shell])
 
   final class TwoFaceShellMaterializer[Shell](shellTpe : Type) {
-    def shell1() : c.Tree = {
-      implicit val annotatedSym : TypeSymbol = shellTpe.typeSymbol.asType
+    def shell1(shellAliasTpe : TypeSymbol) : c.Tree = {
+      implicit val annotatedSym : TypeSymbol = shellAliasTpe
       val funcApplyTpe = shellTpe.typeArgs(0)
       val funcArgsTpe = shellTpe.typeArgs(1)
       val arg1Tpe = shellTpe.typeArgs(2)
@@ -1274,8 +1274,8 @@ trait GeneralMacros {
       //      print(showCode(genTree))
       genTree
     }
-    def shell2() : c.Tree = {
-      implicit val annotatedSym : TypeSymbol = shellTpe.typeSymbol.asType
+    def shell2(shellAliasTpe : TypeSymbol) : c.Tree = {
+      implicit val annotatedSym : TypeSymbol = shellAliasTpe
       val funcApplyTpe = shellTpe.typeArgs(0)
       val funcArgsTpe = shellTpe.typeArgs(1)
       val arg1Tpe = shellTpe.typeArgs(2)
@@ -1301,8 +1301,8 @@ trait GeneralMacros {
 //      print(showCode(genTree))
       genTree
     }
-    def shell3() : c.Tree = {
-      implicit val annotatedSym : TypeSymbol = shellTpe.typeSymbol.asType
+    def shell3(shellAliasTpe : TypeSymbol) : c.Tree = {
+      implicit val annotatedSym : TypeSymbol = shellAliasTpe
       val funcApplyTpe = shellTpe.typeArgs(0)
       val funcArgsTpe = shellTpe.typeArgs(1)
       val arg1Tpe = shellTpe.typeArgs(2)
