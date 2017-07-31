@@ -4,6 +4,7 @@ import singleton.twoface.math._
 import org.scalacheck.Properties
 import shapeless.test.illTyped
 import singleton.TestUtils._
+import singleton.ops._
 
 class TwoFaceFloatSpec extends Properties("TwoFace.Float") {
   property("Implicit Creation[]") = {
@@ -334,7 +335,6 @@ class TwoFaceFloatSpec extends Properties("TwoFace.Float") {
   property("Unsafe Float pow Unsafe Double") = verifyTF(pow(TwoFace.Float(us(2.0f)), TwoFace.Double(us(3.0))), us(8.0))
 
   property("Implicit Conversions") = wellTyped {
-    import singleton.ops._
     val a : TwoFace.Float[3.0f] = implicitly[TwoFace.Float[2.0f + 1.0f]]
     val b : TwoFace.Float[3.0f + 0.0f] = implicitly[TwoFace.Float[2.0f + 1.0f]]
     val c : TwoFace.Float[3.0f + 0.0f] = implicitly[TwoFace.Float[3.0f]]
@@ -343,7 +343,6 @@ class TwoFaceFloatSpec extends Properties("TwoFace.Float") {
   }
 
   property("Wrong Implicit Conversions") = {
-    import singleton.ops._
     illTyped("""val a : TwoFace.Float[3.0f] = implicitly[TwoFace.Float[2.0f + 2.0f]]""")
     illTyped("""val b : TwoFace.Float[3.0f + 0.0f] = implicitly[TwoFace.Float[2.0f + 2.0f]]""")
     illTyped("""val c : TwoFace.Float[3.0f + 0.0f] = implicitly[TwoFace.Float[4.0f]]""")
@@ -352,5 +351,21 @@ class TwoFaceFloatSpec extends Properties("TwoFace.Float") {
 
   property("ToString") = {
     TwoFace.Float[1.0f].toString() == "1.0"
+  }
+
+  type Fin = 3.0f
+  final val fin = 3.0f
+  property("Extracting from Safe TwoFace") = {
+    val a = TwoFace.Float(fin)
+    val ret = shapeless.the[Id[a.type]]
+    implicitly[ret.Out =:= Fin]
+    ret.value == fin
+  }
+
+  property("Extracting from Unsafe TwoFace") = wellTyped {
+    val a = TwoFace.Float(us(fin))
+    val ret = shapeless.the[AcceptNonLiteral[Id[a.type]]]
+    implicitly[ret.Out =:= Float]
+    ret.value == fin
   }
 }

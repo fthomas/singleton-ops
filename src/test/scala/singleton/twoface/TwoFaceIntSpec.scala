@@ -328,17 +328,20 @@ class TwoFaceIntSpec extends Properties("TwoFace.Int") {
     TwoFace.Int[1].toString() == "1"
   }
 
+  type Fin = 3
+  final val fin = 3
   property("Extracting from Safe TwoFace") = {
-    val a = TwoFace.Int(3)
+    val a = TwoFace.Int(fin)
     val ret = shapeless.the[Id[a.type]]
-    implicitly[ret.Out =:= 3]
-    ret.value == 3
+    implicitly[ret.Out =:= Fin]
+    ret.value == fin
   }
 
-//  property("Extracting from Unsafe TwoFace") = wellTyped {
-//    val a = TwoFace.Int(us(3))
-//    val ret = shapeless.the[AcceptNonLiteral[Id[a.type]]]
-//    ret.value == 3
-//  }
+  property("Extracting from Unsafe TwoFace") = wellTyped {
+    val a = TwoFace.Int(us(fin))
+    val ret = shapeless.the[AcceptNonLiteral[Id[a.type]]]
+    implicitly[ret.Out =:= Int]
+    ret.value == fin
+  }
 
 }

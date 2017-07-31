@@ -291,13 +291,13 @@ trait GeneralMacros {
       val tfTypeArg = tp.typeArgs.head
       unapplyOpArg(tfTypeArg) match {
         case Some(t : CalcLit) => Some(t)
-        case Some(CalcType.Char) => Some(CalcTFType.Char)
-        case Some(CalcType.Int) => Some(CalcTFType.Int)
-        case Some(CalcType.Long) => Some(CalcTFType.Long)
-        case Some(CalcType.Float) => Some(CalcTFType.Float)
-        case Some(CalcType.Double) => Some(CalcTFType.Double)
-        case Some(CalcType.String) => Some(CalcTFType.String)
-        case Some(CalcType.Boolean) => Some(CalcTFType.Boolean)
+        case Some(t : Calc.Char) => Some(CalcTFType.Char)
+        case Some(t : Calc.Int) => Some(CalcTFType.Int)
+        case Some(t : Calc.Long) => Some(CalcTFType.Long)
+        case Some(t : Calc.Float) => Some(CalcTFType.Float)
+        case Some(t : Calc.Double) => Some(CalcTFType.Double)
+        case Some(t : Calc.String) => Some(CalcTFType.String)
+        case Some(t : Calc.Boolean) => Some(CalcTFType.Boolean)
         case _ => abort("Unsupported TwoFace argument: " + tfTypeArg)
       }
     }

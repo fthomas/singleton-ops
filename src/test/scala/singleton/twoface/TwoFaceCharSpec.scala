@@ -2,6 +2,7 @@ package singleton.twoface
 
 import org.scalacheck.Properties
 import singleton.TestUtils._
+import singleton.ops._
 
 class TwoFaceCharSpec extends Properties("TwoFace.Char") {
   property("Implicit Creation[]") = {
@@ -297,5 +298,21 @@ class TwoFaceCharSpec extends Properties("TwoFace.Char") {
 
   property("ToString") = {
     TwoFace.Char['t'].toString() == "t"
+  }
+
+  type Fin = '\u0003'
+  final val fin = '\u0003'
+  property("Extracting from Safe TwoFace") = {
+    val a = TwoFace.Char(fin)
+    val ret = shapeless.the[Id[a.type]]
+    implicitly[ret.Out =:= Fin]
+    ret.value == fin
+  }
+
+  property("Extracting from Unsafe TwoFace") = wellTyped {
+    val a = TwoFace.Char(us(fin))
+    val ret = shapeless.the[AcceptNonLiteral[Id[a.type]]]
+    implicitly[ret.Out =:= Char]
+    ret.value == fin
   }
 }

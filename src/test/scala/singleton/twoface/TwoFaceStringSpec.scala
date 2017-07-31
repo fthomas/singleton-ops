@@ -3,6 +3,7 @@ package singleton.twoface
 import org.scalacheck.Properties
 import shapeless.test.illTyped
 import singleton.TestUtils._
+import singleton.ops._
 
 class TwoFaceStringSpec extends Properties("TwoFace.String") {
   property("Implicit Creation[]") = {
@@ -71,7 +72,6 @@ class TwoFaceStringSpec extends Properties("TwoFace.String") {
   property("Unsafe reverse") = verifyTF(TwoFace.String(us("Some")).reverse, us("emoS"))
 
   property("Implicit Conversions") = wellTyped {
-    import singleton.ops._
     val a : TwoFace.String["Something"] = implicitly[TwoFace.String["Some" + "thing"]]
     val b : TwoFace.String["Som" + "ething"] = implicitly[TwoFace.String["Some" + "thing"]]
     val c : TwoFace.String["Some" + "thing"] = implicitly[TwoFace.String["Something"]]
@@ -80,9 +80,24 @@ class TwoFaceStringSpec extends Properties("TwoFace.String") {
   }
 
   property("Wrong Implicit Conversions") = {
-    import singleton.ops._
     illTyped("""val a : TwoFace.String["Some"] = implicitly[TwoFace.String["Som" + "E"]]""")
     illTyped("""val b : TwoFace.String["Some" + "thing"] = implicitly[TwoFace.String["SomeThing"]]""")
     true
+  }
+
+  type Fin = "a"
+  final val fin = "a"
+  property("Extracting from Safe TwoFace") = {
+    val a = TwoFace.String(fin)
+    val ret = shapeless.the[Id[a.type]]
+    implicitly[ret.Out =:= Fin]
+    ret.value == fin
+  }
+
+  property("Extracting from Unsafe TwoFace") = wellTyped {
+    val a = TwoFace.String(us(fin))
+    val ret = shapeless.the[AcceptNonLiteral[Id[a.type]]]
+    implicitly[ret.Out =:= String]
+    ret.value == fin
   }
 }

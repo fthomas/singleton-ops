@@ -3,6 +3,7 @@ package singleton.ops
 import org.scalacheck.Properties
 import shapeless.test.illTyped
 import singleton.TestUtils._
+import singleton.ops.math._
 
 //Unsupported operation check to increase coverage
 class UnsupportedSpec extends Properties("UnsupportedSpec") {

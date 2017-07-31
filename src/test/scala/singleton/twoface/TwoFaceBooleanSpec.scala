@@ -3,6 +3,7 @@ package singleton.twoface
 import org.scalacheck.Properties
 import shapeless.test.illTyped
 import singleton.TestUtils._
+import singleton.ops._
 
 class TwoFaceBooleanSpec extends Properties("TwoFace.Boolean") {
   property("Implicit Creation[]") = {
@@ -65,7 +66,6 @@ class TwoFaceBooleanSpec extends Properties("TwoFace.Boolean") {
   }
 
   property("Implicit Conversions") = wellTyped {
-    import singleton.ops._
     val a : TwoFace.Boolean[true] = implicitly[TwoFace.Boolean[true || false]]
     val b : TwoFace.Boolean[true || false] = implicitly[TwoFace.Boolean[true && true]]
     val c : TwoFace.Boolean[true && true] = implicitly[TwoFace.Boolean[true]]
@@ -74,7 +74,6 @@ class TwoFaceBooleanSpec extends Properties("TwoFace.Boolean") {
   }
 
   property("Wrong Implicit Conversions") = {
-    import singleton.ops._
     illTyped("""val a : TwoFace.Boolean[true] = implicitly[TwoFace.Boolean[false && true]]""")
     illTyped("""val b : TwoFace.Boolean[false && true] = implicitly[TwoFace.Boolean[true]]""")
     true
@@ -82,5 +81,21 @@ class TwoFaceBooleanSpec extends Properties("TwoFace.Boolean") {
 
   property("ToString") = {
     TwoFace.Boolean[true].toString() == "true"
+  }
+
+  type Fin = true
+  final val fin = true
+  property("Extracting from Safe TwoFace") = {
+    val a = TwoFace.Boolean(fin)
+    val ret = shapeless.the[Id[a.type]]
+    implicitly[ret.Out =:= Fin]
+    ret.value == fin
+  }
+
+  property("Extracting from Unsafe TwoFace") = wellTyped {
+    val a = TwoFace.Boolean(us(fin))
+    val ret = shapeless.the[AcceptNonLiteral[Id[a.type]]]
+    implicitly[ret.Out =:= Boolean]
+    ret.value == fin
   }
 }
