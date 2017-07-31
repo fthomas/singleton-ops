@@ -59,6 +59,7 @@ class TwoFaceBooleanSpec extends Properties("TwoFace.Boolean") {
   property("Safe require") = wellTyped {
     require(TwoFace.Boolean(true), "something")
     illTyped("""require(TwoFace.Boolean(false), "something")""","something")
+    illRun(require(TwoFace.Boolean(us(false)), us("something")))
   }
   property("Unsafe require") = wellTyped {
     require(TwoFace.Boolean(us(true)), "something")
