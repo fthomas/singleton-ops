@@ -623,7 +623,6 @@ trait GeneralMacros {
       case CalcVal.Double(t, tt) => CalcVal(t.toString, q"$tt.toString")
       case CalcVal.String(t, tt) => CalcVal(t.toString, q"$tt.toString")
       case CalcVal.Boolean(t, tt) => CalcVal(t.toString, q"$tt.toString")
-      case _ => unsupported()
     }
     def IsNat = a match {
       case CalcLit.Int(t) => CalcLit(t >= 0)
@@ -741,12 +740,12 @@ trait GeneralMacros {
           case _ => abort(msg)
         }
         //directly using the java lib `require` resulted in compiler crash, so we use wrapped require instead
-        case msg : CalcNLit => CalcNLit.Boolean(q"{_root_.singleton.ops.impl._require(false, $msg); false}")
+        case CalcNLit.String(msg) => CalcNLit.Boolean(q"{_root_.singleton.ops.impl._require(false, $msg); false}")
         case _ => unsupported()
       }
-      case cond : CalcNLit => b match {
+      case CalcNLit.Boolean(cond) => b match {
         //directly using the java lib `require` resulted in compiler crash, so we use wrapped require instead
-        case msg : CalcVal => CalcNLit.Boolean(q"{_root_.singleton.ops.impl._require($cond, $msg); true}")
+        case CalcVal.String(msg, msgt) => CalcNLit.Boolean(q"{_root_.singleton.ops.impl._require($cond, $msgt); true}")
         case _ => unsupported()
       }
       case _ => unsupported()
@@ -769,10 +768,7 @@ trait GeneralMacros {
         CalcVal(if(it) tt else et, q"if ($itt) $ttt else $ett")
       case _ => unsupported()
     }
-    def Next = b match {
-      case bv : CalcVal => bv
-      case _ => unsupported()
-    }
+    def Next = b
     def Plus = (a, b) match {
       case (CalcVal.Char(at, att), CalcVal.Char(bt, btt)) => CalcVal(at + bt, q"$att + $btt")
       case (CalcVal.Char(at, att), CalcVal.Int(bt, btt)) => CalcVal(at + bt, q"$att + $btt")
