@@ -227,14 +227,16 @@ trait GeneralMacros {
     def apply[T](valueRef : T, tree : Tree)(implicit unsupported : TypeSymbol) : CalcNLit =
       CalcNLit(CalcLit(valueRef), tree)
     def apply(calcTypeRef : Calc, tree : Tree)(implicit unsupported : TypeSymbol) : CalcNLit = {
-      if (calcTypeRef.isInstanceOf[Calc.Char]) Char(tree)
-      else if (calcTypeRef.isInstanceOf[Calc.Int]) Int(tree)
-      else if (calcTypeRef.isInstanceOf[Calc.Long]) Long(tree)
-      else if (calcTypeRef.isInstanceOf[Calc.Float]) Float(tree)
-      else if (calcTypeRef.isInstanceOf[Calc.Double]) Double(tree)
-      else if (calcTypeRef.isInstanceOf[Calc.String]) String(tree)
-      else if (calcTypeRef.isInstanceOf[Calc.Boolean]) Boolean(tree)
-      else abort("Unsupported type")
+      calcTypeRef match {
+        case (t : Calc.Char) => Char(tree)
+        case (t : Calc.Int) => Int(tree)
+        case (t : Calc.Long) => Long(tree)
+        case (t : Calc.Float) => Float(tree)
+        case (t : Calc.Double) => Double(tree)
+        case (t : Calc.String) => String(tree)
+        case (t : Calc.Boolean) => Boolean(tree)
+        case _ => abort("Unsupported type")
+      }
     }
     def unapply(arg: CalcNLit) : Option[Tree] = Some(arg.tree)
   }
