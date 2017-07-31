@@ -164,7 +164,6 @@ trait GeneralMacros {
       case Lit => CalcLit(value)
       case NLit => CalcNLit(value, tree)
     }
-//    def unapply(arg: CalcVal) : Option[arg.T] = Some(arg.value)
   }
 
   sealed trait CalcLit extends CalcVal {
