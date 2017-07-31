@@ -18,7 +18,14 @@ trait Op extends Serializable {
   val valueWide: OutWide
 }
 
+protected[singleton] trait OpGen[O <: Op] {type Out; val value : Out}
+protected[singleton] object OpGen {
+  type Aux[O <: Op, Ret_Out] = OpGen[O] {type Out = Ret_Out}
+  implicit def impl[O <: Op](implicit o: O) : Aux[O, o.Out] = new OpGen[O] {type Out = o.Out; val value = o.value.asInstanceOf[o.Out]}
+}
+
 trait OpCast[T, O <: Op] {type Out <: T; type Value = Out; val value : Value}
+
 
 @scala.annotation.implicitNotFound(msg = "Unable to prove type argument is a Nat.")
 trait OpNat[O <: Op] extends OpCast[Nat, O]
