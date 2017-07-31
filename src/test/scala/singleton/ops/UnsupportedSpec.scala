@@ -28,12 +28,12 @@ class UnsupportedSpec extends Properties("UnsupportedSpec") {
   property("Log") = wellTyped {illTyped("""implicitly[Log[true]]""")}
   property("Log10") = wellTyped {illTyped("""implicitly[Log10[true]]""")}
   property("Reverse") = wellTyped {illTyped("""implicitly[Reverse[true]]""")}
-  property("Not") = wellTyped {illTyped("""implicitly[Not["a"]]""")}
+  property("Not") = wellTyped {illTyped("""implicitly[!["a"]]""")}
   property("Require") = wellTyped {
     val a = true
-    illTyped("""implicitly[Require[false,false]]""")
-    illTyped("""implicitly[Require[a.type,11]]""")
-    illTyped("""implicitly[Require[1,false]]""")
+    illTyped("""implicitly[RequireMsg[false,false]]""")
+    illTyped("""implicitly[RequireMsg[a.type,11]]""")
+    illTyped("""implicitly[RequireMsg[1,false]]""")
   }
   property("ITE") = wellTyped {illTyped("""implicitly[ITE[1,1,true]]""")}
   property("+") = wellTyped {illTyped("""implicitly[true + 2]""")}

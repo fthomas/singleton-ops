@@ -526,24 +526,6 @@ trait GeneralMacros {
     }
   }
 
-  def extractValueFromTwoFace[T](tfTree : c.Tree)(implicit annotatedSym : TypeSymbol) : CalcVal = {
-    val typedTree = c.typecheck(tfTree)
-    extractSingletonValue(typedTree.tpe) match {
-      case t : CalcLit => t
-      case t : CalcTFType => CalcNLit(t, q"$tfTree.getValue")
-      case t => CalcNLit(t, tfTree)
-    }
-  }
-
-  def evalTyped[T](tree: Tree)(implicit annotatedSym : TypeSymbol): Constant = {
-    try {
-      Constant(c.eval(c.Expr(c.untypecheck(tree))))
-    } catch {
-      case e: TypecheckException =>
-        val msg = e.getMessage
-        abort(s"Unexpected error during type check.\nMessage: $msg\nType: $tree\nRaw: ${showRaw(tree)}" )
-    }
-  }
 
   ///////////////////////////////////////////////////////////////////////////////////////////
   // Three operands (Generic)
@@ -625,7 +607,6 @@ trait GeneralMacros {
     }
     def IsNat = a match {
       case CalcLit.Int(t) => CalcLit(t >= 0)
-      case CalcNLit.Int(tt) => CalcNLit.Boolean(q"$tt >= 0")
       case _ => CalcLit(false)
     }
     def IsChar = a match {
