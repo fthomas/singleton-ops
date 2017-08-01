@@ -323,11 +323,14 @@ trait GeneralMacros {
         case (funcTypes.Arg, Some(CalcLit.Int(argNum))) =>
           unapplyOpArg(args(2)) match { //Checking the argument type
             case (Some(t : CalcLit)) => Some(t) //Literal argument is just a literal
-            case (Some(t)) => //Got a type, so returning argument name
-              val term = TermName(s"arg$argNum")
-              Some(CalcNLit(t, q"$term"))
-            case _ =>
-              None
+            case _ => //Got a type, so returning argument name
+              unapply(args(3)) match {
+                case Some(t: CalcType) =>
+                  val term = TermName(s"arg$argNum")
+                  Some(CalcNLit(t, q"$term"))
+                case _ =>
+                  None
+              }
           }
 
         case _ => //regular cases
