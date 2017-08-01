@@ -407,7 +407,19 @@ trait GeneralMacros {
           else
             unapply(tpDealias)
         case TypeRef(pre, sym, Nil) =>
-          unapply(sym.info asSeenFrom (pre, sym.owner))
+          unapply(sym.info asSeenFrom (pre, sym.owner)) match {
+            case Some(t : CalcVal) =>
+              //Values (literal/non-literal) are OK and returned properly.
+              Some(t)
+            case _ =>
+              //There can be cases, like in the following example, where we can extract a non-literal value.
+              //  def foo2[W](w : TwoFace.Int[W])(implicit tfs : TwoFace.Int.Shell1[Negate, W, Int]) = -w+1
+              //We want to calculate `-w+1`, even though we have not provided an complete implicit.
+              //While returning `TwoFace.Int[Int](-w+1)` is possible in this case, we would rather reserve
+              //the ability to have a literal return type, so `TwoFace.Int[Negate[W]+1](-w+1)` is returned.
+              //So even if we can have a `Some(CalcType)` returning, we force it as `None`.
+              None
+          }
         case SingleType(pre, sym) =>
           unapply(sym.info asSeenFrom (pre, sym.owner))
         case ConstantType(Constant(t)) => Some(CalcLit(t))
@@ -1227,7 +1239,7 @@ trait GeneralMacros {
            """
         case _ => extractionFailed(shellTpe)
       }
-      //      print(showCode(genTree))
+//            print(showCode(genTree))
       genTree
     }
     def shell2(shellAliasTpe : TypeSymbol) : c.Tree = {
