@@ -16,11 +16,17 @@ object TwoFaceAny {
 
   trait Builder[TF[T], Face, Shl1[_,_,_,_], Shl2[_,_,_,_,_,_], Shl3[_,_,_,_,_,_,_,_]] {
     type Shell1[Func[_], Arg1, Arg1Wide] =
-      Shl1[Func[Arg1], Func[Arg[1, Arg1]], Arg1, Arg1Wide]
+      Shl1[Func[Arg1],
+           Func[Arg[1, Arg1, Arg1Wide]],
+           Arg1, Arg1Wide]
     type Shell2[Func[_,_], Arg1, Arg1Wide, Arg2, Arg2Wide] =
-      Shl2[Func[Arg1, Arg2], Func[Arg[1, Arg1], Arg[2, Arg2]], Arg1, Arg1Wide, Arg2, Arg2Wide]
+      Shl2[Func[Arg1, Arg2],
+           Func[Arg[1, Arg1, Arg1Wide], Arg[2, Arg2, Arg2Wide]],
+           Arg1, Arg1Wide, Arg2, Arg2Wide]
     type Shell3[Func[_,_,_], Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide] =
-      Shl3[Func[Arg1, Arg2, Arg3], Func[Arg[1, Arg1], Arg[2, Arg2], Arg[3, Arg3]], Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]
+      Shl3[Func[Arg1, Arg2, Arg3],
+           Func[Arg[1, Arg1, Arg1Wide], Arg[2, Arg2, Arg2Wide], Arg[3, Arg3, Arg3Wide]],
+           Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]
     protected[singleton] def create[T](value : Face) : TF[T]
     implicit def apply[T <: Face with Singleton](value : T)(implicit tfb : Builder[TF, Face, Shl1, Shl2, Shl3])
     : TF[T] =  tfb.create[T](value)
