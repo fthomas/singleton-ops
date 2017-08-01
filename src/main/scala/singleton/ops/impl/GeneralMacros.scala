@@ -9,7 +9,6 @@ trait GeneralMacros {
 
   import c.universe._
 
-
   object funcTypes {
     val Arg = symbolOf[OpId.Arg]
     val AcceptNonLiteral = symbolOf[OpId.AcceptNonLiteral]
