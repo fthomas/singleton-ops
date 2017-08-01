@@ -343,4 +343,20 @@ class TwoFaceLongSpec extends Properties("TwoFace.Long") {
     implicitly[ret.Out =:= Long]
     ret.value == fin
   }
+
+  def noImplFoo[W](w : TwoFace.Long[W]) = -w //Missing twoface shell implicit
+  property("Unavailable Implicit Safe TwoFace Shell") = {
+    val ret = noImplFoo(2L)
+    implicitly[ret.type <:< TwoFace.Long[Negate[2L]]]
+    val retSimple = ret.simplify
+    implicitly[retSimple.type <:< TwoFace.Long[-2L]]
+    retSimple.getValue == -2L
+  }
+  property("Unavailable Implicit Unsafe TwoFace Shell") = {
+    val ret = noImplFoo(us(2L))
+    implicitly[ret.type <:< TwoFace.Long[Negate[Long]]]
+    val retSimple = ret.simplify
+    implicitly[retSimple.type <:< TwoFace.Long[Long]]
+    retSimple.getValue == -2L
+  }
 }

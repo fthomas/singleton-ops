@@ -371,4 +371,20 @@ class TwoFaceDoubleSpec extends Properties("TwoFace.Double") {
     implicitly[ret.Out =:= Double]
     ret.value == fin
   }
+
+  def noImplFoo[W](w : TwoFace.Double[W]) = -w //Missing twoface shell implicit
+  property("Unavailable Implicit Safe TwoFace Shell") = {
+    val ret = noImplFoo(2.0)
+    implicitly[ret.type <:< TwoFace.Double[Negate[2.0]]]
+    val retSimple = ret.simplify
+    implicitly[retSimple.type <:< TwoFace.Double[-2.0]]
+    retSimple.getValue == -2.0
+  }
+  property("Unavailable Implicit Unsafe TwoFace Shell") = {
+    val ret = noImplFoo(us(2.0))
+    implicitly[ret.type <:< TwoFace.Double[Negate[Double]]]
+    val retSimple = ret.simplify
+    implicitly[retSimple.type <:< TwoFace.Double[Double]]
+    retSimple.getValue == -2.0
+  }
 }

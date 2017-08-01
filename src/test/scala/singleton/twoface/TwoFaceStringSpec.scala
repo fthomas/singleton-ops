@@ -100,4 +100,20 @@ class TwoFaceStringSpec extends Properties("TwoFace.String") {
     implicitly[ret.Out =:= String]
     ret.value == fin
   }
+  
+  def noImplFoo[W](w : TwoFace.String[W]) = w + w //Missing twoface shell implicit
+  property("Unavailable Implicit Safe TwoFace Shell") = {
+    val ret = noImplFoo("Ma")
+    implicitly[ret.type <:< TwoFace.String[+["Ma","Ma"]]]
+    val retSimple = ret.simplify
+    implicitly[retSimple.type <:< TwoFace.String["MaMa"]]
+    retSimple.getValue == "MaMa"
+  }
+  property("Unavailable Implicit Unsafe TwoFace Shell") = {
+    val ret = noImplFoo(us("Ma"))
+    implicitly[ret.type <:< TwoFace.String[+[String, String]]]
+    val retSimple = ret.simplify
+    implicitly[retSimple.type <:< TwoFace.String[String]]
+    retSimple.getValue == "MaMa"
+  }
 }

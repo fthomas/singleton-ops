@@ -3,7 +3,6 @@ package singleton.twoface.impl
 import singleton.ops._
 
 trait TwoFaceAny[Face, T] extends Any {
-  type ShellArg = Tuple2[T, Face]
   def isLiteral(implicit rt : RunTime[T]) : scala.Boolean = !rt
   @inline def getValue : Face
   override def toString = getValue.toString
@@ -136,6 +135,9 @@ object TwoFaceAny {
     def toFloat(implicit tfs : Float.Shell1[ToFloat, T, scala.Char]) = tfs(this)
     def toDouble(implicit tfs : Double.Shell1[ToDouble, T, scala.Char]) = tfs(this)
     def toStringTF(implicit tfs : String.Shell1[ToString, T, scala.Char]) = tfs(this)
+
+    def simplify(implicit id : AcceptNonLiteral[this.type]) : Char[id.Out] =
+      Char.create[id.Out](id.valueWide.asInstanceOf[scala.Char])
   }
   final class _Char[T](val value : scala.Char) extends AnyVal with TwoFaceAny.Char[T] {
     @inline def getValue : scala.Char = value
@@ -243,6 +245,9 @@ object TwoFaceAny {
     def toFloat(implicit tfs : Float.Shell1[ToFloat, T, scala.Int]) = tfs(this)
     def toDouble(implicit tfs : Double.Shell1[ToDouble, T, scala.Int]) = tfs(this)
     def toStringTF(implicit tfs : String.Shell1[ToString, T, scala.Int]) = tfs(this)
+
+    def simplify(implicit id : AcceptNonLiteral[this.type]) : Int[id.Out] =
+      Int.create[id.Out](id.valueWide.asInstanceOf[scala.Int])
   }
   final class _Int[T](val value : scala.Int) extends AnyVal with TwoFaceAny.Int[T] {
     @inline def getValue : scala.Int = value
@@ -351,6 +356,9 @@ object TwoFaceAny {
     def toFloat(implicit tfs : Float.Shell1[ToFloat, T, scala.Long]) = tfs(this)
     def toDouble(implicit tfs : Double.Shell1[ToDouble, T, scala.Long]) = tfs(this)
     def toStringTF(implicit tfs : String.Shell1[ToString, T, scala.Long]) = tfs(this)
+
+    def simplify(implicit id : AcceptNonLiteral[this.type]) : Long[id.Out] =
+      Long.create[id.Out](id.valueWide.asInstanceOf[scala.Long])
   }
 
   final class _Long[T](val value : scala.Long) extends AnyVal with TwoFaceAny.Long[T] {
@@ -460,6 +468,9 @@ object TwoFaceAny {
     def toLong(implicit tfs : Long.Shell1[ToLong, T, scala.Float]) = tfs(this)
     def toDouble(implicit tfs : Double.Shell1[ToDouble, T, scala.Float]) = tfs(this)
     def toStringTF(implicit tfs : String.Shell1[ToString, T, scala.Float]) = tfs(this)
+
+    def simplify(implicit id : AcceptNonLiteral[this.type]) : Float[id.Out] =
+      Float.create[id.Out](id.valueWide.asInstanceOf[scala.Float])
   }
   final class _Float[T](val value : scala.Float) extends AnyVal with TwoFaceAny.Float[T] {
     @inline def getValue : scala.Float = value
@@ -567,6 +578,9 @@ object TwoFaceAny {
     def toLong(implicit tfs : Long.Shell1[ToLong, T, scala.Double]) = tfs(this)
     def toFloat(implicit tfs : Float.Shell1[ToFloat, T, scala.Double]) = tfs(this)
     def toStringTF(implicit tfs : String.Shell1[ToString, T, scala.Double]) = tfs(this)
+
+    def simplify(implicit id : AcceptNonLiteral[this.type]) : Double[id.Out] =
+      Double.create[id.Out](id.valueWide.asInstanceOf[scala.Double])
   }
   final class _Double[T](val value : scala.Double) extends AnyVal with TwoFaceAny.Double[T] {
     @inline def getValue : scala.Double = value
@@ -594,6 +608,9 @@ object TwoFaceAny {
     def toLong(implicit tfs : Long.Shell1[ToLong, T, java.lang.String]) = tfs(this)
     def toFloat(implicit tfs : Float.Shell1[ToFloat, T, java.lang.String]) = tfs(this)
     def toDouble(implicit tfs : Double.Shell1[ToDouble, T, java.lang.String]) = tfs(this)
+
+    def simplify(implicit id : AcceptNonLiteral[this.type]) : String[id.Out] =
+      String.create[id.Out](id.valueWide.asInstanceOf[java.lang.String])
   }
   final class _String[T](val value : java.lang.String) extends AnyVal with TwoFaceAny.String[T] {
     @inline def getValue : java.lang.String = value
@@ -614,6 +631,9 @@ object TwoFaceAny {
     def || [R](r : Boolean[R])(implicit tfs : Boolean.Shell2[||, T, scala.Boolean, R, scala.Boolean]) = tfs(this, r)
     def unary_!(implicit tfs : Boolean.Shell1[!, T, scala.Boolean]) = tfs(this)
     def toStringTF(implicit tfs : String.Shell1[ToString, T, scala.Boolean]) = tfs(this)
+
+    def simplify(implicit id : AcceptNonLiteral[this.type]) : Boolean[id.Out] =
+      Boolean.create[id.Out](id.valueWide.asInstanceOf[scala.Boolean])
   }
   final class _Boolean[T](val value : scala.Boolean) extends AnyVal with TwoFaceAny.Boolean[T] {
     @inline def getValue : scala.Boolean = value

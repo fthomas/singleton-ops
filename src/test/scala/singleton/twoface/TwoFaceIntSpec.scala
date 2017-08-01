@@ -344,4 +344,19 @@ class TwoFaceIntSpec extends Properties("TwoFace.Int") {
     ret.value == fin
   }
 
+  def noImplFoo[W](w : TwoFace.Int[W]) = -w //Missing twoface shell implicit
+  property("Unavailable Implicit Safe TwoFace Shell") = {
+    val ret = noImplFoo(2)
+    implicitly[ret.type <:< TwoFace.Int[Negate[2]]]
+    val retSimple = ret.simplify
+    implicitly[retSimple.type <:< TwoFace.Int[-2]]
+    retSimple.getValue == -2
+  }
+  property("Unavailable Implicit Unsafe TwoFace Shell") = {
+    val ret = noImplFoo(us(2))
+    implicitly[ret.type <:< TwoFace.Int[Negate[Int]]]
+    val retSimple = ret.simplify
+    implicitly[retSimple.type <:< TwoFace.Int[Int]]
+    retSimple.getValue == -2
+  }
 }
