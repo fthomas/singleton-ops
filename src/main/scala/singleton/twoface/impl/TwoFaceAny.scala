@@ -27,7 +27,7 @@ object TwoFaceAny {
       Shl3[Func[Arg1, Arg2, Arg3],
            Func[Arg[1, Arg1, Arg1Wide], Arg[2, Arg2, Arg2Wide], Arg[3, Arg3, Arg3Wide]],
            Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]
-    protected[singleton] def create[T](value : Face) : TF[T]
+    def create[T](value : Face) : TF[T]
     implicit def apply[T <: Face with Singleton](value : T)(implicit tfb : Builder[TF, Face, Shl1, Shl2, Shl3])
     : TF[T] =  tfb.create[T](value)
     implicit def apply(value : Face)(implicit tfb : Builder[TF, Face, Shl1, Shl2, Shl3], di: DummyImplicit)
@@ -141,7 +141,7 @@ object TwoFaceAny {
     @inline def getValue : scala.Char = value
   }
   implicit object Char extends TwoFaceAny.Builder[Char, scala.Char, Shell.One.Char, Shell.Two.Char, Shell.Three.Char] {
-    protected[singleton] def create[T](value : scala.Char) = new _Char[T](value)
+    def create[T](value : scala.Char) = new _Char[T](value)
   }
 
   trait Int[T] extends Any with TwoFaceAny[scala.Int, T] {
@@ -248,7 +248,7 @@ object TwoFaceAny {
     @inline def getValue : scala.Int = value
   }
   implicit object Int extends TwoFaceAny.Builder[Int, scala.Int, Shell.One.Int, Shell.Two.Int, Shell.Three.Int] {
-    protected[singleton] def create[T](value : scala.Int) : Int[T] = new _Int[T](value)
+    def create[T](value : scala.Int) : Int[T] = new _Int[T](value)
     def numberOfLeadingZeros[T](t : Int[T])(implicit tfs : Int.Shell1[NumberOfLeadingZeros, T, scala.Int]) = tfs(t)
   }
 
@@ -357,7 +357,7 @@ object TwoFaceAny {
     @inline def getValue : scala.Long = value
   }
   implicit object Long extends TwoFaceAny.Builder[Long, scala.Long, Shell.One.Long, Shell.Two.Long, Shell.Three.Long] {
-    protected[singleton] def create[T](value : scala.Long) = new _Long[T](value)
+    def create[T](value : scala.Long) = new _Long[T](value)
     def numberOfLeadingZeros[T](t : Long[T])(implicit tfs : Int.Shell1[NumberOfLeadingZeros, T, scala.Long]) = tfs(t)
   }
 
@@ -465,7 +465,7 @@ object TwoFaceAny {
     @inline def getValue : scala.Float = value
   }
   implicit object Float extends TwoFaceAny.Builder[Float, scala.Float, Shell.One.Float, Shell.Two.Float, Shell.Three.Float] {
-    protected[singleton] def create[T](value : scala.Float) = new _Float[T](value)
+    def create[T](value : scala.Float) = new _Float[T](value)
   }
 
   trait Double[T] extends Any with TwoFaceAny[scala.Double, T] {
@@ -572,7 +572,7 @@ object TwoFaceAny {
     @inline def getValue : scala.Double = value
   }
   implicit object Double extends TwoFaceAny.Builder[Double, scala.Double, Shell.One.Double, Shell.Two.Double, Shell.Three.Double] {
-    protected[singleton] def create[T](value : scala.Double) = new _Double[T](value)
+    def create[T](value : scala.Double) = new _Double[T](value)
   }
 
   trait String[T] extends Any with TwoFaceAny[java.lang.String, T] {
@@ -599,7 +599,7 @@ object TwoFaceAny {
     @inline def getValue : java.lang.String = value
   }
   implicit object String extends TwoFaceAny.Builder[String, java.lang.String, Shell.One.String, Shell.Two.String, Shell.Three.String] {
-    protected[singleton] def create[T](value : java.lang.String) = new _String[T](value)
+    def create[T](value : java.lang.String) = new _String[T](value)
   }
 
   trait Boolean[T] extends Any with TwoFaceAny[scala.Boolean, T] {
@@ -619,7 +619,7 @@ object TwoFaceAny {
     @inline def getValue : scala.Boolean = value
   }
   implicit object Boolean extends TwoFaceAny.Builder[Boolean, scala.Boolean, Shell.One.Boolean, Shell.Two.Boolean, Shell.Three.Boolean] {
-    protected[singleton] def create[T](value : scala.Boolean) = new _Boolean[T](value)
+    def create[T](value : scala.Boolean) = new _Boolean[T](value)
   }
 
 }

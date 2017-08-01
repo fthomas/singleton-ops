@@ -512,7 +512,7 @@ trait GeneralMacros {
 
   def extractSingletonValue(tpe: Type)(implicit annotatedSym : TypeSymbol): Calc = {
     val value = Const.unapply(tpe) match {
-      case None => extractionFailed(tpe)
+      case None => CalcUnknown(tpe)
       case Some(calc) => calc
     }
     value
@@ -1220,84 +1220,57 @@ trait GeneralMacros {
   : TwoFaceShellMaterializer[Shell] = new TwoFaceShellMaterializer[Shell](weakTypeOf[Shell])
 
   final class TwoFaceShellMaterializer[Shell](shellTpe : Type) {
-    def shell1(shellAliasTpe : TypeSymbol) : c.Tree = {
+    def shell(shellAliasTpe : TypeSymbol) : c.Tree = {
       implicit val annotatedSym : TypeSymbol = shellAliasTpe
       val funcApplyTpe = shellTpe.typeArgs(0)
       val funcArgsTpe = shellTpe.typeArgs(1)
-      val arg1Tpe = shellTpe.typeArgs(2)
-      val arg1WideTpe = shellTpe.typeArgs(3)
-      val outTpe = extractSingletonValue(funcApplyTpe).tpe
-      val tfTerm = TermName(outTpe.widen.typeSymbol.name.toString)
-      val tfType = TypeName(outTpe.widen.typeSymbol.name.toString)
-      val genTree = extractSingletonValue(funcArgsTpe) match {
-        case (t : CalcVal) =>
-          q"""
-             new $shellTpe {
-               type Out = $outTpe
-               type TF[T] = _root_.singleton.twoface.TwoFace.$tfType[T]
-               def apply(arg1 : $arg1WideTpe) : _root_.singleton.twoface.TwoFace.$tfType[$outTpe] = {
-                 _root_.singleton.twoface.TwoFace.$tfTerm($t)
-               }
-             }
-           """
+      val (applyBodyTree, tfName) = extractSingletonValue(funcArgsTpe) match {
+        case (t: CalcVal) => (t.tree, t.tpe.widen.typeSymbol.name.toString)
         case _ => extractionFailed(shellTpe)
       }
-//            print(showCode(genTree))
-      genTree
-    }
-    def shell2(shellAliasTpe : TypeSymbol) : c.Tree = {
-      implicit val annotatedSym : TypeSymbol = shellAliasTpe
-      val funcApplyTpe = shellTpe.typeArgs(0)
-      val funcArgsTpe = shellTpe.typeArgs(1)
-      val arg1Tpe = shellTpe.typeArgs(2)
-      val arg1WideTpe = shellTpe.typeArgs(3)
-      val arg2Tpe = shellTpe.typeArgs(4)
-      val arg2WideTpe = shellTpe.typeArgs(5)
+      val tfTerm = TermName(tfName)
+      val tfType = TypeName(tfName)
       val outTpe = extractSingletonValue(funcApplyTpe).tpe
-      val tfTerm = TermName(outTpe.widen.typeSymbol.name.toString)
-      val tfType = TypeName(outTpe.widen.typeSymbol.name.toString)
-      val genTree = extractSingletonValue(funcArgsTpe) match {
-        case (t : CalcVal) =>
+      val genTree = shellTpe.typeArgs.length match {
+        case 4 =>
+          val arg1WideTpe = shellTpe.typeArgs(3)
           q"""
-             new $shellTpe {
-               type Out = $outTpe
-               type TF[T] = _root_.singleton.twoface.TwoFace.$tfType[T]
-               def apply(arg1 : $arg1WideTpe, arg2 : $arg2WideTpe) : _root_.singleton.twoface.TwoFace.$tfType[$outTpe] = {
-                 _root_.singleton.twoface.TwoFace.$tfTerm($t)
-               }
+           new $shellTpe {
+             type Out = $outTpe
+             type TF[T] = _root_.singleton.twoface.TwoFace.$tfType[T]
+             def apply(arg1 : $arg1WideTpe) : _root_.singleton.twoface.TwoFace.$tfType[$outTpe] = {
+               _root_.singleton.twoface.TwoFace.$tfTerm.create[$outTpe]($applyBodyTree)
              }
-           """
+           }
+          """
+        case 6 =>
+          val arg1WideTpe = shellTpe.typeArgs(3)
+          val arg2WideTpe = shellTpe.typeArgs(5)
+          q"""
+           new $shellTpe {
+             type Out = $outTpe
+             type TF[T] = _root_.singleton.twoface.TwoFace.$tfType[T]
+             def apply(arg1 : $arg1WideTpe, arg2 : $arg2WideTpe) : _root_.singleton.twoface.TwoFace.$tfType[$outTpe] = {
+               _root_.singleton.twoface.TwoFace.$tfTerm.create[$outTpe]($applyBodyTree)
+             }
+           }
+          """
+        case 8 =>
+          val arg1WideTpe = shellTpe.typeArgs(3)
+          val arg2WideTpe = shellTpe.typeArgs(5)
+          val arg3WideTpe = shellTpe.typeArgs(7)
+          q"""
+           new $shellTpe {
+             type Out = $outTpe
+             type TF[T] = _root_.singleton.twoface.TwoFace.$tfType[T]
+             def apply(arg1 : $arg1WideTpe, arg2 : $arg2WideTpe, arg3 : $arg3WideTpe) : _root_.singleton.twoface.TwoFace.$tfType[$outTpe] = {
+               _root_.singleton.twoface.TwoFace.$tfTerm.create[$outTpe]($applyBodyTree)
+             }
+           }
+          """
         case _ => extractionFailed(shellTpe)
       }
-//      print(showCode(genTree))
-      genTree
-    }
-    def shell3(shellAliasTpe : TypeSymbol) : c.Tree = {
-      implicit val annotatedSym : TypeSymbol = shellAliasTpe
-      val funcApplyTpe = shellTpe.typeArgs(0)
-      val funcArgsTpe = shellTpe.typeArgs(1)
-      val arg1Tpe = shellTpe.typeArgs(2)
-      val arg1WideTpe = shellTpe.typeArgs(3)
-      val arg2Tpe = shellTpe.typeArgs(4)
-      val arg2WideTpe = shellTpe.typeArgs(5)
-      val arg3Tpe = shellTpe.typeArgs(6)
-      val arg3WideTpe = shellTpe.typeArgs(7)
-      val outTpe = extractSingletonValue(funcApplyTpe).tpe
-      val tfTerm = TermName(outTpe.widen.typeSymbol.name.toString)
-      val tfType = TypeName(outTpe.widen.typeSymbol.name.toString)
-      val genTree = extractSingletonValue(funcArgsTpe) match {
-        case (t : CalcVal) =>
-          q"""
-             new $shellTpe {
-               type Out = $outTpe
-               type TF[T] = _root_.singleton.twoface.TwoFace.$tfType[T]
-               def apply(arg1 : $arg1WideTpe, arg2 : $arg2WideTpe, arg3 : $arg3WideTpe) : _root_.singleton.twoface.TwoFace.$tfType[$outTpe] = {
-                 _root_.singleton.twoface.TwoFace.$tfTerm($t)
-               }
-             }
-           """
-        case _ => extractionFailed(shellTpe)
-      }
+
       //      print(showCode(genTree))
       genTree
     }

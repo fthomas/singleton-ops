@@ -31,145 +31,145 @@ object Shell {
 //      }
 //    implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide, Ret_Out, Ret_TF[T]]:
 //    Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Ret_Out, Ret_TF] =
-//    macro Macro.shell1[FuncApply, FuncArgs, Arg1, Arg1Wide]
+//    macro Macro.shell[FuncApply, FuncArgs, Arg1, Arg1Wide]
 //
 //    final class Macro(val c: whitebox.Context) extends GeneralMacros {
-//      def shell1[FuncApply, FuncArgs, Arg1, Arg1Wide]
+//      def shell[FuncApply, FuncArgs, Arg1, Arg1Wide]
 //      (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
 //       arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide]) : c.Tree = TwoFaceShellMaterializer[
-//        One[FuncApply, FuncArgs, Arg1, Arg1Wide]].shell1()
+//        One[FuncApply, FuncArgs, Arg1, Arg1Wide]].shell()
 //    }
 //
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait Char[FuncApply, FuncArgs, Arg1, Arg1Wide] {
-      type Out <: scala.Char
+      type Out
       def apply(arg1 : Arg1Wide) : TwoFaceAny.Char[Out]
     }
     @bundle
     object Char {
       implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide]:
       Char[FuncApply, FuncArgs, Arg1, Arg1Wide] =
-      macro Macro.shell1[FuncApply, FuncArgs, Arg1, Arg1Wide]
+      macro Macro.shell[FuncApply, FuncArgs, Arg1, Arg1Wide]
 
       final class Macro(val c: whitebox.Context) extends GeneralMacros {
-        def shell1[FuncApply, FuncArgs, Arg1, Arg1Wide]
+        def shell[FuncApply, FuncArgs, Arg1, Arg1Wide]
         (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide]) : c.Tree = TwoFaceShellMaterializer[
-          Char[FuncApply, FuncArgs, Arg1, Arg1Wide]].shell1(c.symbolOf[TwoFaceAny.Char.Shell1[F,_,_]])
+          Char[FuncApply, FuncArgs, Arg1, Arg1Wide]].shell(c.symbolOf[TwoFaceAny.Char.Shell1[F,_,_]])
       }
     }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait Int[FuncApply, FuncArgs, Arg1, Arg1Wide] {
-      type Out <: scala.Int
+      type Out
       def apply(arg1 : Arg1Wide) : TwoFaceAny.Int[Out]
     }
     @bundle
     object Int {
       implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide]:
       Int[FuncApply, FuncArgs, Arg1, Arg1Wide] =
-      macro Macro.shell1[FuncApply, FuncArgs, Arg1, Arg1Wide]
+      macro Macro.shell[FuncApply, FuncArgs, Arg1, Arg1Wide]
 
       final class Macro(val c: whitebox.Context) extends GeneralMacros {
-        def shell1[FuncApply, FuncArgs, Arg1, Arg1Wide]
+        def shell[FuncApply, FuncArgs, Arg1, Arg1Wide]
         (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide]) : c.Tree = TwoFaceShellMaterializer[
-          Int[FuncApply, FuncArgs, Arg1, Arg1Wide]].shell1(c.symbolOf[TwoFaceAny.Int.Shell1[F,_,_]])
+          Int[FuncApply, FuncArgs, Arg1, Arg1Wide]].shell(c.symbolOf[TwoFaceAny.Int.Shell1[F,_,_]])
       }
     }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait Long[FuncApply, FuncArgs, Arg1, Arg1Wide] {
-      type Out <: scala.Long
+      type Out
       def apply(arg1 : Arg1Wide) : TwoFaceAny.Long[Out]
     }
     @bundle
     object Long {
       implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide]:
       Long[FuncApply, FuncArgs, Arg1, Arg1Wide] =
-      macro Macro.shell1[FuncApply, FuncArgs, Arg1, Arg1Wide]
+      macro Macro.shell[FuncApply, FuncArgs, Arg1, Arg1Wide]
 
       final class Macro(val c: whitebox.Context) extends GeneralMacros {
-        def shell1[FuncApply, FuncArgs, Arg1, Arg1Wide]
+        def shell[FuncApply, FuncArgs, Arg1, Arg1Wide]
         (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide]) : c.Tree = TwoFaceShellMaterializer[
-          Long[FuncApply, FuncArgs, Arg1, Arg1Wide]].shell1(c.symbolOf[TwoFaceAny.Long.Shell1[F,_,_]])
+          Long[FuncApply, FuncArgs, Arg1, Arg1Wide]].shell(c.symbolOf[TwoFaceAny.Long.Shell1[F,_,_]])
       }
     }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait Float[FuncApply, FuncArgs, Arg1, Arg1Wide] {
-      type Out <: scala.Float
+      type Out
       def apply(arg1 : Arg1Wide) : TwoFaceAny.Float[Out]
     }
     @bundle
     object Float {
       implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide]:
       Float[FuncApply, FuncArgs, Arg1, Arg1Wide] =
-      macro Macro.shell1[FuncApply, FuncArgs, Arg1, Arg1Wide]
+      macro Macro.shell[FuncApply, FuncArgs, Arg1, Arg1Wide]
 
       final class Macro(val c: whitebox.Context) extends GeneralMacros {
-        def shell1[FuncApply, FuncArgs, Arg1, Arg1Wide]
+        def shell[FuncApply, FuncArgs, Arg1, Arg1Wide]
         (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide]) : c.Tree = TwoFaceShellMaterializer[
-          Float[FuncApply, FuncArgs, Arg1, Arg1Wide]].shell1(c.symbolOf[TwoFaceAny.Float.Shell1[F,_,_]])
+          Float[FuncApply, FuncArgs, Arg1, Arg1Wide]].shell(c.symbolOf[TwoFaceAny.Float.Shell1[F,_,_]])
       }
     }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait Double[FuncApply, FuncArgs, Arg1, Arg1Wide] {
-      type Out <: scala.Double
+      type Out
       def apply(arg1 : Arg1Wide) : TwoFaceAny.Double[Out]
     }
     @bundle
     object Double {
       implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide]:
       Double[FuncApply, FuncArgs, Arg1, Arg1Wide] =
-      macro Macro.shell1[FuncApply, FuncArgs, Arg1, Arg1Wide]
+      macro Macro.shell[FuncApply, FuncArgs, Arg1, Arg1Wide]
 
       final class Macro(val c: whitebox.Context) extends GeneralMacros {
-        def shell1[FuncApply, FuncArgs, Arg1, Arg1Wide]
+        def shell[FuncApply, FuncArgs, Arg1, Arg1Wide]
         (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide]) : c.Tree = TwoFaceShellMaterializer[
-          Double[FuncApply, FuncArgs, Arg1, Arg1Wide]].shell1(c.symbolOf[TwoFaceAny.Double.Shell1[F,_,_]])
+          Double[FuncApply, FuncArgs, Arg1, Arg1Wide]].shell(c.symbolOf[TwoFaceAny.Double.Shell1[F,_,_]])
       }
     }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait String[FuncApply, FuncArgs, Arg1, Arg1Wide] {
-      type Out <: java.lang.String
+      type Out
       def apply(arg1 : Arg1Wide) : TwoFaceAny.String[Out]
     }
     @bundle
     object String {
       implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide]:
       String[FuncApply, FuncArgs, Arg1, Arg1Wide] =
-      macro Macro.shell1[FuncApply, FuncArgs, Arg1, Arg1Wide]
+      macro Macro.shell[FuncApply, FuncArgs, Arg1, Arg1Wide]
 
       final class Macro(val c: whitebox.Context) extends GeneralMacros {
-        def shell1[FuncApply, FuncArgs, Arg1, Arg1Wide]
+        def shell[FuncApply, FuncArgs, Arg1, Arg1Wide]
         (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide]) : c.Tree = TwoFaceShellMaterializer[
-          String[FuncApply, FuncArgs, Arg1, Arg1Wide]].shell1(c.symbolOf[TwoFaceAny.String.Shell1[F,_,_]])
+          String[FuncApply, FuncArgs, Arg1, Arg1Wide]].shell(c.symbolOf[TwoFaceAny.String.Shell1[F,_,_]])
       }
     }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait Boolean[FuncApply, FuncArgs, Arg1, Arg1Wide] {
-      type Out <: scala.Boolean
+      type Out
       def apply(arg1 : Arg1Wide) : TwoFaceAny.Boolean[Out]
     }
     @bundle
     object Boolean {
       implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide]:
       Boolean[FuncApply, FuncArgs, Arg1, Arg1Wide] =
-      macro Macro.shell1[FuncApply, FuncArgs, Arg1, Arg1Wide]
+      macro Macro.shell[FuncApply, FuncArgs, Arg1, Arg1Wide]
 
       final class Macro(val c: whitebox.Context) extends GeneralMacros {
-        def shell1[FuncApply, FuncArgs, Arg1, Arg1Wide]
+        def shell[FuncApply, FuncArgs, Arg1, Arg1Wide]
         (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide]) : c.Tree = TwoFaceShellMaterializer[
-          Boolean[FuncApply, FuncArgs, Arg1, Arg1Wide]].shell1(c.symbolOf[TwoFaceAny.Boolean.Shell1[F,_,_]])
+          Boolean[FuncApply, FuncArgs, Arg1, Arg1Wide]].shell(c.symbolOf[TwoFaceAny.Boolean.Shell1[F,_,_]])
       }
     }
   }
@@ -191,153 +191,153 @@ object Shell {
 //      }
 //    implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Ret_Out, Ret_TF[T]]:
 //    Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Ret_Out, Ret_TF] =
-//    macro Macro.shell2[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
+//    macro Macro.shell[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
 //
 //    final class Macro(val c: whitebox.Context) extends GeneralMacros {
-//      def shell2[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
+//      def shell[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
 //      (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
 //       arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide], arg2 : c.WeakTypeTag[Arg2],
 //       arg2Wide : c.WeakTypeTag[Arg2Wide]) : c.Tree = TwoFaceShellMaterializer[
-//        Two[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]].shell2()
+//        Two[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]].shell()
 //    }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait Char[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] {
-      type Out <: scala.Char
+      type Out
       def apply(arg1 : Arg1Wide, arg2 : Arg2Wide) : TwoFaceAny.Char[Out]
     }
     @bundle
     object Char {
       implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]:
       Char[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] =
-      macro Macro.shell2[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
+      macro Macro.shell[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
 
       final class Macro(val c: whitebox.Context) extends GeneralMacros {
-        def shell2[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
+        def shell[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
         (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide], arg2 : c.WeakTypeTag[Arg2],
          arg2Wide : c.WeakTypeTag[Arg2Wide]) : c.Tree = TwoFaceShellMaterializer[
-          Char[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]].shell2(c.symbolOf[TwoFaceAny.Char.Shell2[F,_,_,_,_]])
+          Char[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]].shell(c.symbolOf[TwoFaceAny.Char.Shell2[F,_,_,_,_]])
       }
     }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait Int[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] {
-      type Out <: scala.Int
+      type Out
       def apply(arg1 : Arg1Wide, arg2 : Arg2Wide) : TwoFaceAny.Int[Out]
     }
     @bundle
     object Int {
       implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]:
       Int[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] =
-      macro Macro.shell2[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
+      macro Macro.shell[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
 
       final class Macro(val c: whitebox.Context) extends GeneralMacros {
-        def shell2[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
+        def shell[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
         (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide], arg2 : c.WeakTypeTag[Arg2],
          arg2Wide : c.WeakTypeTag[Arg2Wide]) : c.Tree = TwoFaceShellMaterializer[
-          Int[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]].shell2(c.symbolOf[TwoFaceAny.Int.Shell2[F,_,_,_,_]])
+          Int[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]].shell(c.symbolOf[TwoFaceAny.Int.Shell2[F,_,_,_,_]])
       }
     }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait Long[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] {
-      type Out <: scala.Long
+      type Out
       def apply(arg1 : Arg1Wide, arg2 : Arg2Wide) : TwoFaceAny.Long[Out]
     }
     @bundle
     object Long {
       implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]:
       Long[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] =
-      macro Macro.shell2[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
+      macro Macro.shell[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
 
       final class Macro(val c: whitebox.Context) extends GeneralMacros {
-        def shell2[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
+        def shell[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
         (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide], arg2 : c.WeakTypeTag[Arg2],
          arg2Wide : c.WeakTypeTag[Arg2Wide]) : c.Tree = TwoFaceShellMaterializer[
-          Long[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]].shell2(c.symbolOf[TwoFaceAny.Long.Shell2[F,_,_,_,_]])
+          Long[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]].shell(c.symbolOf[TwoFaceAny.Long.Shell2[F,_,_,_,_]])
       }
     }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait Float[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] {
-      type Out <: scala.Float
+      type Out
       def apply(arg1 : Arg1Wide, arg2 : Arg2Wide) : TwoFaceAny.Float[Out]
     }
     @bundle
     object Float {
       implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]:
       Float[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] =
-      macro Macro.shell2[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
+      macro Macro.shell[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
 
       final class Macro(val c: whitebox.Context) extends GeneralMacros {
-        def shell2[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
+        def shell[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
         (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide], arg2 : c.WeakTypeTag[Arg2],
          arg2Wide : c.WeakTypeTag[Arg2Wide]) : c.Tree = TwoFaceShellMaterializer[
-          Float[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]].shell2(c.symbolOf[TwoFaceAny.Float.Shell2[F,_,_,_,_]])
+          Float[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]].shell(c.symbolOf[TwoFaceAny.Float.Shell2[F,_,_,_,_]])
       }
     }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait Double[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] {
-      type Out <: scala.Double
+      type Out
       def apply(arg1 : Arg1Wide, arg2 : Arg2Wide) : TwoFaceAny.Double[Out]
     }
     @bundle
     object Double {
       implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]:
       Double[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] =
-      macro Macro.shell2[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
+      macro Macro.shell[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
 
       final class Macro(val c: whitebox.Context) extends GeneralMacros {
-        def shell2[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
+        def shell[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
         (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide], arg2 : c.WeakTypeTag[Arg2],
          arg2Wide : c.WeakTypeTag[Arg2Wide]) : c.Tree = TwoFaceShellMaterializer[
-          Double[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]].shell2(c.symbolOf[TwoFaceAny.String.Shell2[F,_,_,_,_]])
+          Double[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]].shell(c.symbolOf[TwoFaceAny.String.Shell2[F,_,_,_,_]])
       }
     }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait String[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] {
-      type Out <: java.lang.String
+      type Out
       def apply(arg1 : Arg1Wide, arg2 : Arg2Wide) : TwoFaceAny.String[Out]
     }
     @bundle
     object String {
       implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]:
       String[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] =
-      macro Macro.shell2[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
+      macro Macro.shell[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
 
       final class Macro(val c: whitebox.Context) extends GeneralMacros {
-        def shell2[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
+        def shell[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
         (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide], arg2 : c.WeakTypeTag[Arg2],
          arg2Wide : c.WeakTypeTag[Arg2Wide]) : c.Tree = TwoFaceShellMaterializer[
-          String[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]].shell2(c.symbolOf[TwoFaceAny.Boolean.Shell2[F,_,_,_,_]])
+          String[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]].shell(c.symbolOf[TwoFaceAny.Boolean.Shell2[F,_,_,_,_]])
       }
     }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait Boolean[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] {
-      type Out <: scala.Boolean
+      type Out
       def apply(arg1 : Arg1Wide, arg2 : Arg2Wide) : TwoFaceAny.Boolean[Out]
     }
     @bundle
     object Boolean {
       implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]:
       Boolean[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] =
-      macro Macro.shell2[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
+      macro Macro.shell[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
 
       final class Macro(val c: whitebox.Context) extends GeneralMacros {
-        def shell2[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
+        def shell[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
         (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide], arg2 : c.WeakTypeTag[Arg2],
          arg2Wide : c.WeakTypeTag[Arg2Wide]) : c.Tree = TwoFaceShellMaterializer[
-          Boolean[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]].shell2(c.symbolOf[TwoFaceAny.Boolean.Shell2[F,_,_,_,_]])
+          Boolean[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]].shell(c.symbolOf[TwoFaceAny.Boolean.Shell2[F,_,_,_,_]])
       }
     }
   }
@@ -361,161 +361,161 @@ object Shell {
 //      }
 //    implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide, Ret_Out, Ret_TF[T]]:
 //    Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide, Ret_Out, Ret_TF] =
-//    macro Macro.shell3[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]
+//    macro Macro.shell[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]
 //
 //    final class Macro(val c: whitebox.Context) extends GeneralMacros {
-//      def shell3[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]
+//      def shell[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]
 //      (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
 //       arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide], arg2 : c.WeakTypeTag[Arg2],
 //       arg2Wide : c.WeakTypeTag[Arg2Wide], arg3 : c.WeakTypeTag[Arg3],
 //       arg3Wide : c.WeakTypeTag[Arg3Wide]) : c.Tree = TwoFaceShellMaterializer[
-//        Three[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]].shell3()
+//        Three[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]].shell()
 //    }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait Char[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide] {
-      type Out <: scala.Char
+      type Out
       def apply(arg1 : Arg1Wide, arg2 : Arg2Wide, arg3 : Arg3Wide) : TwoFaceAny.Char[Out]
     }
     @bundle
     object Char {
       implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]:
       Char[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide] =
-      macro Macro.shell3[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]
+      macro Macro.shell[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]
 
       final class Macro(val c: whitebox.Context) extends GeneralMacros {
-        def shell3[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]
+        def shell[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]
         (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide], arg2 : c.WeakTypeTag[Arg2],
          arg2Wide : c.WeakTypeTag[Arg2Wide], arg3 : c.WeakTypeTag[Arg3],
          arg3Wide : c.WeakTypeTag[Arg3Wide]) : c.Tree = TwoFaceShellMaterializer[
-          Char[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]].shell3(c.symbolOf[TwoFaceAny.Char.Shell3[F,_,_,_,_,_,_]])
+          Char[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]].shell(c.symbolOf[TwoFaceAny.Char.Shell3[F,_,_,_,_,_,_]])
       }
     }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait Int[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide] {
-      type Out <: scala.Int
+      type Out
       def apply(arg1 : Arg1Wide, arg2 : Arg2Wide, arg3 : Arg3Wide) : TwoFaceAny.Int[Out]
     }
     @bundle
     object Int {
       implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]:
       Int[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide] =
-      macro Macro.shell3[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]
+      macro Macro.shell[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]
 
       final class Macro(val c: whitebox.Context) extends GeneralMacros {
-        def shell3[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]
+        def shell[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]
         (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide], arg2 : c.WeakTypeTag[Arg2],
          arg2Wide : c.WeakTypeTag[Arg2Wide], arg3 : c.WeakTypeTag[Arg3],
          arg3Wide : c.WeakTypeTag[Arg3Wide]) : c.Tree = TwoFaceShellMaterializer[
-          Int[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]].shell3(c.symbolOf[TwoFaceAny.Int.Shell3[F,_,_,_,_,_,_]])
+          Int[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]].shell(c.symbolOf[TwoFaceAny.Int.Shell3[F,_,_,_,_,_,_]])
       }
     }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait Long[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide] {
-      type Out <: scala.Long
+      type Out
       def apply(arg1 : Arg1Wide, arg2 : Arg2Wide, arg3 : Arg3Wide) : TwoFaceAny.Long[Out]
     }
     @bundle
     object Long {
       implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]:
       Long[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide] =
-      macro Macro.shell3[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]
+      macro Macro.shell[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]
 
       final class Macro(val c: whitebox.Context) extends GeneralMacros {
-        def shell3[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]
+        def shell[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]
         (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide], arg2 : c.WeakTypeTag[Arg2],
          arg2Wide : c.WeakTypeTag[Arg2Wide], arg3 : c.WeakTypeTag[Arg3],
          arg3Wide : c.WeakTypeTag[Arg3Wide]) : c.Tree = TwoFaceShellMaterializer[
-          Long[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]].shell3(c.symbolOf[TwoFaceAny.Long.Shell3[F,_,_,_,_,_,_]])
+          Long[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]].shell(c.symbolOf[TwoFaceAny.Long.Shell3[F,_,_,_,_,_,_]])
       }
     }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait Float[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide] {
-      type Out <: scala.Float
+      type Out
       def apply(arg1 : Arg1Wide, arg2 : Arg2Wide, arg3 : Arg3Wide) : TwoFaceAny.Float[Out]
     }
     @bundle
     object Float {
       implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]:
       Float[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide] =
-      macro Macro.shell3[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]
+      macro Macro.shell[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]
 
       final class Macro(val c: whitebox.Context) extends GeneralMacros {
-        def shell3[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]
+        def shell[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]
         (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide], arg2 : c.WeakTypeTag[Arg2],
          arg2Wide : c.WeakTypeTag[Arg2Wide], arg3 : c.WeakTypeTag[Arg3],
          arg3Wide : c.WeakTypeTag[Arg3Wide]) : c.Tree = TwoFaceShellMaterializer[
-          Float[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]].shell3(c.symbolOf[TwoFaceAny.Float.Shell3[F,_,_,_,_,_,_]])
+          Float[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]].shell(c.symbolOf[TwoFaceAny.Float.Shell3[F,_,_,_,_,_,_]])
       }
     }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait Double[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide] {
-      type Out <: scala.Double
+      type Out
       def apply(arg1 : Arg1Wide, arg2 : Arg2Wide, arg3 : Arg3Wide) : TwoFaceAny.Double[Out]
     }
     @bundle
     object Double {
       implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]:
       Double[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide] =
-      macro Macro.shell3[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]
+      macro Macro.shell[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]
 
       final class Macro(val c: whitebox.Context) extends GeneralMacros {
-        def shell3[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]
+        def shell[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]
         (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide], arg2 : c.WeakTypeTag[Arg2],
          arg2Wide : c.WeakTypeTag[Arg2Wide], arg3 : c.WeakTypeTag[Arg3],
          arg3Wide : c.WeakTypeTag[Arg3Wide]) : c.Tree = TwoFaceShellMaterializer[
-          Double[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]].shell3(c.symbolOf[TwoFaceAny.Double.Shell3[F,_,_,_,_,_,_]])
+          Double[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]].shell(c.symbolOf[TwoFaceAny.Double.Shell3[F,_,_,_,_,_,_]])
       }
     }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait String[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide] {
-      type Out <: java.lang.String
+      type Out
       def apply(arg1 : Arg1Wide, arg2 : Arg2Wide, arg3 : Arg3Wide) : TwoFaceAny.String[Out]
     }
     @bundle
     object String {
       implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]:
       String[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide] =
-      macro Macro.shell3[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]
+      macro Macro.shell[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]
 
       final class Macro(val c: whitebox.Context) extends GeneralMacros {
-        def shell3[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]
+        def shell[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]
         (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide], arg2 : c.WeakTypeTag[Arg2],
          arg2Wide : c.WeakTypeTag[Arg2Wide], arg3 : c.WeakTypeTag[Arg3],
          arg3Wide : c.WeakTypeTag[Arg3Wide]) : c.Tree = TwoFaceShellMaterializer[
-          String[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]].shell3(c.symbolOf[TwoFaceAny.String.Shell3[F,_,_,_,_,_,_]])
+          String[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]].shell(c.symbolOf[TwoFaceAny.String.Shell3[F,_,_,_,_,_,_]])
       }
     }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait Boolean[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide] {
-      type Out <: scala.Boolean
+      type Out
       def apply(arg1 : Arg1Wide, arg2 : Arg2Wide, arg3 : Arg3Wide) : TwoFaceAny.Boolean[Out]
     }
     @bundle
     object Boolean {
       implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]:
       Boolean[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide] =
-      macro Macro.shell3[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]
+      macro Macro.shell[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]
 
       final class Macro(val c: whitebox.Context) extends GeneralMacros {
-        def shell3[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]
+        def shell[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]
         (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide], arg2 : c.WeakTypeTag[Arg2],
          arg2Wide : c.WeakTypeTag[Arg2Wide], arg3 : c.WeakTypeTag[Arg3],
          arg3Wide : c.WeakTypeTag[Arg3Wide]) : c.Tree = TwoFaceShellMaterializer[
-          Boolean[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]].shell3(c.symbolOf[TwoFaceAny.Boolean.Shell3[F,_,_,_,_,_,_]])
+          Boolean[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]].shell(c.symbolOf[TwoFaceAny.Boolean.Shell3[F,_,_,_,_,_,_]])
       }
     }
   }
