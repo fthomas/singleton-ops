@@ -1,5 +1,7 @@
 package singleton.ops.impl
 import macrocompat.bundle
+import shapeless.tag
+import shapeless.tag.@@
 import singleton.twoface.impl.TwoFaceAny
 
 import scala.reflect.macros.whitebox
@@ -20,6 +22,7 @@ trait GeneralMacros {
     val ToFloat = symbolOf[OpId.ToFloat]
     val ToDouble = symbolOf[OpId.ToDouble]
     val ToString = symbolOf[OpId.ToString]
+    val ToSymbol = symbolOf[OpId.ToSymbol]
     val IsNat = symbolOf[OpId.IsNat]
     val IsChar = symbolOf[OpId.IsChar]
     val IsInt = symbolOf[OpId.IsInt]
@@ -28,6 +31,7 @@ trait GeneralMacros {
     val IsDouble = symbolOf[OpId.IsDouble]
     val IsString = symbolOf[OpId.IsString]
     val IsBoolean = symbolOf[OpId.IsBoolean]
+    val IsSymbol = symbolOf[OpId.IsSymbol]
     val Negate = symbolOf[OpId.Negate]
     val Abs = symbolOf[OpId.Abs]
     val NumberOfLeadingZeros = symbolOf[OpId.NumberOfLeadingZeros]
@@ -119,6 +123,7 @@ trait GeneralMacros {
     sealed trait Double extends Calc{type T = scala.Double; val tpe = typeOf[scala.Double]}
     sealed trait String extends Calc{type T = java.lang.String; val tpe = typeOf[java.lang.String]}
     sealed trait Boolean extends Calc{type T = scala.Boolean; val tpe = typeOf[scala.Boolean]}
+    sealed trait Symbol extends Calc{type T = scala.Symbol; val tpe = typeOf[scala.Symbol]}
   }
 
   sealed trait CalcVal extends Calc {
@@ -185,6 +190,7 @@ trait GeneralMacros {
       case t : scala.Double => Double(t)
       case t : java.lang.String => String(t)
       case t : scala.Boolean => Boolean(t)
+      case t : scala.Symbol => String(t.name.toString)
       case _ => abort(s"Unsupported literal type: $t")
     }
     def unapply(arg: CalcLit) : Option[arg.T] = Some(arg.value)
@@ -199,6 +205,7 @@ trait GeneralMacros {
     object Double extends CalcType with Calc.Double
     object String extends CalcType with Calc.String
     object Boolean extends CalcType with Calc.Boolean
+    object Symbol extends CalcType with Calc.Symbol
   }
 
   sealed trait CalcTFType extends Calc
@@ -278,6 +285,8 @@ trait GeneralMacros {
           Some(t)
         case Some(t : CalcNLit) =>
           Some(t)
+        case Some(t : Calc.Symbol) =>
+          Some(CalcNLit(CalcType.String, q"valueOf[$tp].name"))
         case Some(t : CalcTFType) =>
           Some(CalcNLit(t, q"valueOf[$tp].getValue"))
         case Some(t : CalcType) =>
@@ -353,6 +362,7 @@ trait GeneralMacros {
       tp match {
         case tp @ ExistentialType(_, _) => unapply(tp.underlying)
         case TypeBounds(lo, hi) => unapply(hi)
+        case SingletonSymbolType(s) => Some(CalcLit(s))
         case RefinedType(parents, scope) =>
           parents.iterator map unapply collectFirst { case Some(x) => x }
         case NullaryMethodType(tpe) => unapply(tpe)
@@ -367,6 +377,7 @@ trait GeneralMacros {
         case TypeRef(_, sym, _) if sym == symbolOf[Double] => Some(CalcType.Double)
         case TypeRef(_, sym, _) if sym == symbolOf[java.lang.String] => Some(CalcType.String)
         case TypeRef(_, sym, _) if sym == symbolOf[Boolean] => Some(CalcType.Boolean)
+        case TypeRef(_, sym, _) if sym == symbolOf[scala.Symbol] => Some(CalcType.Symbol)
         ////////////////////////////////////////////////////////////////////////
 
         ////////////////////////////////////////////////////////////////////////
@@ -434,6 +445,7 @@ trait GeneralMacros {
   }
   ////////////////////////////////////////////////////////////////////
 
+
   def abort(msg: String)(implicit annotatedSym : TypeSymbol): Nothing = {
     setAnnotation(msg)
     c.abort(c.enclosingPosition, msg)
@@ -479,6 +491,24 @@ trait GeneralMacros {
     val outTypeName = TypeName("OutNat")
     val outTpe = mkNatTpe(t)
     val outTree = q"new ${mkNatTpt(t)}"
+    q"""
+      new $opTpe {
+        type OutWide = $outWideTpe
+        type Out = $outTpe
+        type $outTypeName = $outTpe
+        final val value: $outTpe = $outTree
+        final val isLiteral = true
+        final val valueWide: $outWideTpe = $outWideLiteral
+      }
+      """
+  }
+
+  def genOpTreeSymbol(opTpe : Type, t: String) : Tree = {
+    val outTpe = SingletonSymbolType(t)
+    val outTree = mkSingletonSymbol(t)
+    val outWideTpe = typeOf[scala.Symbol]
+    val outWideLiteral = outTree
+    val outTypeName = TypeName("OutSymbol")
     q"""
       new $opTpe {
         type OutWide = $outWideTpe
@@ -559,14 +589,7 @@ trait GeneralMacros {
 
     def AcceptNonLiteral = a
     def Id = a
-    def ToNat = a match { //Has a special case to handle this in MaterializeOpAuxGen
-      case CalcVal.Char(t, tt) => CalcVal(t.toInt, q"$tt.toInt")
-      case CalcVal.Int(t, tt) => CalcVal(t.toInt, q"$tt.toInt")
-      case CalcVal.Long(t, tt) => CalcVal(t.toInt, q"$tt.toInt")
-      case CalcVal.Float(t, tt) => CalcVal(t.toInt, q"$tt.toInt")
-      case CalcVal.Double(t, tt) => CalcVal(t.toInt, q"$tt.toInt")
-      case _ => unsupported()
-    }
+    def ToNat = ToInt //Same handling, but also has a special case to handle this in MaterializeOpAuxGen
     def ToChar = a match {
       case CalcVal.Char(t, tt) => CalcVal(t.toChar, q"$tt.toChar")
       case CalcVal.Int(t, tt) => CalcVal(t.toChar, q"$tt.toChar")
@@ -620,6 +643,7 @@ trait GeneralMacros {
       case CalcVal.String(t, tt) => CalcVal(t.toString, q"$tt.toString")
       case CalcVal.Boolean(t, tt) => CalcVal(t.toString, q"$tt.toString")
     }
+    def ToSymbol = ToString //Same handling, but has also has a special case in MaterializeOpAuxGen
     def IsNat = a match {
       case CalcLit.Int(t) => CalcLit(t >= 0)
       case _ => CalcLit(false)
@@ -652,6 +676,7 @@ trait GeneralMacros {
       case t : Calc.Boolean => CalcLit(true)
       case _ => CalcLit(false)
     }
+    def IsSymbol = IsString
     def Negate = a match {
       case CalcVal.Char(t, tt) => CalcVal(-t, q"-$tt")
       case CalcVal.Int(t, tt) => CalcVal(-t, q"-$tt")
@@ -1143,6 +1168,7 @@ trait GeneralMacros {
       case funcTypes.ToFloat => ToFloat
       case funcTypes.ToDouble => ToDouble
       case funcTypes.ToString => ToString
+      case funcTypes.ToSymbol => ToSymbol
       case funcTypes.IsNat => IsNat
       case funcTypes.IsChar => IsChar
       case funcTypes.IsInt => IsInt
@@ -1151,6 +1177,7 @@ trait GeneralMacros {
       case funcTypes.IsDouble => IsDouble
       case funcTypes.IsString => IsString
       case funcTypes.IsBoolean => IsBoolean
+      case funcTypes.IsSymbol => IsSymbol
       case funcTypes.Negate => Negate
       case funcTypes.Abs => Abs
       case funcTypes.NumberOfLeadingZeros => NumberOfLeadingZeros
@@ -1199,6 +1226,7 @@ trait GeneralMacros {
 
       val genTree = (funcType, opResult) match {
         case (funcTypes.ToNat, CalcLit.Int(t)) => genOpTreeNat(opTpe, t)
+        case (funcTypes.ToSymbol, CalcLit.String(t)) => genOpTreeSymbol(opTpe, t)
         case (_, CalcLit(t)) => genOpTreeLit(opTpe, t)
         case (funcTypes.AcceptNonLiteral, t : CalcNLit) => genOpTreeNLit(opTpe, t)
         case (_, t: CalcNLit) =>
@@ -1335,5 +1363,33 @@ trait GeneralMacros {
   //copied from Shapeless
   def mkNatValue(i: Int): Tree =
   q""" new ${mkNatTpt(i)} """
+
+
+  //copied from Shapeless
+  val SymTpe = typeOf[scala.Symbol]
+  object SingletonSymbolType {
+    val atatTpe = typeOf[@@[_,_]].typeConstructor
+    val TaggedSym = typeOf[tag.Tagged[_]].typeConstructor.typeSymbol
+
+    def unrefine(t: Type): Type =
+      t.dealias match {
+        case RefinedType(List(t), scope) if scope.isEmpty => unrefine(t)
+        case t => t
+      }
+
+    def apply(s: String): Type = appliedType(atatTpe, List(SymTpe, c.internal.constantType(Constant(s))))
+
+    def unapply(t: Type): Option[String] =
+      unrefine(t).dealias match {
+        case RefinedType(List(SymTpe, TypeRef(_, TaggedSym, List(ConstantType(Constant(s: String))))), _) => Some(s)
+        case _ => None
+      }
+  }
+
+  //copied from Shapeless
+  def mkSingletonSymbol(s: String): Tree = {
+    val sTpe = SingletonSymbolType(s)
+    q"""_root_.scala.Symbol($s).asInstanceOf[$sTpe]"""
+  }
   ///////////////////////////////////////////////////////////////////////////////////////////
 }

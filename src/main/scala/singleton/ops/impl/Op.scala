@@ -13,6 +13,7 @@ trait Op extends Serializable {
   type OutDouble <: Double with Singleton
   type OutString <: String with Singleton
   type OutBoolean <: Boolean with Singleton
+  type OutSymbol <: Symbol
   val value: Out
   val isLiteral : Boolean
   val valueWide: OutWide
@@ -90,3 +91,10 @@ object OpBoolean {
   implicit def conv[O <: Op](op : OpBoolean[O]) : Boolean = op.value
 }
 
+@scala.annotation.implicitNotFound(msg = "Unable to prove type argument is a Symbol.")
+trait OpSymbol[O <: Op] extends OpCast[Symbol, O]
+object OpSymbol {
+  type Aux[O <: Op, Ret_Out <: Symbol] = OpSymbol[O] {type Out = Ret_Out}
+  implicit def impl[O <: Op](implicit o: O) : Aux[O, o.OutSymbol] = new OpSymbol[O] {type Out = o.OutSymbol; val value = o.value.asInstanceOf[o.OutSymbol]}
+  implicit def conv[O <: Op](op : OpSymbol[O]) : Symbol = op.value
+}
