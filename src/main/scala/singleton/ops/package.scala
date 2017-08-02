@@ -144,7 +144,6 @@ package object ops {
   X <: Singleton, N, S1, S2, S3, OP_OUT
   ](x: X)
    (implicit
-    v : ValueOf[X],
     op : OpMacro[N, S1, S2, S3],
     opaux: OpAuxGen[OpMacro[N, S1, S2, S3], OP_OUT],
     check : Require[X == OP_OUT]
@@ -162,8 +161,8 @@ package object ops {
   ](op : OpMacro[N, S1, S2, S3])
    (implicit
     opaux: OpAuxGen[OpMacro[N, S1, S2, S3], OP_OUT],
-    v : ValueOf[OP_OUT]
-   ) : OP_OUT = valueOf[OP_OUT]
+    id : Id[OP_OUT]
+   ) : OP_OUT = id.value.asInstanceOf[OP_OUT]
   /////////////////////////////////////////////////
 
 

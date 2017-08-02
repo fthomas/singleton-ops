@@ -11,7 +11,7 @@ trait TwoFaceAny[Face, T] extends Any {
 object TwoFaceAny {
   @inline implicit def fromTwoFaceUnsafe[Face, T](tf : TwoFaceAny[Face, T]) : Face = tf.getValue
   @inline implicit def fromTwoFaceSafe[Face, T <: Face with Singleton](tf : TwoFaceAny[Face, T])
-                                                                      (implicit sc: ValueOf[T]) : T {} = valueOf[T]
+                                                                      (implicit id: Id[T]) : T {} = id.value.asInstanceOf[T]
 
   trait Builder[TF[T], Face, Shl1[_,_,_,_], Shl2[_,_,_,_,_,_], Shl3[_,_,_,_,_,_,_,_]] {
     type Shell1[Func[_], Arg1, Arg1Wide] =

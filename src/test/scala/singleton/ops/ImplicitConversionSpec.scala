@@ -11,5 +11,5 @@ class ImplicitConversionSpec extends Properties("ImplicitConversion") {
   property("Wrong OpToOp") = {illTyped("""val ret : 2 + 1 = implicitly[4 - 2]"""); true}
   property("Wrong OpToSingleton") = {illTyped("""val ret : 3 = implicitly[4 - 2]"""); true}
   property("Wrong SingletonToOp") = {illTyped("""val ret : 2 + 1 = 4"""); true}
-  property("ValueOf[Op]") = wellTyped {val ret : 3 = valueOf[4 - 1]}
+//  property("ValueOf[Op]") = wellTyped {val ret : 3 = valueOf[4 - 1]}
 }
