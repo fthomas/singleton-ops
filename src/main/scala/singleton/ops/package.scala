@@ -57,6 +57,8 @@ package object ops {
   private type DefaultRequireMsg = DefaultRequireMsg.T
   protected[singleton] val True = W(true)
   protected[singleton] type True = True.T
+  protected[singleton] val False = W(false)
+  protected[singleton] type False = False.T
   protected[singleton] val SomethingBadHappened = W("Something bad happened")
   protected[singleton] type SomethingBadHappened = SomethingBadHappened.T
 

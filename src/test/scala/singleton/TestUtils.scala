@@ -2,7 +2,7 @@ package singleton
 
 import org.scalacheck.Prop
 import singleton.ops._
-import singleton.twoface._
+//import singleton.twoface._
 
 object TestUtils {
   def sameType[A, B](implicit ev: A =:= B): Boolean = true
@@ -42,34 +42,34 @@ object TestUtils {
 
   type VerifyTF[OP, Expected] = Require[ITE[IsNonLiteral[Expected], IsNonLiteral[OP], OP == Expected]]
 
-  def verifyTF[OP, Expected](opResult : TwoFace.Char[OP], expectedResult : TwoFace.Char[Expected])
-                            (implicit verify : VerifyTF[OP, Expected]) : Prop = {
-    opResult.getValue == expectedResult.getValue
-  }
-  def verifyTF[OP, Expected](opResult : TwoFace.Int[OP], expectedResult : TwoFace.Int[Expected])
-                               (implicit verify : VerifyTF[OP, Expected]) : Prop = {
-    opResult.getValue == expectedResult.getValue
-  }
-  def verifyTF[OP, Expected](opResult : TwoFace.Long[OP], expectedResult : TwoFace.Long[Expected])
-                               (implicit verify : VerifyTF[OP, Expected]) : Prop = {
-    opResult.getValue == expectedResult.getValue
-  }
-  def verifyTF[OP, Expected](opResult : TwoFace.Float[OP], expectedResult : TwoFace.Float[Expected])
-                                (implicit verify : VerifyTF[OP, Expected]) : Prop = {
-    opResult.getValue == expectedResult.getValue
-  }
-  def verifyTF[OP, Expected](opResult : TwoFace.Double[OP], expectedResult : TwoFace.Double[Expected])
-                            (implicit verify : VerifyTF[OP, Expected]) : Prop = {
-    opResult.getValue == expectedResult.getValue
-  }
-  def verifyTF[OP, Expected](opResult : TwoFace.String[OP], expectedResult : TwoFace.String[Expected])
-                            (implicit verify : VerifyTF[OP, Expected]) : Prop = {
-    opResult.getValue == expectedResult.getValue
-  }
-  def verifyTF[OP, Expected](opResult : TwoFace.Boolean[OP], expectedResult : TwoFace.Boolean[Expected])
-                            (implicit verify : VerifyTF[OP, Expected]) : Prop = {
-    opResult.getValue == expectedResult.getValue
-  }
+//  def verifyTF[OP, Expected](opResult : TwoFace.Char[OP], expectedResult : TwoFace.Char[Expected])
+//                            (implicit verify : VerifyTF[OP, Expected]) : Prop = {
+//    opResult.getValue == expectedResult.getValue
+//  }
+//  def verifyTF[OP, Expected](opResult : TwoFace.Int[OP], expectedResult : TwoFace.Int[Expected])
+//                               (implicit verify : VerifyTF[OP, Expected]) : Prop = {
+//    opResult.getValue == expectedResult.getValue
+//  }
+//  def verifyTF[OP, Expected](opResult : TwoFace.Long[OP], expectedResult : TwoFace.Long[Expected])
+//                               (implicit verify : VerifyTF[OP, Expected]) : Prop = {
+//    opResult.getValue == expectedResult.getValue
+//  }
+//  def verifyTF[OP, Expected](opResult : TwoFace.Float[OP], expectedResult : TwoFace.Float[Expected])
+//                                (implicit verify : VerifyTF[OP, Expected]) : Prop = {
+//    opResult.getValue == expectedResult.getValue
+//  }
+//  def verifyTF[OP, Expected](opResult : TwoFace.Double[OP], expectedResult : TwoFace.Double[Expected])
+//                            (implicit verify : VerifyTF[OP, Expected]) : Prop = {
+//    opResult.getValue == expectedResult.getValue
+//  }
+//  def verifyTF[OP, Expected](opResult : TwoFace.String[OP], expectedResult : TwoFace.String[Expected])
+//                            (implicit verify : VerifyTF[OP, Expected]) : Prop = {
+//    opResult.getValue == expectedResult.getValue
+//  }
+//  def verifyTF[OP, Expected](opResult : TwoFace.Boolean[OP], expectedResult : TwoFace.Boolean[Expected])
+//                            (implicit verify : VerifyTF[OP, Expected]) : Prop = {
+//    opResult.getValue == expectedResult.getValue
+//  }
 
   //nf = unsafe. used to force a not-final value. e.g., nf(3) returns a non-literal 3
   def us[T](t : T) : T = {

@@ -70,7 +70,7 @@ lazy val metadataSettings = Def.settings(
 )
 
 lazy val compileSettings = Def.settings(
-  scalaOrganization := "org.typelevel",
+  scalaOrganization := "org.scala-lang",
   scalacOptions ++= Seq(
     "-deprecation",
     "-encoding",
@@ -84,7 +84,7 @@ lazy val compileSettings = Def.settings(
     "-Xfatal-warnings",
     "-Xfuture",
     "-Xlint:-unused,_",
-    "-Yliteral-types",
+//    "-Yliteral-types",
     "-Yno-adapted-args",
     "-Ywarn-numeric-widen",
     "-Ywarn-unused-import"

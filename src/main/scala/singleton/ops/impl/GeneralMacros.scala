@@ -2,7 +2,7 @@ package singleton.ops.impl
 import macrocompat.bundle
 import shapeless.tag
 import shapeless.tag.@@
-import singleton.twoface.impl.TwoFaceAny
+//import singleton.twoface.impl.TwoFaceAny
 
 import scala.reflect.macros.whitebox
 @bundle
@@ -404,13 +404,13 @@ trait GeneralMacros {
         ////////////////////////////////////////////////////////////////////////
         // TwoFace Values
         ////////////////////////////////////////////////////////////////////////
-        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny.Char[_]] => unapplyOpTwoFace(tp)
-        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny.Int[_]] => unapplyOpTwoFace(tp)
-        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny.Long[_]] => unapplyOpTwoFace(tp)
-        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny.Float[_]] => unapplyOpTwoFace(tp)
-        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny.Double[_]] => unapplyOpTwoFace(tp)
-        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny.String[_]] => unapplyOpTwoFace(tp)
-        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny.Boolean[_]] => unapplyOpTwoFace(tp)
+//        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny.Char[_]] => unapplyOpTwoFace(tp)
+//        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny.Int[_]] => unapplyOpTwoFace(tp)
+//        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny.Long[_]] => unapplyOpTwoFace(tp)
+//        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny.Float[_]] => unapplyOpTwoFace(tp)
+//        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny.Double[_]] => unapplyOpTwoFace(tp)
+//        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny.String[_]] => unapplyOpTwoFace(tp)
+//        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny.Boolean[_]] => unapplyOpTwoFace(tp)
         ////////////////////////////////////////////////////////////////////////
 
 

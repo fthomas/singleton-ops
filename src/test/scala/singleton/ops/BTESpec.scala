@@ -7,30 +7,27 @@ import singleton.TestUtils._
 class BTESpec extends Properties(">=") {
   type OP[L,R] = >=[L,R]
   type leftNat = shapeless.Nat._3
-  type leftChar = '\u0003'
-  type leftInt = 3
-  type leftLong = 3L
-  type leftFloat = 3.0f
-  type leftDouble = 3.0
-  type leftString = "Something"
-  type leftBoolean = true
+  type leftChar = W.`'\u0003'`.T
+  type leftInt = W.`3`.T
+  type leftLong = W.`3L`.T
+  type leftFloat = W.`3.0f`.T
+  type leftDouble = W.`3.0`.T
+  type leftString = W.`"Something"`.T
+  type leftBoolean = True
 
   type rightNat = shapeless.Nat._2
-  type rightChar = '\u0002'
-  type rightInt = 2
-  type rightLong = 2L
-  type rightFloat = 2.0f
-  type rightDouble = 2.0
-  type rightString = "Else"
-  type rightBoolean = false
-
-  type resultFalse = false
-  type resultTrue = true
+  type rightChar = W.`'\u0002'`.T
+  type rightInt = W.`2`.T
+  type rightLong = W.`2L`.T
+  type rightFloat = W.`2.0f`.T
+  type rightDouble = W.`2.0`.T
+  type rightString = W.`"Else"`.T
+  type rightBoolean = False
 
   def verifyBTENum[L,R](implicit
-                        verifyFalse: Verify[Negate[L] >= R, resultFalse],
-                        verifyTrue: Verify[L >= L, resultTrue],
-                        verifyTrue2: Verify[L >= R, resultTrue]) : Prop = wellTyped {}
+                        verifyFalse: Verify[Negate[L] >= R, False],
+                        verifyTrue: Verify[L >= L, True],
+                        verifyTrue2: Verify[L >= R, True]) : Prop = wellTyped {}
 
   ////////////////////////////////////////////////////////////////////////
   // Nat op XXX
