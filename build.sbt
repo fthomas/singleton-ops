@@ -11,7 +11,7 @@ val macroParadiseVersion = "2.1.0"
 val shapelessVersion = "2.3.2"
 val scalaCheckVersion = "1.13.4"
 val scalaMetaVersion = "1.8.0"
-val macroParadise3Version = "3.0.0-M9"
+val macroParadise3Version = "3.0.0-M10"
 
 bintrayOrganization := Some("core-act-ness")
 bintrayRepository := "maven"

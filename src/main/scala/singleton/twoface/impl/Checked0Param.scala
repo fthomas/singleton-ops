@@ -20,8 +20,8 @@ trait Checked0Param[Cond[_], Msg[_], Face, T] extends Any with TwoFaceAny[Face, 
 object Checked0Param {
   trait Builder[Chk[T], Cond[_], Msg[_], Face] {
     type Shell[T] <: Checked0ParamShell[Chk, Face, T]
-    type CondHelper[T] = ITE[IsNonLiteral[Cond[T]], true, Cond[T]]
-    type MsgHelper[T] = ITE[IsNonLiteral[Msg[T]], "Something bad happened", Msg[T]]
+    type CondHelper[T] = ITE[IsNonLiteral[Cond[T]], True, Cond[T]]
+    type MsgHelper[T] = ITE[IsNonLiteral[Msg[T]], SomethingBadHappened, Msg[T]]
 
     implicit def impl[T]
     (implicit vc : CondHelper[T], vm : MsgHelper[T]) :
@@ -80,8 +80,8 @@ trait Checked0ParamShell[Chk[_], Face, T] {
 
 object Checked0ParamShell {
   trait Builder[ChkShl[_], Chk[_], Cond[_], Msg[_], Face] {
-    type MsgHelper[T] = ITE[IsNonLiteral[Msg[T]], "Something bad happened", Msg[T]]
-    type CondHelper[T] = RequireMsgSym[ITE[IsNonLiteral[Cond[T]], true, Cond[T]], MsgHelper[T],ChkShl[_]]
+    type MsgHelper[T] = ITE[IsNonLiteral[Msg[T]], SomethingBadHappened, Msg[T]]
+    type CondHelper[T] = RequireMsgSym[ITE[IsNonLiteral[Cond[T]], True, Cond[T]], MsgHelper[T],ChkShl[_]]
     def create[T] : ChkShl[T]
 
     implicit def impl[T]

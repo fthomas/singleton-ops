@@ -4,6 +4,12 @@ import singleton.ops.impl._
 
 package object ops {
   /////////////////////////////////////////////////
+  //Short of shapeless's Witness
+  /////////////////////////////////////////////////
+  val W = shapeless.Witness
+  /////////////////////////////////////////////////
+
+  /////////////////////////////////////////////////
   //Short aliases of singleton types
   /////////////////////////////////////////////////
   type XChar                = Char with Singleton
@@ -45,8 +51,15 @@ package object ops {
   type OpAuxSymbol[O <: Op,   Ret_Out <: Symbol]    = OpSymbol.Aux[O, Ret_Out]
   /////////////////////////////////////////////////
 
-  private type NP = 0
-  private type DefaultRequireMsg = "Cannot prove requirement Require[...]"
+  private val NP = W(0)
+  private type NP = NP.T
+  private val DefaultRequireMsg = W("Cannot prove requirement Require[...]")
+  private type DefaultRequireMsg = DefaultRequireMsg.T
+  protected[singleton] val True = W(true)
+  protected[singleton] type True = True.T
+  protected[singleton] val SomethingBadHappened = W("Something bad happened")
+  protected[singleton] type SomethingBadHappened = SomethingBadHappened.T
+
   /////////////////////////////////////////////////
   //Special control aliases
   /////////////////////////////////////////////////
@@ -100,12 +113,12 @@ package object ops {
   type Length[P1]           = OpMacro[OpId.Length, P1, NP, NP]
   type CharAt[P1, P2]       = OpMacro[OpId.CharAt, P1, P2, NP]
 
-  type CompileTime[C]       = Require[ITE[IsNonLiteral[C], true, C]]
+  type CompileTime[C]       = Require[ITE[IsNonLiteral[C], W.`true`.T, C]]
   type RunTime[R]           = SafeBoolean[IsNonLiteral[R]]
 
   object math {
-    type Pi                 = 3.141592653589793
-    type E                  = 2.718281828459045
+    type Pi                 = W.`3.141592653589793`.T
+    type E                  = W.`2.718281828459045`.T
     type Abs[P1]            = OpMacro[OpId.Abs, P1, NP, NP]
     type Min[P1, P2]        = OpMacro[OpId.Min, P1, P2, NP]
     type Max[P1, P2]        = OpMacro[OpId.Max, P1, P2, NP]
