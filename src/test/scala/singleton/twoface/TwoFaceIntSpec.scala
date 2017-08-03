@@ -1,29 +1,29 @@
-//package singleton.twoface
-//
+package singleton.twoface
+
 //import singleton.twoface.math._
-//import org.scalacheck.Properties
-//import singleton.TestUtils._
+import org.scalacheck.Properties
+import singleton.TestUtils._
 //import shapeless.test.illTyped
-//import singleton.ops._
-//
-//class TwoFaceIntSpec extends Properties("TwoFace.Int") {
-//  property("Implicit Creation[]") = {
-//    val a = implicitly[TwoFace.Int[2]]
-//    a.getValue == 2 && a.isLiteral
-//  }
-//  property("Safe Creation[]") = {
-//    val a = TwoFace.Int[2]
-//    a.getValue == 2 && a.isLiteral
-//  }
-//  property("Safe Creation()") = {
-//    val a = TwoFace.Int(2)
-//    a.getValue == 2 && a.isLiteral
-//  }
-//  property("Unsafe Creation()") = {
-//    val a = TwoFace.Int(us(2))
-//    a.getValue == 2 && !a.isLiteral
-//  }
-//
+import singleton.ops._
+
+class TwoFaceIntSpec extends Properties("TwoFace.Int") {
+  property("Implicit Creation[]") = {
+    val a = implicitly[TwoFace.Int[W.`2`.T]]
+    a.getValue == 2 && a.isLiteral
+  }
+  property("Safe Creation[]") = {
+    val a = TwoFace.Int[W.`2`.T]
+    a.getValue == 2 && a.isLiteral
+  }
+  property("Safe Creation()") = {
+    val a = TwoFace.Int(2)
+    a.getValue == 2 && a.isLiteral
+  }
+  property("Unsafe Creation()") = {
+    val a = TwoFace.Int(us(2))
+    a.getValue == 2 && !a.isLiteral
+  }
+
 //  property("Safe ifThenElse") = verifyTF(ifThenElse(true, 1, 2), 1)
 //  property("Unsafe ifThenElse") = verifyTF(ifThenElse(us(false), 1, 2), us(2))
 //
@@ -310,25 +310,25 @@
 //  property("Unsafe numberOfLeadingZeros") = verifyTF(TwoFace.Int.numberOfLeadingZeros(TwoFace.Int(us(1))), us(31))
 //
 //  property("Implicit Conversions") = wellTyped {
-//    val a : TwoFace.Int[3] = implicitly[TwoFace.Int[2 + 1]]
-//    val b : TwoFace.Int[3 + 0] = implicitly[TwoFace.Int[2 + 1]]
-//    val c : TwoFace.Int[3 + 0] = implicitly[TwoFace.Int[3]]
-//    val d : 3 = TwoFace.Int(3)
+//    val a : TwoFace.Int[W.`3`.T] = implicitly[TwoFace.Int[W.`2`.T + W.`1`.T]]
+//    val b : TwoFace.Int[W.`3`.T + W.`0`.T] = implicitly[TwoFace.Int[W.`2`.T + W.`1`.T]]
+//    val c : TwoFace.Int[W.`3`.T + W.`0`.T] = implicitly[TwoFace.Int[W.`3`.T]]
+//    val d : W.`3`.T = TwoFace.Int(3)
 //    val e : Int = TwoFace.Int(us(3))
 //  }
 //
 //  property("Wrong Implicit Conversions") = {
-//    illTyped("""val a : TwoFace.Int[3] = implicitly[TwoFace.Int[2 + 2]]""")
-//    illTyped("""val b : TwoFace.Int[3 + 0] = implicitly[TwoFace.Int[2 + 2]]""")
-//    illTyped("""val c : TwoFace.Int[3 + 0] = implicitly[TwoFace.Int[4]]""")
+//    illTyped("""val a : TwoFace.Int[W.`3`.T] = implicitly[TwoFace.Int[W.`2`.T + W.`2`.T]]""")
+//    illTyped("""val b : TwoFace.Int[W.`3`.T + W.`0`.T] = implicitly[TwoFace.Int[W.`2`.T + W.`2`.T]]""")
+//    illTyped("""val c : TwoFace.Int[W.`3`.T + W.`0`.T] = implicitly[TwoFace.Int[W.`4`.T]]""")
 //    true
 //  }
 //
 //  property("ToString") = {
-//    TwoFace.Int[1].toString() == "1"
+//    TwoFace.Int[W.`3`.T].toString() == "1"
 //  }
 //
-//  type Fin = 3
+//  type Fin = W.`3`.T
 //  final val fin = 3
 //  property("Extracting from Safe TwoFace") = {
 //    val a = TwoFace.Int(fin)
@@ -347,9 +347,9 @@
 //  def noImplFoo[W](w : TwoFace.Int[W]) = -w //Missing twoface shell implicit
 //  property("Unavailable Implicit Safe TwoFace Shell") = {
 //    val ret = noImplFoo(2)
-//    implicitly[ret.type <:< TwoFace.Int[Negate[2]]]
+//    implicitly[ret.type <:< TwoFace.Int[Negate[W.`2`.T]]]
 //    val retSimple = ret.simplify
-//    implicitly[retSimple.type <:< TwoFace.Int[-2]]
+//    implicitly[retSimple.type <:< TwoFace.Int[W.`-2`.T]]
 //    retSimple.getValue == -2
 //  }
 //  property("Unavailable Implicit Unsafe TwoFace Shell") = {
@@ -359,4 +359,4 @@
 //    implicitly[retSimple.type <:< TwoFace.Int[Int]]
 //    retSimple.getValue == -2
 //  }
-//}
+}

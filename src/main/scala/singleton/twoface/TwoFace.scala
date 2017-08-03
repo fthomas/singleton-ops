@@ -1,26 +1,26 @@
-//package singleton.twoface
-//
-//import impl._
-//
-//object TwoFace {
-//  type Char[T] = TwoFaceAny.Char[T]
-//  val Char = TwoFaceAny.Char
-//
-//  type Int[T] = TwoFaceAny.Int[T]
-//  val Int = TwoFaceAny.Int
-//
-//  type Long[T] = TwoFaceAny.Long[T]
-//  val Long = TwoFaceAny.Long
-//
-//  type Float[T] = TwoFaceAny.Float[T]
-//  val Float = TwoFaceAny.Float
-//
-//  type Double[T] = TwoFaceAny.Double[T]
-//  val Double = TwoFaceAny.Double
-//
-//  type String[T] = TwoFaceAny.String[T]
-//  val String = TwoFaceAny.String
-//
-//  type Boolean[T] = TwoFaceAny.Boolean[T]
-//  val Boolean = TwoFaceAny.Boolean
-//}
+package singleton.twoface
+
+import impl._
+
+object TwoFace {
+  type Char[T] = TwoFaceAny.CharLike.Aux[T]
+  val Char = TwoFaceAny.CharLike
+
+  type Int[T0] = TwoFaceAny.IntLike{type T <: T0}
+  val Int = TwoFaceAny.IntLike
+
+  type Long[T] = TwoFaceAny.LongLike.Aux[T]
+  val Long = TwoFaceAny.LongLike
+
+  type Float[T] = TwoFaceAny.FloatLike.Aux[T]
+  val Float = TwoFaceAny.FloatLike
+
+  type Double[T] = TwoFaceAny.DoubleLike.Aux[T]
+  val Double = TwoFaceAny.DoubleLike
+
+  type String[T] = TwoFaceAny.StringLike.Aux[T]
+  val String = TwoFaceAny.StringLike
+
+  type Boolean[T] = TwoFaceAny.BooleanLike.Aux[T]
+  val Boolean = TwoFaceAny.BooleanLike
+}

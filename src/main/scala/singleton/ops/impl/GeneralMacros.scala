@@ -2,7 +2,8 @@ package singleton.ops.impl
 import macrocompat.bundle
 import shapeless.tag
 import shapeless.tag.@@
-//import singleton.twoface.impl.TwoFaceAny
+import singleton.twoface.TwoFace
+import singleton.twoface.impl.TwoFaceAny
 
 import scala.reflect.macros.whitebox
 @bundle
@@ -399,18 +400,26 @@ trait GeneralMacros {
         case TypeRef(_, sym, args) if sym == symbolOf[OpDouble[_]] => unapplyOpArg(args.head)
         case TypeRef(_, sym, args) if sym == symbolOf[OpString[_]] => unapplyOpArg(args.head)
         case TypeRef(_, sym, args) if sym == symbolOf[OpBoolean[_]] => unapplyOpArg(args.head)
+        case TypeRef(_, sym, args) if sym == symbolOf[OpSymbol[_]] => unapplyOpArg(args.head)
         ////////////////////////////////////////////////////////////////////////
 
         ////////////////////////////////////////////////////////////////////////
         // TwoFace Values
         ////////////////////////////////////////////////////////////////////////
-//        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny.Char[_]] => unapplyOpTwoFace(tp)
-//        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny.Int[_]] => unapplyOpTwoFace(tp)
-//        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny.Long[_]] => unapplyOpTwoFace(tp)
-//        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny.Float[_]] => unapplyOpTwoFace(tp)
-//        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny.Double[_]] => unapplyOpTwoFace(tp)
-//        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny.String[_]] => unapplyOpTwoFace(tp)
-//        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny.Boolean[_]] => unapplyOpTwoFace(tp)
+        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny._Char[_]] => unapplyOpTwoFace(tp)
+        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny._Int[_]] => unapplyOpTwoFace(tp)
+        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny._Long[_]] => unapplyOpTwoFace(tp)
+        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny._Float[_]] => unapplyOpTwoFace(tp)
+        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny._Double[_]] => unapplyOpTwoFace(tp)
+        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny._String[_]] => unapplyOpTwoFace(tp)
+        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny._Boolean[_]] => unapplyOpTwoFace(tp)
+        case TypeRef(_, sym, args) if sym == symbolOf[TwoFace.Char[_]] => Some(CalcTFType.Char)
+        case TypeRef(_, sym, args) if sym == symbolOf[TwoFace.Int[_]] => Some(CalcTFType.Int)
+        case TypeRef(_, sym, args) if sym == symbolOf[TwoFace.Long[_]] => Some(CalcTFType.Long)
+        case TypeRef(_, sym, args) if sym == symbolOf[TwoFace.Float[_]] => Some(CalcTFType.Float)
+        case TypeRef(_, sym, args) if sym == symbolOf[TwoFace.Double[_]] => Some(CalcTFType.Double)
+        case TypeRef(_, sym, args) if sym == symbolOf[TwoFace.String[_]] => Some(CalcTFType.String)
+        case TypeRef(_, sym, args) if sym == symbolOf[TwoFace.Boolean[_]] => Some(CalcTFType.Boolean)
         ////////////////////////////////////////////////////////////////////////
 
 
@@ -455,24 +464,12 @@ trait GeneralMacros {
 
   def constantTypeOf[T](t: T) : Type = c.internal.constantType(Constant(t))
 
-  def runtimeTypeOf[T](t : T)(implicit annotatedSym : TypeSymbol) : Type = {
-    t match {
-      case tt : Char => typeOf[Char]
-      case tt : Int => typeOf[Int]
-      case tt : Long => typeOf[Long]
-      case tt : Float => typeOf[Float]
-      case tt : Double => typeOf[Double]
-      case tt : String => typeOf[String]
-      case tt : Boolean => typeOf[Boolean]
-      case _ => abort(s"Unsupported type $t")
-    }
-  }
   def genOpTreeLit[T](opTpe : Type, t: T)(implicit annotatedSym : TypeSymbol) : Tree = {
-    val outWideLiteral = Literal(Constant(t))
-    val outWideTpe = runtimeTypeOf(t)
-    val outTypeName = TypeName("Out" + outWideTpe.typeSymbol.name.toString)
     val outTpe = constantTypeOf(t)
     val outTree = constantTreeOf(t)
+    val outWideTpe = outTpe.widen
+    val outTypeName = TypeName("Out" + wideTypeName(outTpe))
+    val outWideLiteral = outTree
     q"""
       new $opTpe {
         type OutWide = $outWideTpe
@@ -487,7 +484,7 @@ trait GeneralMacros {
 
   def genOpTreeNat(opTpe : Type, t: Int) : Tree = {
     val outWideTpe = typeOf[Int]
-    val outWideLiteral = Literal(Constant(t))
+    val outWideLiteral = constantTreeOf(t)
     val outTypeName = TypeName("OutNat")
     val outTpe = mkNatTpe(t)
     val outTree = q"new ${mkNatTpt(t)}"
@@ -523,7 +520,7 @@ trait GeneralMacros {
 
   def genOpTreeNLit(opTpe : Type, calc : CalcNLit)(implicit annotatedSym : TypeSymbol) : Tree = {
     val valueTree = calc.tree
-    val outTpe = runtimeTypeOf(calc.value)
+    val outTpe = calc.tpe
     q"""
       new $opTpe {
         type OutWide = $outTpe
@@ -571,7 +568,25 @@ trait GeneralMacros {
     }
   }
 
+  def extractValueFromNumTree[T](numValueTree : c.Tree)(implicit annotatedSym : TypeSymbol) : CalcVal = {
+    val typedTree = c.typecheck(numValueTree)
+    extractSingletonValue(typedTree.tpe) match {
+      case t : CalcVal => t
+      case t : CalcType => CalcNLit(t, numValueTree)
+      case _ => extractionFailed(typedTree.tpe)
+    }
+  }
 
+  def extractValueFromTwoFaceTree[T](tfTree : c.Tree)(implicit annotatedSym : TypeSymbol) : CalcVal = {
+    val typedTree = c.typecheck(tfTree)
+    extractSingletonValue(typedTree.tpe) match {
+      case t : CalcVal => t
+      case t : CalcTFType => CalcNLit(t, q"$tfTree.getValue")
+      case _ => extractionFailed(typedTree.tpe)
+    }
+  }
+
+  def wideTypeName(tpe : Type) : String = tpe.widen.typeSymbol.name.toString
   ///////////////////////////////////////////////////////////////////////////////////////////
   // Three operands (Generic)
   ///////////////////////////////////////////////////////////////////////////////////////////
@@ -1242,7 +1257,7 @@ trait GeneralMacros {
 
 
   ///////////////////////////////////////////////////////////////////////////////////////////
-  // TwoFace
+  // TwoFace Shell
   ///////////////////////////////////////////////////////////////////////////////////////////
   def TwoFaceShellMaterializer[Shell](implicit shell : c.WeakTypeTag[Shell])
   : TwoFaceShellMaterializer[Shell] = new TwoFaceShellMaterializer[Shell](weakTypeOf[Shell])
@@ -1276,6 +1291,85 @@ trait GeneralMacros {
 //      print(showCode(genTree))
       genTree
     }
+  }
+  ///////////////////////////////////////////////////////////////////////////////////////////
+
+
+  ///////////////////////////////////////////////////////////////////////////////////////////
+  // TwoFace
+  ///////////////////////////////////////////////////////////////////////////////////////////
+  def TwoFaceMaterializer : TwoFaceMaterializer = new TwoFaceMaterializer
+
+  final class TwoFaceMaterializer {
+    def fromNumValue(numValueTree : c.Tree, tfSym : TypeSymbol) : c.Tree =  {
+      implicit val annotatedSym : TypeSymbol = tfSym
+      val calc = extractValueFromNumTree(numValueTree)
+      val outTpe = calc.tpe
+      val outTree = calc.tree
+      val tfName = wideTypeName(outTpe)
+      val tfTerm = TermName(tfName)
+
+      val genTree =
+        q"""
+          _root_.singleton.twoface.TwoFace.$tfTerm.create[$outTpe]($outTree.asInstanceOf[$outTpe])
+        """
+
+//      print(showCode(genTree))
+      genTree
+    }
+    def toNumValue(tfTree : c.Tree, tfSym : TypeSymbol) : c.Tree = {
+      implicit val annotatedSym : TypeSymbol = tfSym
+      val calc = extractValueFromTwoFaceTree(tfTree)
+      val outTpe = calc.tpe
+      val outTree = calc.tree
+      val genTree =
+        q"""
+          $outTree.asInstanceOf[$outTpe]
+        """
+      genTree
+    }
+
+
+//    def newTwoFace(resultCalc : CalcVal)(implicit annotatedSym : TypeSymbol) : Tree = {
+//      val valueTree = c.typecheck(q"$resultCalc")
+//      valueTree.tpe.widen.toString match {
+//        case "Char" => q"_root_.singleton.twoface.TwoFace.Char($resultCalc)"
+//        case "Int" => q"_root_.singleton.twoface.TwoFace.Int($resultCalc)"
+//        case "Long" => q"_root_.singleton.twoface.TwoFace.Long($resultCalc)"
+//        case "Float" => q"_root_.singleton.twoface.TwoFace.Float($resultCalc)"
+//        case "Double" => q"_root_.singleton.twoface.TwoFace.Double($resultCalc)"
+//        case "String" => q"_root_.singleton.twoface.TwoFace.String($resultCalc)"
+//        case "Boolean" => q"_root_.singleton.twoface.TwoFace.Boolean($resultCalc)"
+//        case t => abort(s"Unsupported type $t")
+//      }
+//    }
+//    def unaryOp(arg : c.Tree) : c.Tree = {
+//      implicit val annotatedSym : TypeSymbol = symbolOf[OpMacro[_,_,_,_]]
+//
+//      val argCalc = extractValueFromTwoFace(arg)
+//      val resultCalc = opCalc(opType, argCalc, CalcLit(0), CalcLit(0))
+//
+//      newTwoFace(resultCalc)
+//    }
+//    def binOp(lhs : c.Tree, rhs : c.Tree) : c.Tree = {
+//      implicit val annotatedSym : TypeSymbol = symbolOf[OpMacro[_,_,_,_]]
+//
+//      val lCalc = extractValueFromTwoFace(lhs)
+//      val rCalc = extractValueFromTwoFace(rhs)
+//      val resultCalc = opCalc(opType, lCalc, rCalc, CalcLit(0))
+//
+//      newTwoFace(resultCalc)
+//    }
+//    def triOp(arg1 : c.Tree, arg2 : c.Tree, arg3 : c.Tree) : c.Tree = {
+//      implicit val annotatedSym : TypeSymbol = symbolOf[OpMacro[_,_,_,_]]
+//
+//      val arg1Calc = extractValueFromTwoFace(arg1)
+//      val arg2Calc = extractValueFromTwoFace(arg2)
+//      val arg3Calc = extractValueFromTwoFace(arg3)
+//      val resultCalc = opCalc(opType, arg1Calc, arg2Calc, arg3Calc)
+//
+//      newTwoFace(resultCalc)
+//    }
   }
   ///////////////////////////////////////////////////////////////////////////////////////////
 
