@@ -310,12 +310,18 @@ class TwoFaceIntSpec extends Properties("TwoFace.Int") {
   property("Unsafe numberOfLeadingZeros") = verifyTF(TwoFace.Int.numberOfLeadingZeros(TwoFace.Int(us(1))), us(31))
 
   property("Implicit Conversions") = wellTyped {
-    val a : TwoFace.Int[W.`3`.T] = implicitly[TwoFace.Int[W.`2`.T + W.`1`.T]]
-    val b : TwoFace.Int[W.`3`.T + W.`0`.T] = implicitly[TwoFace.Int[W.`2`.T + W.`1`.T]]
-    val c : TwoFace.Int[W.`3`.T + W.`0`.T] = implicitly[TwoFace.Int[W.`3`.T]]
-    val d : W.`3`.T = TwoFace.Int(3)
-    val e : Int = TwoFace.Int(us(3))
-//    val f : W.`3`.T = shapeless.the[TwoFace.Int[Id[W.`3`.T]]]
+    val conv0 : W.`3`.T = TwoFace.Int[W.`3`.T]
+    val conv1 : W.`3`.T = TwoFace.Int(3)
+    val conv2 : W.`3`.T = implicitly[TwoFace.Int[W.`3`.T]]
+    val conv3 : W.`3`.T = implicitly[Id[TwoFace.Int[W.`3`.T]]]
+    def conv4[T](tf : TwoFace.Int[T]) : Int = tf
+    val conv5 : Int = implicitly[TwoFace.Int[W.`3`.T]]
+    val conv6 : Int = implicitly[Id[TwoFace.Int[W.`3`.T]]]
+    val conv7 : TwoFace.Int[W.`3`.T] = implicitly[TwoFace.Int[W.`2`.T + W.`1`.T]]
+    val conv8 : TwoFace.Int[W.`3`.T + W.`0`.T] = implicitly[TwoFace.Int[W.`2`.T + W.`1`.T]]
+    val conv9 : TwoFace.Int[W.`3`.T + W.`0`.T] = implicitly[TwoFace.Int[W.`3`.T]]
+    val conv10 : Int = TwoFace.Int(us(3))
+    val conv11 : W.`3`.T = implicitly[TwoFace.Int[Id[W.`3`.T]]]
   }
 
   property("Wrong Implicit Conversions") = {

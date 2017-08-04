@@ -10,7 +10,7 @@
 //  (implicit
 //   cond : TwoFaceAny.Boolean.Shell1[Cond, Face, Face],
 //   msg : TwoFaceAny.String.Shell1[Msg, Face, Face],
-//   req : TwoFaceAny.Boolean.Shell2[RequireMsg, Cond[Face], scala.Boolean, Msg[Face], java.lang.String]
+//   req : TwoFaceAny.Boolean.Shell2[RequireMsg, Cond[Face], std.Boolean, Msg[Face], std.String]
 //  ) : this.type = {
 //    req(cond(getValue), msg(getValue))
 //    this

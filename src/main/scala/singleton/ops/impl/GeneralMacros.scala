@@ -116,14 +116,14 @@ trait GeneralMacros {
   }
 
   object Calc {
-    sealed trait Char extends Calc{type T = scala.Char; val tpe = typeOf[scala.Char]}
-    sealed trait Int extends Calc{type T = scala.Int; val tpe = typeOf[scala.Int]}
-    sealed trait Long extends Calc{type T = scala.Long; val tpe = typeOf[scala.Long]}
-    sealed trait Float extends Calc{type T = scala.Float; val tpe = typeOf[scala.Float]}
-    sealed trait Double extends Calc{type T = scala.Double; val tpe = typeOf[scala.Double]}
-    sealed trait String extends Calc{type T = java.lang.String; val tpe = typeOf[java.lang.String]}
-    sealed trait Boolean extends Calc{type T = scala.Boolean; val tpe = typeOf[scala.Boolean]}
-    sealed trait Symbol extends Calc{type T = scala.Symbol; val tpe = typeOf[scala.Symbol]}
+    sealed trait Char extends Calc{type T = std.Char; val tpe = typeOf[std.Char]}
+    sealed trait Int extends Calc{type T = std.Int; val tpe = typeOf[std.Int]}
+    sealed trait Long extends Calc{type T = std.Long; val tpe = typeOf[std.Long]}
+    sealed trait Float extends Calc{type T = std.Float; val tpe = typeOf[std.Float]}
+    sealed trait Double extends Calc{type T = std.Double; val tpe = typeOf[std.Double]}
+    sealed trait String extends Calc{type T = std.String; val tpe = typeOf[std.String]}
+    sealed trait Boolean extends Calc{type T = std.Boolean; val tpe = typeOf[std.Boolean]}
+    sealed trait Symbol extends Calc{type T = std.Symbol; val tpe = typeOf[std.Symbol]}
   }
 
   sealed trait CalcVal extends Calc {
@@ -135,31 +135,31 @@ trait GeneralMacros {
     object Lit extends Kind
     object NLit extends Kind
     implicit val lift = Liftable[CalcVal] {p => p.tree}
-    class Char(val value : scala.Char, val tree : Tree) extends CalcVal with Calc.Char
+    class Char(val value : std.Char, val tree : Tree) extends CalcVal with Calc.Char
     object Char {
       def unapply(arg: Char) : Option[(arg.T, Tree)] = Some((arg.value, arg.tree))
     }
-    class Int(val value : scala.Int, val tree : Tree) extends CalcVal with Calc.Int
+    class Int(val value : std.Int, val tree : Tree) extends CalcVal with Calc.Int
     object Int {
       def unapply(arg: Int) : Option[(arg.T, Tree)] = Some((arg.value, arg.tree))
     }
-    class Long(val value : scala.Long, val tree : Tree) extends CalcVal with Calc.Long
+    class Long(val value : std.Long, val tree : Tree) extends CalcVal with Calc.Long
     object Long {
       def unapply(arg: Long) : Option[(arg.T, Tree)] = Some((arg.value, arg.tree))
     }
-    class Float(val value : scala.Float, val tree : Tree) extends CalcVal with Calc.Float
+    class Float(val value : std.Float, val tree : Tree) extends CalcVal with Calc.Float
     object Float {
       def unapply(arg: Float) : Option[(arg.T, Tree)] = Some((arg.value, arg.tree))
     }
-    class Double(val value : scala.Double, val tree : Tree) extends CalcVal with Calc.Double
+    class Double(val value : std.Double, val tree : Tree) extends CalcVal with Calc.Double
     object Double {
       def unapply(arg: Double) : Option[(arg.T, Tree)] = Some((arg.value, arg.tree))
     }
-    class String(val value : java.lang.String, val tree : Tree) extends CalcVal with Calc.String
+    class String(val value : std.String, val tree : Tree) extends CalcVal with Calc.String
     object String {
       def unapply(arg: String) : Option[(arg.T, Tree)] = Some((arg.value, arg.tree))
     }
-    class Boolean(val value : scala.Boolean, val tree : Tree) extends CalcVal with Calc.Boolean
+    class Boolean(val value : std.Boolean, val tree : Tree) extends CalcVal with Calc.Boolean
     object Boolean {
       def unapply(arg: Boolean) : Option[(arg.T, Tree)] = Some((arg.value, arg.tree))
     }
@@ -175,22 +175,22 @@ trait GeneralMacros {
 
   object CalcLit {
     implicit val lift = Liftable[CalcLit] { p => p.tree }
-    case class Char(override val value : scala.Char) extends CalcVal.Char(value, Literal(Constant(value))) with CalcLit
-    case class Int(override val value : scala.Int) extends CalcVal.Int(value, Literal(Constant(value))) with CalcLit
-    case class Long(override val value : scala.Long) extends CalcVal.Long(value, Literal(Constant(value))) with CalcLit
-    case class Float(override val value : scala.Float) extends CalcVal.Float(value, Literal(Constant(value))) with CalcLit
-    case class Double(override val value : scala.Double) extends CalcVal.Double(value, Literal(Constant(value))) with CalcLit
-    case class String(override val value : java.lang.String) extends CalcVal.String(value, Literal(Constant(value))) with CalcLit
-    case class Boolean(override val value : scala.Boolean) extends CalcVal.Boolean(value, Literal(Constant(value))) with CalcLit
+    case class Char(override val value : std.Char) extends CalcVal.Char(value, Literal(Constant(value))) with CalcLit
+    case class Int(override val value : std.Int) extends CalcVal.Int(value, Literal(Constant(value))) with CalcLit
+    case class Long(override val value : std.Long) extends CalcVal.Long(value, Literal(Constant(value))) with CalcLit
+    case class Float(override val value : std.Float) extends CalcVal.Float(value, Literal(Constant(value))) with CalcLit
+    case class Double(override val value : std.Double) extends CalcVal.Double(value, Literal(Constant(value))) with CalcLit
+    case class String(override val value : std.String) extends CalcVal.String(value, Literal(Constant(value))) with CalcLit
+    case class Boolean(override val value : std.Boolean) extends CalcVal.Boolean(value, Literal(Constant(value))) with CalcLit
     def apply[T](t : T)(implicit unsupported : TypeSymbol) = t match {
-      case t : scala.Char => Char(t)
-      case t : scala.Int => Int(t)
-      case t : scala.Long => Long(t)
-      case t : scala.Float => Float(t)
-      case t : scala.Double => Double(t)
-      case t : java.lang.String => String(t)
-      case t : scala.Boolean => Boolean(t)
-      case t : scala.Symbol => String(t.name.toString)
+      case t : std.Char => Char(t)
+      case t : std.Int => Int(t)
+      case t : std.Long => Long(t)
+      case t : std.Float => Float(t)
+      case t : std.Double => Double(t)
+      case t : std.String => String(t)
+      case t : std.Boolean => Boolean(t)
+      case t : std.Symbol => String(t.name.toString)
       case _ => abort(s"Unsupported literal type: $t")
     }
     def unapply(arg: CalcLit) : Option[arg.T] = Some(arg.value)
@@ -349,7 +349,8 @@ trait GeneralMacros {
     def unapply(tp: Type)(implicit annotatedSym : TypeSymbol): Option[Calc] = {
       val g = c.universe.asInstanceOf[SymbolTable]
       implicit def fixSymbolOps(sym: Symbol): g.Symbol = sym.asInstanceOf[g.Symbol]
-//            print(tp + " RAW " + showRaw(tp))
+
+//      print(tp + " RAW " + showRaw(tp))
       tp match {
         ////////////////////////////////////////////////////////////////////////
         // Operational Function
@@ -393,9 +394,9 @@ trait GeneralMacros {
         case TypeRef(_, sym, _) if sym == symbolOf[Long] => Some(CalcType.Long)
         case TypeRef(_, sym, _) if sym == symbolOf[Float] => Some(CalcType.Float)
         case TypeRef(_, sym, _) if sym == symbolOf[Double] => Some(CalcType.Double)
-        case TypeRef(_, sym, _) if sym == symbolOf[java.lang.String] => Some(CalcType.String)
+        case TypeRef(_, sym, _) if sym == symbolOf[std.String] => Some(CalcType.String)
         case TypeRef(_, sym, _) if sym == symbolOf[Boolean] => Some(CalcType.Boolean)
-        case TypeRef(_, sym, _) if sym == symbolOf[scala.Symbol] => Some(CalcType.Symbol)
+        case TypeRef(_, sym, _) if sym == symbolOf[std.Symbol] => Some(CalcType.Symbol)
         ////////////////////////////////////////////////////////////////////////
 
         ////////////////////////////////////////////////////////////////////////
@@ -413,9 +414,9 @@ trait GeneralMacros {
         case TypeRef(_, sym, _) if sym == symbolOf[Long] => Some(CalcType.Long)
         case TypeRef(_, sym, _) if sym == symbolOf[Float] => Some(CalcType.Float)
         case TypeRef(_, sym, _) if sym == symbolOf[Double] => Some(CalcType.Double)
-        case TypeRef(_, sym, _) if sym == symbolOf[java.lang.String] => Some(CalcType.String)
+        case TypeRef(_, sym, _) if sym == symbolOf[std.String] => Some(CalcType.String)
         case TypeRef(_, sym, _) if sym == symbolOf[Boolean] => Some(CalcType.Boolean)
-        case TypeRef(_, sym, _) if sym == symbolOf[scala.Symbol] => Some(CalcType.Symbol)
+        case TypeRef(_, sym, _) if sym == symbolOf[std.Symbol] => Some(CalcType.Symbol)
         ////////////////////////////////////////////////////////////////////////
 
         ////////////////////////////////////////////////////////////////////////
@@ -512,7 +513,7 @@ trait GeneralMacros {
   def genOpTreeSymbol(opTpe : Type, t: String) : Tree = {
     val outTpe = SingletonSymbolType(t)
     val outTree = mkSingletonSymbol(t)
-    val outWideTpe = typeOf[scala.Symbol]
+    val outWideTpe = typeOf[std.Symbol]
     val outWideLiteral = outTree
     val outTypeName = TypeName("OutSymbol")
     q"""
@@ -1428,7 +1429,7 @@ trait GeneralMacros {
 
 
   //copied from Shapeless
-  val SymTpe = typeOf[scala.Symbol]
+  val SymTpe = typeOf[std.Symbol]
   object SingletonSymbolType {
     val atatTpe = typeOf[@@[_,_]].typeConstructor
     val TaggedSym = typeOf[tag.Tagged[_]].typeConstructor.typeSymbol
@@ -1451,7 +1452,7 @@ trait GeneralMacros {
   //copied from Shapeless
   def mkSingletonSymbol(s: String): Tree = {
     val sTpe = SingletonSymbolType(s)
-    q"""_root_.scala.Symbol($s).asInstanceOf[$sTpe]"""
+    q"""_root_.std.Symbol($s).asInstanceOf[$sTpe]"""
   }
   ///////////////////////////////////////////////////////////////////////////////////////////
 }

@@ -152,8 +152,8 @@
 //////        @checked0Param[CondCheckedLength, MsgCheckedLength, Int] class CheckedLength[L]
 //////
 //////        implicit object RuntimeCheckedLength extends CheckedLength.Runtime {
-//////          def cond(l : Int) : scala.Boolean = l > 0
-//////          def msg(l : Int) : java.lang.String = s"Length must be positive (received value of $l)"
+//////          def cond(l : Int) : std.Boolean = l > 0
+//////          def msg(l : Int) : std.String = s"Length must be positive (received value of $l)"
 //////        }
 ////
 ////        //Protected Constructor (performs unsafe run-time check, if compile-time check is not possible)
