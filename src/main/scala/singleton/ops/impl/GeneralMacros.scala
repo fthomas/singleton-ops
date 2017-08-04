@@ -1308,7 +1308,7 @@ trait GeneralMacros {
       """
     }
     def fromNumValue(numValueTree : c.Tree, tfSym : TypeSymbol) : c.Tree =  {
-      implicit val annotatedSym : TypeSymbol = tfSym
+      implicit val annotatedSym : TypeSymbol = symbolOf[TwoFaceAny[_]]//not really used
       genTwoFace(extractValueFromNumTree(numValueTree))
     }
     def toNumValue[Out](tfTree : c.Tree, tfSym : TypeSymbol, tTpe : Type) : c.Tree = {
@@ -1323,15 +1323,15 @@ trait GeneralMacros {
 //      print(genTree)
       genTree
     }
-    def equal(tTree : c.Tree, rTree : c.Tree, tfSym : TypeSymbol) : c.Tree = {
-      implicit val annotatedSym : TypeSymbol = tfSym
+    def equal(tTree : c.Tree, rTree : c.Tree) : c.Tree = {
+      implicit val annotatedSym : TypeSymbol = symbolOf[TwoFaceAny[_]]//not really used
       val tCalc = extractValueFromTwoFaceTree(tTree)
       val rCalc = extractValueFromNumTree(rTree)
       val outCalc = opCalc(funcTypes.==, tCalc, rCalc, CalcLit(0))
       genTwoFace(outCalc)
     }
-    def nequal(tTree : c.Tree, rTree : c.Tree, tfSym : TypeSymbol) : c.Tree = {
-      implicit val annotatedSym : TypeSymbol = tfSym
+    def nequal(tTree : c.Tree, rTree : c.Tree) : c.Tree = {
+      implicit val annotatedSym : TypeSymbol = symbolOf[TwoFaceAny[_]]//not really used
       val tCalc = extractValueFromTwoFaceTree(tTree)
       val rCalc = extractValueFromNumTree(rTree)
       val outCalc = opCalc(funcTypes.!=, tCalc, rCalc, CalcLit(0))
