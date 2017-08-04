@@ -353,7 +353,7 @@ class TwoFaceIntSpec extends Properties("TwoFace.Int") {
   }
 
   property("ToString") = {
-    TwoFace.Int[W.`3`.T].toString() == "1"
+    TwoFace.Int[W.`3`.T].toString() == "3"
   }
 
   type Fin = W.`3`.T
