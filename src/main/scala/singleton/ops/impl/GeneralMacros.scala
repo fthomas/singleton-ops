@@ -578,7 +578,7 @@ trait GeneralMacros {
     }
   }
 
-  def extractValueFromNumTree[T](numValueTree : c.Tree)(implicit annotatedSym : TypeSymbol) : CalcVal = {
+  def extractValueFromNumTree(numValueTree : c.Tree)(implicit annotatedSym : TypeSymbol) : CalcVal = {
     val typedTree = c.typecheck(numValueTree)
     extractSingletonValue(typedTree.tpe) match {
       case t : CalcVal => t
@@ -587,7 +587,7 @@ trait GeneralMacros {
     }
   }
 
-  def extractValueFromTwoFaceTree[T](tfTree : c.Tree)(implicit annotatedSym : TypeSymbol) : CalcVal = {
+  def extractValueFromTwoFaceTree(tfTree : c.Tree)(implicit annotatedSym : TypeSymbol) : CalcVal = {
     val typedTree = c.typecheck(tfTree)
     extractSingletonValue(typedTree.tpe) match {
       case t : CalcVal => t
@@ -1311,21 +1311,18 @@ trait GeneralMacros {
   def TwoFaceMaterializer : TwoFaceMaterializer = new TwoFaceMaterializer
 
   final class TwoFaceMaterializer {
-    def fromNumValue(numValueTree : c.Tree, tfSym : TypeSymbol) : c.Tree =  {
-      implicit val annotatedSym : TypeSymbol = tfSym
-      val calc = extractValueFromNumTree(numValueTree)
+    def genTwoFace(calc : CalcVal) : c.Tree = {
       val outTpe = calc.tpe
       val outTree = calc.tree
       val tfName = wideTypeName(outTpe)
       val tfTerm = TermName(tfName)
-
-      val genTree =
-        q"""
-          _root_.singleton.twoface.TwoFace.$tfTerm.create[$outTpe]($outTree.asInstanceOf[$outTpe])
-        """
-
-//      print(showCode(genTree))
-      genTree
+      q"""
+        _root_.singleton.twoface.TwoFace.$tfTerm.create[$outTpe]($outTree.asInstanceOf[$outTpe])
+      """
+    }
+    def fromNumValue(numValueTree : c.Tree, tfSym : TypeSymbol) : c.Tree =  {
+      implicit val annotatedSym : TypeSymbol = tfSym
+      genTwoFace(extractValueFromNumTree(numValueTree))
     }
     def toNumValue[Out](tfTree : c.Tree, tfSym : TypeSymbol, tTpe : Type) : c.Tree = {
       implicit val annotatedSym : TypeSymbol = tfSym
@@ -1338,6 +1335,20 @@ trait GeneralMacros {
         """
 //      print(genTree)
       genTree
+    }
+    def equal(tTree : c.Tree, rTree : c.Tree, tfSym : TypeSymbol) : c.Tree = {
+      implicit val annotatedSym : TypeSymbol = tfSym
+      val tCalc = extractValueFromTwoFaceTree(tTree)
+      val rCalc = extractValueFromNumTree(rTree)
+      val outCalc = opCalc(funcTypes.==, tCalc, rCalc, CalcLit(0))
+      genTwoFace(outCalc)
+    }
+    def nequal(tTree : c.Tree, rTree : c.Tree, tfSym : TypeSymbol) : c.Tree = {
+      implicit val annotatedSym : TypeSymbol = tfSym
+      val tCalc = extractValueFromTwoFaceTree(tTree)
+      val rCalc = extractValueFromNumTree(rTree)
+      val outCalc = opCalc(funcTypes.!=, tCalc, rCalc, CalcLit(0))
+      genTwoFace(outCalc)
     }
   }
   ///////////////////////////////////////////////////////////////////////////////////////////
