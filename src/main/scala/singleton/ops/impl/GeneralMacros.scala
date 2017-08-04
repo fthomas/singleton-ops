@@ -394,9 +394,9 @@ trait GeneralMacros {
         case TypeRef(_, sym, _) if sym == symbolOf[Long] => Some(CalcType.Long)
         case TypeRef(_, sym, _) if sym == symbolOf[Float] => Some(CalcType.Float)
         case TypeRef(_, sym, _) if sym == symbolOf[Double] => Some(CalcType.Double)
-        case TypeRef(_, sym, _) if sym == symbolOf[std.String] => Some(CalcType.String)
+        case TypeRef(_, sym, _) if sym == symbolOf[java.lang.String] => Some(CalcType.String)
         case TypeRef(_, sym, _) if sym == symbolOf[Boolean] => Some(CalcType.Boolean)
-        case TypeRef(_, sym, _) if sym == symbolOf[std.Symbol] => Some(CalcType.Symbol)
+        case TypeRef(_, sym, _) if sym == symbolOf[scala.Symbol] => Some(CalcType.Symbol)
         ////////////////////////////////////////////////////////////////////////
 
         ////////////////////////////////////////////////////////////////////////
@@ -404,19 +404,6 @@ trait GeneralMacros {
         ////////////////////////////////////////////////////////////////////////
         case TypeRef(_, sym, args) if sym == symbolOf[shapeless.Succ[_]] || sym == symbolOf[shapeless._0] =>
           Some(calcNat(tp))
-        ////////////////////////////////////////////////////////////////////////
-
-        ////////////////////////////////////////////////////////////////////////
-        // Non-literal values
-        ////////////////////////////////////////////////////////////////////////
-        case TypeRef(_, sym, _) if sym == symbolOf[Char] => Some(CalcType.Char)
-        case TypeRef(_, sym, _) if sym == symbolOf[Int] => Some(CalcType.Int)
-        case TypeRef(_, sym, _) if sym == symbolOf[Long] => Some(CalcType.Long)
-        case TypeRef(_, sym, _) if sym == symbolOf[Float] => Some(CalcType.Float)
-        case TypeRef(_, sym, _) if sym == symbolOf[Double] => Some(CalcType.Double)
-        case TypeRef(_, sym, _) if sym == symbolOf[std.String] => Some(CalcType.String)
-        case TypeRef(_, sym, _) if sym == symbolOf[Boolean] => Some(CalcType.Boolean)
-        case TypeRef(_, sym, _) if sym == symbolOf[std.Symbol] => Some(CalcType.Symbol)
         ////////////////////////////////////////////////////////////////////////
 
         ////////////////////////////////////////////////////////////////////////
