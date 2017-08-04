@@ -42,11 +42,11 @@ object TwoFaceAny {
   object Builder {
     final class Macro(val c: whitebox.Context) extends GeneralMacros {
       def fromNumValue[TF](value : c.Tree) : c.Tree =
-        TwoFaceMaterializer.fromNumValue(value,c.symbolOf[TF])
-      def toNumValue[TF](tf : c.Tree) : c.Tree =
-        TwoFaceMaterializer.toNumValue(tf,c.symbolOf[TF])
-      def toNumValue2[TF](tf : c.Tree, id : c.Tree) : c.Tree =
-        TwoFaceMaterializer.toNumValue(tf,c.symbolOf[TF])
+        TwoFaceMaterializer.fromNumValue(value, c.symbolOf[TF])
+      def toNumValue[TF, T](tf : c.Tree)(implicit tTag : c.WeakTypeTag[T]) : c.Tree =
+        TwoFaceMaterializer.toNumValue[T](tf, c.symbolOf[TF], c.weakTypeOf[T])
+      def toNumValue2[TF, T](tf : c.Tree)(id : c.Tree)(implicit tTag : c.WeakTypeTag[T]) : c.Tree =
+        TwoFaceMaterializer.toNumValue(tf, c.symbolOf[TF], c.weakTypeOf[T])
     }
   }
 
@@ -159,6 +159,12 @@ object TwoFaceAny {
   }
   implicit object CharLike extends TwoFaceAny.Builder[CharLike, scala.Char, Shell.One.Char, Shell.Two.Char, Shell.Three.Char] {
     def create[T](value : scala.Char) = new _Char[T](value)
+    def apply[T](implicit id : AcceptNonLiteral[Id[T]]) : Char[id.Out] = create[id.Out](id.valueWide.asInstanceOf[scala.Char])
+    implicit def apply[T <: scala.Char](value : T) : Char[T] = macro Builder.Macro.fromNumValue[CharLike]
+    implicit def ev[T](implicit id : AcceptNonLiteral[Id[T]]) : Char[T] = create[T](id.valueWide.asInstanceOf[scala.Char])
+    implicit def tf2Num[T <: scala.Char](tf : Char[T]) : T = macro Builder.Macro.toNumValue[CharLike, T]
+    implicit def opTF2Num[T <: singleton.ops.impl.Op](tf : Char[T])(implicit id : AcceptNonLiteral[Id[T]]) : id.Out = macro Builder.Macro.toNumValue2[CharLike, id.Out]
+    implicit def unknownTF2Num(tf : CharLike) : scala.Char = macro Builder.Macro.toNumValue[CharLike, scala.Char]
   }
 
   trait IntLike extends Any with TwoFaceAny[scala.Int] {
@@ -261,8 +267,7 @@ object TwoFaceAny {
     def toDouble(implicit tfs : Double.Shell1[ToDouble, T, scala.Int]) = tfs(this.getValue)
     def toStringTF(implicit tfs : String.Shell1[ToString, T, scala.Int]) = tfs(this.getValue)
 
-//    def simplify(implicit id : AcceptNonLiteral[this.type]) : Int[id.Out] =
-//      Int.create[id.Out](id.valueWide.asInstanceOf[scala.Int])
+    def simplify(implicit tfs : Int.Shell1[Id, T, scala.Int]) = tfs(this.getValue)
   }
   final class _Int[T0](val value : scala.Int) extends AnyVal with IntLike {
     type T = T0
@@ -274,9 +279,9 @@ object TwoFaceAny {
     def apply[T](implicit id : AcceptNonLiteral[Id[T]]) : Int[id.Out] = create[id.Out](id.valueWide.asInstanceOf[scala.Int])
     implicit def apply[T <: scala.Int](value : T) : Int[T] = macro Builder.Macro.fromNumValue[IntLike]
     implicit def ev[T](implicit id : AcceptNonLiteral[Id[T]]) : Int[T] = create[T](id.valueWide.asInstanceOf[scala.Int])
-    implicit def toNumValue[T <: scala.Int](tf : Int[T]) : T = macro Builder.Macro.toNumValue[IntLike]
-    implicit def toNumValue2[T <: singleton.ops.impl.Op](tf : Int[T], id : AcceptNonLiteral[Id[T]]) : id.Out = macro Builder.Macro.toNumValue2[IntLike]
-    implicit def toNumValue(tf : IntLike) : scala.Int = macro Builder.Macro.toNumValue[IntLike]
+    implicit def tf2Num[T <: scala.Int](tf : Int[T]) : T = macro Builder.Macro.toNumValue[IntLike, T]
+    implicit def opTF2Num[T <: singleton.ops.impl.Op](tf : Int[T])(implicit id : AcceptNonLiteral[Id[T]]) : id.Out = macro Builder.Macro.toNumValue2[IntLike, id.Out]
+    implicit def unknownTF2Num(tf : IntLike) : scala.Int = macro Builder.Macro.toNumValue[IntLike, scala.Int]
   }
 
   trait LongLike extends Any with TwoFaceAny[scala.Long] {

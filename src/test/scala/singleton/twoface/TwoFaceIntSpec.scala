@@ -1,9 +1,9 @@
 package singleton.twoface
 
-//import singleton.twoface.math._
+import singleton.twoface.math._
 import org.scalacheck.Properties
 import singleton.TestUtils._
-//import shapeless.test.illTyped
+import shapeless.test.illTyped
 import singleton.ops._
 
 class TwoFaceIntSpec extends Properties("TwoFace.Int") {
@@ -31,10 +31,10 @@ class TwoFaceIntSpec extends Properties("TwoFace.Int") {
 //  property("Safe Int + Unsafe Char") = verifyTF(TwoFace.Int(2) + TwoFace.Char(us('\u0001')), us(3))
 //  property("Unsafe Int + Safe Char") = verifyTF(TwoFace.Int(us(2)) + TwoFace.Char('\u0001'), us(3))
 //  property("Unsafe Int + Unsafe Char") = verifyTF(TwoFace.Int(us(2)) + TwoFace.Char(us('\u0001')), us(3))
-//  property("Safe Int + Safe Int") = verifyTF(TwoFace.Int(2) + TwoFace.Int(1), 3)
-//  property("Safe Int + Unsafe Int") = verifyTF(TwoFace.Int(2) + TwoFace.Int(us(1)), us(3))
-//  property("Unsafe Int + Safe Int") = verifyTF(TwoFace.Int(us(2)) + TwoFace.Int(1), us(3))
-//  property("Unsafe Int + Unsafe Int") = verifyTF(TwoFace.Int(us(2)) + TwoFace.Int(us(1)), us(3))
+  property("Safe Int + Safe Int") = verifyTF(TwoFace.Int(2) + TwoFace.Int(1), 3)
+  property("Safe Int + Unsafe Int") = verifyTF(TwoFace.Int(2) + TwoFace.Int(us(1)), us(3))
+  property("Unsafe Int + Safe Int") = verifyTF(TwoFace.Int(us(2)) + TwoFace.Int(1), us(3))
+  property("Unsafe Int + Unsafe Int") = verifyTF(TwoFace.Int(us(2)) + TwoFace.Int(us(1)), us(3))
 //  property("Safe Int + Safe Long") = verifyTF(TwoFace.Int(2) + TwoFace.Long(1L), 3L)
 //  property("Safe Int + Unsafe Long") = verifyTF(TwoFace.Int(2) + TwoFace.Long(us(1L)), us(3L))
 //  property("Unsafe Int + Safe Long") = verifyTF(TwoFace.Int(us(2)) + TwoFace.Long(1L), us(3L))
@@ -288,10 +288,10 @@ class TwoFaceIntSpec extends Properties("TwoFace.Int") {
 //  property("Safe Int max Unsafe Int") = verifyTF(max(TwoFace.Int(2), TwoFace.Int(us(1))), us(2))
 //  property("Unsafe Int max Safe Int") = verifyTF(max(TwoFace.Int(us(2)), TwoFace.Int(1)), us(2))
 //  property("Unsafe Int max Unsafe Int") = verifyTF(max(TwoFace.Int(us(2)), TwoFace.Int(us(1))), us(2))
-//
-//  property("Safe Negate") = verifyTF(-TwoFace.Int(-1), 1)
-//  property("Unsafe Negate") = verifyTF(-TwoFace.Int(us(1)), us(-1))
-//
+
+  property("Safe Negate") = verifyTF(-TwoFace.Int(-1), 1)
+  property("Unsafe Negate") = verifyTF(-TwoFace.Int(us(1)), us(-1))
+
 //  property("Safe toChar") = verifyTF(TwoFace.Int(1).toChar, '\u0001')
 //  property("Unsafe toChar") = verifyTF(TwoFace.Int(us(1)).toChar, us('\u0001'))
 //  property("Safe toLong") = verifyTF(TwoFace.Int(1).toLong, 1L)
@@ -302,61 +302,55 @@ class TwoFaceIntSpec extends Properties("TwoFace.Int") {
 //  property("Unsafe toDouble") = verifyTF(TwoFace.Int(us(1)).toDouble, us(1.0))
 //  property("Safe toStringTF") = verifyTF(TwoFace.Int(1).toStringTF, "1")
 //  property("Unsafe toStringTF") = verifyTF(TwoFace.Int(us(1)).toStringTF, us("1"))
-//
-//  property("Safe abs") = verifyTF(abs(TwoFace.Int(-1)), 1)
-//  property("Unsafe abs") = verifyTF(abs(TwoFace.Int(us(-1))), us(1))
-//
-//  property("Safe numberOfLeadingZeros") = verifyTF(TwoFace.Int.numberOfLeadingZeros(TwoFace.Int(1)), 31)
-//  property("Unsafe numberOfLeadingZeros") = verifyTF(TwoFace.Int.numberOfLeadingZeros(TwoFace.Int(us(1))), us(31))
-//
-//  property("Implicit Conversions") = wellTyped {
-//    val a : TwoFace.Int[W.`3`.T] = implicitly[TwoFace.Int[W.`2`.T + W.`1`.T]]
-//    val b : TwoFace.Int[W.`3`.T + W.`0`.T] = implicitly[TwoFace.Int[W.`2`.T + W.`1`.T]]
-//    val c : TwoFace.Int[W.`3`.T + W.`0`.T] = implicitly[TwoFace.Int[W.`3`.T]]
-//    val d : W.`3`.T = TwoFace.Int(3)
-//    val e : Int = TwoFace.Int(us(3))
-//  }
-//
-//  property("Wrong Implicit Conversions") = {
-//    illTyped("""val a : TwoFace.Int[W.`3`.T] = implicitly[TwoFace.Int[W.`2`.T + W.`2`.T]]""")
-//    illTyped("""val b : TwoFace.Int[W.`3`.T + W.`0`.T] = implicitly[TwoFace.Int[W.`2`.T + W.`2`.T]]""")
-//    illTyped("""val c : TwoFace.Int[W.`3`.T + W.`0`.T] = implicitly[TwoFace.Int[W.`4`.T]]""")
-//    true
-//  }
-//
-//  property("ToString") = {
-//    TwoFace.Int[W.`3`.T].toString() == "1"
-//  }
-//
-//  type Fin = W.`3`.T
-//  final val fin = 3
-//  property("Extracting from Safe TwoFace") = {
-//    val a = TwoFace.Int(fin)
-//    val ret = shapeless.the[Id[a.type]]
-//    implicitly[ret.Out =:= Fin]
-//    ret.value == fin
-//  }
-//
-//  property("Extracting from Unsafe TwoFace") = wellTyped {
-//    val a = TwoFace.Int(us(fin))
-//    val ret = shapeless.the[AcceptNonLiteral[Id[a.type]]]
-//    implicitly[ret.Out =:= Int]
-//    ret.value == fin
-//  }
-//
-//  def noImplFoo[W](w : TwoFace.Int[W]) = -w //Missing twoface shell implicit
-//  property("Unavailable Implicit Safe TwoFace Shell") = {
-//    val ret = noImplFoo(2)
-//    implicitly[ret.type <:< TwoFace.Int[Negate[W.`2`.T]]]
-//    val retSimple = ret.simplify
-//    implicitly[retSimple.type <:< TwoFace.Int[W.`-2`.T]]
-//    retSimple.getValue == -2
-//  }
-//  property("Unavailable Implicit Unsafe TwoFace Shell") = {
-//    val ret = noImplFoo(us(2))
-//    implicitly[ret.type <:< TwoFace.Int[Negate[Int]]]
-//    val retSimple = ret.simplify
-//    implicitly[retSimple.type <:< TwoFace.Int[Int]]
-//    retSimple.getValue == -2
-//  }
+
+  property("Safe abs") = verifyTF(abs(TwoFace.Int(-1)), 1)
+  property("Unsafe abs") = verifyTF(abs(TwoFace.Int(us(-1))), us(1))
+
+  property("Safe numberOfLeadingZeros") = verifyTF(TwoFace.Int.numberOfLeadingZeros(TwoFace.Int(1)), 31)
+  property("Unsafe numberOfLeadingZeros") = verifyTF(TwoFace.Int.numberOfLeadingZeros(TwoFace.Int(us(1))), us(31))
+
+  property("Implicit Conversions") = wellTyped {
+    val a : TwoFace.Int[W.`3`.T] = implicitly[TwoFace.Int[W.`2`.T + W.`1`.T]]
+    val b : TwoFace.Int[W.`3`.T + W.`0`.T] = implicitly[TwoFace.Int[W.`2`.T + W.`1`.T]]
+    val c : TwoFace.Int[W.`3`.T + W.`0`.T] = implicitly[TwoFace.Int[W.`3`.T]]
+    val d : W.`3`.T = TwoFace.Int(3)
+    val e : Int = TwoFace.Int(us(3))
+//    val f : W.`3`.T = shapeless.the[TwoFace.Int[Id[W.`3`.T]]]
+  }
+
+  property("Wrong Implicit Conversions") = {
+    illTyped("""val a : TwoFace.Int[W.`3`.T] = implicitly[TwoFace.Int[W.`2`.T + W.`2`.T]]""")
+    illTyped("""val b : TwoFace.Int[W.`3`.T + W.`0`.T] = implicitly[TwoFace.Int[W.`2`.T + W.`2`.T]]""")
+    illTyped("""val c : TwoFace.Int[W.`3`.T + W.`0`.T] = implicitly[TwoFace.Int[W.`4`.T]]""")
+    true
+  }
+
+  property("ToString") = {
+    TwoFace.Int[W.`3`.T].toString() == "1"
+  }
+
+  type Fin = W.`3`.T
+  final val fin = 3
+  property("Extracting from Safe TwoFace") = {
+    val a = me(TwoFace.Int(fin))
+    val ret = shapeless.the[Id[a.T]]
+    implicitly[ret.Out =:= Fin]
+    ret.value == fin
+  }
+
+  def noImplFoo[W](w : TwoFace.Int[W]) = -w //Missing twoface shell implicit
+  property("Unavailable Implicit Safe TwoFace Shell") = {
+    val ret = noImplFoo(2)
+    implicitly[ret.T <:< Negate[W.`2`.T]]
+    val retSimple = ret.simplify
+    implicitly[retSimple.T <:< W.`-2`.T]
+    retSimple.getValue == -2
+  }
+  property("Unavailable Implicit Unsafe TwoFace Shell") = {
+    val ret = noImplFoo(us(2))
+    implicitly[ret.T <:< Negate[Int]]
+    val retSimple = ret.simplify
+    implicitly[retSimple.T <:< Int]
+    retSimple.getValue == -2
+  }
 }
