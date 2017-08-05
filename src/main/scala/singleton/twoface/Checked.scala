@@ -11,9 +11,14 @@ class checked0Param[Cond[_], Msg[_], TFace] extends scala.annotation.StaticAnnot
         val primName = name.value
         val secName = "_" + name.value
         val shellName = name.value + "Shell"
+        val traitName = name.value + "Like"
+        val traitTypeName = Type.Name(traitName)
+        val traitCtorName = Ctor.Name(traitName)
+        val traitTermName = Term.Name(traitName)
         val primTypeName = Type.Name(primName)
         val primCtorName = Ctor.Name(primName)
         val primTermName = Term.Name(primName)
+        val primTerm = Pat.Var.Term(primTermName)
         val secTypeName = Type.Name(secName)
         val secCtorName = Ctor.Name(secName)
         val shellClassName = Type.Name(shellName)
@@ -21,23 +26,31 @@ class checked0Param[Cond[_], Msg[_], TFace] extends scala.annotation.StaticAnnot
         val shellObjectName = Term.Name(shellName)
         val likeTrait =
           q"""
-             trait $primTypeName[T] extends Any with
-               _root_.singleton.twoface.impl.Checked0Param[$Cond, $Msg, $TFace, T] with
+             trait $traitTypeName extends Any with
+               _root_.singleton.twoface.impl.Checked0Param[$Cond, $Msg, $TFace] with
                ${Ctor.Name("_root_.singleton.twoface.impl.TwoFaceAny." + tFaceName.toString() + "Like")} {
              }
            """
         val updatedCls =
           q"""
-             final class $secTypeName[T0] (val value : $TFace) extends AnyVal with $primCtorName[T0] {
+             final class $secTypeName[T0] (val value : $TFace) extends AnyVal with $traitCtorName {
                type T = T0
                @inline def getValue : $TFace = value
              }
            """
         val companion =
           q"""
-             object $primTermName extends _root_.singleton.twoface.impl.Checked0Param.Builder[$primTypeName, $secTypeName, $Cond, $Msg, $TFace] {
+             object $traitTermName extends _root_.singleton.twoface.impl.Checked0Param.Builder[$primTypeName, $secTypeName, $Cond, $Msg, $TFace] {
                type Shell[T] = $shellClassName[T]
              }
+           """
+        val typeBlock =
+          q"""
+             type $primTypeName[T0] = $traitTypeName {type T <: T0}
+           """
+        val valBlock =
+          q"""
+             val $primTerm = $traitTermName
            """
         val shellCls =
           q"""
@@ -52,7 +65,7 @@ class checked0Param[Cond[_], Msg[_], TFace] extends scala.annotation.StaticAnnot
                def create[T] : $shellClassName[T] = new $shellCtorName[T]
              }
            """
-        Term.Block(Seq(likeTrait, updatedCls, companion, shellCls, shellCompanion))
+        Term.Block(Seq(likeTrait, updatedCls, companion, typeBlock, valBlock, shellCls, shellCompanion))
       case _ =>
 //        println(defn.structure)
         abort("@checked must annotate a class.")

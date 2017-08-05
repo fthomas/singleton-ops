@@ -3,21 +3,21 @@ package singleton.twoface.impl
 import macrocompat.bundle
 import singleton.ops._
 import singleton.ops.impl._
+import singleton.twoface.TwoFace
 //import singleton.twoface.TwoFace
 
 import scala.reflect.macros.whitebox
 
-trait Checked0Param[Cond[_], Msg[_], Face, T0] extends Any with TwoFaceAny[Face] {
-  type T <: T0
-//  def unsafeCheck()
-//  (implicit
-//   cond : TwoFace.Boolean.Shell1[Cond, Face, Face],
-//   msg : TwoFace.String.Shell1[Msg, Face, Face],
-//   req : TwoFace.Boolean.Shell2[RequireMsg, Cond[Face], std.Boolean, Msg[Face], std.String]
-//  ) = {
-//    req(cond(getValue), msg(getValue))
-//    this
-//  }
+trait Checked0Param[Cond[_], Msg[_], Face] extends Any with TwoFaceAny[Face] {
+  def unsafeCheck()
+  (implicit
+   cond : TwoFace.Boolean.Shell1[Cond, Face, Face],
+   msg : TwoFace.String.Shell1[Msg, Face, Face],
+   req : TwoFace.Boolean.Shell2[RequireMsg, Cond[Face], std.Boolean, Msg[Face], std.String]
+  ) = {
+    req(cond(getValue), msg(getValue))
+    this
+  }
 }
 
 object Checked0Param {
