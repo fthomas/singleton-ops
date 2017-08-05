@@ -1344,50 +1344,57 @@ trait GeneralMacros {
   ///////////////////////////////////////////////////////////////////////////////////////////
   // Checked TwoFace
   ///////////////////////////////////////////////////////////////////////////////////////////
-  def CheckedImplMaterializer[T, Param, Chk](implicit t : c.WeakTypeTag[T], param : c.WeakTypeTag[Param], chk : c.WeakTypeTag[Chk]) :
-  CheckedImplMaterializer[T, Param, Chk] = new CheckedImplMaterializer[T, Param, Chk](weakTypeOf[T], weakTypeOf[Param], symbolOf[Chk])
+  def CheckedImplMaterializer[Chk, Cond, Msg](implicit chk : c.WeakTypeTag[Chk], cond : c.WeakTypeTag[Cond], msg : c.WeakTypeTag[Msg]) :
+  CheckedImplMaterializer[Chk, Cond, Msg] = new CheckedImplMaterializer[Chk, Cond, Msg](symbolOf[Chk], weakTypeOf[Cond], weakTypeOf[Msg])
 
-  final class CheckedImplMaterializer[T, Param, Chk](tTpe : Type, paramTpe : Type, chkSym : TypeSymbol) {
-    def newChecked(paramNum : Int, valueTree : c.Tree)(implicit annotatedSym : TypeSymbol) : c.Tree = {
+  final class CheckedImplMaterializer[Chk, Cond, Msg](chkSym : TypeSymbol, condTpe : Type, msgTpe : Type) {
+    def newChecked(paramNum : Int, calc : CalcVal, reqCalc : CalcVal)(implicit annotatedSym : TypeSymbol) : c.Tree = {
+      val outTpe = calc.tpe
+      val outTpeWide = outTpe.widen
+      val outTree = calc.tree
       paramNum match {
-        case 0 => q"new $chkSym[$tTpe]($valueTree)"
-        case 1 => q"new $chkSym[$tTpe,$paramTpe]($valueTree)"
+        case 0 =>
+          q"""
+             new $chkSym[$outTpe]($outTree.asInstanceOf[$outTpe])
+           """
+//        case 1 => q"new $chkSym[$outTpe,$paramTpe]($valueTree)"
         case _ =>
           abort("Unsupported number of parameters")
       }
     }
-    def impl(paramNum : Int, vc : c.Tree, vm : c.Tree) : c.Tree = {
+    def fromNumValue(paramNum : Int, numValueTree : c.Tree) : c.Tree = {
       implicit val annotatedSym : TypeSymbol = chkSym
-      val msgValue = extractValueFromOpTree(vm) match {
-        case Some(Constant(s : String)) => s
-        case _ => abort("Invalid error message:\n" + showRaw(vm))
+      val numValueCalc = extractValueFromNumTree(numValueTree)
+
+      val outTpe = numValueCalc.tpe
+      val fixedCondTpe = condTpe.substituteTypes(List(condTpe.typeArgs.head.typeSymbol), List(outTpe))
+      val fixedMsgTpe = msgTpe.substituteTypes(List(msgTpe.typeArgs.head.typeSymbol), List(outTpe))
+
+      val condCalc = extractSingletonValue(fixedCondTpe) match {
+        case t : CalcVal => t
+        case _ => extractionFailed(fixedCondTpe)
       }
 
-      extractValueFromOpTree(vc) match {
-        case Some(Constant(true)) =>                  //condition given to macro must be true
-        case Some(Constant(false)) => abort(msgValue) //otherwise the given error message is set as the abort message
-        case _ => abort("Unable to retrieve compile-time value:\n" + showRaw(vm))
+      val msgCalc = extractSingletonValue(fixedMsgTpe) match {
+        case t : CalcVal => t
+        case _ => extractionFailed(fixedMsgTpe)
       }
 
-      val chkTerm = TermName(chkSym.name.toString)
-      val tValue = extractSingletonValue(tTpe) match {
-        case CalcLit(t) => t
-        case _ => abort("Unable to retrieve compile-time value:\n" + showRaw(tTpe))
-      }
-      val tValueTree = constantTreeOf(tValue)
-      val genTree = newChecked(paramNum, tValueTree)
+      val reqCalc = opCalc(funcTypes.Require, condCalc, msgCalc, CalcLit(0))
+      val genTree = newChecked(paramNum, numValueCalc, reqCalc)
+//      print(genTree)
       genTree
     }
-    def unsafe(paramNum : Int, valueTree : c.Tree) : c.Tree = {
-      implicit val annotatedSym : TypeSymbol = chkSym
-      val genTree = newChecked(paramNum, valueTree)
-      genTree
-    }
-    def unsafeTF(paramNum : Int, valueTree : c.Tree) : c.Tree = {
-      implicit val annotatedSym : TypeSymbol = chkSym
-      val genTree = newChecked(paramNum, q"$valueTree.getValue")
-      genTree
-    }
+//    def unsafe(paramNum : Int, valueTree : c.Tree) : c.Tree = {
+//      implicit val annotatedSym : TypeSymbol = chkSym
+//      val genTree = newChecked(paramNum, valueTree)
+//      genTree
+//    }
+//    def unsafeTF(paramNum : Int, valueTree : c.Tree) : c.Tree = {
+//      implicit val annotatedSym : TypeSymbol = chkSym
+//      val genTree = newChecked(paramNum, q"$valueTree.getValue")
+//      genTree
+//    }
   }
   ///////////////////////////////////////////////////////////////////////////////////////////
 

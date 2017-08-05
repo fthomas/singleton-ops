@@ -18,7 +18,7 @@ class checked0Param[Cond[_], Msg[_], TFace] extends scala.annotation.StaticAnnot
           q"""
              final class $className[T0] (val value : $TFace) extends AnyVal with
                _root_.singleton.twoface.impl.Checked0Param[$Cond, $Msg, $TFace, T0] with
-               ${Ctor.Name("_root_.singleton.twoface.impl.TwoFaceAny." + tFaceName.toString())}[T0] {
+               ${Ctor.Name("_root_.singleton.twoface.impl.TwoFaceAny." + tFaceName.toString() + "Like")} {
                type T = T0
                @inline def getValue : $TFace = value
              }

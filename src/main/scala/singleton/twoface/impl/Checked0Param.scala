@@ -3,16 +3,18 @@ package singleton.twoface.impl
 import macrocompat.bundle
 import singleton.ops._
 import singleton.ops.impl._
+//import singleton.twoface.TwoFace
+
 import scala.reflect.macros.whitebox
 
 trait Checked0Param[Cond[_], Msg[_], Face, T0] extends Any with TwoFaceAny[Face] {
   type T <: T0
 //  def unsafeCheck()
 //  (implicit
-//   cond : TwoFaceAny.Boolean.Shell1[Cond, Face, Face],
-//   msg : TwoFaceAny.String.Shell1[Msg, Face, Face],
-//   req : TwoFaceAny.Boolean.Shell2[RequireMsg, Cond[Face], std.Boolean, Msg[Face], std.String]
-//  ) : this.type = {
+//   cond : TwoFace.Boolean.Shell1[Cond, Face, Face],
+//   msg : TwoFace.String.Shell1[Msg, Face, Face],
+//   req : TwoFace.Boolean.Shell2[RequireMsg, Cond[Face], std.Boolean, Msg[Face], std.String]
+//  ) = {
 //    req(cond(getValue), msg(getValue))
 //    this
 //  }
@@ -21,8 +23,9 @@ trait Checked0Param[Cond[_], Msg[_], Face, T0] extends Any with TwoFaceAny[Face]
 object Checked0Param {
   trait Builder[Chk[T], Cond[_], Msg[_], Face] {
     type Shell[T] <: Checked0ParamShell[Chk, Face, T]
-    type CondHelper[T] = ITE[IsNonLiteral[Cond[T]], True, Cond[T]]
-    type MsgHelper[T] = ITE[IsNonLiteral[Msg[T]], SomethingBadHappened, Msg[T]]
+
+    implicit def apply[T <: Face, Out <: Face](value : T) :
+    Chk[Out] = macro Builder.Macro.apply[Chk[_], Cond[_], Msg[_]]
 
 //    implicit def impl[T]
 //    (implicit vc : CondHelper[T], vm : MsgHelper[T]) :
@@ -46,30 +49,30 @@ object Checked0Param {
   @bundle
   object Builder {
     final class Macro(val c: whitebox.Context) extends GeneralMacros {
-      def impl[T, Chk](vc : c.Tree, vm : c.Tree)(
+      def apply[Chk, Cond, Msg](value : c.Tree)(
         implicit
-        t : c.WeakTypeTag[T], chk: c.WeakTypeTag[Chk]
-      ): c.Tree = CheckedImplMaterializer[T, T, Chk].impl(0, vc, vm)
+        chk : c.WeakTypeTag[Chk], cond : c.WeakTypeTag[Cond], msg : c.WeakTypeTag[Msg]
+      ): c.Tree = CheckedImplMaterializer[Chk, Cond, Msg].fromNumValue(0, value)
 
-      def safe[T, Chk](value : c.Tree)(vc : c.Tree, vm : c.Tree)(
-        implicit
-        t : c.WeakTypeTag[T], chk: c.WeakTypeTag[Chk]
-      ): c.Tree = CheckedImplMaterializer[T, T, Chk].impl(0, vc, vm)
-
-      def safeTF[T, Chk](value : c.Tree)(vc : c.Tree, vm : c.Tree)(
-        implicit
-        t : c.WeakTypeTag[T], chk: c.WeakTypeTag[Chk]
-      ): c.Tree = CheckedImplMaterializer[T, T, Chk].impl(0, vc, vm)
-
-      def unsafe[T, Chk](value : c.Tree)(
-        implicit
-        t : c.WeakTypeTag[T], chk: c.WeakTypeTag[Chk]
-      ): c.Tree = CheckedImplMaterializer[T, T, Chk].unsafe(0, value)
-
-      def unsafeTF[T, Chk](value : c.Tree)(
-        implicit
-        t : c.WeakTypeTag[T], chk: c.WeakTypeTag[Chk]
-      ): c.Tree = CheckedImplMaterializer[T, T, Chk].unsafeTF(0, value)
+//      def impl[T, Chk](vc : c.Tree, vm : c.Tree)(
+//        implicit
+//        t : c.WeakTypeTag[T], chk: c.WeakTypeTag[Chk]
+//      ): c.Tree = CheckedImplMaterializer[T, T, Chk].fromNumValue(0, vc, vm)
+//
+//      def safeTF[T, Chk](value : c.Tree)(vc : c.Tree, vm : c.Tree)(
+//        implicit
+//        t : c.WeakTypeTag[T], chk: c.WeakTypeTag[Chk]
+//      ): c.Tree = CheckedImplMaterializer[T, T, Chk].fromNumValue(0, vc, vm)
+//
+//      def unsafe[T, Chk](value : c.Tree)(
+//        implicit
+//        t : c.WeakTypeTag[T], chk: c.WeakTypeTag[Chk]
+//      ): c.Tree = CheckedImplMaterializer[T, T, Chk].unsafe(0, value)
+//
+//      def unsafeTF[T, Chk](value : c.Tree)(
+//        implicit
+//        t : c.WeakTypeTag[T], chk: c.WeakTypeTag[Chk]
+//      ): c.Tree = CheckedImplMaterializer[T, T, Chk].unsafeTF(0, value)
     }
   }
 }
