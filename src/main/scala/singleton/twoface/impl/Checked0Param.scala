@@ -24,8 +24,8 @@ object Checked0Param {
   trait Builder[Chk[T], Cond[_], Msg[_], Face] {
     type Shell[T] <: Checked0ParamShell[Chk, Face, T]
 
-    implicit def apply[T <: Face, Out <: Face](value : T) :
-    Chk[Out] = macro Builder.Macro.apply[Chk[_], Cond[_], Msg[_]]
+    implicit def apply[T <: Face](value : T) :
+    Chk[T] = macro Builder.Macro.apply[Chk[_], Cond[_], Msg[_]]
 
 //    implicit def impl[T]
 //    (implicit vc : CondHelper[T], vm : MsgHelper[T]) :
