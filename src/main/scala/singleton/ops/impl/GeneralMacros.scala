@@ -1344,10 +1344,10 @@ trait GeneralMacros {
   ///////////////////////////////////////////////////////////////////////////////////////////
   // Checked TwoFace
   ///////////////////////////////////////////////////////////////////////////////////////////
-  def CheckedImplMaterializer[Chk, Cond, Msg](implicit chk : c.WeakTypeTag[Chk], cond : c.WeakTypeTag[Cond], msg : c.WeakTypeTag[Msg]) :
-  CheckedImplMaterializer[Chk, Cond, Msg] = new CheckedImplMaterializer[Chk, Cond, Msg](symbolOf[Chk], weakTypeOf[Cond], weakTypeOf[Msg])
+  def CheckedImplMaterializer[PrimChk, SecChk, Cond, Msg](implicit primChk : c.WeakTypeTag[PrimChk], secChk : c.WeakTypeTag[SecChk], cond : c.WeakTypeTag[Cond], msg : c.WeakTypeTag[Msg]) :
+  CheckedImplMaterializer[PrimChk, SecChk, Cond, Msg] = new CheckedImplMaterializer[PrimChk, SecChk, Cond, Msg](symbolOf[PrimChk], symbolOf[SecChk], weakTypeOf[Cond], weakTypeOf[Msg])
 
-  final class CheckedImplMaterializer[Chk, Cond, Msg](chkSym : TypeSymbol, condTpe : Type, msgTpe : Type) {
+  final class CheckedImplMaterializer[PrimChk, SecChk, Cond, Msg](primChkSym : TypeSymbol, secChkSym : TypeSymbol, condTpe : Type, msgTpe : Type) {
     def newChecked(paramNum : Int, calc : CalcVal, reqCalc : CalcVal)(implicit annotatedSym : TypeSymbol) : c.Tree = {
       val outTpe = calc.tpe
       val outTpeWide = outTpe.widen
@@ -1355,7 +1355,7 @@ trait GeneralMacros {
       paramNum match {
         case 0 =>
           q"""
-             new $chkSym[$outTpe]($outTree.asInstanceOf[$outTpe])
+             new $secChkSym[$outTpe]($outTree.asInstanceOf[$outTpe])
            """
 //        case 1 => q"new $chkSym[$outTpe,$paramTpe]($valueTree)"
         case _ =>
@@ -1363,7 +1363,7 @@ trait GeneralMacros {
       }
     }
     def fromNumValue(paramNum : Int, numValueTree : c.Tree) : c.Tree = {
-      implicit val annotatedSym : TypeSymbol = chkSym
+      implicit val annotatedSym : TypeSymbol = primChkSym
       val numValueCalc = extractValueFromNumTree(numValueTree)
 
       val outTpe = numValueCalc.tpe
@@ -1382,7 +1382,7 @@ trait GeneralMacros {
 
       val reqCalc = opCalc(funcTypes.Require, condCalc, msgCalc, CalcLit(0))
       val genTree = newChecked(paramNum, numValueCalc, reqCalc)
-//      print(genTree)
+      print(genTree)
       genTree
     }
 //    def unsafe(paramNum : Int, valueTree : c.Tree) : c.Tree = {
