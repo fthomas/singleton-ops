@@ -1385,12 +1385,12 @@ trait GeneralMacros {
 
 
   ///////////////////////////////////////////////////////////////////////////////////////////
-  // Checked TwoFace
+  // Checked0Param TwoFace
   ///////////////////////////////////////////////////////////////////////////////////////////
   def Checked0ParamMaterializer[PrimChk, SecChk, Cond, Msg](implicit primChk : c.WeakTypeTag[PrimChk], secChk : c.WeakTypeTag[SecChk], cond : c.WeakTypeTag[Cond], msg : c.WeakTypeTag[Msg]) :
-  CheckedImplMaterializer[PrimChk, SecChk, Cond, Msg] = new CheckedImplMaterializer[PrimChk, SecChk, Cond, Msg](symbolOf[PrimChk], symbolOf[SecChk], weakTypeOf[Cond], weakTypeOf[Msg])
+  Checked0ParamMaterializer[PrimChk, SecChk, Cond, Msg] = new Checked0ParamMaterializer[PrimChk, SecChk, Cond, Msg](symbolOf[PrimChk], symbolOf[SecChk], weakTypeOf[Cond], weakTypeOf[Msg])
 
-  final class CheckedImplMaterializer[PrimChk, SecChk, Cond, Msg](primChkSym : TypeSymbol, secChkSym : TypeSymbol, condTpe : Type, msgTpe : Type) {
+  final class Checked0ParamMaterializer[PrimChk, SecChk, Cond, Msg](primChkSym : TypeSymbol, secChkSym : TypeSymbol, condTpe : Type, msgTpe : Type) {
     def newChecked(calc : CalcVal, chkArgTpe : Type)(implicit annotatedSym : TypeSymbol) : c.Tree = {
       val outTpe = calc.tpe
       val outTree = calc.tree
@@ -1420,7 +1420,7 @@ trait GeneralMacros {
       print("======>fromOpApply")
       val numValueCalc = extractValueFromOpTree(opTree)
       val genTree = newChecked(numValueCalc)
-            print(genTree)
+      print(genTree)
       print("<======fromOpApply")
       genTree
     }
@@ -1429,6 +1429,7 @@ trait GeneralMacros {
       print("======>fromOpImpl")
       val numValueCalc = extractValueFromOpTree(opTree)
       val genTree = newChecked(numValueCalc, tTpe)
+      print(genTree)
       print("<======fromOpImpl")
       genTree
     }
@@ -1446,7 +1447,83 @@ trait GeneralMacros {
       print("======>fromTF")
       val tfValueCalc = extractValueFromTwoFaceTree(tfTree)
       val genTree = newChecked(tfValueCalc)
-            print(genTree)
+      print(genTree)
+      print("<======fromTF")
+      genTree
+    }
+  }
+  ///////////////////////////////////////////////////////////////////////////////////////////
+
+
+  ///////////////////////////////////////////////////////////////////////////////////////////
+  // Checked1Param TwoFace
+  ///////////////////////////////////////////////////////////////////////////////////////////
+  def Checked1ParamMaterializer[PrimChk, SecChk, Cond, Msg](implicit primChk : c.WeakTypeTag[PrimChk], secChk : c.WeakTypeTag[SecChk], cond : c.WeakTypeTag[Cond], msg : c.WeakTypeTag[Msg]) :
+  Checked1ParamMaterializer[PrimChk, SecChk, Cond, Msg] = new Checked1ParamMaterializer[PrimChk, SecChk, Cond, Msg](symbolOf[PrimChk], symbolOf[SecChk], weakTypeOf[Cond], weakTypeOf[Msg])
+
+  final class Checked1ParamMaterializer[PrimChk, SecChk, Cond, Msg](primChkSym : TypeSymbol, secChkSym : TypeSymbol, condTpe : Type, msgTpe : Type) {
+    def newChecked(tCalc : CalcVal, tTpe : Type, paramCalc : CalcVal, paramTpe : Type)(implicit annotatedSym : TypeSymbol) : c.Tree = {
+      val outTpe = tCalc.tpe
+      val outTree = tCalc.tree
+      val outTpeWide = outTpe.widen
+      val fixedCondTpe = condTpe.substituteTypes(condTpe.typeArgs.map(t => t.typeSymbol), List(tCalc.tpe, paramCalc.tpe))
+      val fixedMsgTpe = msgTpe.substituteTypes(msgTpe.typeArgs.map(t => t.typeSymbol), List(tCalc.tpe, paramCalc.tpe))
+
+      val condCalc = TypeCalc(fixedCondTpe) match {
+        case t : CalcVal => t
+        case _ => extractionFailed(fixedCondTpe)
+      }
+
+      val msgCalc = TypeCalc(fixedMsgTpe) match {
+        case t : CalcVal => t
+        case _ => extractionFailed(fixedMsgTpe)
+      }
+
+      val reqCalc = opCalc(funcTypes.Require, condCalc, msgCalc, CalcLit(0))
+
+      q"""
+         (new $secChkSym[$tTpe, $paramTpe]($outTree.asInstanceOf[$outTpe])).asInstanceOf[$primChkSym[$tTpe, $paramTpe]]
+       """
+    }
+    def newChecked(tCalc : CalcVal, paramCalc : CalcVal)(implicit annotatedSym : TypeSymbol) : c.Tree =
+      newChecked(tCalc, tCalc.tpe, paramCalc, paramCalc.tpe)
+    def fromOpApply(tOpTree : c.Tree, paramOpTree : c.Tree) : c.Tree = {
+      implicit val annotatedSym : TypeSymbol = primChkSym
+      print("======>fromOpApply")
+      val tCalc = extractValueFromOpTree(tOpTree)
+      val paramCalc = extractValueFromOpTree(paramOpTree)
+      val genTree = newChecked(tCalc, paramCalc)
+      print(genTree)
+      print("<======fromOpApply")
+      genTree
+    }
+    def fromOpImpl(tOpTree : c.Tree, tTpe : Type, paramOpTree : c.Tree, paramTpe : Type) : c.Tree = {
+      implicit val annotatedSym : TypeSymbol = primChkSym
+      print("======>fromOpImpl")
+      val tCalc = extractValueFromOpTree(tOpTree)
+      val paramCalc = extractValueFromOpTree(paramOpTree)
+      val genTree = newChecked(tCalc, tTpe, paramCalc, paramTpe)
+      print(genTree)
+      print("<======fromOpImpl")
+      genTree
+    }
+    def fromNumValue(tNumTree : c.Tree, paramOpTree : c.Tree) : c.Tree = {
+      implicit val annotatedSym : TypeSymbol = primChkSym
+      print("======>fromNumValue")
+      val tCalc = extractValueFromNumTree(tNumTree)
+      val paramCalc = extractValueFromOpTree(paramOpTree)
+      val genTree = newChecked(tCalc, paramCalc)
+      print(genTree)
+      print("<======fromNumValue")
+      genTree
+    }
+    def fromTF(tTFTree : c.Tree, paramOpTree : c.Tree) : c.Tree = {
+      implicit val annotatedSym : TypeSymbol = primChkSym
+      print("======>fromTF")
+      val tCalc = extractValueFromTwoFaceTree(tTFTree)
+      val paramCalc = extractValueFromOpTree(paramOpTree)
+      val genTree = newChecked(tCalc, paramCalc)
+      print(genTree)
       print("<======fromTF")
       genTree
     }
