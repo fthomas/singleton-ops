@@ -65,7 +65,9 @@ class checked0Param[Cond[_], Msg[_], TFace] extends scala.annotation.StaticAnnot
                def create[T] : $shellClassName[T] = new $shellCtorName[T]
              }
            """
-        Term.Block(Seq(likeTrait, updatedCls, companion, typeBlock, valBlock, shellCls, shellCompanion))
+        val termBlock = Term.Block(Seq(likeTrait, updatedCls, companion, typeBlock, valBlock, shellCls, shellCompanion))
+//        print(termBlock)
+        termBlock
       case _ =>
 //        println(defn.structure)
         abort("@checked must annotate a class.")

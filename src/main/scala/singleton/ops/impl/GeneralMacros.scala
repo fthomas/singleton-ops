@@ -1402,7 +1402,7 @@ trait GeneralMacros {
       paramNum match {
         case 0 =>
           q"""
-             new $secChkSym[$chkArgTpe]($outTree.asInstanceOf[$outTpe])
+             (new $secChkSym[$chkArgTpe]($outTree.asInstanceOf[$outTpe])).asInstanceOf[$primChkSym[$chkArgTpe]]
            """
 //        case 1 => q"new $chkSym[$outTpe,$paramTpe]($valueTree)"
         case _ =>
