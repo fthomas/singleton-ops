@@ -265,44 +265,6 @@ trait GeneralMacros {
       case _ => None
     }
   }
-  object TwoFaceCalc {
-    def unappyArg(calcTFType : Option[CalcTFType], tfArgType : Type)(implicit annotatedSym : TypeSymbol): Option[Calc] = {
-      TypeCalc.unapply(tfArgType) match {
-        case Some(t : CalcLit) => Some(t)
-        case _ => calcTFType
-      }
-    }
-    
-    def unapply(tpe: Type)(implicit annotatedSym : TypeSymbol) : Option[Calc] = {
-      tpe match {
-        case TypeRef(_, sym, args) =>
-          val calcTFType = sym match {
-            case t if t == symbolOf[TwoFaceAny._Char[_]] => Some(CalcTFType.Char)
-            case t if t == symbolOf[TwoFaceAny._Int[_]] => Some(CalcTFType.Int)
-            case t if t == symbolOf[TwoFaceAny._Long[_]] => Some(CalcTFType.Long)
-            case t if t == symbolOf[TwoFaceAny._Float[_]] => Some(CalcTFType.Float)
-            case t if t == symbolOf[TwoFaceAny._Double[_]] => Some(CalcTFType.Double)
-            case t if t == symbolOf[TwoFaceAny._String[_]] => Some(CalcTFType.String)
-            case t if t == symbolOf[TwoFaceAny._Boolean[_]] => Some(CalcTFType.Boolean)
-            case _ => None
-          }
-          if (calcTFType.isDefined) unappyArg(calcTFType, args.head) else None
-        case RefinedType(parents, scope) =>
-          val calcTFType = parents.head.typeSymbol match {
-            case t if t == symbolOf[TwoFaceAny.CharLike] => Some(CalcTFType.Char)
-            case t if t == symbolOf[TwoFaceAny.IntLike] => Some(CalcTFType.Int)
-            case t if t == symbolOf[TwoFaceAny.LongLike] => Some(CalcTFType.Long)
-            case t if t == symbolOf[TwoFaceAny.FloatLike] => Some(CalcTFType.Float)
-            case t if t == symbolOf[TwoFaceAny.DoubleLike] => Some(CalcTFType.Double)
-            case t if t == symbolOf[TwoFaceAny.StringLike] => Some(CalcTFType.String)
-            case t if t == symbolOf[TwoFaceAny.BooleanLike] => Some(CalcTFType.Boolean)
-            case _ => None
-          }
-          if (calcTFType.isDefined) unappyArg(calcTFType, scope.head.asType.toType) else None
-        case _ => None
-      }
-    }
-  }
   ////////////////////////////////////////////////////////////////////
 
 
@@ -316,6 +278,7 @@ trait GeneralMacros {
     *  available known-at-compile-time values.
     */
   object TypeCalc {
+    val verboseTraversal = false
     ////////////////////////////////////////////////////////////////////////
     // Calculates the integer value of Shapeless Nat
     ////////////////////////////////////////////////////////////////////////
@@ -339,6 +302,51 @@ trait GeneralMacros {
     }
     ////////////////////////////////////////////////////////////////////////
 
+    ////////////////////////////////////////////////////////////////////////
+    // Calculates the TwoFace values
+    ////////////////////////////////////////////////////////////////////////
+    object TwoFaceCalc {
+      def unappyArg(calcTFType : Option[CalcTFType], tfArgType : Type)(implicit annotatedSym : TypeSymbol): Option[Calc] = {
+        TypeCalc.unapply(tfArgType) match {
+          case Some(t : CalcLit) => Some(t)
+          case _ => calcTFType
+        }
+      }
+
+      def unapply(tp: Type)(implicit annotatedSym : TypeSymbol) : Option[Calc] = {
+        tp match {
+          case TypeRef(_, sym, args) =>
+            val calcTFType = sym match {
+              case t if t == symbolOf[TwoFaceAny._Char[_]] => Some(CalcTFType.Char)
+              case t if t == symbolOf[TwoFaceAny._Int[_]] => Some(CalcTFType.Int)
+              case t if t == symbolOf[TwoFaceAny._Long[_]] => Some(CalcTFType.Long)
+              case t if t == symbolOf[TwoFaceAny._Float[_]] => Some(CalcTFType.Float)
+              case t if t == symbolOf[TwoFaceAny._Double[_]] => Some(CalcTFType.Double)
+              case t if t == symbolOf[TwoFaceAny._String[_]] => Some(CalcTFType.String)
+              case t if t == symbolOf[TwoFaceAny._Boolean[_]] => Some(CalcTFType.Boolean)
+              case _ => None
+            }
+            if (calcTFType.isDefined) unappyArg(calcTFType, args.head) else None
+          case RefinedType(parents, scope) =>
+            val calcTFType = parents.head.typeSymbol match {
+              case t if t == symbolOf[TwoFaceAny.CharLike] => Some(CalcTFType.Char)
+              case t if t == symbolOf[TwoFaceAny.IntLike] => Some(CalcTFType.Int)
+              case t if t == symbolOf[TwoFaceAny.LongLike] => Some(CalcTFType.Long)
+              case t if t == symbolOf[TwoFaceAny.FloatLike] => Some(CalcTFType.Float)
+              case t if t == symbolOf[TwoFaceAny.DoubleLike] => Some(CalcTFType.Double)
+              case t if t == symbolOf[TwoFaceAny.StringLike] => Some(CalcTFType.String)
+              case t if t == symbolOf[TwoFaceAny.BooleanLike] => Some(CalcTFType.Boolean)
+              case _ => None
+            }
+            if (calcTFType.isDefined) {
+              if (verboseTraversal) print(s"@@TwoFaceCalc@@\nTP: $tp\nRAW: + ${showRaw(tp)}")
+              unappyArg(calcTFType, scope.head.asType.toType)
+            } else None
+          case _ => None
+        }
+      }
+    }
+    ////////////////////////////////////////////////////////////////////////
 
     ////////////////////////////////////////////////////////////////////////
     // Calculates the different Op wrappers by unapplying their argument.
@@ -348,15 +356,15 @@ trait GeneralMacros {
         tp match {
           case TypeRef(_, sym, args) =>
             sym match {
-              case t if t == symbolOf[OpNat[_]] => OpArgCalc.unapply(args.head)
-              case t if t == symbolOf[OpChar[_]] => OpArgCalc.unapply(args.head)
-              case t if t == symbolOf[OpInt[_]] => OpArgCalc.unapply(args.head)
-              case t if t == symbolOf[OpLong[_]] => OpArgCalc.unapply(args.head)
-              case t if t == symbolOf[OpFloat[_]] => OpArgCalc.unapply(args.head)
-              case t if t == symbolOf[OpDouble[_]] => OpArgCalc.unapply(args.head)
-              case t if t == symbolOf[OpString[_]] => OpArgCalc.unapply(args.head)
-              case t if t == symbolOf[OpBoolean[_]] => OpArgCalc.unapply(args.head)
-              case t if t == symbolOf[OpSymbol[_]] => OpArgCalc.unapply(args.head)
+              case t if t == symbolOf[OpNat[_]] => Some(OpArgCalc.unapply(args.head))
+              case t if t == symbolOf[OpChar[_]] => Some(OpArgCalc.unapply(args.head))
+              case t if t == symbolOf[OpInt[_]] => Some(OpArgCalc.unapply(args.head))
+              case t if t == symbolOf[OpLong[_]] => Some(OpArgCalc.unapply(args.head))
+              case t if t == symbolOf[OpFloat[_]] => Some(OpArgCalc.unapply(args.head))
+              case t if t == symbolOf[OpDouble[_]] => Some(OpArgCalc.unapply(args.head))
+              case t if t == symbolOf[OpString[_]] => Some(OpArgCalc.unapply(args.head))
+              case t if t == symbolOf[OpBoolean[_]] => Some(OpArgCalc.unapply(args.head))
+              case t if t == symbolOf[OpSymbol[_]] => Some(OpArgCalc.unapply(args.head))
               case _ => None
             }
           case _ =>
@@ -370,20 +378,13 @@ trait GeneralMacros {
     // Calculates an Op argument.
     ////////////////////////////////////////////////////////////////////////
     object OpArgCalc {
-      def unapply(tp: Type)(implicit annotatedSym : TypeSymbol): Option[Calc] = {
+      def unapply(tp: Type)(implicit annotatedSym : TypeSymbol): Calc = {
         TypeCalc.unapply(tp) match {
-          case Some(t : CalcLit) =>
-            Some(t)
-          case Some(t : CalcNLit) =>
-            Some(t)
-          case Some(t : Calc.Symbol) =>
-            Some(CalcNLit(CalcType.String, q"valueOf[$tp].name"))
-          case Some(t : CalcTFType) =>
-            Some(CalcNLit(t, q"valueOf[$tp].getValue"))
-          case Some(t : CalcType) =>
-            Some(CalcNLit(t, q"valueOf[$tp]"))
-          case _ =>
-            Some(CalcUnknown(tp))
+          case Some(t : CalcVal) => t
+          case Some(t : Calc.Symbol) => CalcNLit(CalcType.String, q"valueOf[$tp].name")
+          case Some(t : CalcTFType) => CalcNLit(t, q"valueOf[$tp].getValue")
+          case Some(t : CalcType) => CalcNLit(t, q"valueOf[$tp]")
+          case _ => CalcUnknown(tp)
         }
       }
     }
@@ -396,6 +397,7 @@ trait GeneralMacros {
       def unapply(tp: Type)(implicit annotatedSym : TypeSymbol): Option[Calc] = {
         tp match {
           case TypeRef(_, sym, args) if sym == symbolOf[OpMacro[_,_,_,_]] =>
+            if (verboseTraversal) print(s"@@OpCalc@@\nTP: $tp\nRAW: + ${showRaw(tp)}")
             val args = tp.typeArgs
             val funcType = args.head.typeSymbol.asType
 
@@ -405,17 +407,17 @@ trait GeneralMacros {
             val retVal = (funcType, aValue) match {
               case (funcTypes.IsNonLiteral, _) => //Looking for non literals
                 aValue match {
-                  case Some(t : CalcLit) => Some(CalcLit(false))
+                  case t : CalcLit => Some(CalcLit(false))
                   case _ => Some(CalcLit(true)) //non-literal type (e.g., Int, Long,...)
                 }
-              case (funcTypes.ITE, Some(CalcLit.Boolean(cond))) => //Special control case: ITE (If-Then-Else)
+              case (funcTypes.ITE, CalcLit.Boolean(cond)) => //Special control case: ITE (If-Then-Else)
                 if (cond)
-                  OpArgCalc.unapply(args(2)) //true (then) part of the IF
+                  Some(OpArgCalc.unapply(args(2))) //true (then) part of the IF
                 else
-                  OpArgCalc.unapply(args(3)) //false (else) part of the IF
-              case (funcTypes.Arg, Some(CalcLit.Int(argNum))) =>
+                  Some(OpArgCalc.unapply(args(3))) //false (else) part of the IF
+              case (funcTypes.Arg, CalcLit.Int(argNum)) =>
                 OpArgCalc.unapply(args(2)) match { //Checking the argument type
-                  case (Some(t : CalcLit)) => Some(t) //Literal argument is just a literal
+                  case t : CalcLit => Some(t) //Literal argument is just a literal
                   case _ => //Got a type, so returning argument name
                     TypeCalc.unapply(args(3)) match {
                       case Some(t: CalcType) =>
@@ -430,7 +432,7 @@ trait GeneralMacros {
                 val bValue = OpArgCalc.unapply(args(2))
                 val cValue = OpArgCalc.unapply(args(3))
                 (aValue, bValue, cValue) match {
-                  case (Some(a : CalcVal), Some(b: CalcVal), Some(c : Calc)) =>
+                  case (a : CalcVal, b: CalcVal, c : Calc) =>
                     Some(opCalc(funcType, a, b, c))
                   case _ => None
                 }
@@ -446,7 +448,7 @@ trait GeneralMacros {
       val g = c.universe.asInstanceOf[SymbolTable]
       implicit def fixSymbolOps(sym: Symbol): g.Symbol = sym.asInstanceOf[g.Symbol]
 
-//      print(tp + " RAW " + showRaw(tp))
+      if (verboseTraversal) print(tp + " RAW " + showRaw(tp))
       tp match {
         ////////////////////////////////////////////////////////////////////////
         // Value cases
@@ -1480,16 +1482,6 @@ trait GeneralMacros {
       print("<======fromTF")
       genTree
     }
-//    def unsafe(paramNum : Int, valueTree : c.Tree) : c.Tree = {
-//      implicit val annotatedSym : TypeSymbol = chkSym
-//      val genTree = newChecked(paramNum, valueTree)
-//      genTree
-//    }
-//    def unsafeTF(paramNum : Int, valueTree : c.Tree) : c.Tree = {
-//      implicit val annotatedSym : TypeSymbol = chkSym
-//      val genTree = newChecked(paramNum, q"$valueTree.getValue")
-//      genTree
-//    }
   }
   ///////////////////////////////////////////////////////////////////////////////////////////
 
