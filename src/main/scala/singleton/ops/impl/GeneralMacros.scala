@@ -353,35 +353,19 @@ trait GeneralMacros {
         tp match {
           case TypeRef(_, sym, args) =>
             sym match {
-              case t if t == symbolOf[OpNat[_]] => Some(OpArgCalc.unapply(args.head))
-              case t if t == symbolOf[OpChar[_]] => Some(OpArgCalc.unapply(args.head))
-              case t if t == symbolOf[OpInt[_]] => Some(OpArgCalc.unapply(args.head))
-              case t if t == symbolOf[OpLong[_]] => Some(OpArgCalc.unapply(args.head))
-              case t if t == symbolOf[OpFloat[_]] => Some(OpArgCalc.unapply(args.head))
-              case t if t == symbolOf[OpDouble[_]] => Some(OpArgCalc.unapply(args.head))
-              case t if t == symbolOf[OpString[_]] => Some(OpArgCalc.unapply(args.head))
-              case t if t == symbolOf[OpBoolean[_]] => Some(OpArgCalc.unapply(args.head))
-              case t if t == symbolOf[OpSymbol[_]] => Some(OpArgCalc.unapply(args.head))
+              case t if t == symbolOf[OpNat[_]] => Some(TypeCalc(args.head))
+              case t if t == symbolOf[OpChar[_]] => Some(TypeCalc(args.head))
+              case t if t == symbolOf[OpInt[_]] => Some(TypeCalc(args.head))
+              case t if t == symbolOf[OpLong[_]] => Some(TypeCalc(args.head))
+              case t if t == symbolOf[OpFloat[_]] => Some(TypeCalc(args.head))
+              case t if t == symbolOf[OpDouble[_]] => Some(TypeCalc(args.head))
+              case t if t == symbolOf[OpString[_]] => Some(TypeCalc(args.head))
+              case t if t == symbolOf[OpBoolean[_]] => Some(TypeCalc(args.head))
+              case t if t == symbolOf[OpSymbol[_]] => Some(TypeCalc(args.head))
               case _ => None
             }
           case _ =>
             None
-        }
-      }
-    }
-    ////////////////////////////////////////////////////////////////////////
-
-    ////////////////////////////////////////////////////////////////////////
-    // Calculates an Op argument.
-    ////////////////////////////////////////////////////////////////////////
-    object OpArgCalc {
-      def unapply(tp: Type)(implicit annotatedSym : TypeSymbol): Calc = {
-        TypeCalc.unapply(tp) match {
-          case Some(t : CalcVal) => t
-          case Some(t : CalcType.Symbol) => CalcNLit(CalcType.String, q"valueOf[$tp].name")
-          case Some(t : CalcTFType) => CalcNLit(t, q"valueOf[$tp].getValue")
-          case Some(t : CalcType) => CalcNLit(t, q"valueOf[$tp]")
-          case _ => CalcUnknown(tp)
         }
       }
     }
@@ -400,7 +384,7 @@ trait GeneralMacros {
 
             //If function is set/get variable we keep the original string,
             //otherwise we get the variable's value
-            val aValue = OpArgCalc.unapply(args(1))
+            val aValue = TypeCalc(args(1))
             val retVal = (funcType, aValue) match {
               case (funcTypes.IsNonLiteral, _) => //Looking for non literals
                 aValue match {
@@ -409,11 +393,11 @@ trait GeneralMacros {
                 }
               case (funcTypes.ITE, CalcLit.Boolean(cond)) => //Special control case: ITE (If-Then-Else)
                 if (cond)
-                  Some(OpArgCalc.unapply(args(2))) //true (then) part of the IF
+                  Some(TypeCalc(args(2))) //true (then) part of the IF
                 else
-                  Some(OpArgCalc.unapply(args(3))) //false (else) part of the IF
+                  Some(TypeCalc(args(3))) //false (else) part of the IF
               case (funcTypes.Arg, CalcLit.Int(argNum)) =>
-                OpArgCalc.unapply(args(2)) match { //Checking the argument type
+                TypeCalc(args(2)) match { //Checking the argument type
                   case t : CalcLit => Some(t) //Literal argument is just a literal
                   case _ => //Got a type, so returning argument name
                     TypeCalc.unapply(args(3)) match {
@@ -426,8 +410,8 @@ trait GeneralMacros {
                 }
 
               case _ => //regular cases
-                val bValue = OpArgCalc.unapply(args(2))
-                val cValue = OpArgCalc.unapply(args(3))
+                val bValue = TypeCalc(args(2))
+                val cValue = TypeCalc(args(3))
                 (aValue, bValue, cValue) match {
                   case (a : CalcVal, b: CalcVal, c : Calc) =>
                     Some(opCalc(funcType, a, b, c))
@@ -441,6 +425,16 @@ trait GeneralMacros {
     }
     ////////////////////////////////////////////////////////////////////////
 
+    def apply(tp: Type)(implicit annotatedSym : TypeSymbol): Calc = {
+      TypeCalc.unapply(tp) match {
+        case Some(t : CalcVal) => t
+        case Some(t : CalcType.Symbol) => CalcNLit(CalcType.String, q"valueOf[$tp].name")
+        case Some(t : CalcTFType) => CalcNLit(t, q"valueOf[$tp].getValue")
+        case Some(t : CalcType) => CalcNLit(t, q"valueOf[$tp]")
+        case _ => CalcUnknown(tp)
+      }
+    }
+    
     def unapply(tp: Type)(implicit annotatedSym : TypeSymbol): Option[Calc] = {
       val g = c.universe.asInstanceOf[SymbolTable]
       implicit def fixSymbolOps(sym: Symbol): g.Symbol = sym.asInstanceOf[g.Symbol]
@@ -586,9 +580,6 @@ trait GeneralMacros {
     abort(msg)
   }
 
-  def extractSingletonValue(tpe: Type)(implicit annotatedSym : TypeSymbol): Calc =
-    TypeCalc.OpArgCalc.unapply(tpe)
-
   def extractValueFromOpTree(opTree : c.Tree)(implicit annotatedSym : TypeSymbol) : CalcVal = {
     def outFindCond(elem : c.Tree) : Boolean = elem match {
       case q"final val value : $valueTpe = $valueTree" => true
@@ -617,7 +608,7 @@ trait GeneralMacros {
 
   def extractValueFromNumTree(numValueTree : c.Tree)(implicit annotatedSym : TypeSymbol) : CalcVal = {
     val typedTree = c.typecheck(numValueTree)
-    extractSingletonValue(typedTree.tpe) match {
+    TypeCalc(typedTree.tpe) match {
       case t : CalcLit => t
       case t : CalcType => CalcNLit(t, numValueTree)
       case _ => extractionFailed(typedTree.tpe)
@@ -626,7 +617,7 @@ trait GeneralMacros {
 
   def extractValueFromTwoFaceTree(tfTree : c.Tree)(implicit annotatedSym : TypeSymbol) : CalcVal = {
     val typedTree = c.typecheck(tfTree)
-    extractSingletonValue(typedTree.tpe) match {
+    TypeCalc(typedTree.tpe) match {
       case t : CalcLit => t
       case t : CalcType => CalcNLit(t, q"$tfTree.getValue")
       case _ => extractionFailed(typedTree.tpe)
@@ -1284,7 +1275,7 @@ trait GeneralMacros {
     def usingFuncName : Tree = {
       implicit val annotatedSym : TypeSymbol = symbolOf[OpMacro[_,_,_,_]]
       val funcType = opTpe.typeArgs.head.typeSymbol.asType
-      val opResult = extractSingletonValue(opTpe)
+      val opResult = TypeCalc(opTpe)
 
       val genTree = (funcType, opResult) match {
         case (funcTypes.ToNat, CalcLit.Int(t)) => genOpTreeNat(opTpe, t)
@@ -1314,13 +1305,13 @@ trait GeneralMacros {
       implicit val annotatedSym : TypeSymbol = shellAliasTpe
       val funcApplyTpe = shellTpe.typeArgs(0)
       val funcArgsTpe = shellTpe.typeArgs(1)
-      val (tfValueTree, tfName) = extractSingletonValue(funcArgsTpe) match {
+      val (tfValueTree, tfName) = TypeCalc(funcArgsTpe) match {
         case (t: CalcVal) => (t.tree, t.tpe.widen.typeSymbol.name.toString)
         case _ => extractionFailed(shellTpe)
       }
       val tfTerm = TermName(tfName)
       val tfType = TypeName(tfName)
-      val outTpe = extractSingletonValue(funcApplyTpe).tpe
+      val outTpe = TypeCalc(funcApplyTpe).tpe
       val paramVec = for (i <- 4 to shellTpe.typeArgs.length by 2)
         yield ValDef(Modifiers(Flag.PARAM),TermName(s"arg${(i-4)/2+1}"),tq"${shellTpe.typeArgs(i-1)}",EmptyTree)
       val paramTree = List(paramVec.toList)
@@ -1407,12 +1398,12 @@ trait GeneralMacros {
       val fixedCondTpe = condTpe.substituteTypes(List(condTpe.typeArgs.head.typeSymbol), List(outTpe))
       val fixedMsgTpe = msgTpe.substituteTypes(List(msgTpe.typeArgs.head.typeSymbol), List(outTpe))
 
-      val condCalc = extractSingletonValue(fixedCondTpe) match {
+      val condCalc = TypeCalc(fixedCondTpe) match {
         case t : CalcVal => t
         case _ => extractionFailed(fixedCondTpe)
       }
 
-      val msgCalc = extractSingletonValue(fixedMsgTpe) match {
+      val msgCalc = TypeCalc(fixedMsgTpe) match {
         case t : CalcVal => t
         case _ => extractionFailed(fixedMsgTpe)
       }
