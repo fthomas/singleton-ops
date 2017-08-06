@@ -1,8 +1,8 @@
 package singleton.twoface
 
 import org.scalacheck.Properties
-import shapeless.test.illTyped
-import singleton.TestUtils._
+//import shapeless.test.illTyped
+//import singleton.TestUtils._
 import singleton.ops._
 
 object CheckedIntSpec {
@@ -17,17 +17,18 @@ class CheckedIntSpec extends Properties("Checked.Int") {
 
   def smallerThan50[T](t : CheckedSmallerThan50[T]) : Unit = {t.unsafeCheck()}
 
-  property("Compile-time checks") = wellTyped {
-    smallerThan50(40)
+//  CheckedSmallerThan50[W.`5`.T]
+//  property("Compile-time checks") = wellTyped {
+//    smallerThan50(40)
 //    smallerThan50(TwoFace.Int(40))
-    illTyped("""smallerThan50(50)""")
+//    illTyped("""smallerThan50(50)""")
 //    illTyped("""smallerThan50(TwoFace.Int(50))""")
-  }
-
-  property("Run-time checks") = wellTyped {
-    smallerThan50(us(40))
+//  }
+//
+//  property("Run-time checks") = wellTyped {
+//    smallerThan50(us(40))
 //    smallerThan50(TwoFace.Int(us(40)))
-    illRun{smallerThan50(us(50))}
+//    illRun{smallerThan50(us(50))}
 //    illRun{smallerThan50(TwoFace.Int(us(50)))}
-  }
+//  }
 }

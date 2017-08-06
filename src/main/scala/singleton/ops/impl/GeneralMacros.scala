@@ -249,6 +249,60 @@ trait GeneralMacros {
   case class CalcUnknown(t: Type) extends Calc {
     val tpe = t
   }
+  object NonLiteralCalc {
+    def unapply(tpe: Type): Option[CalcType] = tpe match {
+      case TypeRef(_, sym, _) => sym match {
+        case t if t == symbolOf[Char] => Some(CalcType.Char)
+        case t if t == symbolOf[Int] => Some(CalcType.Int)
+        case t if t == symbolOf[Long] => Some(CalcType.Long)
+        case t if t == symbolOf[Float] => Some(CalcType.Float)
+        case t if t == symbolOf[Double] => Some(CalcType.Double)
+        case t if t == symbolOf[java.lang.String] => Some(CalcType.String)
+        case t if t == symbolOf[Boolean] => Some(CalcType.Boolean)
+        case t if t == symbolOf[scala.Symbol] => Some(CalcType.Symbol)
+        case _ => None
+      }
+      case _ => None
+    }
+  }
+  object TwoFaceCalc {
+    def unappyArg(calcTFType : Option[CalcTFType], tfArgType : Type)(implicit annotatedSym : TypeSymbol): Option[Calc] = {
+      TypeCalc.unapply(tfArgType) match {
+        case Some(t : CalcLit) => Some(t)
+        case _ => calcTFType
+      }
+    }
+    
+    def unapply(tpe: Type)(implicit annotatedSym : TypeSymbol) : Option[Calc] = {
+      tpe match {
+        case TypeRef(_, sym, args) =>
+          val calcTFType = sym match {
+            case t if t == symbolOf[TwoFaceAny._Char[_]] => Some(CalcTFType.Char)
+            case t if t == symbolOf[TwoFaceAny._Int[_]] => Some(CalcTFType.Int)
+            case t if t == symbolOf[TwoFaceAny._Long[_]] => Some(CalcTFType.Long)
+            case t if t == symbolOf[TwoFaceAny._Float[_]] => Some(CalcTFType.Float)
+            case t if t == symbolOf[TwoFaceAny._Double[_]] => Some(CalcTFType.Double)
+            case t if t == symbolOf[TwoFaceAny._String[_]] => Some(CalcTFType.String)
+            case t if t == symbolOf[TwoFaceAny._Boolean[_]] => Some(CalcTFType.Boolean)
+            case _ => None
+          }
+          if (calcTFType.isDefined) unappyArg(calcTFType, args.head) else None
+        case RefinedType(parents, scope) =>
+          val calcTFType = parents.head.typeSymbol match {
+            case t if t == symbolOf[TwoFaceAny.CharLike] => Some(CalcTFType.Char)
+            case t if t == symbolOf[TwoFaceAny.IntLike] => Some(CalcTFType.Int)
+            case t if t == symbolOf[TwoFaceAny.LongLike] => Some(CalcTFType.Long)
+            case t if t == symbolOf[TwoFaceAny.FloatLike] => Some(CalcTFType.Float)
+            case t if t == symbolOf[TwoFaceAny.DoubleLike] => Some(CalcTFType.Double)
+            case t if t == symbolOf[TwoFaceAny.StringLike] => Some(CalcTFType.String)
+            case t if t == symbolOf[TwoFaceAny.BooleanLike] => Some(CalcTFType.Boolean)
+            case _ => None
+          }
+          if (calcTFType.isDefined) unappyArg(calcTFType, scope.head.asType.toType) else None
+        case _ => None
+      }
+    }
+  }
   ////////////////////////////////////////////////////////////////////
 
 
@@ -261,7 +315,7 @@ trait GeneralMacros {
   /** Typecheck singleton types so as to obtain indirectly
     *  available known-at-compile-time values.
     */
-  object Const {
+  object TypeCalc {
     ////////////////////////////////////////////////////////////////////////
     // Calculates the integer value of Shapeless Nat
     ////////////////////////////////////////////////////////////////////////
@@ -293,13 +347,6 @@ trait GeneralMacros {
           Some(CalcNLit(t, q"valueOf[$tp]"))
         case _ =>
           Some(CalcUnknown(tp))
-      }
-    }
-
-    def unapplyOpTwoFace(tfCalc : CalcTFType, tfArgType : Type)(implicit annotatedSym : TypeSymbol): Option[Calc] = {
-      unapply(tfArgType) match {
-        case Some(t : CalcLit) => Some(t)
-        case _ => Some(tfCalc)
       }
     }
 
@@ -368,36 +415,10 @@ trait GeneralMacros {
         ////////////////////////////////////////////////////////////////////////
 
         ////////////////////////////////////////////////////////////////////////
-        // TwoFace Values
+        // 
         ////////////////////////////////////////////////////////////////////////
-        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny._Char[_]] => unapplyOpTwoFace(CalcTFType.Char, tp.typeArgs.head)
-        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny._Int[_]] => unapplyOpTwoFace(CalcTFType.Int, tp.typeArgs.head)
-        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny._Long[_]] => unapplyOpTwoFace(CalcTFType.Long, tp.typeArgs.head)
-        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny._Float[_]] => unapplyOpTwoFace(CalcTFType.Float, tp.typeArgs.head)
-        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny._Double[_]] => unapplyOpTwoFace(CalcTFType.Double, tp.typeArgs.head)
-        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny._String[_]] => unapplyOpTwoFace(CalcTFType.String, tp.typeArgs.head)
-        case TypeRef(_, sym, args) if sym == symbolOf[TwoFaceAny._Boolean[_]] => unapplyOpTwoFace(CalcTFType.Boolean, tp.typeArgs.head)
-        case RefinedType(parents, scope) if parents.head.typeSymbol == symbolOf[TwoFaceAny.CharLike] => unapplyOpTwoFace(CalcTFType.Char, scope.head.asType.toType)
-        case RefinedType(parents, scope) if parents.head.typeSymbol == symbolOf[TwoFaceAny.IntLike] => unapplyOpTwoFace(CalcTFType.Int, scope.head.asType.toType)
-        case RefinedType(parents, scope) if parents.head.typeSymbol == symbolOf[TwoFaceAny.LongLike] => unapplyOpTwoFace(CalcTFType.Long, scope.head.asType.toType)
-        case RefinedType(parents, scope) if parents.head.typeSymbol == symbolOf[TwoFaceAny.FloatLike] => unapplyOpTwoFace(CalcTFType.Float, scope.head.asType.toType)
-        case RefinedType(parents, scope) if parents.head.typeSymbol == symbolOf[TwoFaceAny.DoubleLike] => unapplyOpTwoFace(CalcTFType.Double, scope.head.asType.toType)
-        case RefinedType(parents, scope) if parents.head.typeSymbol == symbolOf[TwoFaceAny.StringLike] => unapplyOpTwoFace(CalcTFType.String, scope.head.asType.toType)
-        case RefinedType(parents, scope) if parents.head.typeSymbol == symbolOf[TwoFaceAny.BooleanLike] => unapplyOpTwoFace(CalcTFType.Boolean, scope.head.asType.toType)
-        ////////////////////////////////////////////////////////////////////////
-
-        ////////////////////////////////////////////////////////////////////////
-        // Non-literal values
-        ////////////////////////////////////////////////////////////////////////
-        case TypeRef(_, sym, _) if sym == symbolOf[Char] => Some(CalcType.Char)
-        case TypeRef(_, sym, _) if sym == symbolOf[Int] => Some(CalcType.Int)
-        case TypeRef(_, sym, _) if sym == symbolOf[Long] => Some(CalcType.Long)
-        case TypeRef(_, sym, _) if sym == symbolOf[Float] => Some(CalcType.Float)
-        case TypeRef(_, sym, _) if sym == symbolOf[Double] => Some(CalcType.Double)
-        case TypeRef(_, sym, _) if sym == symbolOf[java.lang.String] => Some(CalcType.String)
-        case TypeRef(_, sym, _) if sym == symbolOf[Boolean] => Some(CalcType.Boolean)
-        case TypeRef(_, sym, _) if sym == symbolOf[scala.Symbol] => Some(CalcType.Symbol)
-        ////////////////////////////////////////////////////////////////////////
+        case TwoFaceCalc(t) => Some(t) //TwoFace values
+        case NonLiteralCalc(t) => Some(t)// Non-literal values
 
         ////////////////////////////////////////////////////////////////////////
         // For Shapeless Nat
@@ -405,14 +426,8 @@ trait GeneralMacros {
         case TypeRef(_, sym, args) if sym == symbolOf[shapeless.Succ[_]] || sym == symbolOf[shapeless._0] =>
           Some(calcNat(tp))
         ////////////////////////////////////////////////////////////////////////
-
-        ////////////////////////////////////////////////////////////////////////
-        // For Shapeless Nat
-        ////////////////////////////////////////////////////////////////////////
-        case TypeRef(_, sym, args) if sym == symbolOf[shapeless.Succ[_]] || sym == symbolOf[shapeless._0] =>
-          Some(calcNat(tp))
-        ////////////////////////////////////////////////////////////////////////
-
+//        case ClassInfoType(parents, _, _) =>
+//          parents.iterator map unapply collectFirst { case Some(x) => x }
         case tp @ ExistentialType(_, _) => unapply(tp.underlying)
         case TypeBounds(lo, hi) => unapply(hi)
         case SingletonSymbolType(s) => Some(CalcLit(s))
@@ -533,27 +548,34 @@ trait GeneralMacros {
     val msg = s"Cannot extract value from $tpe\n" + "showRaw==> " + showRaw(tpe)
     abort(msg)
   }
+  def extractionFailed(tree: Tree)(implicit annotatedSym : TypeSymbol) = {
+    val msg = s"Cannot extract value from $tree\n" + "showRaw==> " + showRaw(tree)
+    abort(msg)
+  }
 
   def extractSingletonValue(tpe: Type)(implicit annotatedSym : TypeSymbol): Calc = {
-    val value = Const.unapply(tpe) match {
+    val value = TypeCalc.unapply(tpe) match {
       case None => CalcUnknown(tpe)
       case Some(calc) => calc
     }
     value
   }
 
-  def extractValueFromOpTree(opTree : c.Tree)(implicit annotatedSym : TypeSymbol) : Option[Constant] = {
+  def extractValueFromOpTree(opTree : c.Tree)(implicit annotatedSym : TypeSymbol) : CalcVal = {
     def outFindCond(elem : c.Tree) : Boolean = elem match {
-      case q"final val value : $typeTree = $valueTree" => true
+      case q"final val value : $valueTpe = $valueTree" => true
       case _ => false
     }
-    def getOut(opClsBlk : List[c.Tree]) : Option[Constant] = opClsBlk.find(outFindCond) match {
-      case Some(q"final val value : $typeTree = $valueTree") =>
+    def getOut(opClsBlk : List[c.Tree]) : CalcVal = opClsBlk.find(outFindCond) match {
+      case Some(q"final val value : $valueTpe = $valueTree") =>
         valueTree match {
-          case Literal(const) => Some(const)
-          case _ => None
+          case Literal(Constant(t)) => CalcLit(t)
+          case _ => valueTpe match {
+            case NonLiteralCalc(t) => CalcNLit(t, q"$valueTree")
+            case _ => extractionFailed(opTree)
+          }
         }
-      case _ => None
+      case _ => extractionFailed(opTree)
     }
 
     opTree match {
@@ -561,7 +583,7 @@ trait GeneralMacros {
         $mods class $tpname[..$tparams] $ctorMods(...$paramss) extends ..$parents { $self => ..$opClsBlk }
         $expr(...$exprss)
       }""" => getOut(opClsBlk)
-      case _ => None
+      case _ => extractionFailed(opTree)
     }
   }
 
@@ -573,6 +595,15 @@ trait GeneralMacros {
       case _ => extractionFailed(typedTree.tpe)
     }
   }
+
+//  def extractValueFromOpTree(opTree : c.Tree)(implicit annotatedSym : TypeSymbol) : CalcVal = {
+//    val typedTree = c.typecheck(opTree)
+//    extractSingletonValue(typedTree.tpe) match {
+//      case t : CalcVal => t
+//      case t : CalcTFType => CalcNLit(t, q"$opTree.valueWide")
+//      case _ => extractionFailed(typedTree.tpe)
+//    }
+//  }
 
   def extractValueFromTwoFaceTree(tfTree : c.Tree)(implicit annotatedSym : TypeSymbol) : CalcVal = {
     val typedTree = c.typecheck(tfTree)
@@ -1328,7 +1359,9 @@ trait GeneralMacros {
       val tCalc = extractValueFromTwoFaceTree(tTree)
       val rCalc = extractValueFromNumTree(rTree)
       val outCalc = opCalc(funcTypes.==, tCalc, rCalc, CalcLit(0))
-      genTwoFace(outCalc)
+      val genTree = genTwoFace(outCalc)
+      //      print(genTree)
+      genTree
     }
     def nequal(tTree : c.Tree, rTree : c.Tree) : c.Tree = {
       implicit val annotatedSym : TypeSymbol = symbolOf[TwoFaceAny[_]]//not really used
@@ -1348,25 +1381,10 @@ trait GeneralMacros {
   CheckedImplMaterializer[PrimChk, SecChk, Cond, Msg] = new CheckedImplMaterializer[PrimChk, SecChk, Cond, Msg](symbolOf[PrimChk], symbolOf[SecChk], weakTypeOf[Cond], weakTypeOf[Msg])
 
   final class CheckedImplMaterializer[PrimChk, SecChk, Cond, Msg](primChkSym : TypeSymbol, secChkSym : TypeSymbol, condTpe : Type, msgTpe : Type) {
-    def newChecked(paramNum : Int, calc : CalcVal, reqCalc : CalcVal)(implicit annotatedSym : TypeSymbol) : c.Tree = {
+    def newChecked(paramNum : Int, calc : CalcVal)(implicit annotatedSym : TypeSymbol) : c.Tree = {
       val outTpe = calc.tpe
       val outTpeWide = outTpe.widen
       val outTree = calc.tree
-      paramNum match {
-        case 0 =>
-          q"""
-             new $secChkSym[$outTpe]($outTree.asInstanceOf[$outTpe])
-           """
-//        case 1 => q"new $chkSym[$outTpe,$paramTpe]($valueTree)"
-        case _ =>
-          abort("Unsupported number of parameters")
-      }
-    }
-    def fromNumValue(paramNum : Int, numValueTree : c.Tree) : c.Tree = {
-      implicit val annotatedSym : TypeSymbol = primChkSym
-      val numValueCalc = extractValueFromNumTree(numValueTree)
-
-      val outTpe = numValueCalc.tpe
       val fixedCondTpe = condTpe.substituteTypes(List(condTpe.typeArgs.head.typeSymbol), List(outTpe))
       val fixedMsgTpe = msgTpe.substituteTypes(List(msgTpe.typeArgs.head.typeSymbol), List(outTpe))
 
@@ -1381,8 +1399,43 @@ trait GeneralMacros {
       }
 
       val reqCalc = opCalc(funcTypes.Require, condCalc, msgCalc, CalcLit(0))
-      val genTree = newChecked(paramNum, numValueCalc, reqCalc)
-      print(genTree)
+      paramNum match {
+        case 0 =>
+          q"""
+             new $secChkSym[$outTpe]($outTree.asInstanceOf[$outTpe])
+           """
+//        case 1 => q"new $chkSym[$outTpe,$paramTpe]($valueTree)"
+        case _ =>
+          abort("Unsupported number of parameters")
+      }
+    }
+    def fromOpApply(paramNum : Int, opTree : c.Tree) : c.Tree = {
+      implicit val annotatedSym : TypeSymbol = primChkSym
+      val numValueCalc = extractValueFromOpTree(opTree)
+      val genTree = newChecked(0, numValueCalc)
+      //      print(genTree)
+      genTree
+    }
+    def fromOpImpl(paramNum : Int, opTree : c.Tree, tTpe : Type) : c.Tree = {
+      implicit val annotatedSym : TypeSymbol = primChkSym
+      val numValueCalc = extractValueFromOpTree(opTree)
+      val outTree = newChecked(0, numValueCalc)
+      val genTree = q"$outTree.asInstanceOf[$tTpe]"
+      //      print(genTree)
+      genTree
+    }
+    def fromNumValue(paramNum : Int, numValueTree : c.Tree) : c.Tree = {
+      implicit val annotatedSym : TypeSymbol = primChkSym
+      val numValueCalc = extractValueFromNumTree(numValueTree)
+      val genTree = newChecked(0, numValueCalc)
+//      print(genTree)
+      genTree
+    }
+    def fromTF(paramNum : Int, tfTree : c.Tree) : c.Tree = {
+      implicit val annotatedSym : TypeSymbol = primChkSym
+      val tfValueCalc = extractValueFromTwoFaceTree(tfTree)
+      val genTree = newChecked(0, tfValueCalc)
+      //      print(genTre?e)
       genTree
     }
 //    def unsafe(paramNum : Int, valueTree : c.Tree) : c.Tree = {
