@@ -37,7 +37,7 @@ object Checked0Param {
     ////////////////////////////////////////////////////////////////////////////////////////
 
     ////////////////////////////////////////////////////////////////////////////////////////
-    // Manual invocations (usually used to for testing)
+    // Implicit Conversions
     ////////////////////////////////////////////////////////////////////////////////////////
     implicit def ev[T](implicit value : AcceptNonLiteral[Id[T]])
     : PrimChk[T] = macro Builder.Macro.fromOpImpl[T, PrimChk[_], SecChk[_], Cond[_], Msg[_]]
@@ -56,22 +56,22 @@ object Checked0Param {
       def fromOpApply[PrimChk, SecChk, Cond, Msg](value : c.Tree)(
         implicit
         primChk : c.WeakTypeTag[PrimChk], secChk : c.WeakTypeTag[SecChk], cond : c.WeakTypeTag[Cond], msg : c.WeakTypeTag[Msg]
-      ): c.Tree = CheckedImplMaterializer[PrimChk, SecChk, Cond, Msg].fromOpApply(0, value)
+      ): c.Tree = Checked0ParamMaterializer[PrimChk, SecChk, Cond, Msg].fromOpApply(value)
 
       def fromOpImpl[T, PrimChk, SecChk, Cond, Msg](value : c.Tree)(
         implicit
         t : c.WeakTypeTag[T], primChk : c.WeakTypeTag[PrimChk], secChk : c.WeakTypeTag[SecChk], cond : c.WeakTypeTag[Cond], msg : c.WeakTypeTag[Msg]
-      ): c.Tree = CheckedImplMaterializer[PrimChk, SecChk, Cond, Msg].fromOpImpl(0, value, c.weakTypeOf[T])
+      ): c.Tree = Checked0ParamMaterializer[PrimChk, SecChk, Cond, Msg].fromOpImpl(value, c.weakTypeOf[T])
 
       def fromNumValue[PrimChk, SecChk, Cond, Msg](value : c.Tree)(
         implicit
         primChk : c.WeakTypeTag[PrimChk], secChk : c.WeakTypeTag[SecChk], cond : c.WeakTypeTag[Cond], msg : c.WeakTypeTag[Msg]
-      ): c.Tree = CheckedImplMaterializer[PrimChk, SecChk, Cond, Msg].fromNumValue(0, value)
+      ): c.Tree = Checked0ParamMaterializer[PrimChk, SecChk, Cond, Msg].fromNumValue(value)
 
       def fromTF[PrimChk, SecChk, Cond, Msg](value : c.Tree)(
         implicit
         primChk : c.WeakTypeTag[PrimChk], secChk : c.WeakTypeTag[SecChk], cond : c.WeakTypeTag[Cond], msg : c.WeakTypeTag[Msg]
-      ): c.Tree = CheckedImplMaterializer[PrimChk, SecChk, Cond, Msg].fromTF(0, value)
+      ): c.Tree = Checked0ParamMaterializer[PrimChk, SecChk, Cond, Msg].fromTF(value)
     }
   }
 }
