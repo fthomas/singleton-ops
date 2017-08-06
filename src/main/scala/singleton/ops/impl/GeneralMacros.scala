@@ -1381,10 +1381,10 @@ trait GeneralMacros {
   CheckedImplMaterializer[PrimChk, SecChk, Cond, Msg] = new CheckedImplMaterializer[PrimChk, SecChk, Cond, Msg](symbolOf[PrimChk], symbolOf[SecChk], weakTypeOf[Cond], weakTypeOf[Msg])
 
   final class CheckedImplMaterializer[PrimChk, SecChk, Cond, Msg](primChkSym : TypeSymbol, secChkSym : TypeSymbol, condTpe : Type, msgTpe : Type) {
-    def newChecked(paramNum : Int, calc : CalcVal)(implicit annotatedSym : TypeSymbol) : c.Tree = {
+    def newChecked(paramNum : Int, calc : CalcVal, chkArgTpe : Type)(implicit annotatedSym : TypeSymbol) : c.Tree = {
       val outTpe = calc.tpe
-      val outTpeWide = outTpe.widen
       val outTree = calc.tree
+      val outTpeWide = outTpe.widen
       val fixedCondTpe = condTpe.substituteTypes(List(condTpe.typeArgs.head.typeSymbol), List(outTpe))
       val fixedMsgTpe = msgTpe.substituteTypes(List(msgTpe.typeArgs.head.typeSymbol), List(outTpe))
 
@@ -1402,13 +1402,15 @@ trait GeneralMacros {
       paramNum match {
         case 0 =>
           q"""
-             new $secChkSym[$outTpe]($outTree.asInstanceOf[$outTpe])
+             new $secChkSym[$chkArgTpe]($outTree.asInstanceOf[$outTpe])
            """
 //        case 1 => q"new $chkSym[$outTpe,$paramTpe]($valueTree)"
         case _ =>
           abort("Unsupported number of parameters")
       }
     }
+    def newChecked(paramNum : Int, calc : CalcVal)(implicit annotatedSym : TypeSymbol) : c.Tree =
+      newChecked(paramNum, calc, calc.tpe)
     def fromOpApply(paramNum : Int, opTree : c.Tree) : c.Tree = {
       implicit val annotatedSym : TypeSymbol = primChkSym
       print("======>fromOpApply")
@@ -1422,9 +1424,7 @@ trait GeneralMacros {
       implicit val annotatedSym : TypeSymbol = primChkSym
       print("======>fromOpImpl")
       val numValueCalc = extractValueFromOpTree(opTree)
-      val outTree = newChecked(0, numValueCalc)
-      val genTree = q"$outTree.asInstanceOf[$tTpe]"
-            print(genTree)
+      val genTree = newChecked(0, numValueCalc, tTpe)
       print("<======fromOpImpl")
       genTree
     }

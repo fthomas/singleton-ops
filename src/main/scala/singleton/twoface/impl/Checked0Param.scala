@@ -34,23 +34,6 @@ object Checked0Param {
 
     implicit def fromTF[T0 <: Face](value : TwoFaceAny[Face]{type T = T0})(implicit di: DummyImplicit)
     : PrimChk[T0] = macro Builder.Macro.fromTF[PrimChk[_], SecChk[_], Cond[_], Msg[_]]
-//    implicit def impl[T]
-//    (implicit vc : CondHelper[T], vm : MsgHelper[T]) :
-//    PrimChk[T] = macro Builder.Macro.impl[T, PrimChk[T]]
-//
-//    implicit def safe[T <: Face with Singleton]
-//    (value : T)(implicit vc : CondHelper[T], vm : MsgHelper[T]) :
-//    PrimChk[T] = macro Builder.Macro.safe[T, PrimChk[T]]
-//
-//    implicit def unsafe[Param](value : Face) :
-//    PrimChk[Face] = macro Builder.Macro.unsafe[Face, PrimChk[Face]]
-//
-//    implicit def safeTF[T0 <: Face with Singleton]
-//    (value : TwoFaceAny[Face]{type T})(implicit vc : CondHelper[T0], vm : MsgHelper[T0]) :
-//    PrimChk[T0] = macro Builder.Macro.safeTF[T0, PrimChk[T0]]
-//
-//    implicit def unsafeTF[Param](value : TwoFaceAny[Face, Face]) :
-//    PrimChk[Face] = macro Builder.Macro.unsafeTF[Face, PrimChk[Face]]
   }
 
   @bundle
@@ -75,25 +58,6 @@ object Checked0Param {
         implicit
         primChk : c.WeakTypeTag[PrimChk], secChk : c.WeakTypeTag[SecChk], cond : c.WeakTypeTag[Cond], msg : c.WeakTypeTag[Msg]
       ): c.Tree = CheckedImplMaterializer[PrimChk, SecChk, Cond, Msg].fromTF(0, value)
-//      def impl[T, Chk](vc : c.Tree, vm : c.Tree)(
-//        implicit
-//        t : c.WeakTypeTag[T], chk: c.WeakTypeTag[Chk]
-//      ): c.Tree = CheckedImplMaterializer[T, T, Chk].fromNumValue(0, vc, vm)
-//
-//      def safeTF[T, Chk](value : c.Tree)(vc : c.Tree, vm : c.Tree)(
-//        implicit
-//        t : c.WeakTypeTag[T], chk: c.WeakTypeTag[Chk]
-//      ): c.Tree = CheckedImplMaterializer[T, T, Chk].fromNumValue(0, vc, vm)
-//
-//      def unsafe[T, Chk](value : c.Tree)(
-//        implicit
-//        t : c.WeakTypeTag[T], chk: c.WeakTypeTag[Chk]
-//      ): c.Tree = CheckedImplMaterializer[T, T, Chk].unsafe(0, value)
-//
-//      def unsafeTF[T, Chk](value : c.Tree)(
-//        implicit
-//        t : c.WeakTypeTag[T], chk: c.WeakTypeTag[Chk]
-//      ): c.Tree = CheckedImplMaterializer[T, T, Chk].unsafeTF(0, value)
     }
   }
 }
