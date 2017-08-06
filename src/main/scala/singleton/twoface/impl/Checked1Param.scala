@@ -7,7 +7,7 @@ import singleton.twoface.TwoFace
 
 import scala.reflect.macros.whitebox
 
-trait Checked1Param[Chk[_,_], Cond[_,_], Msg[_,_], Face, ParamFace, T] extends Any with TwoFaceAny[Face] {
+trait Checked1Param[Cond[_,_], Msg[_,_], Face, ParamFace] extends Any with TwoFaceAny[Face] {
   def unsafeCheck(p : ParamFace)
   (implicit
    cond : TwoFace.Boolean.Shell2[Cond, Face, Face, ParamFace, ParamFace],
