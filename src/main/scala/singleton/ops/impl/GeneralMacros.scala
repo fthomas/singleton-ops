@@ -1312,20 +1312,20 @@ trait GeneralMacros {
       val tfTerm = TermName(tfName)
       val tfType = TypeName(tfName)
       val outTpe = TypeCalc(funcApplyTpe).tpe
-      val paramVec = for (i <- 4 to shellTpe.typeArgs.length by 2)
-        yield ValDef(Modifiers(Flag.PARAM),TermName(s"arg${(i-4)/2+1}"),tq"${shellTpe.typeArgs(i-1)}",EmptyTree)
+      val paramVec = for (i <- 4 to shellTpe.typeArgs.length by 2; typeTree = AppliedTypeTree(Ident(TypeName("<byname>")), List(tq"${shellTpe.typeArgs(i-1)}")))
+        yield ValDef(Modifiers(Flag.PARAM | Flag.BYNAMEPARAM),TermName(s"arg${(i-4)/2+1}"),typeTree,EmptyTree)
+
       val paramTree = List(paramVec.toList)
       val genTree =
-         q"""
-           new $shellTpe {
-             type Out = $outTpe
-             type TF[T] = _root_.singleton.twoface.TwoFace.$tfType[T]
-             def apply(...$paramTree) : _root_.singleton.twoface.TwoFace.$tfType[$outTpe] = {
-               _root_.singleton.twoface.TwoFace.$tfTerm.create[$outTpe]($tfValueTree)
-             }
+       q"""
+         new $shellTpe {
+           type Out = $outTpe
+           type TF[T] = _root_.singleton.twoface.TwoFace.$tfType[T]
+           def apply(...$paramTree) : _root_.singleton.twoface.TwoFace.$tfType[$outTpe] = {
+             _root_.singleton.twoface.TwoFace.$tfTerm.create[$outTpe]($tfValueTree)
            }
-          """
-
+         }
+        """
 //      print(showCode(genTree))
       genTree
     }
