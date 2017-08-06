@@ -319,17 +319,23 @@ trait GeneralMacros {
     ////////////////////////////////////////////////////////////////////////
     // Calculates the integer value of Shapeless Nat
     ////////////////////////////////////////////////////////////////////////
-    def calcNat(tp: Type)(implicit annotatedSym : TypeSymbol): CalcLit.Int = {
-      tp match {
-        case TypeRef(_, sym, args) if sym == symbolOf[shapeless.Succ[_]] =>
-          CalcLit.Int(calcNat(args.head).value + 1)
-        case TypeRef(_, sym, _) if sym == symbolOf[shapeless._0] =>
-          CalcLit.Int(0)
-        case TypeRef(pre, sym, Nil) =>
-          calcNat(sym.info asSeenFrom (pre, sym.owner))
-        case _ =>
-          abort(s"Given Nat type is defective: $tp, raw: ${showRaw(tp)}")
+    object NatCalc {
+      def unapply(tp: Type)(implicit annotatedSym : TypeSymbol): Option[CalcLit.Int] = {
+        tp match {
+          case TypeRef(_, sym, args) if sym == symbolOf[shapeless.Succ[_]] =>
+            args.head match {
+              case NatCalc(t) => Some(CalcLit.Int(t.value+1))
+              case _ => abort(s"Given Nat type is defective: $tp, raw: ${showRaw(tp)}")
+            }
+          case TypeRef(_, sym, _) if sym == symbolOf[shapeless._0] =>
+            Some(CalcLit.Int(0))
+          case TypeRef(pre, sym, Nil) =>
+            unapply(sym.info asSeenFrom (pre, sym.owner))
+          case _ =>
+            None
+        }
       }
+
     }
     ////////////////////////////////////////////////////////////////////////
 
@@ -397,7 +403,7 @@ trait GeneralMacros {
       val g = c.universe.asInstanceOf[SymbolTable]
       implicit def fixSymbolOps(sym: Symbol): g.Symbol = sym.asInstanceOf[g.Symbol]
 
-      print(tp + " RAW " + showRaw(tp))
+//      print(tp + " RAW " + showRaw(tp))
       tp match {
         ////////////////////////////////////////////////////////////////////////
         // Operational Function
@@ -415,17 +421,13 @@ trait GeneralMacros {
         ////////////////////////////////////////////////////////////////////////
 
         ////////////////////////////////////////////////////////////////////////
-        // 
+        // Special cases
         ////////////////////////////////////////////////////////////////////////
         case TwoFaceCalc(t) => Some(t) //TwoFace values
         case NonLiteralCalc(t) => Some(t)// Non-literal values
+        case NatCalc(t) => Some(t) //For Shapeless Nat
+        ////////////////////////////////////////////////////////////////////////
 
-        ////////////////////////////////////////////////////////////////////////
-        // For Shapeless Nat
-        ////////////////////////////////////////////////////////////////////////
-        case TypeRef(_, sym, args) if sym == symbolOf[shapeless.Succ[_]] || sym == symbolOf[shapeless._0] =>
-          Some(calcNat(tp))
-        ////////////////////////////////////////////////////////////////////////
 //        case ClassInfoType(parents, _, _) =>
 //          parents.iterator map unapply collectFirst { case Some(x) => x }
         case tp @ ExistentialType(_, _) => unapply(tp.underlying)
