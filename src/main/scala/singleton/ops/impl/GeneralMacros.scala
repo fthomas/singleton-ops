@@ -397,7 +397,7 @@ trait GeneralMacros {
       val g = c.universe.asInstanceOf[SymbolTable]
       implicit def fixSymbolOps(sym: Symbol): g.Symbol = sym.asInstanceOf[g.Symbol]
 
-//      print(tp + " RAW " + showRaw(tp))
+      print(tp + " RAW " + showRaw(tp))
       tp match {
         ////////////////////////////////////////////////////////////////////////
         // Operational Function
@@ -1411,31 +1411,39 @@ trait GeneralMacros {
     }
     def fromOpApply(paramNum : Int, opTree : c.Tree) : c.Tree = {
       implicit val annotatedSym : TypeSymbol = primChkSym
+      print("======>fromOpApply")
       val numValueCalc = extractValueFromOpTree(opTree)
       val genTree = newChecked(0, numValueCalc)
-      //      print(genTree)
+            print(genTree)
+      print("<======fromOpApply")
       genTree
     }
     def fromOpImpl(paramNum : Int, opTree : c.Tree, tTpe : Type) : c.Tree = {
       implicit val annotatedSym : TypeSymbol = primChkSym
+      print("======>fromOpImpl")
       val numValueCalc = extractValueFromOpTree(opTree)
       val outTree = newChecked(0, numValueCalc)
       val genTree = q"$outTree.asInstanceOf[$tTpe]"
-      //      print(genTree)
+            print(genTree)
+      print("<======fromOpImpl")
       genTree
     }
     def fromNumValue(paramNum : Int, numValueTree : c.Tree) : c.Tree = {
       implicit val annotatedSym : TypeSymbol = primChkSym
+      print("======>fromNumValue")
       val numValueCalc = extractValueFromNumTree(numValueTree)
       val genTree = newChecked(0, numValueCalc)
-//      print(genTree)
+      print(genTree)
+      print("<======fromNumValue")
       genTree
     }
     def fromTF(paramNum : Int, tfTree : c.Tree) : c.Tree = {
       implicit val annotatedSym : TypeSymbol = primChkSym
+      print("======>fromTF")
       val tfValueCalc = extractValueFromTwoFaceTree(tfTree)
       val genTree = newChecked(0, tfValueCalc)
-      //      print(genTre?e)
+            print(genTree)
+      print("<======fromTF")
       genTree
     }
 //    def unsafe(paramNum : Int, valueTree : c.Tree) : c.Tree = {
