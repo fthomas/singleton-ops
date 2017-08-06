@@ -115,15 +115,24 @@ trait GeneralMacros {
     val tpe : Type
   }
 
-  object Calc {
-    sealed trait Char extends Calc{type T = std.Char; val tpe = typeOf[std.Char]}
-    sealed trait Int extends Calc{type T = std.Int; val tpe = typeOf[std.Int]}
-    sealed trait Long extends Calc{type T = std.Long; val tpe = typeOf[std.Long]}
-    sealed trait Float extends Calc{type T = std.Float; val tpe = typeOf[std.Float]}
-    sealed trait Double extends Calc{type T = std.Double; val tpe = typeOf[std.Double]}
-    sealed trait String extends Calc{type T = std.String; val tpe = typeOf[std.String]}
-    sealed trait Boolean extends Calc{type T = std.Boolean; val tpe = typeOf[std.Boolean]}
-    sealed trait Symbol extends Calc{type T = std.Symbol; val tpe = typeOf[std.Symbol]}
+  sealed trait CalcType extends Calc
+  object CalcType {
+    sealed trait Char extends CalcType{type T = std.Char; val tpe = typeOf[std.Char]}
+    sealed trait Int extends CalcType{type T = std.Int; val tpe = typeOf[std.Int]}
+    sealed trait Long extends CalcType{type T = std.Long; val tpe = typeOf[std.Long]}
+    sealed trait Float extends CalcType{type T = std.Float; val tpe = typeOf[std.Float]}
+    sealed trait Double extends CalcType{type T = std.Double; val tpe = typeOf[std.Double]}
+    sealed trait String extends CalcType{type T = std.String; val tpe = typeOf[std.String]}
+    sealed trait Boolean extends CalcType{type T = std.Boolean; val tpe = typeOf[std.Boolean]}
+    sealed trait Symbol extends CalcType{type T = std.Symbol; val tpe = typeOf[std.Symbol]}
+    object Char extends Char
+    object Int extends Int
+    object Long extends Long
+    object Float extends Float
+    object Double extends Double
+    object String extends String
+    object Boolean extends Boolean
+    object Symbol extends Symbol
   }
 
   sealed trait CalcVal extends Calc {
@@ -135,31 +144,31 @@ trait GeneralMacros {
     object Lit extends Kind
     object NLit extends Kind
     implicit val lift = Liftable[CalcVal] {p => p.tree}
-    class Char(val value : std.Char, val tree : Tree) extends CalcVal with Calc.Char
+    class Char(val value : std.Char, val tree : Tree) extends CalcVal with CalcType.Char
     object Char {
       def unapply(arg: Char) : Option[(arg.T, Tree)] = Some((arg.value, arg.tree))
     }
-    class Int(val value : std.Int, val tree : Tree) extends CalcVal with Calc.Int
+    class Int(val value : std.Int, val tree : Tree) extends CalcVal with CalcType.Int
     object Int {
       def unapply(arg: Int) : Option[(arg.T, Tree)] = Some((arg.value, arg.tree))
     }
-    class Long(val value : std.Long, val tree : Tree) extends CalcVal with Calc.Long
+    class Long(val value : std.Long, val tree : Tree) extends CalcVal with CalcType.Long
     object Long {
       def unapply(arg: Long) : Option[(arg.T, Tree)] = Some((arg.value, arg.tree))
     }
-    class Float(val value : std.Float, val tree : Tree) extends CalcVal with Calc.Float
+    class Float(val value : std.Float, val tree : Tree) extends CalcVal with CalcType.Float
     object Float {
       def unapply(arg: Float) : Option[(arg.T, Tree)] = Some((arg.value, arg.tree))
     }
-    class Double(val value : std.Double, val tree : Tree) extends CalcVal with Calc.Double
+    class Double(val value : std.Double, val tree : Tree) extends CalcVal with CalcType.Double
     object Double {
       def unapply(arg: Double) : Option[(arg.T, Tree)] = Some((arg.value, arg.tree))
     }
-    class String(val value : std.String, val tree : Tree) extends CalcVal with Calc.String
+    class String(val value : std.String, val tree : Tree) extends CalcVal with CalcType.String
     object String {
       def unapply(arg: String) : Option[(arg.T, Tree)] = Some((arg.value, arg.tree))
     }
-    class Boolean(val value : std.Boolean, val tree : Tree) extends CalcVal with Calc.Boolean
+    class Boolean(val value : std.Boolean, val tree : Tree) extends CalcVal with CalcType.Boolean
     object Boolean {
       def unapply(arg: Boolean) : Option[(arg.T, Tree)] = Some((arg.value, arg.tree))
     }
@@ -196,27 +205,15 @@ trait GeneralMacros {
     def unapply(arg: CalcLit) : Option[arg.T] = Some(arg.value)
   }
 
-  sealed trait CalcType extends Calc
-  object CalcType {
-    object Char extends CalcType with Calc.Char
-    object Int extends CalcType with Calc.Int
-    object Long extends CalcType with Calc.Long
-    object Float extends CalcType with Calc.Float
-    object Double extends CalcType with Calc.Double
-    object String extends CalcType with Calc.String
-    object Boolean extends CalcType with Calc.Boolean
-    object Symbol extends CalcType with Calc.Symbol
-  }
-
   sealed trait CalcTFType extends Calc
   object CalcTFType {
-    object Char extends CalcTFType with Calc.Char
-    object Int extends CalcTFType with Calc.Int
-    object Long extends CalcTFType with Calc.Long
-    object Float extends CalcTFType with Calc.Float
-    object Double extends CalcTFType with Calc.Double
-    object String extends CalcTFType with Calc.String
-    object Boolean extends CalcTFType with Calc.Boolean
+    object Char extends CalcTFType with CalcType.Char
+    object Int extends CalcTFType with CalcType.Int
+    object Long extends CalcTFType with CalcType.Long
+    object Float extends CalcTFType with CalcType.Float
+    object Double extends CalcTFType with CalcType.Double
+    object String extends CalcTFType with CalcType.String
+    object Boolean extends CalcTFType with CalcType.Boolean
   }
 
   sealed trait CalcNLit extends CalcVal
@@ -234,13 +231,13 @@ trait GeneralMacros {
       CalcNLit(CalcLit(valueRef), tree)
     def apply(calcTypeRef : Calc, tree : Tree)(implicit unsupported : TypeSymbol) : CalcNLit = {
       calcTypeRef match {
-        case (t : Calc.Char) => Char(tree)
-        case (t : Calc.Int) => Int(tree)
-        case (t : Calc.Long) => Long(tree)
-        case (t : Calc.Float) => Float(tree)
-        case (t : Calc.Double) => Double(tree)
-        case (t : Calc.String) => String(tree)
-        case (t : Calc.Boolean) => Boolean(tree)
+        case (t : CalcType.Char) => Char(tree)
+        case (t : CalcType.Int) => Int(tree)
+        case (t : CalcType.Long) => Long(tree)
+        case (t : CalcType.Float) => Float(tree)
+        case (t : CalcType.Double) => Double(tree)
+        case (t : CalcType.String) => String(tree)
+        case (t : CalcType.Boolean) => Boolean(tree)
         case _ => abort("Unsupported type")
       }
     }
@@ -381,7 +378,7 @@ trait GeneralMacros {
       def unapply(tp: Type)(implicit annotatedSym : TypeSymbol): Calc = {
         TypeCalc.unapply(tp) match {
           case Some(t : CalcVal) => t
-          case Some(t : Calc.Symbol) => CalcNLit(CalcType.String, q"valueOf[$tp].name")
+          case Some(t : CalcType.Symbol) => CalcNLit(CalcType.String, q"valueOf[$tp].name")
           case Some(t : CalcTFType) => CalcNLit(t, q"valueOf[$tp].getValue")
           case Some(t : CalcType) => CalcNLit(t, q"valueOf[$tp]")
           case _ => CalcUnknown(tp)
@@ -589,13 +586,8 @@ trait GeneralMacros {
     abort(msg)
   }
 
-  def extractSingletonValue(tpe: Type)(implicit annotatedSym : TypeSymbol): Calc = {
-    val value = TypeCalc.unapply(tpe) match {
-      case None => CalcUnknown(tpe)
-      case Some(calc) => calc
-    }
-    value
-  }
+  def extractSingletonValue(tpe: Type)(implicit annotatedSym : TypeSymbol): Calc =
+    TypeCalc.OpArgCalc.unapply(tpe)
 
   def extractValueFromOpTree(opTree : c.Tree)(implicit annotatedSym : TypeSymbol) : CalcVal = {
     def outFindCond(elem : c.Tree) : Boolean = elem match {
@@ -626,26 +618,17 @@ trait GeneralMacros {
   def extractValueFromNumTree(numValueTree : c.Tree)(implicit annotatedSym : TypeSymbol) : CalcVal = {
     val typedTree = c.typecheck(numValueTree)
     extractSingletonValue(typedTree.tpe) match {
-      case t : CalcVal => t
+      case t : CalcLit => t
       case t : CalcType => CalcNLit(t, numValueTree)
       case _ => extractionFailed(typedTree.tpe)
     }
   }
 
-//  def extractValueFromOpTree(opTree : c.Tree)(implicit annotatedSym : TypeSymbol) : CalcVal = {
-//    val typedTree = c.typecheck(opTree)
-//    extractSingletonValue(typedTree.tpe) match {
-//      case t : CalcVal => t
-//      case t : CalcTFType => CalcNLit(t, q"$opTree.valueWide")
-//      case _ => extractionFailed(typedTree.tpe)
-//    }
-//  }
-
   def extractValueFromTwoFaceTree(tfTree : c.Tree)(implicit annotatedSym : TypeSymbol) : CalcVal = {
     val typedTree = c.typecheck(tfTree)
     extractSingletonValue(typedTree.tpe) match {
-      case t : CalcVal => t
-      case t : CalcTFType => CalcNLit(t, q"$tfTree.getValue")
+      case t : CalcLit => t
+      case t : CalcType => CalcNLit(t, q"$tfTree.getValue")
       case _ => extractionFailed(typedTree.tpe)
     }
   }
@@ -728,31 +711,31 @@ trait GeneralMacros {
       case _ => CalcLit(false)
     }
     def IsChar = a match {
-      case t : Calc.Char => CalcLit(true)
+      case t : CalcType.Char => CalcLit(true)
       case _ => CalcLit(false)
     }
     def IsInt = a match {
-      case t : Calc.Int => CalcLit(true)
+      case t : CalcType.Int => CalcLit(true)
       case _ => CalcLit(false)
     }
     def IsLong = a match {
-      case t : Calc.Long => CalcLit(true)
+      case t : CalcType.Long => CalcLit(true)
       case _ => CalcLit(false)
     }
     def IsFloat = a match {
-      case t : Calc.Float => CalcLit(true)
+      case t : CalcType.Float => CalcLit(true)
       case _ => CalcLit(false)
     }
     def IsDouble = a match {
-      case t : Calc.Double => CalcLit(true)
+      case t : CalcType.Double => CalcLit(true)
       case _ => CalcLit(false)
     }
     def IsString = a match {
-      case t : Calc.String => CalcLit(true)
+      case t : CalcType.String => CalcLit(true)
       case _ => CalcLit(false)
     }
     def IsBoolean = a match {
-      case t : Calc.Boolean => CalcLit(true)
+      case t : CalcType.Boolean => CalcLit(true)
       case _ => CalcLit(false)
     }
     def IsSymbol = IsString
