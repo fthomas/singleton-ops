@@ -23,17 +23,31 @@ object Checked0Param {
   trait Builder[PrimChk[T], SecChk[T], Cond[_], Msg[_], Face] {
     type Shell[T] <: Checked0ParamShell[PrimChk, Face, T]
 
+    ////////////////////////////////////////////////////////////////////////////////////////
+    // Manual invocations (usually used to for testing)
+    ////////////////////////////////////////////////////////////////////////////////////////
     def apply[T](implicit value : AcceptNonLiteral[Id[T]])
     : PrimChk[value.Out] = macro Builder.Macro.fromOpApply[PrimChk[_], SecChk[_], Cond[_], Msg[_]]
 
+    def apply[T <: Face](value : T)
+    : PrimChk[T] = macro Builder.Macro.fromNumValue[PrimChk[_], SecChk[_], Cond[_], Msg[_]]
+
+    def apply[T0 <: Face](value : TwoFaceAny[Face]{type T = T0})
+    : PrimChk[T0] = macro Builder.Macro.fromTF[PrimChk[_], SecChk[_], Cond[_], Msg[_]]
+    ////////////////////////////////////////////////////////////////////////////////////////
+
+    ////////////////////////////////////////////////////////////////////////////////////////
+    // Manual invocations (usually used to for testing)
+    ////////////////////////////////////////////////////////////////////////////////////////
     implicit def ev[T](implicit value : AcceptNonLiteral[Id[T]])
     : PrimChk[T] = macro Builder.Macro.fromOpImpl[T, PrimChk[_], SecChk[_], Cond[_], Msg[_]]
 
-    implicit def apply[T <: Face](value : T)
+    implicit def fromNum[T <: Face](value : T)
     : PrimChk[T] = macro Builder.Macro.fromNumValue[PrimChk[_], SecChk[_], Cond[_], Msg[_]]
 
-    implicit def fromTF[T0 <: Face](value : TwoFaceAny[Face]{type T = T0})(implicit di: DummyImplicit)
+    implicit def fromTF[T0 <: Face](value : TwoFaceAny[Face]{type T = T0})
     : PrimChk[T0] = macro Builder.Macro.fromTF[PrimChk[_], SecChk[_], Cond[_], Msg[_]]
+    ////////////////////////////////////////////////////////////////////////////////////////
   }
 
   @bundle
@@ -54,7 +68,7 @@ object Checked0Param {
         primChk : c.WeakTypeTag[PrimChk], secChk : c.WeakTypeTag[SecChk], cond : c.WeakTypeTag[Cond], msg : c.WeakTypeTag[Msg]
       ): c.Tree = CheckedImplMaterializer[PrimChk, SecChk, Cond, Msg].fromNumValue(0, value)
 
-      def fromTF[PrimChk, SecChk, Cond, Msg](value : c.Tree)(di : c.Tree)(
+      def fromTF[PrimChk, SecChk, Cond, Msg](value : c.Tree)(
         implicit
         primChk : c.WeakTypeTag[PrimChk], secChk : c.WeakTypeTag[SecChk], cond : c.WeakTypeTag[Cond], msg : c.WeakTypeTag[Msg]
       ): c.Tree = CheckedImplMaterializer[PrimChk, SecChk, Cond, Msg].fromTF(0, value)

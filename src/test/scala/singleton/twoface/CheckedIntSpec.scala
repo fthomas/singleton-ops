@@ -20,6 +20,7 @@ class CheckedIntSpec extends Properties("Checked.Int") {
   property("Compile-time checks") = wellTyped {
     CheckedSmallerThan50(5)
     CheckedSmallerThan50[W.`5`.T]
+    CheckedSmallerThan50(TwoFace.Int(5))
     val a = CheckedSmallerThan50[W.`5`.T + W.`3`.T]
     implicitly[a.T <:< W.`8`.T]
     implicitly[CheckedSmallerThan50[W.`5`.T]]
