@@ -15,6 +15,8 @@ trait TwoFaceAny[Face] extends Any {
   override def toString = getValue.toString
 }
 
+trait TwoFaceAnyUB[Face, T0] extends Any with TwoFaceAny[Face] {type T <: T0}
+
 object TwoFaceAny {
   trait Builder[TF <: TwoFaceAny[Face], TFRet[T], Face, Shl1[_,_,_,_], Shl2[_,_,_,_,_,_], Shl3[_,_,_,_,_,_,_,_]] {
     type Ret[T] = TFRet[T]
@@ -283,16 +285,16 @@ object TwoFaceAny {
 
     def simplify(implicit tfs : Int.Shell1[Id, T, std.Int]) = tfs(this.getValue)
   }
-  final class _Int[T0](val value : std.Int) extends AnyVal with IntLike {
+  final class _Int[T0](val value : std.Int) extends AnyVal with IntLike with TwoFaceAnyUB[std.Int, T0] {
     type T = T0
     @inline def getValue : std.Int = value
   }
   implicit object IntLike extends TwoFaceAny.Builder[IntLike, _Int, std.Int, Shell.One.Int, Shell.Two.Int, Shell.Three.Int] {
-    def create[T](value : std.Int) = new _Int[T](value)
+    def create[T](value : std.Int) : Ret[T] = new _Int[T](value)
     def numberOfLeadingZeros[T](t : Int[T])(implicit tfs : Int.Shell1[NumberOfLeadingZeros, T, std.Int]) = tfs(t.getValue)
-    def apply[T](implicit id : AcceptNonLiteral[Id[T]]) : Int[id.Out] = create[id.Out](id.valueWide.asInstanceOf[std.Int])
+    def apply[T](implicit id : AcceptNonLiteral[Id[T]]) : Ret[id.Out] = create[id.Out](id.valueWide.asInstanceOf[std.Int])
     implicit def apply[T <: std.Int](value : T) : Int[T] = macro Builder.Macro.fromNumValue[IntLike]
-    implicit def ev[T](implicit id : AcceptNonLiteral[Id[T]]) : Int[T] = create[T](id.valueWide.asInstanceOf[std.Int])
+    implicit def ev[T, TF[T0] >: Int[T0]](implicit id : AcceptNonLiteral[Id[T]]) : TF[T] = create[T](id.valueWide.asInstanceOf[std.Int])
     implicit def tf2Num[T <: std.Int](tf : Int[T]) : T = macro Builder.Macro.toNumValue[IntLike, T]
     implicit def opTF2Num[T <: singleton.ops.impl.Op, Out <: std.Int](tf : Int[T])(implicit id : OpAuxInt[AcceptNonLiteral[Id[T]], Out]) : Out = macro Builder.Macro.toNumValue2[IntLike, Out]
     implicit def unknownTF2Num(tf : IntLike) : std.Int = macro Builder.Macro.toNumValue[IntLike, std.Int]
