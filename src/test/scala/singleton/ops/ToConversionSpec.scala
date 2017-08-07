@@ -83,4 +83,9 @@ class ToConversionSpec extends Properties("ToConversion") {
   property("Double to String") = verifyOp1Args[ToString,W.`6.0`.T,W.`"6.0"`.T]
   property("String to String") = verifyOp1Args[ToString,W.`"7"`.T,W.`"7"`.T]
   property("Boolean to String") = verifyOp1Args[ToString,True,W.`"true"`.T]
+
+  import shapeless.syntax.singleton._
+  val sym = 'foo.narrow
+  property("Symbol to String") = verifyOp1Args[ToString,sym.type,W.`"foo"`.T]
+
 }

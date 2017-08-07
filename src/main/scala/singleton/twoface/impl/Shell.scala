@@ -19,7 +19,7 @@ object Shell {
 //  trait One[FuncApply, FuncArgs, Arg1, Arg1Wide] {
 //    type Out
 //    type TF[T]
-//    def apply(arg1 : => Arg1Wide) : TF[Out]
+//    def apply(arg1 : => Arg1Wide) : TF.Ret[Out]
 //  }
 //
 //  @bundle
@@ -44,7 +44,7 @@ object Shell {
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait Char[FuncApply, FuncArgs, Arg1, Arg1Wide] {
       type Out
-      def apply(arg1 : => Arg1Wide) : TwoFace.Char[Out]
+      def apply(arg1 : => Arg1Wide) : TwoFace.Char.Ret[Out]
     }
     @bundle
     object Char {
@@ -63,7 +63,7 @@ object Shell {
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait Int[FuncApply, FuncArgs, Arg1, Arg1Wide] {
       type Out
-      def apply(arg1 : => Arg1Wide) : TwoFace.Int[Out]
+      def apply(arg1 : => Arg1Wide) : TwoFace.Int.Ret[Out]
     }
     @bundle
     object Int {
@@ -82,7 +82,7 @@ object Shell {
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait Long[FuncApply, FuncArgs, Arg1, Arg1Wide] {
       type Out
-      def apply(arg1 : => Arg1Wide) : TwoFace.Long[Out]
+      def apply(arg1 : => Arg1Wide) : TwoFace.Long.Ret[Out]
     }
     @bundle
     object Long {
@@ -101,7 +101,7 @@ object Shell {
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait Float[FuncApply, FuncArgs, Arg1, Arg1Wide] {
       type Out
-      def apply(arg1 : => Arg1Wide) : TwoFace.Float[Out]
+      def apply(arg1 : => Arg1Wide) : TwoFace.Float.Ret[Out]
     }
     @bundle
     object Float {
@@ -120,7 +120,7 @@ object Shell {
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait Double[FuncApply, FuncArgs, Arg1, Arg1Wide] {
       type Out
-      def apply(arg1 : => Arg1Wide) : TwoFace.Double[Out]
+      def apply(arg1 : => Arg1Wide) : TwoFace.Double.Ret[Out]
     }
     @bundle
     object Double {
@@ -139,7 +139,7 @@ object Shell {
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait String[FuncApply, FuncArgs, Arg1, Arg1Wide] {
       type Out
-      def apply(arg1 : => Arg1Wide) : TwoFace.String[Out]
+      def apply(arg1 : => Arg1Wide) : TwoFace.String.Ret[Out]
     }
     @bundle
     object String {
@@ -158,7 +158,7 @@ object Shell {
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait Boolean[FuncApply, FuncArgs, Arg1, Arg1Wide] {
       type Out
-      def apply(arg1 : => Arg1Wide) : TwoFace.Boolean[Out]
+      def apply(arg1 : => Arg1Wide) : TwoFace.Boolean.Ret[Out]
     }
     @bundle
     object Boolean {
@@ -180,7 +180,7 @@ object Shell {
 //  trait Two[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] {
 //    type Out
 //    type TF[T]
-//    def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide) : TF[Out]
+//    def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide) : TF.Ret[Out]
 //  }
 //
   object Two { //Two Parameters Shell
@@ -205,7 +205,7 @@ object Shell {
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait Char[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] {
       type Out
-      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide) : TwoFace.Char[Out]
+      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide) : TwoFace.Char.Ret[Out]
     }
     @bundle
     object Char {
@@ -225,7 +225,7 @@ object Shell {
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait Int[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] {
       type Out
-      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide) : TwoFace.Int[Out]
+      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide) : TwoFace.Int.Ret[Out]
     }
     @bundle
     object Int {
@@ -245,7 +245,7 @@ object Shell {
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait Long[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] {
       type Out
-      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide) : TwoFace.Long[Out]
+      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide) : TwoFace.Long.Ret[Out]
     }
     @bundle
     object Long {
@@ -265,7 +265,7 @@ object Shell {
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait Float[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] {
       type Out
-      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide) : TwoFace.Float[Out]
+      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide) : TwoFace.Float.Ret[Out]
     }
     @bundle
     object Float {
@@ -285,7 +285,7 @@ object Shell {
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait Double[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] {
       type Out
-      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide) : TwoFace.Double[Out]
+      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide) : TwoFace.Double.Ret[Out]
     }
     @bundle
     object Double {
@@ -305,7 +305,7 @@ object Shell {
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait String[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] {
       type Out
-      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide) : TwoFace.String[Out]
+      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide) : TwoFace.String.Ret[Out]
     }
     @bundle
     object String {
@@ -325,7 +325,7 @@ object Shell {
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait Boolean[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] {
       type Out
-      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide) : TwoFace.Boolean[Out]
+      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide) : TwoFace.Boolean.Ret[Out]
     }
     @bundle
     object Boolean {
@@ -349,7 +349,7 @@ object Shell {
 //  trait Three[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide] {
 //    type Out
 //    type TF[T]
-//    def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide, arg3 : => Arg3Wide) : TF[Out]
+//    def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide, arg3 : => Arg3Wide) : TF.Ret[Out]
 //  }
 
   @bundle
@@ -376,7 +376,7 @@ object Shell {
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait Char[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide] {
       type Out
-      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide, arg3 : => Arg3Wide) : TwoFace.Char[Out]
+      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide, arg3 : => Arg3Wide) : TwoFace.Char.Ret[Out]
     }
     @bundle
     object Char {
@@ -397,7 +397,7 @@ object Shell {
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait Int[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide] {
       type Out
-      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide, arg3 : => Arg3Wide) : TwoFace.Int[Out]
+      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide, arg3 : => Arg3Wide) : TwoFace.Int.Ret[Out]
     }
     @bundle
     object Int {
@@ -418,7 +418,7 @@ object Shell {
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait Long[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide] {
       type Out
-      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide, arg3 : => Arg3Wide) : TwoFace.Long[Out]
+      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide, arg3 : => Arg3Wide) : TwoFace.Long.Ret[Out]
     }
     @bundle
     object Long {
@@ -439,7 +439,7 @@ object Shell {
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait Float[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide] {
       type Out
-      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide, arg3 : => Arg3Wide) : TwoFace.Float[Out]
+      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide, arg3 : => Arg3Wide) : TwoFace.Float.Ret[Out]
     }
     @bundle
     object Float {
@@ -460,7 +460,7 @@ object Shell {
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait Double[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide] {
       type Out
-      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide, arg3 : => Arg3Wide) : TwoFace.Double[Out]
+      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide, arg3 : => Arg3Wide) : TwoFace.Double.Ret[Out]
     }
     @bundle
     object Double {
@@ -481,7 +481,7 @@ object Shell {
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait String[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide] {
       type Out
-      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide, arg3 : => Arg3Wide) : TwoFace.String[Out]
+      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide, arg3 : => Arg3Wide) : TwoFace.String.Ret[Out]
     }
     @bundle
     object String {
@@ -502,7 +502,7 @@ object Shell {
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait Boolean[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide] {
       type Out
-      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide, arg3 : => Arg3Wide) : TwoFace.Boolean[Out]
+      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide, arg3 : => Arg3Wide) : TwoFace.Boolean.Ret[Out]
     }
     @bundle
     object Boolean {

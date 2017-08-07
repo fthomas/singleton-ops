@@ -117,14 +117,14 @@ trait GeneralMacros {
 
   sealed trait CalcType extends Calc
   object CalcType {
-    sealed trait Char extends CalcType{type T = std.Char; val tpe = typeOf[std.Char]}
-    sealed trait Int extends CalcType{type T = std.Int; val tpe = typeOf[std.Int]}
-    sealed trait Long extends CalcType{type T = std.Long; val tpe = typeOf[std.Long]}
-    sealed trait Float extends CalcType{type T = std.Float; val tpe = typeOf[std.Float]}
-    sealed trait Double extends CalcType{type T = std.Double; val tpe = typeOf[std.Double]}
-    sealed trait String extends CalcType{type T = std.String; val tpe = typeOf[std.String]}
-    sealed trait Boolean extends CalcType{type T = std.Boolean; val tpe = typeOf[std.Boolean]}
-    sealed trait Symbol extends CalcType{type T = std.Symbol; val tpe = typeOf[std.Symbol]}
+    sealed trait Char extends CalcType{type T = std.Char; val tpe = typeOf[scala.Char]}
+    sealed trait Int extends CalcType{type T = std.Int; val tpe = typeOf[scala.Int]}
+    sealed trait Long extends CalcType{type T = std.Long; val tpe = typeOf[scala.Long]}
+    sealed trait Float extends CalcType{type T = std.Float; val tpe = typeOf[scala.Float]}
+    sealed trait Double extends CalcType{type T = std.Double; val tpe = typeOf[scala.Double]}
+    sealed trait String extends CalcType{type T = std.String; val tpe = typeOf[java.lang.String]}
+    sealed trait Boolean extends CalcType{type T = std.Boolean; val tpe = typeOf[scala.Boolean]}
+    sealed trait Symbol extends CalcType{type T = std.Symbol; val tpe = typeOf[scala.Symbol]}
     object Char extends Char
     object Int extends Int
     object Long extends Long
@@ -542,7 +542,7 @@ trait GeneralMacros {
   def genOpTreeSymbol(opTpe : Type, t: String) : Tree = {
     val outTpe = SingletonSymbolType(t)
     val outTree = mkSingletonSymbol(t)
-    val outWideTpe = typeOf[std.Symbol]
+    val outWideTpe = typeOf[scala.Symbol]
     val outWideLiteral = mkSingletonSymbolWide(t)
     val outTypeName = TypeName("OutSymbol")
     q"""
@@ -556,21 +556,7 @@ trait GeneralMacros {
       }
       """
   }
-//  Warning:scalac: {
-//    final class $anon extends singleton.ops.impl.OpMacro[singleton.ops.impl.OpId.ToSymbol,String("Me"),singleton.ops.NP,singleton.ops.NP] {
-//      def <init>() = {
-//        super.<init>();
-//        ()
-//        };
-//        type OutWide = singleton.ops.impl.std.Symbol;
-//        type Out = singleton.ops.impl.std.Symbol @@ String("Me");
-//        type OutSymbol = singleton.ops.impl.std.Symbol @@ String("Me");
-//        final val value: singleton.ops.impl.std.Symbol @@ String("Me") = _root_.std.Symbol("Me").asInstanceOf[singleton.ops.impl.std.Symbol @@ String("Me")];
-//        final val isLiteral = true;
-//        final val valueWide: singleton.ops.impl.std.Symbol = _root_.std.Symbol("Me")
-//        };
-//        new $anon()
-//        }
+
   def genOpTreeNLit(opTpe : Type, calc : CalcNLit)(implicit annotatedSym : TypeSymbol) : Tree = {
     val valueTree = calc.tree
     val outTpe = calc.tpe
@@ -1334,8 +1320,7 @@ trait GeneralMacros {
        q"""
          new $shellTpe {
            type Out = $outTpe
-           type TF[T] = _root_.singleton.twoface.TwoFace.$tfType[T]
-           def apply(...$paramTree) : _root_.singleton.twoface.TwoFace.$tfType[$outTpe] = {
+           def apply(...$paramTree) : _root_.singleton.twoface.TwoFace.$tfTerm.Ret[$outTpe] = {
              _root_.singleton.twoface.TwoFace.$tfTerm.create[$outTpe]($tfValueTree)
            }
          }
@@ -1564,7 +1549,7 @@ trait GeneralMacros {
 
 
   //copied from Shapeless
-  val SymTpe = typeOf[std.Symbol]
+  val SymTpe = typeOf[scala.Symbol]
   object SingletonSymbolType {
     val atatTpe = typeOf[@@[_,_]].typeConstructor
     val TaggedSym = typeOf[tag.Tagged[_]].typeConstructor.typeSymbol
