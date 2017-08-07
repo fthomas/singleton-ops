@@ -1,23 +1,23 @@
-//package singleton.ops
-//
-//import org.scalacheck.Properties
-//import singleton.TestUtils._
-//import singleton.ops.math._
-//
-//class MinSpec extends Properties("Min") {
-//  property("Nat, left is minimum") = verifyOp2Args[Min,shapeless.Nat._1, shapeless.Nat._2, 1]
-//  property("Nat, right is minimum") = verifyOp2Args[Min,shapeless.Nat._3, shapeless.Nat._2, 2]
-//  property("Nat, equal") = verifyOp2Args[Min,shapeless.Nat._3, shapeless.Nat._3, 3]
-//  property("Int, left is minimum") = verifyOp2Args[Min,1, 2, 1]
-//  property("Int, right is minimum") = verifyOp2Args[Min,3, 2, 2]
-//  property("Int, equal") = verifyOp2Args[Min,3, 3, 3]
-//  property("Long, left is minimum") = verifyOp2Args[Min,1L, 2L, 1L]
-//  property("Long, right is minimum") = verifyOp2Args[Min,3L, 2L, 2L]
-//  property("Long, equal") = verifyOp2Args[Min,3L, 3L, 3L]
-//  property("Float, left is minimum") = verifyOp2Args[Min,1.0f, 2.0f, 1.0f]
-//  property("Float, right is minimum") = verifyOp2Args[Min,3.0f, 2.0f, 2.0f]
-//  property("Float, equal") = verifyOp2Args[Min,3.0f, 3.0f, 3.0f]
-//  property("Double, left is minimum") = verifyOp2Args[Min,1.0, 2.0, 1.0]
-//  property("Double, right is minimum") = verifyOp2Args[Min,3.0, 2.0, 2.0]
-//  property("Double, equal") = verifyOp2Args[Min,3.0, 3.0, 3.0]
-//}
+package singleton.ops
+
+import org.scalacheck.Properties
+import singleton.TestUtils._
+import singleton.ops.math._
+
+class MinSpec extends Properties("Min") {
+  property("Nat, right is minimum") = verifyOp2Args[Min,shapeless.Nat._1, shapeless.Nat._2, W.`1`.T]
+  property("Nat, left is minimum") = verifyOp2Args[Min,shapeless.Nat._3, shapeless.Nat._2, W.`2`.T]
+  property("Nat, equal") = verifyOp2Args[Min,shapeless.Nat._3, shapeless.Nat._3, W.`3`.T]
+  property("Int, right is minimum") = verifyOp2Args[Min, W.`1`.T, W.`2`.T, W.`1`.T]
+  property("Int, left is minimum") = verifyOp2Args[Min, W.`3`.T, W.`2`.T, W.`2`.T]
+  property("Int, equal") = verifyOp2Args[Min, W.`3`.T, W.`3`.T, W.`3`.T]
+  property("Long, right is minimum") = verifyOp2Args[Min, W.`1L`.T, W.`2L`.T, W.`1L`.T]
+  property("Long, left is minimum") = verifyOp2Args[Min, W.`3L`.T, W.`2L`.T, W.`2L`.T]
+  property("Long, equal") = verifyOp2Args[Min, W.`3L`.T, W.`3L`.T, W.`3L`.T]
+  property("Float, right is minimum") = verifyOp2Args[Min, W.`1.0f`.T, W.`2.0f`.T, W.`1.0f`.T]
+  property("Float, left is minimum") = verifyOp2Args[Min, W.`3.0f`.T, W.`2.0f`.T, W.`2.0f`.T]
+  property("Float, equal") = verifyOp2Args[Min, W.`3.0f`.T, W.`3.0f`.T, W.`3.0f`.T]
+  property("Double, right is minimum") = verifyOp2Args[Min, W.`1.0`.T, W.`2.0`.T, W.`1.0`.T]
+  property("Double, left is minimum") = verifyOp2Args[Min, W.`3.0`.T, W.`2.0`.T, W.`2.0`.T]
+  property("Double, equal") = verifyOp2Args[Min, W.`3.0`.T, W.`3.0`.T, W.`3.0`.T]
+}

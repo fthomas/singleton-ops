@@ -1,60 +1,60 @@
-//package singleton.ops
-//
-//import org.scalacheck.Properties
-//import shapeless.test.illTyped
-//import singleton.TestUtils._
-//import singleton.ops.math._
-//
-////Unsupported operation check to increase coverage
-//class UnsupportedSpec extends Properties("UnsupportedSpec") {
-//  property("ToNat") = wellTyped {illTyped("""implicitly[ToNat[true]]""")}
-//  property("ToNat with negative number") = wellTyped {illTyped("""implicitly[ToNat[-1]]""")}
-//  property("ToChar") = wellTyped {illTyped("""implicitly[ToChar[true]]""")}
-//  property("ToInt") = wellTyped {illTyped("""implicitly[ToInt[true]]""")}
-//  property("ToLong") = wellTyped {illTyped("""implicitly[ToLong[true]]""")}
-//  property("ToFloat") = wellTyped {illTyped("""implicitly[ToFloat[true]]""")}
-//  property("ToDouble") = wellTyped {illTyped("""implicitly[ToDouble[true]]""")}
-//  property("Negate") = wellTyped {illTyped("""implicitly[Negate[true]]""")}
-//  property("Abs") = wellTyped {illTyped("""implicitly[Abs[true]]""")}
-//  property("ToDouble") = wellTyped {illTyped("""implicitly[ToDouble[true]]""")}
-//  property("NumberOfLeadingZeros") = wellTyped {illTyped("""implicitly[NumberOfLeadingZeros[true]]""")}
-//  property("Floor") = wellTyped {illTyped("""implicitly[Floor[true]]""")}
-//  property("Ceil") = wellTyped {illTyped("""implicitly[Ceil[true]]""")}
-//  property("Round") = wellTyped {illTyped("""implicitly[Round[true]]""")}
-//  property("Sin") = wellTyped {illTyped("""implicitly[Sin[true]]""")}
-//  property("Cos") = wellTyped {illTyped("""implicitly[Cos[true]]""")}
-//  property("Tan") = wellTyped {illTyped("""implicitly[Tan[true]]""")}
-//  property("Sqrt") = wellTyped {illTyped("""implicitly[Sqrt[true]]""")}
-//  property("Log") = wellTyped {illTyped("""implicitly[Log[true]]""")}
-//  property("Log10") = wellTyped {illTyped("""implicitly[Log10[true]]""")}
-//  property("Reverse") = wellTyped {illTyped("""implicitly[Reverse[true]]""")}
-//  property("Not") = wellTyped {illTyped("""implicitly[!["a"]]""")}
-//  property("Require") = wellTyped {
-//    val a = true
-//    illTyped("""implicitly[RequireMsg[false,false]]""")
-//    illTyped("""implicitly[RequireMsg[a.type,11]]""")
-//    illTyped("""implicitly[RequireMsg[1,false]]""")
-//  }
-//  property("ITE") = wellTyped {illTyped("""implicitly[ITE[1,1,true]]""")}
-//  property("+") = wellTyped {illTyped("""implicitly[true + 2]""")}
-//  property("-") = wellTyped {illTyped("""implicitly["a" - 2]""")}
-//  property("*") = wellTyped {illTyped("""implicitly[true * 2]""")}
-//  property("/") = wellTyped {illTyped("""implicitly[true / 2]""")}
-//  property("%") = wellTyped {illTyped("""implicitly[true % 2]""")}
-//  property("<") = wellTyped {illTyped("""implicitly[true < 2]""")}
-//  property(">") = wellTyped {illTyped("""implicitly[true > 2]""")}
-//  property("<=") = wellTyped {illTyped("""implicitly[true <= 2]""")}
-//  property(">=") = wellTyped {illTyped("""implicitly[true >= 2]""")}
-//  property("==") = wellTyped {illTyped("""implicitly[true == 2]""")}
-//  property("!=") = wellTyped {illTyped("""implicitly[true != 2]""")}
-//  property("&&") = wellTyped {illTyped("""implicitly[1 && 2]""")}
-//  property("||") = wellTyped {illTyped("""implicitly[1 || 2]""")}
-//  property("Pow") = wellTyped {illTyped("""implicitly[Pow[true, 2]]""")}
-//  property("Min") = wellTyped {illTyped("""implicitly[Min[true, 2]]""")}
-//  property("Max") = wellTyped {illTyped("""implicitly[Max[true, 2]]""")}
-//  property("Substring") = wellTyped {illTyped("""implicitly[Substring[true, 2]]""")}
-//  property("CharAt") = wellTyped {illTyped("""implicitly[CharAt[true, 2]]""")}
-//  property("Length") = wellTyped {illTyped("""implicitly[Length[true]]""")}
-//  property("No Extraction from Bad Num") = wellTyped {illTyped("""implicitly[Id[Int]]""")}
-//  property("No Extraction from Bad TwoFace") = wellTyped {illTyped("""implicitly[TwoFace.Int[Int]]""")}
-//}
+package singleton.ops
+
+import org.scalacheck.Properties
+import shapeless.test.illTyped
+import singleton.TestUtils._
+import singleton.ops.math._
+
+//Unsupported operation check to increase coverage
+class UnsupportedSpec extends Properties("UnsupportedSpec") {
+  property("ToNat") = wellTyped {illTyped("""implicitly[ToNat[W.`true`.T]]""")}
+  property("ToNat with negative number") = wellTyped {illTyped("""implicitly[ToNat[W.`-1`.T]]""")}
+  property("ToChar") = wellTyped {illTyped("""implicitly[ToChar[W.`true`.T]]""")}
+  property("ToInt") = wellTyped {illTyped("""implicitly[ToInt[W.`true`.T]]""")}
+  property("ToLong") = wellTyped {illTyped("""implicitly[ToLong[W.`true`.T]]""")}
+  property("ToFloat") = wellTyped {illTyped("""implicitly[ToFloat[W.`true`.T]]""")}
+  property("ToDouble") = wellTyped {illTyped("""implicitly[ToDouble[W.`true`.T]]""")}
+  property("Negate") = wellTyped {illTyped("""implicitly[Negate[W.`true`.T]]""")}
+  property("Abs") = wellTyped {illTyped("""implicitly[Abs[W.`true`.T]]""")}
+  property("ToDouble") = wellTyped {illTyped("""implicitly[ToDouble[W.`true`.T]]""")}
+  property("NumberOfLeadingZeros") = wellTyped {illTyped("""implicitly[NumberOfLeadingZeros[W.`true`.T]]""")}
+  property("Floor") = wellTyped {illTyped("""implicitly[Floor[W.`true`.T]]""")}
+  property("Ceil") = wellTyped {illTyped("""implicitly[Ceil[W.`true`.T]]""")}
+  property("Round") = wellTyped {illTyped("""implicitly[Round[W.`true`.T]]""")}
+  property("Sin") = wellTyped {illTyped("""implicitly[Sin[W.`true`.T]]""")}
+  property("Cos") = wellTyped {illTyped("""implicitly[Cos[W.`true`.T]]""")}
+  property("Tan") = wellTyped {illTyped("""implicitly[Tan[W.`true`.T]]""")}
+  property("Sqrt") = wellTyped {illTyped("""implicitly[Sqrt[W.`true`.T]]""")}
+  property("Log") = wellTyped {illTyped("""implicitly[Log[W.`true`.T]]""")}
+  property("Log10") = wellTyped {illTyped("""implicitly[Log10[W.`true`.T]]""")}
+  property("Reverse") = wellTyped {illTyped("""implicitly[Reverse[W.`true`.T]]""")}
+  property("Not") = wellTyped {illTyped("""implicitly[![W.`"a"`.T]]""")}
+  property("Require") = wellTyped {
+    val a = W(true)
+    illTyped("""implicitly[RequireMsg[W.`false`.T,W.`false`.T]]""")
+//    illTyped("""implicitly[RequireMsg[a.T,W.`11`.T]]""")
+    illTyped("""implicitly[RequireMsg[W.`1`.T,W.`false`.T]]""")
+  }
+  property("ITE") = wellTyped {illTyped("""implicitly[ITE[W.`1`.T,W.`1`.T,W.`true`.T]]""")}
+  property("+") = wellTyped {illTyped("""implicitly[W.`true`.T + W.`2`.T]""")}
+  property("-") = wellTyped {illTyped("""implicitly[W.`"a"`.T - W.`2`.T]""")}
+  property("*") = wellTyped {illTyped("""implicitly[W.`true`.T * W.`2`.T]""")}
+  property("/") = wellTyped {illTyped("""implicitly[W.`true`.T / W.`2`.T]""")}
+  property("%") = wellTyped {illTyped("""implicitly[W.`true`.T % W.`2`.T]""")}
+  property("<") = wellTyped {illTyped("""implicitly[W.`true`.T < W.`2`.T]""")}
+  property(">") = wellTyped {illTyped("""implicitly[W.`true`.T > W.`2`.T]""")}
+  property("<=") = wellTyped {illTyped("""implicitly[W.`true`.T <= W.`2`.T]""")}
+  property(">=") = wellTyped {illTyped("""implicitly[W.`true`.T >= W.`2`.T]""")}
+  property("==") = wellTyped {illTyped("""implicitly[W.`true`.T == W.`2`.T]""")}
+  property("!=") = wellTyped {illTyped("""implicitly[W.`true`.T != W.`2`.T]""")}
+  property("&&") = wellTyped {illTyped("""implicitly[W.`1`.T && W.`2`.T]""")}
+  property("||") = wellTyped {illTyped("""implicitly[W.`1`.T || W.`2`.T]""")}
+  property("Pow") = wellTyped {illTyped("""implicitly[Pow[W.`true`.T, W.`2`.T]]""")}
+  property("Min") = wellTyped {illTyped("""implicitly[Min[W.`true`.T, W.`2`.T]]""")}
+  property("Max") = wellTyped {illTyped("""implicitly[Max[W.`true`.T, W.`2`.T]]""")}
+  property("Substring") = wellTyped {illTyped("""implicitly[Substring[W.`true`.T, W.`2`.T]]""")}
+  property("CharAt") = wellTyped {illTyped("""implicitly[CharAt[W.`true`.T, W.`2`.T]]""")}
+  property("Length") = wellTyped {illTyped("""implicitly[Length[W.`true`.T]]""")}
+  property("No Extraction from Bad Num") = wellTyped {illTyped("""implicitly[Id[Int]]""")}
+  property("No Extraction from Bad TwoFace") = wellTyped {illTyped("""implicitly[TwoFace.Int[Int]]""")}
+}
