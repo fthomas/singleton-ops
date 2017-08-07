@@ -2,7 +2,7 @@
 
 val groupId = "core-act-ness"
 val projectName = "singleton-ops"
-val rootPkg = "singleton.ops"
+val rootPkg = "singleton"
 val gitPubUrl = s"https://github.com/fthomas/$projectName.git"
 val gitDevUrl = s"git@github.com:fthomas/$projectName.git"
 
@@ -174,7 +174,8 @@ lazy val styleSettings = Def.settings(
 
 lazy val miscSettings = Def.settings(
   initialCommands += s"""
-    import $rootPkg._
+    import $rootPkg.ops._
+    import $rootPkg.twoface._
   """
 )
 
