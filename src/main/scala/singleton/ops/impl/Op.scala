@@ -25,7 +25,7 @@ protected[singleton] object OpGen {
   implicit def impl[O <: Op](implicit o: O) : Aux[O, o.Out] = new OpGen[O] {type Out = o.Out; val value = o.value.asInstanceOf[o.Out]}
 }
 
-trait OpCast[T, O <: Op] {type Out <: T; type Value = Out; val value : Value}
+trait OpCast[T, O <: Op] {type Out <: T; val value : Out}
 
 
 @scala.annotation.implicitNotFound(msg = "Unable to prove type argument is a Nat.")

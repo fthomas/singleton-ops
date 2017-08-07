@@ -61,6 +61,10 @@ class TwoFaceStringSpec extends Properties("TwoFace.String") {
   property("Unsafe String charAt Safe Int") = verifyTFChar(TwoFace.String(us("Something")) charAt TwoFace.Int(4), us('t'))
   property("Unsafe String charAt Unsafe Int") = verifyTFChar(TwoFace.String(us("Something")) charAt TwoFace.Int(us(4)), us('t'))
 
+  property("Safe toNat") = wellTyped {
+    val nat = TwoFace.String("1").toNat
+    verifyOp[nat.N, shapeless.Nat._1]
+  }
   property("Safe toInt") = verifyTFInt(TwoFace.String("1").toInt, 1)
   property("Unsafe toInt") = verifyTFInt(TwoFace.String(us("1")).toInt, us(1))
   property("Safe toLong") = verifyTFLong(TwoFace.String("1").toLong, 1L)
@@ -69,6 +73,10 @@ class TwoFaceStringSpec extends Properties("TwoFace.String") {
   property("Unsafe toFloat") = verifyTFFloat(TwoFace.String(us("1.0")).toFloat, us(1.0f))
   property("Safe toDouble") = verifyTFDouble(TwoFace.String("1.0").toDouble, 1.0)
   property("Unsafe toDouble") = verifyTFDouble(TwoFace.String(us("1.0")).toDouble, us(1.0))
+  property("Safe toSymbol") = {
+    val sym = TwoFace.String("foo").toSymbol
+    sym == 'foo
+  }
 
   property("Safe length") = verifyTFInt(TwoFace.String("Some").length, 4)
   property("Unsafe length") = verifyTFInt(TwoFace.String(us("Some")).length, us(4))

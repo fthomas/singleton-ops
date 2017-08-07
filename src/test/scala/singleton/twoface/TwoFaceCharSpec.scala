@@ -301,6 +301,10 @@ class TwoFaceCharSpec extends Properties("TwoFace.Char") {
   property("Safe Negate") = verifyTFInt(-TwoFace.Char('\u0002'), -2)
   property("Unsafe Negate") = verifyTFInt(-TwoFace.Char(us('\u0002')), us(-2))
 
+  property("Safe toNat") = wellTyped {
+    val nat = TwoFace.Char('\u0002').toNat
+    verifyOp[nat.N, shapeless.Nat._2]
+  }
   property("Safe toInt") = verifyTFInt(TwoFace.Char('\u0001').toInt, 1)
   property("Unsafe toInt") = verifyTFInt(TwoFace.Char(us('\u0001')).toInt, us(1))
   property("Safe toLong") = verifyTFLong(TwoFace.Char('\u0001').toLong, 1L)
@@ -311,6 +315,10 @@ class TwoFaceCharSpec extends Properties("TwoFace.Char") {
   property("Unsafe toDouble") = verifyTFDouble(TwoFace.Char(us('\u0001')).toDouble, us(1.0))
   property("Safe toStringTF") = verifyTFString(TwoFace.Char('t').toStringTF, "t")
   property("Unsafe toStringTF") = verifyTFString(TwoFace.Char(us('t')).toStringTF, us("t"))
+  property("Safe toSymbol") = {
+    val sym = TwoFace.Char('t').toSymbol
+    sym == scala.Symbol("t")
+  }
 
   property("Implicit Conversions") = wellTyped {
     val d : W.`'\u0003'`.T = TwoFace.Char('\u0003')

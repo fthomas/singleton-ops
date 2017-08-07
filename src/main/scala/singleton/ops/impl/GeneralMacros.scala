@@ -543,7 +543,7 @@ trait GeneralMacros {
     val outTpe = SingletonSymbolType(t)
     val outTree = mkSingletonSymbol(t)
     val outWideTpe = typeOf[std.Symbol]
-    val outWideLiteral = outTree
+    val outWideLiteral = mkSingletonSymbolWide(t)
     val outTypeName = TypeName("OutSymbol")
     q"""
       new $opTpe {
@@ -556,7 +556,21 @@ trait GeneralMacros {
       }
       """
   }
-
+//  Warning:scalac: {
+//    final class $anon extends singleton.ops.impl.OpMacro[singleton.ops.impl.OpId.ToSymbol,String("Me"),singleton.ops.NP,singleton.ops.NP] {
+//      def <init>() = {
+//        super.<init>();
+//        ()
+//        };
+//        type OutWide = singleton.ops.impl.std.Symbol;
+//        type Out = singleton.ops.impl.std.Symbol @@ String("Me");
+//        type OutSymbol = singleton.ops.impl.std.Symbol @@ String("Me");
+//        final val value: singleton.ops.impl.std.Symbol @@ String("Me") = _root_.std.Symbol("Me").asInstanceOf[singleton.ops.impl.std.Symbol @@ String("Me")];
+//        final val isLiteral = true;
+//        final val valueWide: singleton.ops.impl.std.Symbol = _root_.std.Symbol("Me")
+//        };
+//        new $anon()
+//        }
   def genOpTreeNLit(opTpe : Type, calc : CalcNLit)(implicit annotatedSym : TypeSymbol) : Tree = {
     val valueTree = calc.tree
     val outTpe = calc.tpe
@@ -1573,7 +1587,10 @@ trait GeneralMacros {
   //copied from Shapeless
   def mkSingletonSymbol(s: String): Tree = {
     val sTpe = SingletonSymbolType(s)
-    q"""_root_.std.Symbol($s).asInstanceOf[$sTpe]"""
+    q"""_root_.scala.Symbol($s).asInstanceOf[$sTpe]"""
+  }
+  def mkSingletonSymbolWide(s: String): Tree = {
+    q"""_root_.scala.Symbol($s)"""
   }
   ///////////////////////////////////////////////////////////////////////////////////////////
 }

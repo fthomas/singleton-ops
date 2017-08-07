@@ -161,11 +161,13 @@ object TwoFaceAny {
     def != [R](r : Double[R])(implicit tfs : Boolean.Shell2[!=, T, std.Char, R, std.Double]) = tfs(this.getValue, r.getValue)
 
     def unary_-(implicit tfs : Int.Shell1[Negate, T, std.Char]) = tfs(this.getValue)
+    def toNat(implicit nat : SafeNat[ToNat[T]]) : nat.Out = nat.value
     def toInt(implicit tfs : Int.Shell1[ToInt, T, std.Char]) = tfs(this.getValue)
     def toLong(implicit tfs : Long.Shell1[ToLong, T, std.Char]) = tfs(this.getValue)
     def toFloat(implicit tfs : Float.Shell1[ToFloat, T, std.Char]) = tfs(this.getValue)
     def toDouble(implicit tfs : Double.Shell1[ToDouble, T, std.Char]) = tfs(this.getValue)
     def toStringTF(implicit tfs : String.Shell1[ToString, T, std.Char]) = tfs(this.getValue)
+    def toSymbol(implicit sym : SafeSymbol[ToSymbol[T]]) : sym.Out = sym.value
 
     def simplify(implicit tfs : Char.Shell1[Id, T, std.Char]) = tfs(this.getValue)
   }
@@ -271,11 +273,13 @@ object TwoFaceAny {
     def != [R](r : Double[R])(implicit tfs : Boolean.Shell2[!=, T, std.Int, R, std.Double]) = tfs(this.getValue, r.getValue)
 
     def unary_-(implicit tfs : Int.Shell1[Negate, T, std.Int]) = tfs(this.getValue)
+    def toNat(implicit nat : SafeNat[ToNat[T]]) : nat.Out = nat.value
     def toChar(implicit tfs : Char.Shell1[ToChar, T, std.Int]) = tfs(this.getValue)
     def toLong(implicit tfs : Long.Shell1[ToLong, T, std.Int]) = tfs(this.getValue)
     def toFloat(implicit tfs : Float.Shell1[ToFloat, T, std.Int]) = tfs(this.getValue)
     def toDouble(implicit tfs : Double.Shell1[ToDouble, T, std.Int]) = tfs(this.getValue)
     def toStringTF(implicit tfs : String.Shell1[ToString, T, std.Int]) = tfs(this.getValue)
+    def toSymbol(implicit sym : SafeSymbol[ToSymbol[T]]) : sym.Out = sym.value
 
     def simplify(implicit tfs : Int.Shell1[Id, T, std.Int]) = tfs(this.getValue)
   }
@@ -382,11 +386,13 @@ object TwoFaceAny {
     def != [R](r : Double[R])(implicit tfs : Boolean.Shell2[!=, T, std.Long, R, std.Double]) = tfs(this.getValue, r.getValue)
 
     def unary_-(implicit tfs : Long.Shell1[Negate, T, std.Long]) = tfs(this.getValue)
+    def toNat(implicit nat : SafeNat[ToNat[T]]) : nat.Out = nat.value
     def toChar(implicit tfs : Char.Shell1[ToChar, T, std.Long]) = tfs(this.getValue)
     def toInt(implicit tfs : Int.Shell1[ToInt, T, std.Long]) = tfs(this.getValue)
     def toFloat(implicit tfs : Float.Shell1[ToFloat, T, std.Long]) = tfs(this.getValue)
     def toDouble(implicit tfs : Double.Shell1[ToDouble, T, std.Long]) = tfs(this.getValue)
     def toStringTF(implicit tfs : String.Shell1[ToString, T, std.Long]) = tfs(this.getValue)
+    def toSymbol(implicit sym : SafeSymbol[ToSymbol[T]]) : sym.Out = sym.value
 
     def simplify(implicit tfs : Long.Shell1[Id, T, std.Long]) = tfs(this.getValue)
   }
@@ -494,11 +500,13 @@ object TwoFaceAny {
     def != [R](r : Double[R])(implicit tfs : Boolean.Shell2[!=, T, std.Float, R, std.Double]) = tfs(this.getValue, r.getValue)
 
     def unary_-(implicit tfs : Float.Shell1[Negate, T, std.Float]) = tfs(this.getValue)
+    def toNat(implicit nat : SafeNat[ToNat[T]]) : nat.Out = nat.value
     def toChar(implicit tfs : Char.Shell1[ToChar, T, std.Float]) = tfs(this.getValue)
     def toInt(implicit tfs : Int.Shell1[ToInt, T, std.Float]) = tfs(this.getValue)
     def toLong(implicit tfs : Long.Shell1[ToLong, T, std.Float]) = tfs(this.getValue)
     def toDouble(implicit tfs : Double.Shell1[ToDouble, T, std.Float]) = tfs(this.getValue)
     def toStringTF(implicit tfs : String.Shell1[ToString, T, std.Float]) = tfs(this.getValue)
+    def toSymbol(implicit sym : SafeSymbol[ToSymbol[T]]) : sym.Out = sym.value
 
     def simplify(implicit tfs : Float.Shell1[Id, T, std.Float]) = tfs(this.getValue)
   }
@@ -604,11 +612,13 @@ object TwoFaceAny {
     def != [R](r : Double[R])(implicit tfs : Boolean.Shell2[!=, T, std.Double, R, std.Double]) = tfs(this.getValue, r.getValue)
 
     def unary_-(implicit tfs : Double.Shell1[Negate, T, std.Double]) = tfs(this.getValue)
+    def toNat(implicit nat : SafeNat[ToNat[T]]) : nat.Out = nat.value
     def toChar(implicit tfs : Char.Shell1[ToChar, T, std.Double]) = tfs(this.getValue)
     def toInt(implicit tfs : Int.Shell1[ToInt, T, std.Double]) = tfs(this.getValue)
     def toLong(implicit tfs : Long.Shell1[ToLong, T, std.Double]) = tfs(this.getValue)
     def toFloat(implicit tfs : Float.Shell1[ToFloat, T, std.Double]) = tfs(this.getValue)
     def toStringTF(implicit tfs : String.Shell1[ToString, T, std.Double]) = tfs(this.getValue)
+    def toSymbol(implicit sym : SafeSymbol[ToSymbol[T]]) : sym.Out = sym.value
 
     def simplify(implicit tfs : Double.Shell1[Id, T, std.Double]) = tfs(this.getValue)
   }
@@ -640,10 +650,12 @@ object TwoFaceAny {
     def substring[R](r : Int[R])(implicit tfs : String.Shell2[Substring, T, std.String, R, std.Int]) = tfs(this.getValue, r.getValue)
     def length(implicit tfs : Int.Shell1[Length, T, std.String]) = tfs(this.getValue)
     def charAt[R](r : Int[R])(implicit tfs : Char.Shell2[CharAt, T, std.String, R, std.Int]) = tfs(this.getValue, r.getValue)
+    def toNat(implicit nat : SafeNat[ToNat[T]]) : nat.Out = nat.value
     def toInt(implicit tfs : Int.Shell1[ToInt, T, std.String]) = tfs(this.getValue)
     def toLong(implicit tfs : Long.Shell1[ToLong, T, std.String]) = tfs(this.getValue)
     def toFloat(implicit tfs : Float.Shell1[ToFloat, T, std.String]) = tfs(this.getValue)
     def toDouble(implicit tfs : Double.Shell1[ToDouble, T, std.String]) = tfs(this.getValue)
+    def toSymbol(implicit sym : SafeSymbol[ToSymbol[T]]) : sym.Out = sym.value
 
     def simplify(implicit tfs : String.Shell1[Id, T, std.String]) = tfs(this.getValue)
   }
@@ -673,6 +685,7 @@ object TwoFaceAny {
     def || [R](r : Boolean[R])(implicit tfs : Boolean.Shell2[||, T, std.Boolean, R, std.Boolean]) = tfs(this.getValue, r.getValue)
     def unary_!(implicit tfs : Boolean.Shell1[!, T, std.Boolean]) = tfs(this.getValue)
     def toStringTF(implicit tfs : String.Shell1[ToString, T, std.Boolean]) = tfs(this.getValue)
+    def toSymbol(implicit sym : SafeSymbol[ToSymbol[T]]) : sym.Out = sym.value
 
     def simplify(implicit tfs : Boolean.Shell1[Id, T, std.Boolean]) = tfs(this.getValue)
   }

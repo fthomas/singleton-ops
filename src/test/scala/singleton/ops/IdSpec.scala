@@ -36,4 +36,8 @@ class IdSpec extends Properties("Id") {
     val ret : Boolean = implicitly[SafeBoolean[Id[W.`true`.T]]]
     ret == true
   }
+  property("Symbol") = {
+    val ret : Symbol = implicitly[SafeSymbol[Id[W.`"Something"`.T]]]
+    ret == 'Something
+  }
 }

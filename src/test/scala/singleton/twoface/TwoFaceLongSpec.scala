@@ -313,6 +313,10 @@ class TwoFaceLongSpec extends Properties("TwoFace.Long") {
   property("Safe Negate") = verifyTFLong(-TwoFace.Long(-1L), 1L)
   property("Unsafe Negate") = verifyTFLong(-TwoFace.Long(us(1L)), us(-1L))
 
+  property("Safe toNat") = wellTyped {
+    val nat = TwoFace.Long(3L).toNat
+    verifyOp[nat.N, shapeless.Nat._3]
+  }
   property("Safe toChar") = verifyTFChar(TwoFace.Long(1L).toChar, '\u0001')
   property("Unsafe toChar") = verifyTFChar(TwoFace.Long(us(1L)).toChar, us('\u0001'))
   property("Safe toInt") = verifyTFInt(TwoFace.Long(1L).toInt, 1)
@@ -323,6 +327,10 @@ class TwoFaceLongSpec extends Properties("TwoFace.Long") {
   property("Unsafe toDouble") = verifyTFDouble(TwoFace.Long(us(1L)).toDouble, us(1.0))
   property("Safe toStringTF") = verifyTFString(TwoFace.Long(1L).toStringTF, "1")
   property("Unsafe toStringTF") = verifyTFString(TwoFace.Long(us(1L)).toStringTF, us("1"))
+  property("Safe toSymbol") = {
+    val sym = TwoFace.Long(2L).toSymbol
+    sym == scala.Symbol("2")
+  }
 
   property("Safe abs") = verifyTFLong(abs(TwoFace.Long(-1L)), 1L)
   property("Unsafe abs") = verifyTFLong(abs(TwoFace.Long(us(-1L))), us(1L))

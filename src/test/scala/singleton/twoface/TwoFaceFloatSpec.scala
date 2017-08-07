@@ -313,6 +313,10 @@ class TwoFaceFloatSpec extends Properties("TwoFace.Float") {
   property("Safe Negate") = verifyTFFloat(-TwoFace.Float(-1.0f), 1.0f)
   property("Unsafe Negate") = verifyTFFloat(-TwoFace.Float(us(1.0f)), us(-1.0f))
 
+  property("Safe toNat") = wellTyped {
+    val nat = TwoFace.Float(2.0f).toNat
+    verifyOp[nat.N, shapeless.Nat._2]
+  }
   property("Safe toChar") = verifyTFChar(TwoFace.Float(1.0f).toChar, '\u0001')
   property("Unsafe toChar") = verifyTFChar(TwoFace.Float(us(1.0f)).toChar, us('\u0001'))
   property("Safe toInt") = verifyTFInt(TwoFace.Float(1.0f).toInt, 1)
@@ -323,6 +327,10 @@ class TwoFaceFloatSpec extends Properties("TwoFace.Float") {
   property("Unsafe toDouble") = verifyTFDouble(TwoFace.Float(us(1.0f)).toDouble, us(1.0))
   property("Safe toStringTF") = verifyTFString(TwoFace.Float(1.0f).toStringTF, "1.0")
   property("Unsafe toStringTF") = verifyTFString(TwoFace.Float(us(1.0f)).toStringTF, us("1.0"))
+  property("Safe toSymbol") = {
+    val sym = TwoFace.Float(2.0f).toSymbol
+    sym == scala.Symbol("2.0")
+  }
 
   property("Safe abs") = verifyTFFloat(abs(TwoFace.Float(-1.0f)), 1.0f)
   property("Unsafe abs") = verifyTFFloat(abs(TwoFace.Float(us(-1.0f))), us(1.0f))
