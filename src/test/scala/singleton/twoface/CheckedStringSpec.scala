@@ -15,7 +15,8 @@ object CheckedStringSpec {
 class CheckedStringSpec extends Properties("Checked.String") {
   import CheckedStringSpec._
 
-  def lengthSmallerThan5[T](t : CheckedLengthSmallerThan[T,W.`5`.T]) : Unit = {t.unsafeCheck(5)}
+  def foo[T](t : TwoFace.String[T]) : Unit = {}
+  def lengthSmallerThan5[T](t : CheckedLengthSmallerThan[T,W.`5`.T]) : Unit = {foo(t.unsafeCheck(5))}
 
   property("Compile-time checks") = wellTyped {
     lengthSmallerThan5("Hi")

@@ -27,7 +27,7 @@ class checked0Param[Cond[_], Msg[_], TFace] extends scala.annotation.StaticAnnot
         val likeTrait =
           q"""
              trait $traitTypeName extends Any with
-               _root_.singleton.twoface.impl.Checked0Param[$Cond, $Msg, $TFace] with
+               _root_.singleton.twoface.impl.Checked0Param[$secTypeName, $Cond, $Msg, $TFace] with
                ${Ctor.Name("_root_.singleton.twoface.impl.TwoFaceAny." + tFaceName.toString() + "Like")} {
              }
            """
@@ -101,7 +101,7 @@ class checked1Param[Cond[_,_], Msg[_,_], TFace, ParamFace] extends scala.annotat
         val likeTrait =
           q"""
              trait $traitTypeName[Param] extends Any with
-               _root_.singleton.twoface.impl.Checked1Param[$Cond, $Msg, $TFace, $ParamFace] with
+               _root_.singleton.twoface.impl.Checked1Param[$secTypeName, $Cond, $Msg, $TFace, Param, $ParamFace] with
                ${Ctor.Name("_root_.singleton.twoface.impl.TwoFaceAny." + tFaceName.toString() + "Like")} {
              }
            """

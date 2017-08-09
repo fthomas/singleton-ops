@@ -9,13 +9,38 @@ object CheckedIntSpec {
 
   type Cond[T] = T < W.`50`.T
   type Msg[T] = W.`"Failed Check"`.T
-  @checked0Param[Cond, Msg, Int] class CheckedSmallerThan50[T]
+
+  trait CheckedSmallerThan50Like extends Any with _root_.singleton.twoface.impl.Checked0Param[_CheckedSmallerThan50, Cond, Msg, Int] with _root_.singleton.twoface.impl.TwoFaceAny.IntLike {}
+
+  final class _CheckedSmallerThan50[T0](val value: Int) extends AnyVal with CheckedSmallerThan50Like {
+    type T = T0
+
+    @inline def getValue: Int = value
+  }
+
+  object CheckedSmallerThan50Like extends _root_.singleton.twoface.impl.Checked0Param.Builder[CheckedSmallerThan50, _CheckedSmallerThan50, Cond, Msg, Int] {
+    type Shell[T] = CheckedSmallerThan50Shell[T]
+  }
+
+  type CheckedSmallerThan50[T0] = CheckedSmallerThan50Like {type T <: T0}
+  val CheckedSmallerThan50 = CheckedSmallerThan50Like
+
+  final class CheckedSmallerThan50Shell[T] extends _root_.singleton.twoface.impl.Checked0ParamShell[CheckedSmallerThan50, Int, T] {
+    def apply(value: Int): CheckedSmallerThan50[T] = new _CheckedSmallerThan50[T](value)
+  }
+
+  object CheckedSmallerThan50Shell extends _root_.singleton.twoface.impl.Checked0ParamShell.Builder[CheckedSmallerThan50Shell, CheckedSmallerThan50, Cond, Msg, Int] {
+    def create[T]: CheckedSmallerThan50Shell[T] = new CheckedSmallerThan50Shell[T]
+  }
+
 }
 
 class CheckedIntSpec extends Properties("Checked.Int") {
   import CheckedIntSpec._
 
-  def smallerThan50[T](t : CheckedSmallerThan50[T]) : Unit = {t.unsafeCheck()}
+  def foo[T](t : TwoFace.Int[T]) : Unit = {}
+  def smallerThan50[T](t : CheckedSmallerThan50[T]) : Unit = {foo(t.unsafeCheck())}
+
 
   property("Compile-time checks") = wellTyped {
     CheckedSmallerThan50(5)
