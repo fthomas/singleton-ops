@@ -179,6 +179,7 @@ object TwoFaceAny {
     implicit def ev[T](implicit id : AcceptNonLiteral[Id[T]]) : Char[T] = create[T](id.valueWide.asInstanceOf[std.Char])
     implicit def tf2Num[T <: std.Char](tf : Char[T]) : T = macro Builder.Macro.toNumValue[Char[_], T]
     implicit def opTF2Num[T <: singleton.ops.impl.Op, Out <: std.Char](tf : Char[T])(implicit id : OpAuxChar[AcceptNonLiteral[Id[T]], Out]) : Out = macro Builder.Macro.toNumValue2[Char[_], Out]
+    implicit def unsafeTF2Num(tf : Char[_]) : std.Char = macro Builder.Macro.toNumValue[Char[_], std.Char]
     implicit def unknownTF2Num(tf : Char[std.Char]) : std.Char = macro Builder.Macro.toNumValue[Char[_], std.Char]
   }
 
@@ -292,6 +293,7 @@ object TwoFaceAny {
     implicit def ev[T](implicit id : AcceptNonLiteral[Id[T]]) : Int[T] = create[T](id.valueWide.asInstanceOf[std.Int])
     implicit def tf2Num[T <: std.Int](tf : Int[T]) : T = macro Builder.Macro.toNumValue[Int[_], T]
     implicit def opTF2Num[T <: singleton.ops.impl.Op, Out <: std.Int](tf : Int[T])(implicit id : OpAuxInt[AcceptNonLiteral[Id[T]], Out]) : Out = macro Builder.Macro.toNumValue2[Int[_], Out]
+    implicit def unsafeTF2Num(tf : Int[_]) : std.Int = macro Builder.Macro.toNumValue[Int[_], std.Int]
     implicit def unknownTF2Num(tf : Int[std.Int]) : std.Int = macro Builder.Macro.toNumValue[Int[_], std.Int]
   }
 
@@ -406,6 +408,7 @@ object TwoFaceAny {
     implicit def ev[T](implicit id : AcceptNonLiteral[Id[T]]) : Long[T] = create[T](id.valueWide.asInstanceOf[std.Long])
     implicit def tf2Num[T <: std.Long](tf : Long[T]) : T = macro Builder.Macro.toNumValue[Long[_], T]
     implicit def opTF2Num[T <: singleton.ops.impl.Op, Out <: std.Long](tf : Long[T])(implicit id : OpAuxLong[AcceptNonLiteral[Id[T]], Out]) : Out = macro Builder.Macro.toNumValue2[Long[_], Out]
+    implicit def unsafeTF2Num(tf : Long[_]) : std.Long = macro Builder.Macro.toNumValue[Long[_], std.Long]
     implicit def unknownTF2Num(tf : Long[std.Long]) : std.Long = macro Builder.Macro.toNumValue[Long[_], std.Long]
   }
 
@@ -518,6 +521,7 @@ object TwoFaceAny {
     implicit def ev[T](implicit id : AcceptNonLiteral[Id[T]]) : Float[T] = create[T](id.valueWide.asInstanceOf[std.Float])
     implicit def tf2Num[T <: std.Float](tf : Float[T]) : T = macro Builder.Macro.toNumValue[Float[_], T]
     implicit def opTF2Num[T <: singleton.ops.impl.Op, Out <: std.Float](tf : Float[T])(implicit id : OpAuxFloat[AcceptNonLiteral[Id[T]], Out]) : Out = macro Builder.Macro.toNumValue2[Float[_], Out]
+    implicit def unsafeTF2Num(tf : Float[_]) : std.Float = macro Builder.Macro.toNumValue[Float[_], std.Float]
     implicit def unknownTF2Num(tf : Float[std.Float]) : std.Float = macro Builder.Macro.toNumValue[Float[_], std.Float]
   }
 
@@ -630,6 +634,7 @@ object TwoFaceAny {
     implicit def ev[T](implicit id : AcceptNonLiteral[Id[T]]) : Double[T] = create[T](id.valueWide.asInstanceOf[std.Double])
     implicit def tf2Num[T <: std.Double](tf : Double[T]) : T = macro Builder.Macro.toNumValue[Double[_], T]
     implicit def opTF2Num[T <: singleton.ops.impl.Op, Out <: std.Double](tf : Double[T])(implicit id : OpAuxDouble[AcceptNonLiteral[Id[T]], Out]) : Out = macro Builder.Macro.toNumValue2[Double[_], Out]
+    implicit def unsafeTF2Num(tf : Double[_]) : std.Double = macro Builder.Macro.toNumValue[Double[_], std.Double]
     implicit def unknownTF2Num(tf : Double[std.Double]) : std.Double = macro Builder.Macro.toNumValue[Double[_], std.Double]
   }
 
@@ -667,6 +672,7 @@ object TwoFaceAny {
     implicit def ev[T](implicit id : AcceptNonLiteral[Id[T]]) : String[T] = create[T](id.valueWide.asInstanceOf[std.String])
     implicit def tf2Num[T <: std.String](tf : String[T]) : T = macro Builder.Macro.toNumValue[String[_], T]
     implicit def opTF2Num[T <: singleton.ops.impl.Op, Out <: std.String](tf : String[T])(implicit id : OpAuxString[AcceptNonLiteral[Id[T]], Out]) : Out = macro Builder.Macro.toNumValue2[String[_], Out]
+    implicit def unsafeTF2Num(tf : String[_]) : std.String = macro Builder.Macro.toNumValue[String[_], std.String]
     implicit def unknownTF2Num(tf : String[std.String]) : std.String = macro Builder.Macro.toNumValue[String[_], std.String]
   }
 
@@ -697,6 +703,7 @@ object TwoFaceAny {
     implicit def ev[T](implicit id : AcceptNonLiteral[Id[T]]) : Boolean[T] = create[T](id.valueWide.asInstanceOf[std.Boolean])
     implicit def tf2Num[T <: std.Boolean](tf : Boolean[T]) : T = macro Builder.Macro.toNumValue[Boolean[_], T]
     implicit def opTF2Num[T <: singleton.ops.impl.Op, Out <: std.Boolean](tf : Boolean[T])(implicit id : OpAuxBoolean[AcceptNonLiteral[Id[T]], Out]) : Out = macro Builder.Macro.toNumValue2[Boolean[_], Out]
+    implicit def unsafeTF2Num(tf : Boolean[_]) : std.Boolean = macro Builder.Macro.toNumValue[Boolean[_], std.Boolean]
     implicit def unknownTF2Num(tf : Boolean[std.Boolean]) : std.Boolean = macro Builder.Macro.toNumValue[Boolean[_], std.Boolean]
   }
 
