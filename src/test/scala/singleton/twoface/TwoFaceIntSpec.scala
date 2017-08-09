@@ -343,7 +343,7 @@ class TwoFaceIntSpec extends Properties("TwoFace.Int") {
     val conv1 : W.`3`.T = TwoFace.Int(3)
     val conv2 : W.`3`.T = implicitly[TwoFace.Int[W.`3`.T]]
     val conv3 : W.`3`.T = implicitly[Id[TwoFace.Int[W.`3`.T]]]
-    def conv4[T](tf : TwoFace.Int[T]) : Int = tf
+//    def conv4[T](tf : TwoFace.Int[T]) : Int = tf
     val conv5 : Int = implicitly[TwoFace.Int[W.`3`.T]]
     val conv6 : Int = implicitly[Id[TwoFace.Int[W.`3`.T]]]
     val conv7 : TwoFace.Int[W.`3`.T] = implicitly[TwoFace.Int[W.`2`.T + W.`1`.T]]

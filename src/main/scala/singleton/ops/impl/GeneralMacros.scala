@@ -324,21 +324,21 @@ trait GeneralMacros {
               case _ => None
             }
             if (calcTFType.isDefined) unappyArg(calcTFType, args.head) else None
-          case RefinedType(parents, scope) =>
-            val calcTFType = parents.head.typeSymbol match {
-              case t if t == symbolOf[TwoFaceAny.CharLike] => Some(CalcTFType.Char)
-              case t if t == symbolOf[TwoFaceAny.IntLike] => Some(CalcTFType.Int)
-              case t if t == symbolOf[TwoFaceAny.LongLike] => Some(CalcTFType.Long)
-              case t if t == symbolOf[TwoFaceAny.FloatLike] => Some(CalcTFType.Float)
-              case t if t == symbolOf[TwoFaceAny.DoubleLike] => Some(CalcTFType.Double)
-              case t if t == symbolOf[TwoFaceAny.StringLike] => Some(CalcTFType.String)
-              case t if t == symbolOf[TwoFaceAny.BooleanLike] => Some(CalcTFType.Boolean)
-              case _ => None
-            }
-            if (calcTFType.isDefined) {
-              if (verboseTraversal) print(s"@@TwoFaceCalc@@\nTP: $tp\nRAW: + ${showRaw(tp)}")
-              unappyArg(calcTFType, scope.head.asType.toType)
-            } else None
+//          case RefinedType(parents, scope) =>
+//            val calcTFType = parents.head.typeSymbol match {
+//              case t if t == symbolOf[TwoFaceAny.Char[_]] => Some(CalcTFType.Char)
+//              case t if t == symbolOf[TwoFaceAny.IntLike] => Some(CalcTFType.Int)
+//              case t if t == symbolOf[TwoFaceAny.LongLike] => Some(CalcTFType.Long)
+//              case t if t == symbolOf[TwoFaceAny.FloatLike] => Some(CalcTFType.Float)
+//              case t if t == symbolOf[TwoFaceAny.DoubleLike] => Some(CalcTFType.Double)
+//              case t if t == symbolOf[TwoFaceAny.StringLike] => Some(CalcTFType.String)
+//              case t if t == symbolOf[TwoFaceAny.BooleanLike] => Some(CalcTFType.Boolean)
+//              case _ => None
+//            }
+//            if (calcTFType.isDefined) {
+//              if (verboseTraversal) print(s"@@TwoFaceCalc@@\nTP: $tp\nRAW: + ${showRaw(tp)}")
+//              unappyArg(calcTFType, scope.head.asType.toType)
+//            } else None
           case _ => None
         }
       }
