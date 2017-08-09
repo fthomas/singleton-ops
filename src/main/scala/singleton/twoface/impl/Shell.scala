@@ -19,7 +19,7 @@ object Shell {
 //  trait One[FuncApply, FuncArgs, Arg1, Arg1Wide] {
 //    type Out
 //    type TF[T]
-//    def apply(arg1 : => Arg1Wide) : TF.Ret[Out]
+//    def apply(arg1 : => Arg1Wide) : TF[Out]
 //  }
 //
 //  @bundle
@@ -44,7 +44,7 @@ object Shell {
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait Char[FuncApply, FuncArgs, Arg1, Arg1Wide] {
       type Out
-      def apply(arg1 : => Arg1Wide) : TwoFace.Char.Ret[Out]
+      def apply(arg1 : => Arg1Wide) : TwoFace.Char[Out]
     }
     @bundle
     object Char {
@@ -56,14 +56,14 @@ object Shell {
         def shell[FuncApply, FuncArgs, Arg1, Arg1Wide]
         (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide]) : c.Tree = TwoFaceShellMaterializer[
-          Char[FuncApply, FuncArgs, Arg1, Arg1Wide]].shell(c.symbolOf[TwoFaceAny.CharLike.Shell1[F,_,_]])
+          Char[FuncApply, FuncArgs, Arg1, Arg1Wide]].shell(c.symbolOf[TwoFaceAny.Char.Shell1[F,_,_]])
       }
     }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait Int[FuncApply, FuncArgs, Arg1, Arg1Wide] {
       type Out
-      def apply(arg1 : => Arg1Wide) : TwoFace.Int.Ret[Out]
+      def apply(arg1 : => Arg1Wide) : TwoFace.Int[Out]
     }
     @bundle
     object Int {
@@ -75,14 +75,14 @@ object Shell {
         def shell[FuncApply, FuncArgs, Arg1, Arg1Wide]
         (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide]) : c.Tree = TwoFaceShellMaterializer[
-          Int[FuncApply, FuncArgs, Arg1, Arg1Wide]].shell(c.symbolOf[TwoFaceAny.IntLike.Shell1[F,_,_]])
+          Int[FuncApply, FuncArgs, Arg1, Arg1Wide]].shell(c.symbolOf[TwoFaceAny.Int.Shell1[F,_,_]])
       }
     }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait Long[FuncApply, FuncArgs, Arg1, Arg1Wide] {
       type Out
-      def apply(arg1 : => Arg1Wide) : TwoFace.Long.Ret[Out]
+      def apply(arg1 : => Arg1Wide) : TwoFace.Long[Out]
     }
     @bundle
     object Long {
@@ -94,14 +94,14 @@ object Shell {
         def shell[FuncApply, FuncArgs, Arg1, Arg1Wide]
         (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide]) : c.Tree = TwoFaceShellMaterializer[
-          Long[FuncApply, FuncArgs, Arg1, Arg1Wide]].shell(c.symbolOf[TwoFaceAny.LongLike.Shell1[F,_,_]])
+          Long[FuncApply, FuncArgs, Arg1, Arg1Wide]].shell(c.symbolOf[TwoFaceAny.Long.Shell1[F,_,_]])
       }
     }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait Float[FuncApply, FuncArgs, Arg1, Arg1Wide] {
       type Out
-      def apply(arg1 : => Arg1Wide) : TwoFace.Float.Ret[Out]
+      def apply(arg1 : => Arg1Wide) : TwoFace.Float[Out]
     }
     @bundle
     object Float {
@@ -113,14 +113,14 @@ object Shell {
         def shell[FuncApply, FuncArgs, Arg1, Arg1Wide]
         (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide]) : c.Tree = TwoFaceShellMaterializer[
-          Float[FuncApply, FuncArgs, Arg1, Arg1Wide]].shell(c.symbolOf[TwoFaceAny.FloatLike.Shell1[F,_,_]])
+          Float[FuncApply, FuncArgs, Arg1, Arg1Wide]].shell(c.symbolOf[TwoFaceAny.Float.Shell1[F,_,_]])
       }
     }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait Double[FuncApply, FuncArgs, Arg1, Arg1Wide] {
       type Out
-      def apply(arg1 : => Arg1Wide) : TwoFace.Double.Ret[Out]
+      def apply(arg1 : => Arg1Wide) : TwoFace.Double[Out]
     }
     @bundle
     object Double {
@@ -132,14 +132,14 @@ object Shell {
         def shell[FuncApply, FuncArgs, Arg1, Arg1Wide]
         (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide]) : c.Tree = TwoFaceShellMaterializer[
-          Double[FuncApply, FuncArgs, Arg1, Arg1Wide]].shell(c.symbolOf[TwoFaceAny.DoubleLike.Shell1[F,_,_]])
+          Double[FuncApply, FuncArgs, Arg1, Arg1Wide]].shell(c.symbolOf[TwoFaceAny.Double.Shell1[F,_,_]])
       }
     }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait String[FuncApply, FuncArgs, Arg1, Arg1Wide] {
       type Out
-      def apply(arg1 : => Arg1Wide) : TwoFace.String.Ret[Out]
+      def apply(arg1 : => Arg1Wide) : TwoFace.String[Out]
     }
     @bundle
     object String {
@@ -151,14 +151,14 @@ object Shell {
         def shell[FuncApply, FuncArgs, Arg1, Arg1Wide]
         (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide]) : c.Tree = TwoFaceShellMaterializer[
-          String[FuncApply, FuncArgs, Arg1, Arg1Wide]].shell(c.symbolOf[TwoFaceAny.StringLike.Shell1[F,_,_]])
+          String[FuncApply, FuncArgs, Arg1, Arg1Wide]].shell(c.symbolOf[TwoFaceAny.String.Shell1[F,_,_]])
       }
     }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait Boolean[FuncApply, FuncArgs, Arg1, Arg1Wide] {
       type Out
-      def apply(arg1 : => Arg1Wide) : TwoFace.Boolean.Ret[Out]
+      def apply(arg1 : => Arg1Wide) : TwoFace.Boolean[Out]
     }
     @bundle
     object Boolean {
@@ -170,7 +170,7 @@ object Shell {
         def shell[FuncApply, FuncArgs, Arg1, Arg1Wide]
         (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide]) : c.Tree = TwoFaceShellMaterializer[
-          Boolean[FuncApply, FuncArgs, Arg1, Arg1Wide]].shell(c.symbolOf[TwoFaceAny.BooleanLike.Shell1[F,_,_]])
+          Boolean[FuncApply, FuncArgs, Arg1, Arg1Wide]].shell(c.symbolOf[TwoFaceAny.Boolean.Shell1[F,_,_]])
       }
     }
   }
@@ -180,7 +180,7 @@ object Shell {
 //  trait Two[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] {
 //    type Out
 //    type TF[T]
-//    def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide) : TF.Ret[Out]
+//    def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide) : TF[Out]
 //  }
 //
   object Two { //Two Parameters Shell
@@ -205,7 +205,7 @@ object Shell {
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait Char[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] {
       type Out
-      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide) : TwoFace.Char.Ret[Out]
+      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide) : TwoFace.Char[Out]
     }
     @bundle
     object Char {
@@ -218,14 +218,14 @@ object Shell {
         (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide], arg2 : c.WeakTypeTag[Arg2],
          arg2Wide : c.WeakTypeTag[Arg2Wide]) : c.Tree = TwoFaceShellMaterializer[
-          Char[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]].shell(c.symbolOf[TwoFaceAny.CharLike.Shell2[F,_,_,_,_]])
+          Char[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]].shell(c.symbolOf[TwoFaceAny.Char.Shell2[F,_,_,_,_]])
       }
     }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait Int[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] {
       type Out
-      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide) : TwoFace.Int.Ret[Out]
+      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide) : TwoFace.Int[Out]
     }
     @bundle
     object Int {
@@ -238,14 +238,14 @@ object Shell {
         (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide], arg2 : c.WeakTypeTag[Arg2],
          arg2Wide : c.WeakTypeTag[Arg2Wide]) : c.Tree = TwoFaceShellMaterializer[
-          Int[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]].shell(c.symbolOf[TwoFaceAny.IntLike.Shell2[F,_,_,_,_]])
+          Int[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]].shell(c.symbolOf[TwoFaceAny.Int.Shell2[F,_,_,_,_]])
       }
     }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait Long[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] {
       type Out
-      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide) : TwoFace.Long.Ret[Out]
+      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide) : TwoFace.Long[Out]
     }
     @bundle
     object Long {
@@ -258,14 +258,14 @@ object Shell {
         (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide], arg2 : c.WeakTypeTag[Arg2],
          arg2Wide : c.WeakTypeTag[Arg2Wide]) : c.Tree = TwoFaceShellMaterializer[
-          Long[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]].shell(c.symbolOf[TwoFaceAny.LongLike.Shell2[F,_,_,_,_]])
+          Long[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]].shell(c.symbolOf[TwoFaceAny.Long.Shell2[F,_,_,_,_]])
       }
     }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait Float[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] {
       type Out
-      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide) : TwoFace.Float.Ret[Out]
+      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide) : TwoFace.Float[Out]
     }
     @bundle
     object Float {
@@ -278,14 +278,14 @@ object Shell {
         (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide], arg2 : c.WeakTypeTag[Arg2],
          arg2Wide : c.WeakTypeTag[Arg2Wide]) : c.Tree = TwoFaceShellMaterializer[
-          Float[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]].shell(c.symbolOf[TwoFaceAny.FloatLike.Shell2[F,_,_,_,_]])
+          Float[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]].shell(c.symbolOf[TwoFaceAny.Float.Shell2[F,_,_,_,_]])
       }
     }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait Double[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] {
       type Out
-      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide) : TwoFace.Double.Ret[Out]
+      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide) : TwoFace.Double[Out]
     }
     @bundle
     object Double {
@@ -298,14 +298,14 @@ object Shell {
         (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide], arg2 : c.WeakTypeTag[Arg2],
          arg2Wide : c.WeakTypeTag[Arg2Wide]) : c.Tree = TwoFaceShellMaterializer[
-          Double[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]].shell(c.symbolOf[TwoFaceAny.StringLike.Shell2[F,_,_,_,_]])
+          Double[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]].shell(c.symbolOf[TwoFaceAny.String.Shell2[F,_,_,_,_]])
       }
     }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait String[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] {
       type Out
-      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide) : TwoFace.String.Ret[Out]
+      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide) : TwoFace.String[Out]
     }
     @bundle
     object String {
@@ -318,14 +318,14 @@ object Shell {
         (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide], arg2 : c.WeakTypeTag[Arg2],
          arg2Wide : c.WeakTypeTag[Arg2Wide]) : c.Tree = TwoFaceShellMaterializer[
-          String[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]].shell(c.symbolOf[TwoFaceAny.BooleanLike.Shell2[F,_,_,_,_]])
+          String[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]].shell(c.symbolOf[TwoFaceAny.Boolean.Shell2[F,_,_,_,_]])
       }
     }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait Boolean[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] {
       type Out
-      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide) : TwoFace.Boolean.Ret[Out]
+      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide) : TwoFace.Boolean[Out]
     }
     @bundle
     object Boolean {
@@ -338,7 +338,7 @@ object Shell {
         (implicit funcApply : c.WeakTypeTag[FuncApply], func : c.WeakTypeTag[FuncArgs],
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide], arg2 : c.WeakTypeTag[Arg2],
          arg2Wide : c.WeakTypeTag[Arg2Wide]) : c.Tree = TwoFaceShellMaterializer[
-          Boolean[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]].shell(c.symbolOf[TwoFaceAny.BooleanLike.Shell2[F,_,_,_,_]])
+          Boolean[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]].shell(c.symbolOf[TwoFaceAny.Boolean.Shell2[F,_,_,_,_]])
       }
     }
   }
@@ -349,7 +349,7 @@ object Shell {
 //  trait Three[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide] {
 //    type Out
 //    type TF[T]
-//    def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide, arg3 : => Arg3Wide) : TF.Ret[Out]
+//    def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide, arg3 : => Arg3Wide) : TF[Out]
 //  }
 
   @bundle
@@ -376,7 +376,7 @@ object Shell {
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait Char[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide] {
       type Out
-      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide, arg3 : => Arg3Wide) : TwoFace.Char.Ret[Out]
+      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide, arg3 : => Arg3Wide) : TwoFace.Char[Out]
     }
     @bundle
     object Char {
@@ -390,14 +390,14 @@ object Shell {
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide], arg2 : c.WeakTypeTag[Arg2],
          arg2Wide : c.WeakTypeTag[Arg2Wide], arg3 : c.WeakTypeTag[Arg3],
          arg3Wide : c.WeakTypeTag[Arg3Wide]) : c.Tree = TwoFaceShellMaterializer[
-          Char[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]].shell(c.symbolOf[TwoFaceAny.CharLike.Shell3[F,_,_,_,_,_,_]])
+          Char[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]].shell(c.symbolOf[TwoFaceAny.Char.Shell3[F,_,_,_,_,_,_]])
       }
     }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait Int[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide] {
       type Out
-      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide, arg3 : => Arg3Wide) : TwoFace.Int.Ret[Out]
+      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide, arg3 : => Arg3Wide) : TwoFace.Int[Out]
     }
     @bundle
     object Int {
@@ -411,14 +411,14 @@ object Shell {
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide], arg2 : c.WeakTypeTag[Arg2],
          arg2Wide : c.WeakTypeTag[Arg2Wide], arg3 : c.WeakTypeTag[Arg3],
          arg3Wide : c.WeakTypeTag[Arg3Wide]) : c.Tree = TwoFaceShellMaterializer[
-          Int[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]].shell(c.symbolOf[TwoFaceAny.IntLike.Shell3[F,_,_,_,_,_,_]])
+          Int[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]].shell(c.symbolOf[TwoFaceAny.Int.Shell3[F,_,_,_,_,_,_]])
       }
     }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait Long[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide] {
       type Out
-      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide, arg3 : => Arg3Wide) : TwoFace.Long.Ret[Out]
+      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide, arg3 : => Arg3Wide) : TwoFace.Long[Out]
     }
     @bundle
     object Long {
@@ -432,14 +432,14 @@ object Shell {
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide], arg2 : c.WeakTypeTag[Arg2],
          arg2Wide : c.WeakTypeTag[Arg2Wide], arg3 : c.WeakTypeTag[Arg3],
          arg3Wide : c.WeakTypeTag[Arg3Wide]) : c.Tree = TwoFaceShellMaterializer[
-          Long[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]].shell(c.symbolOf[TwoFaceAny.LongLike.Shell3[F,_,_,_,_,_,_]])
+          Long[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]].shell(c.symbolOf[TwoFaceAny.Long.Shell3[F,_,_,_,_,_,_]])
       }
     }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait Float[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide] {
       type Out
-      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide, arg3 : => Arg3Wide) : TwoFace.Float.Ret[Out]
+      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide, arg3 : => Arg3Wide) : TwoFace.Float[Out]
     }
     @bundle
     object Float {
@@ -453,14 +453,14 @@ object Shell {
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide], arg2 : c.WeakTypeTag[Arg2],
          arg2Wide : c.WeakTypeTag[Arg2Wide], arg3 : c.WeakTypeTag[Arg3],
          arg3Wide : c.WeakTypeTag[Arg3Wide]) : c.Tree = TwoFaceShellMaterializer[
-          Float[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]].shell(c.symbolOf[TwoFaceAny.FloatLike.Shell3[F,_,_,_,_,_,_]])
+          Float[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]].shell(c.symbolOf[TwoFaceAny.Float.Shell3[F,_,_,_,_,_,_]])
       }
     }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait Double[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide] {
       type Out
-      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide, arg3 : => Arg3Wide) : TwoFace.Double.Ret[Out]
+      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide, arg3 : => Arg3Wide) : TwoFace.Double[Out]
     }
     @bundle
     object Double {
@@ -474,14 +474,14 @@ object Shell {
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide], arg2 : c.WeakTypeTag[Arg2],
          arg2Wide : c.WeakTypeTag[Arg2Wide], arg3 : c.WeakTypeTag[Arg3],
          arg3Wide : c.WeakTypeTag[Arg3Wide]) : c.Tree = TwoFaceShellMaterializer[
-          Double[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]].shell(c.symbolOf[TwoFaceAny.DoubleLike.Shell3[F,_,_,_,_,_,_]])
+          Double[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]].shell(c.symbolOf[TwoFaceAny.Double.Shell3[F,_,_,_,_,_,_]])
       }
     }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait String[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide] {
       type Out
-      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide, arg3 : => Arg3Wide) : TwoFace.String.Ret[Out]
+      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide, arg3 : => Arg3Wide) : TwoFace.String[Out]
     }
     @bundle
     object String {
@@ -495,14 +495,14 @@ object Shell {
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide], arg2 : c.WeakTypeTag[Arg2],
          arg2Wide : c.WeakTypeTag[Arg2Wide], arg3 : c.WeakTypeTag[Arg3],
          arg3Wide : c.WeakTypeTag[Arg3Wide]) : c.Tree = TwoFaceShellMaterializer[
-          String[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]].shell(c.symbolOf[TwoFaceAny.StringLike.Shell3[F,_,_,_,_,_,_]])
+          String[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]].shell(c.symbolOf[TwoFaceAny.String.Shell3[F,_,_,_,_,_,_]])
       }
     }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
     trait Boolean[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide] {
       type Out
-      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide, arg3 : => Arg3Wide) : TwoFace.Boolean.Ret[Out]
+      def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide, arg3 : => Arg3Wide) : TwoFace.Boolean[Out]
     }
     @bundle
     object Boolean {
@@ -516,7 +516,7 @@ object Shell {
          arg1 : c.WeakTypeTag[Arg1], arg1Wide : c.WeakTypeTag[Arg1Wide], arg2 : c.WeakTypeTag[Arg2],
          arg2Wide : c.WeakTypeTag[Arg2Wide], arg3 : c.WeakTypeTag[Arg3],
          arg3Wide : c.WeakTypeTag[Arg3Wide]) : c.Tree = TwoFaceShellMaterializer[
-          Boolean[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]].shell(c.symbolOf[TwoFaceAny.BooleanLike.Shell3[F,_,_,_,_,_,_]])
+          Boolean[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]].shell(c.symbolOf[TwoFaceAny.Boolean.Shell3[F,_,_,_,_,_,_]])
       }
     }
   }

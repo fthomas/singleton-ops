@@ -3,7 +3,6 @@ package singleton.twoface.impl
 import macrocompat.bundle
 import singleton.ops._
 import singleton.ops.impl.GeneralMacros
-import singleton.twoface.TwoFace._
 import singleton.ops.impl.std
 
 import scala.reflect.macros.whitebox
@@ -15,12 +14,8 @@ trait TwoFaceAny[Face] extends Any {
   override def toString = getValue.toString
 }
 
-trait TwoFaceAnyUB[Face, T0] extends Any with TwoFaceAny[Face] {type T <: T0}
-
 object TwoFaceAny {
-  trait Builder[TF <: TwoFaceAny[Face], TFRet[T], Face, Shl1[_,_,_,_], Shl2[_,_,_,_,_,_], Shl3[_,_,_,_,_,_,_,_]] {
-    type Ret[T] = TFRet[T]
-    type Lt[T0] = TF{type T <: T0}
+  trait Builder[TF[T], Face, Shl1[_,_,_,_], Shl2[_,_,_,_,_,_], Shl3[_,_,_,_,_,_,_,_]] {
     type Shell1[Func[_], Arg1, Arg1Wide] =
       Shl1[Func[Arg1],
            Func[Arg[W.`1`.T, Arg1, Arg1Wide]],
@@ -33,7 +28,7 @@ object TwoFaceAny {
       Shl3[Func[Arg1, Arg2, Arg3],
            Func[Arg[W.`1`.T, Arg1, Arg1Wide], Arg[W.`2`.T, Arg2, Arg2Wide], Arg[W.`3`.T, Arg3, Arg3Wide]],
            Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]
-    def create[T](value : Face) : Ret[T]
+    def create[T](value : Face) : TF[T]
 
     //The implicit conversion from numeric to TwoFace could have been implemented generically, like the following.
     //However, since IntelliJ marks everything red, it was preferred to implement it specifically, in the meantime.
@@ -173,12 +168,12 @@ object TwoFaceAny {
 
     def simplify(implicit tfs : Char.Shell1[Id, T, std.Char]) = tfs(this.getValue)
   }
-  final class _Char[T0](val value : std.Char) extends AnyVal with CharLike {
+  final class Char[T0](val value : std.Char) extends AnyVal with CharLike {
     type T = T0
     @inline def getValue : std.Char = value
   }
-  implicit object CharLike extends TwoFaceAny.Builder[CharLike, _Char, std.Char, Shell.One.Char, Shell.Two.Char, Shell.Three.Char] {
-    def create[T](value : std.Char) : Char[T] = new _Char[T](value)
+  implicit object Char extends TwoFaceAny.Builder[Char, std.Char, Shell.One.Char, Shell.Two.Char, Shell.Three.Char] {
+    def create[T](value : std.Char) : Char[T] = new Char[T](value)
     def apply[T](implicit id : AcceptNonLiteral[Id[T]]) : Char[id.Out] = create[id.Out](id.valueWide.asInstanceOf[std.Char])
     implicit def apply[T <: std.Char, Out <: T](value : T) : Char[Out] = macro Builder.Macro.fromNumValue[CharLike]
     implicit def ev[T](implicit id : AcceptNonLiteral[Id[T]]) : Char[T] = create[T](id.valueWide.asInstanceOf[std.Char])
@@ -285,13 +280,13 @@ object TwoFaceAny {
 
     def simplify(implicit tfs : Int.Shell1[Id, T, std.Int]) = tfs(this.getValue)
   }
-  final class _Int[T0](val value : std.Int) extends AnyVal with IntLike {
+  final class Int[T0](val value : std.Int) extends AnyVal with IntLike {
     type T = T0
     @inline def getValue : std.Int = value
   }
-  implicit object IntLike extends TwoFaceAny.Builder[IntLike, _Int, std.Int, Shell.One.Int, Shell.Two.Int, Shell.Three.Int] {
+  implicit object Int extends TwoFaceAny.Builder[Int, std.Int, Shell.One.Int, Shell.Two.Int, Shell.Three.Int] {
     def numberOfLeadingZeros[T](t : Int[T])(implicit tfs : Int.Shell1[NumberOfLeadingZeros, T, std.Int]) = tfs(t.getValue)
-    def create[T](value : std.Int) : Int[T] = new _Int[T](value)
+    def create[T](value : std.Int) : Int[T] = new Int[T](value)
     def apply[T](implicit id : AcceptNonLiteral[Id[T]]) : Int[id.Out] = create[id.Out](id.valueWide.asInstanceOf[std.Int])
     implicit def apply[T <: std.Int, Out <: T](value : T) : Int[Out] = macro Builder.Macro.fromNumValue[IntLike]
     implicit def ev[T](implicit id : AcceptNonLiteral[Id[T]]) : Int[T] = create[T](id.valueWide.asInstanceOf[std.Int])
@@ -399,13 +394,13 @@ object TwoFaceAny {
     def simplify(implicit tfs : Long.Shell1[Id, T, std.Long]) = tfs(this.getValue)
   }
 
-  final class _Long[T0](val value : std.Long) extends AnyVal with LongLike {
+  final class Long[T0](val value : std.Long) extends AnyVal with LongLike {
     type T = T0
     @inline def getValue : std.Long = value
   }
-  implicit object LongLike extends TwoFaceAny.Builder[LongLike, _Long, std.Long, Shell.One.Long, Shell.Two.Long, Shell.Three.Long] {
+  implicit object Long extends TwoFaceAny.Builder[Long, std.Long, Shell.One.Long, Shell.Two.Long, Shell.Three.Long] {
     def numberOfLeadingZeros[T](t : Long[T])(implicit tfs : Int.Shell1[NumberOfLeadingZeros, T, std.Long]) = tfs(t.getValue)
-    def create[T](value : std.Long) : Long[T] = new _Long[T](value)
+    def create[T](value : std.Long) : Long[T] = new Long[T](value)
     def apply[T](implicit id : AcceptNonLiteral[Id[T]]) : Long[id.Out] = create[id.Out](id.valueWide.asInstanceOf[std.Long])
     implicit def apply[T <: std.Long, Out <: T](value : T) : Long[Out] = macro Builder.Macro.fromNumValue[LongLike]
     implicit def ev[T](implicit id : AcceptNonLiteral[Id[T]]) : Long[T] = create[T](id.valueWide.asInstanceOf[std.Long])
@@ -512,12 +507,12 @@ object TwoFaceAny {
 
     def simplify(implicit tfs : Float.Shell1[Id, T, std.Float]) = tfs(this.getValue)
   }
-  final class _Float[T0](val value : std.Float) extends AnyVal with FloatLike {
+  final class Float[T0](val value : std.Float) extends AnyVal with FloatLike {
     type T = T0
     @inline def getValue : std.Float = value
   }
-  implicit object FloatLike extends TwoFaceAny.Builder[FloatLike, _Float, std.Float, Shell.One.Float, Shell.Two.Float, Shell.Three.Float] {
-    def create[T](value : std.Float) : Float[T] = new _Float[T](value)
+  implicit object Float extends TwoFaceAny.Builder[Float, std.Float, Shell.One.Float, Shell.Two.Float, Shell.Three.Float] {
+    def create[T](value : std.Float) : Float[T] = new Float[T](value)
     def apply[T](implicit id : AcceptNonLiteral[Id[T]]) : Float[id.Out] = create[id.Out](id.valueWide.asInstanceOf[std.Float])
     implicit def apply[T <: std.Float, Out <: T](value : T) : Float[Out] = macro Builder.Macro.fromNumValue[FloatLike]
     implicit def ev[T](implicit id : AcceptNonLiteral[Id[T]]) : Float[T] = create[T](id.valueWide.asInstanceOf[std.Float])
@@ -624,12 +619,12 @@ object TwoFaceAny {
 
     def simplify(implicit tfs : Double.Shell1[Id, T, std.Double]) = tfs(this.getValue)
   }
-  final class _Double[T0](val value : std.Double) extends AnyVal with DoubleLike {
+  final class Double[T0](val value : std.Double) extends AnyVal with DoubleLike {
     type T = T0
     @inline def getValue : std.Double = value
   }
-  implicit object DoubleLike extends TwoFaceAny.Builder[DoubleLike, _Double, std.Double, Shell.One.Double, Shell.Two.Double, Shell.Three.Double] {
-    def create[T](value : std.Double) : Double[T] = new _Double[T](value)
+  implicit object Double extends TwoFaceAny.Builder[Double, std.Double, Shell.One.Double, Shell.Two.Double, Shell.Three.Double] {
+    def create[T](value : std.Double) : Double[T] = new Double[T](value)
     def apply[T](implicit id : AcceptNonLiteral[Id[T]]) : Double[id.Out] = create[id.Out](id.valueWide.asInstanceOf[std.Double])
     implicit def apply[T <: std.Double, Out <: T](value : T) : Double[Out] = macro Builder.Macro.fromNumValue[DoubleLike]
     implicit def ev[T](implicit id : AcceptNonLiteral[Id[T]]) : Double[T] = create[T](id.valueWide.asInstanceOf[std.Double])
@@ -661,12 +656,12 @@ object TwoFaceAny {
 
     def simplify(implicit tfs : String.Shell1[Id, T, std.String]) = tfs(this.getValue)
   }
-  final class _String[T0](val value : std.String) extends AnyVal with StringLike {
+  final class String[T0](val value : std.String) extends AnyVal with StringLike {
     type T = T0
     @inline def getValue : std.String = value
   }
-  implicit object StringLike extends TwoFaceAny.Builder[StringLike, _String, std.String, Shell.One.String, Shell.Two.String, Shell.Three.String] {
-    def create[T](value : std.String) : String[T] = new _String[T](value)
+  implicit object String extends TwoFaceAny.Builder[String, std.String, Shell.One.String, Shell.Two.String, Shell.Three.String] {
+    def create[T](value : std.String) : String[T] = new String[T](value)
     def apply[T](implicit id : AcceptNonLiteral[Id[T]]) : String[id.Out] = create[id.Out](id.valueWide.asInstanceOf[std.String])
     implicit def apply[T <: std.String, Out <: T](value : T) : String[Out] = macro Builder.Macro.fromNumValue[StringLike]
     implicit def ev[T](implicit id : AcceptNonLiteral[Id[T]]) : String[T] = create[T](id.valueWide.asInstanceOf[std.String])
@@ -691,12 +686,12 @@ object TwoFaceAny {
 
     def simplify(implicit tfs : Boolean.Shell1[Id, T, std.Boolean]) = tfs(this.getValue)
   }
-  final class _Boolean[T0](val value : std.Boolean) extends AnyVal with BooleanLike {
+  final class Boolean[T0](val value : std.Boolean) extends AnyVal with BooleanLike {
     type T = T0
     @inline def getValue : std.Boolean = value
   }
-  implicit object BooleanLike extends TwoFaceAny.Builder[BooleanLike, _Boolean, std.Boolean, Shell.One.Boolean, Shell.Two.Boolean, Shell.Three.Boolean] {
-    def create[T](value : std.Boolean) : Boolean[T] = new _Boolean[T](value)
+  implicit object Boolean extends TwoFaceAny.Builder[Boolean, std.Boolean, Shell.One.Boolean, Shell.Two.Boolean, Shell.Three.Boolean] {
+    def create[T](value : std.Boolean) : Boolean[T] = new Boolean[T](value)
     def apply[T](implicit id : AcceptNonLiteral[Id[T]]) : Boolean[id.Out] = create[id.Out](id.valueWide.asInstanceOf[std.Boolean])
     implicit def apply[T <: std.Boolean, Out <: T](value : T) : Boolean[Out] = macro Builder.Macro.fromNumValue[BooleanLike]
     implicit def ev[T](implicit id : AcceptNonLiteral[Id[T]]) : Boolean[T] = create[T](id.valueWide.asInstanceOf[std.Boolean])

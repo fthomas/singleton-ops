@@ -314,13 +314,13 @@ trait GeneralMacros {
         tp match {
           case TypeRef(_, sym, args) =>
             val calcTFType = sym match {
-              case t if t == symbolOf[TwoFaceAny._Char[_]] => Some(CalcTFType.Char)
-              case t if t == symbolOf[TwoFaceAny._Int[_]] => Some(CalcTFType.Int)
-              case t if t == symbolOf[TwoFaceAny._Long[_]] => Some(CalcTFType.Long)
-              case t if t == symbolOf[TwoFaceAny._Float[_]] => Some(CalcTFType.Float)
-              case t if t == symbolOf[TwoFaceAny._Double[_]] => Some(CalcTFType.Double)
-              case t if t == symbolOf[TwoFaceAny._String[_]] => Some(CalcTFType.String)
-              case t if t == symbolOf[TwoFaceAny._Boolean[_]] => Some(CalcTFType.Boolean)
+              case t if t == symbolOf[TwoFaceAny.Char[_]] => Some(CalcTFType.Char)
+              case t if t == symbolOf[TwoFaceAny.Int[_]] => Some(CalcTFType.Int)
+              case t if t == symbolOf[TwoFaceAny.Long[_]] => Some(CalcTFType.Long)
+              case t if t == symbolOf[TwoFaceAny.Float[_]] => Some(CalcTFType.Float)
+              case t if t == symbolOf[TwoFaceAny.Double[_]] => Some(CalcTFType.Double)
+              case t if t == symbolOf[TwoFaceAny.String[_]] => Some(CalcTFType.String)
+              case t if t == symbolOf[TwoFaceAny.Boolean[_]] => Some(CalcTFType.Boolean)
               case _ => None
             }
             if (calcTFType.isDefined) unappyArg(calcTFType, args.head) else None
@@ -1320,7 +1320,7 @@ trait GeneralMacros {
        q"""
          new $shellTpe {
            type Out = $outTpe
-           def apply(...$paramTree) : _root_.singleton.twoface.TwoFace.$tfTerm.Ret[$outTpe] = {
+           def apply(...$paramTree) : _root_.singleton.twoface.TwoFace.$tfType[$outTpe] = {
              _root_.singleton.twoface.TwoFace.$tfTerm.create[$outTpe]($tfValueTree)
            }
          }
