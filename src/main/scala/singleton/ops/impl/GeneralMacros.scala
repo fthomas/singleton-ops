@@ -1363,21 +1363,23 @@ trait GeneralMacros {
 //      print(genTree)
       genTree
     }
-    def equal(tTree : c.Tree, rTree : c.Tree) : c.Tree = {
+    def equal[Out <: Boolean](tTree : c.Tree, rTree : c.Tree) : c.Expr[Out] = {
       implicit val annotatedSym : TypeSymbol = symbolOf[TwoFaceAny[_]]//not really used
       val tCalc = extractValueFromTwoFaceTree(tTree)
       val rCalc = extractValueFromNumTree(rTree)
       val outCalc = opCalc(funcTypes.==, tCalc, rCalc, CalcLit(0))
       val genTree = genTwoFace(outCalc)
       //      print(genTree)
-      genTree
+      c.Expr[Out](genTree)
     }
-    def nequal(tTree : c.Tree, rTree : c.Tree) : c.Tree = {
+    def nequal[Out <: Boolean](tTree : c.Tree, rTree : c.Tree) : c.Expr[Out] = {
       implicit val annotatedSym : TypeSymbol = symbolOf[TwoFaceAny[_]]//not really used
       val tCalc = extractValueFromTwoFaceTree(tTree)
       val rCalc = extractValueFromNumTree(rTree)
       val outCalc = opCalc(funcTypes.!=, tCalc, rCalc, CalcLit(0))
-      genTwoFace(outCalc)
+      val genTree = genTwoFace(outCalc)
+      //      print(genTree)
+      c.Expr[Out](genTree)
     }
   }
   ///////////////////////////////////////////////////////////////////////////////////////////

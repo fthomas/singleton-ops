@@ -299,7 +299,7 @@ class TwoFaceIntSpec extends Properties("TwoFace.Int") {
   property("Safe Int != Regular Unsafe Double") = verifyTFBoolean(TwoFace.Int(7) != (us(7.0)), us(false))
   property("Unsafe Int != Regular Safe Double") = verifyTFBoolean(TwoFace.Int(us(7)) != (7.0), us(false))
   property("Unsafe Int != Regular Unsafe Double") = verifyTFBoolean(TwoFace.Int(us(7)) != (us(7.0)), us(false))
-
+//
   property("Safe Int min Safe Int") = verifyTFInt(min(TwoFace.Int(2), TwoFace.Int(1)), 1)
   property("Safe Int min Unsafe Int") = verifyTFInt(min(TwoFace.Int(2), TwoFace.Int(us(1))), us(1))
   property("Unsafe Int min Safe Int") = verifyTFInt(min(TwoFace.Int(us(2)), TwoFace.Int(1)), us(1))

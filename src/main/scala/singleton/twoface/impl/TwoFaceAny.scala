@@ -51,60 +51,60 @@ object TwoFaceAny {
       def toNumValue2[TF, T](tf : c.Tree)(id : c.Tree)(implicit tTag : c.WeakTypeTag[T]) : c.Tree =
         TwoFaceMaterializer.toNumValue(tf, c.symbolOf[TF], c.weakTypeOf[T])
 
-      def equal(r : c.Tree) : c.Tree =
-        TwoFaceMaterializer.equal(c.prefix.tree, r)
-      def equal1(r : c.Tree)(di1 : c.Tree) : c.Tree =
-        TwoFaceMaterializer.equal(c.prefix.tree, r)
-      def equal2(r : c.Tree)(di1 : c.Tree, di2 : c.Tree) : c.Tree =
-        TwoFaceMaterializer.equal(c.prefix.tree, r)
-      def equal3(r : c.Tree)(di1 : c.Tree, di2 : c.Tree, di3 : c.Tree) : c.Tree =
-        TwoFaceMaterializer.equal(c.prefix.tree, r)
-      def equal4(r : c.Tree)(di1 : c.Tree, di2 : c.Tree, di3 : c.Tree, di4 : c.Tree) : c.Tree =
-        TwoFaceMaterializer.equal(c.prefix.tree, r)
+      def equal[Out <: std.Boolean](r : c.Tree) : c.Expr[Out] =
+        TwoFaceMaterializer.equal[Out](c.prefix.tree, r)
+      def equal1[Out <: std.Boolean](r : c.Tree)(di1 : c.Tree) : c.Expr[Out] =
+        TwoFaceMaterializer.equal[Out](c.prefix.tree, r)
+      def equal2[Out <: std.Boolean](r : c.Tree)(di1 : c.Tree, di2 : c.Tree) : c.Expr[Out] =
+        TwoFaceMaterializer.equal[Out](c.prefix.tree, r)
+      def equal3[Out <: std.Boolean](r : c.Tree)(di1 : c.Tree, di2 : c.Tree, di3 : c.Tree) : c.Expr[Out] =
+        TwoFaceMaterializer.equal[Out](c.prefix.tree, r)
+      def equal4[Out <: std.Boolean](r : c.Tree)(di1 : c.Tree, di2 : c.Tree, di3 : c.Tree, di4 : c.Tree) : c.Expr[Out] =
+        TwoFaceMaterializer.equal[Out](c.prefix.tree, r)
 
-      def nequal(r : c.Tree) : c.Tree =
-        TwoFaceMaterializer.nequal(c.prefix.tree, r)
-      def nequal1(r : c.Tree)(di1 : c.Tree) : c.Tree =
-        TwoFaceMaterializer.nequal(c.prefix.tree, r)
-      def nequal2(r : c.Tree)(di1 : c.Tree, di2 : c.Tree) : c.Tree =
-        TwoFaceMaterializer.nequal(c.prefix.tree, r)
-      def nequal3(r : c.Tree)(di1 : c.Tree, di2 : c.Tree, di3 : c.Tree) : c.Tree =
-        TwoFaceMaterializer.nequal(c.prefix.tree, r)
-      def nequal4(r : c.Tree)(di1 : c.Tree, di2 : c.Tree, di3 : c.Tree, di4 : c.Tree) : c.Tree =
-        TwoFaceMaterializer.nequal(c.prefix.tree, r)
+      def nequal[Out <: std.Boolean](r : c.Tree) : c.Expr[Out] =
+        TwoFaceMaterializer.nequal[Out](c.prefix.tree, r)
+      def nequal1[Out <: std.Boolean](r : c.Tree)(di1 : c.Tree) : c.Expr[Out] =
+        TwoFaceMaterializer.nequal[Out](c.prefix.tree, r)
+      def nequal2[Out <: std.Boolean](r : c.Tree)(di1 : c.Tree, di2 : c.Tree) : c.Expr[Out] =
+        TwoFaceMaterializer.nequal[Out](c.prefix.tree, r)
+      def nequal3[Out <: std.Boolean](r : c.Tree)(di1 : c.Tree, di2 : c.Tree, di3 : c.Tree) : c.Expr[Out] =
+        TwoFaceMaterializer.nequal[Out](c.prefix.tree, r)
+      def nequal4[Out <: std.Boolean](r : c.Tree)(di1 : c.Tree, di2 : c.Tree, di3 : c.Tree, di4 : c.Tree) : c.Expr[Out] =
+        TwoFaceMaterializer.nequal[Out](c.prefix.tree, r)
     }
   }
 
   trait CharLike extends Any with TwoFaceAny[std.Char] {
-    def == [R <: std.Char, Out >: std.Boolean](r : R)
-    : Boolean[Out] = macro Builder.Macro.equal
-    def == [R <: std.Int, Out >: std.Boolean](r : R)(
+    def == [R <: std.Char, Out <: std.Boolean, Out0 <: Out](r : R)
+    : Boolean[Out0] = macro Builder.Macro.equal[Out]
+    def == [R <: std.Int, Out <: std.Boolean, Out0 <: Out](r : R)(
       implicit di1 : DummyImplicit
-    ) : Boolean[Out] = macro Builder.Macro.equal1
-    def == [R <: std.Long, Out >: std.Boolean](r : R)(
+    ) : Boolean[Out0] = macro Builder.Macro.equal1[Out]
+    def == [R <: std.Long, Out <: std.Boolean, Out0 <: Out](r : R)(
       implicit di1 : DummyImplicit, di2 : DummyImplicit
-    ) : Boolean[Out] = macro Builder.Macro.equal2
-    def == [R <: std.Float, Out >: std.Boolean](r : R) (
+    ) : Boolean[Out0] = macro Builder.Macro.equal2[Out]
+    def == [R <: std.Float, Out <: std.Boolean, Out0 <: Out](r : R) (
       implicit di1 : DummyImplicit, di2 : DummyImplicit, di3 : DummyImplicit
-    ) : Boolean[Out] = macro Builder.Macro.equal3
-    def == [R <: std.Double, Out >: std.Boolean](r : R) (
+    ) : Boolean[Out0] = macro Builder.Macro.equal3[Out]
+    def == [R <: std.Double, Out <: std.Boolean, Out0 <: Out](r : R) (
       implicit di1 : DummyImplicit, di2 : DummyImplicit, di3 : DummyImplicit, di4 : DummyImplicit
-    ) : Boolean[Out] = macro Builder.Macro.equal4
+    ) : Boolean[Out0] = macro Builder.Macro.equal4[Out]
 
-    def != [R <: std.Char, Out >: std.Boolean](r : R)
-    : Boolean[Out] = macro Builder.Macro.nequal
-    def != [R <: std.Int, Out >: std.Boolean](r : R)(
+    def != [R <: std.Char, Out <: std.Boolean, Out0 <: Out](r : R)
+    : Boolean[Out0] = macro Builder.Macro.nequal[Out]
+    def != [R <: std.Int, Out <: std.Boolean, Out0 <: Out](r : R)(
       implicit di1 : DummyImplicit
-    ) : Boolean[Out] = macro Builder.Macro.nequal1
-    def != [R <: std.Long, Out >: std.Boolean](r : R)(
+    ) : Boolean[Out0] = macro Builder.Macro.nequal1[Out]
+    def != [R <: std.Long, Out <: std.Boolean, Out0 <: Out](r : R)(
       implicit di1 : DummyImplicit, di2 : DummyImplicit
-    ) : Boolean[Out] = macro Builder.Macro.nequal2
-    def != [R <: std.Float, Out >: std.Boolean](r : R) (
+    ) : Boolean[Out0] = macro Builder.Macro.nequal2[Out]
+    def != [R <: std.Float, Out <: std.Boolean, Out0 <: Out](r : R) (
       implicit di1 : DummyImplicit, di2 : DummyImplicit, di3 : DummyImplicit
-    ) : Boolean[Out] = macro Builder.Macro.nequal3
-    def != [R <: std.Double, Out >: std.Boolean](r : R) (
+    ) : Boolean[Out0] = macro Builder.Macro.nequal3[Out]
+    def != [R <: std.Double, Out <: std.Boolean, Out0 <: Out](r : R) (
       implicit di1 : DummyImplicit, di2 : DummyImplicit, di3 : DummyImplicit, di4 : DummyImplicit
-    ) : Boolean[Out] = macro Builder.Macro.nequal4
+    ) : Boolean[Out0] = macro Builder.Macro.nequal4[Out]
 
     def +  [R](r : Char[R])(implicit tfs : Int.Shell2[+, T, std.Char, R, std.Char]) = tfs(this.getValue, r.getValue)
     def +  [R](r : Int[R])(implicit tfs : Int.Shell2[+, T, std.Char, R, std.Int]) = tfs(this.getValue, r.getValue)
@@ -178,45 +178,45 @@ object TwoFaceAny {
     @inline def getValue : std.Char = value
   }
   implicit object CharLike extends TwoFaceAny.Builder[CharLike, _Char, std.Char, Shell.One.Char, Shell.Two.Char, Shell.Three.Char] {
-    def create[T](value : std.Char) : Ret[T] = new _Char[T](value)
-    def apply[T](implicit id : AcceptNonLiteral[Id[T]]) : Ret[id.Out] = create[id.Out](id.valueWide.asInstanceOf[std.Char])
-    implicit def apply[T <: std.Char](value : T) : Char[T] = macro Builder.Macro.fromNumValue[CharLike]
-    implicit def ev[T, TF[T0] >: Char[T0]](implicit id : AcceptNonLiteral[Id[T]]) : TF[T] = create[T](id.valueWide.asInstanceOf[std.Char])
+    def create[T](value : std.Char) : Char[T] = new _Char[T](value)
+    def apply[T](implicit id : AcceptNonLiteral[Id[T]]) : Char[id.Out] = create[id.Out](id.valueWide.asInstanceOf[std.Char])
+    implicit def apply[T <: std.Char, Out <: T](value : T) : Char[Out] = macro Builder.Macro.fromNumValue[CharLike]
+    implicit def ev[T](implicit id : AcceptNonLiteral[Id[T]]) : Char[T] = create[T](id.valueWide.asInstanceOf[std.Char])
     implicit def tf2Num[T <: std.Char](tf : Char[T]) : T = macro Builder.Macro.toNumValue[CharLike, T]
     implicit def opTF2Num[T <: singleton.ops.impl.Op, Out <: std.Char](tf : Char[T])(implicit id : OpAuxChar[AcceptNonLiteral[Id[T]], Out]) : Out = macro Builder.Macro.toNumValue2[CharLike, Out]
     implicit def unknownTF2Num(tf : CharLike) : std.Char = macro Builder.Macro.toNumValue[CharLike, std.Char]
   }
 
   trait IntLike extends Any with TwoFaceAny[std.Int] {
-    def == [R <: std.Char, Out >: std.Boolean](r : R)
-    : Boolean[Out] = macro Builder.Macro.equal
-    def == [R <: std.Int, Out >: std.Boolean](r : R)(
+    def == [R <: std.Char, Out <: std.Boolean, Out0 <: Out](r : R)
+    : Boolean[Out0] = macro Builder.Macro.equal[Out]
+    def == [R <: std.Int, Out <: std.Boolean, Out0 <: Out](r : R)(
       implicit di1 : DummyImplicit
-    ) : Boolean[Out] = macro Builder.Macro.equal1
-    def == [R <: std.Long, Out >: std.Boolean](r : R)(
+    ) : Boolean[Out0] = macro Builder.Macro.equal1[Out]
+    def == [R <: std.Long, Out <: std.Boolean, Out0 <: Out](r : R)(
       implicit di1 : DummyImplicit, di2 : DummyImplicit
-    ) : Boolean[Out] = macro Builder.Macro.equal2
-    def == [R <: std.Float, Out >: std.Boolean](r : R) (
+    ) : Boolean[Out0] = macro Builder.Macro.equal2[Out]
+    def == [R <: std.Float, Out <: std.Boolean, Out0 <: Out](r : R) (
       implicit di1 : DummyImplicit, di2 : DummyImplicit, di3 : DummyImplicit
-    ) : Boolean[Out] = macro Builder.Macro.equal3
-    def == [R <: std.Double, Out >: std.Boolean](r : R) (
+    ) : Boolean[Out0] = macro Builder.Macro.equal3[Out]
+    def == [R <: std.Double, Out <: std.Boolean, Out0 <: Out](r : R) (
       implicit di1 : DummyImplicit, di2 : DummyImplicit, di3 : DummyImplicit, di4 : DummyImplicit
-    ) : Boolean[Out] = macro Builder.Macro.equal4
+    ) : Boolean[Out0] = macro Builder.Macro.equal4[Out]
 
-    def != [R <: std.Char, Out >: std.Boolean](r : R)
-    : Boolean[Out] = macro Builder.Macro.nequal
-    def != [R <: std.Int, Out >: std.Boolean](r : R)(
+    def != [R <: std.Char, Out <: std.Boolean, Out0 <: Out](r : R)
+    : Boolean[Out0] = macro Builder.Macro.nequal[Out]
+    def != [R <: std.Int, Out <: std.Boolean, Out0 <: Out](r : R)(
       implicit di1 : DummyImplicit
-    ) : Boolean[Out] = macro Builder.Macro.nequal1
-    def != [R <: std.Long, Out >: std.Boolean](r : R)(
+    ) : Boolean[Out0] = macro Builder.Macro.nequal1[Out]
+    def != [R <: std.Long, Out <: std.Boolean, Out0 <: Out](r : R)(
       implicit di1 : DummyImplicit, di2 : DummyImplicit
-    ) : Boolean[Out] = macro Builder.Macro.nequal2
-    def != [R <: std.Float, Out >: std.Boolean](r : R) (
+    ) : Boolean[Out0] = macro Builder.Macro.nequal2[Out]
+    def != [R <: std.Float, Out <: std.Boolean, Out0 <: Out](r : R) (
       implicit di1 : DummyImplicit, di2 : DummyImplicit, di3 : DummyImplicit
-    ) : Boolean[Out] = macro Builder.Macro.nequal3
-    def != [R <: std.Double, Out >: std.Boolean](r : R) (
+    ) : Boolean[Out0] = macro Builder.Macro.nequal3[Out]
+    def != [R <: std.Double, Out <: std.Boolean, Out0 <: Out](r : R) (
       implicit di1 : DummyImplicit, di2 : DummyImplicit, di3 : DummyImplicit, di4 : DummyImplicit
-    ) : Boolean[Out] = macro Builder.Macro.nequal4
+    ) : Boolean[Out0] = macro Builder.Macro.nequal4[Out]
 
     def +  [R](r : Char[R])(implicit tfs : Int.Shell2[+, T, std.Int, R, std.Char]) = tfs(this.getValue, r.getValue)
     def +  [R](r : Int[R])(implicit tfs : Int.Shell2[+, T, std.Int, R, std.Int]) = tfs(this.getValue, r.getValue)
@@ -285,51 +285,51 @@ object TwoFaceAny {
 
     def simplify(implicit tfs : Int.Shell1[Id, T, std.Int]) = tfs(this.getValue)
   }
-  final class _Int[T0](val value : std.Int) extends AnyVal with IntLike with TwoFaceAnyUB[std.Int, T0] {
+  final class _Int[T0](val value : std.Int) extends AnyVal with IntLike {
     type T = T0
     @inline def getValue : std.Int = value
   }
   implicit object IntLike extends TwoFaceAny.Builder[IntLike, _Int, std.Int, Shell.One.Int, Shell.Two.Int, Shell.Three.Int] {
     def numberOfLeadingZeros[T](t : Int[T])(implicit tfs : Int.Shell1[NumberOfLeadingZeros, T, std.Int]) = tfs(t.getValue)
-    def create[T](value : std.Int) : Ret[T] = new _Int[T](value)
-    def apply[T](implicit id : AcceptNonLiteral[Id[T]]) : Ret[id.Out] = create[id.Out](id.valueWide.asInstanceOf[std.Int])
-    implicit def apply[T <: std.Int](value : T) : Int[T] = macro Builder.Macro.fromNumValue[IntLike]
-    implicit def ev[T, TF[T0] >: Int[T0]](implicit id : AcceptNonLiteral[Id[T]]) : TF[T] = create[T](id.valueWide.asInstanceOf[std.Int])
+    def create[T](value : std.Int) : Int[T] = new _Int[T](value)
+    def apply[T](implicit id : AcceptNonLiteral[Id[T]]) : Int[id.Out] = create[id.Out](id.valueWide.asInstanceOf[std.Int])
+    implicit def apply[T <: std.Int, Out <: T](value : T) : Int[Out] = macro Builder.Macro.fromNumValue[IntLike]
+    implicit def ev[T](implicit id : AcceptNonLiteral[Id[T]]) : Int[T] = create[T](id.valueWide.asInstanceOf[std.Int])
     implicit def tf2Num[T <: std.Int](tf : Int[T]) : T = macro Builder.Macro.toNumValue[IntLike, T]
     implicit def opTF2Num[T <: singleton.ops.impl.Op, Out <: std.Int](tf : Int[T])(implicit id : OpAuxInt[AcceptNonLiteral[Id[T]], Out]) : Out = macro Builder.Macro.toNumValue2[IntLike, Out]
     implicit def unknownTF2Num(tf : IntLike) : std.Int = macro Builder.Macro.toNumValue[IntLike, std.Int]
   }
 
   trait LongLike extends Any with TwoFaceAny[std.Long] {
-    def == [R <: std.Char, Out >: std.Boolean](r : R)
-    : Boolean[Out] = macro Builder.Macro.equal
-    def == [R <: std.Int, Out >: std.Boolean](r : R)(
+    def == [R <: std.Char, Out <: std.Boolean, Out0 <: Out](r : R)
+    : Boolean[Out0] = macro Builder.Macro.equal[Out]
+    def == [R <: std.Int, Out <: std.Boolean, Out0 <: Out](r : R)(
       implicit di1 : DummyImplicit
-    ) : Boolean[Out] = macro Builder.Macro.equal1
-    def == [R <: std.Long, Out >: std.Boolean](r : R)(
+    ) : Boolean[Out0] = macro Builder.Macro.equal1[Out]
+    def == [R <: std.Long, Out <: std.Boolean, Out0 <: Out](r : R)(
       implicit di1 : DummyImplicit, di2 : DummyImplicit
-    ) : Boolean[Out] = macro Builder.Macro.equal2
-    def == [R <: std.Float, Out >: std.Boolean](r : R) (
+    ) : Boolean[Out0] = macro Builder.Macro.equal2[Out]
+    def == [R <: std.Float, Out <: std.Boolean, Out0 <: Out](r : R) (
       implicit di1 : DummyImplicit, di2 : DummyImplicit, di3 : DummyImplicit
-    ) : Boolean[Out] = macro Builder.Macro.equal3
-    def == [R <: std.Double, Out >: std.Boolean](r : R) (
+    ) : Boolean[Out0] = macro Builder.Macro.equal3[Out]
+    def == [R <: std.Double, Out <: std.Boolean, Out0 <: Out](r : R) (
       implicit di1 : DummyImplicit, di2 : DummyImplicit, di3 : DummyImplicit, di4 : DummyImplicit
-    ) : Boolean[Out] = macro Builder.Macro.equal4
+    ) : Boolean[Out0] = macro Builder.Macro.equal4[Out]
 
-    def != [R <: std.Char, Out >: std.Boolean](r : R)
-    : Boolean[Out] = macro Builder.Macro.nequal
-    def != [R <: std.Int, Out >: std.Boolean](r : R)(
+    def != [R <: std.Char, Out <: std.Boolean, Out0 <: Out](r : R)
+    : Boolean[Out0] = macro Builder.Macro.nequal[Out]
+    def != [R <: std.Int, Out <: std.Boolean, Out0 <: Out](r : R)(
       implicit di1 : DummyImplicit
-    ) : Boolean[Out] = macro Builder.Macro.nequal1
-    def != [R <: std.Long, Out >: std.Boolean](r : R)(
+    ) : Boolean[Out0] = macro Builder.Macro.nequal1[Out]
+    def != [R <: std.Long, Out <: std.Boolean, Out0 <: Out](r : R)(
       implicit di1 : DummyImplicit, di2 : DummyImplicit
-    ) : Boolean[Out] = macro Builder.Macro.nequal2
-    def != [R <: std.Float, Out >: std.Boolean](r : R) (
+    ) : Boolean[Out0] = macro Builder.Macro.nequal2[Out]
+    def != [R <: std.Float, Out <: std.Boolean, Out0 <: Out](r : R) (
       implicit di1 : DummyImplicit, di2 : DummyImplicit, di3 : DummyImplicit
-    ) : Boolean[Out] = macro Builder.Macro.nequal3
-    def != [R <: std.Double, Out >: std.Boolean](r : R) (
+    ) : Boolean[Out0] = macro Builder.Macro.nequal3[Out]
+    def != [R <: std.Double, Out <: std.Boolean, Out0 <: Out](r : R) (
       implicit di1 : DummyImplicit, di2 : DummyImplicit, di3 : DummyImplicit, di4 : DummyImplicit
-    ) : Boolean[Out] = macro Builder.Macro.nequal4
+    ) : Boolean[Out0] = macro Builder.Macro.nequal4[Out]
 
     def +  [R](r : Char[R])(implicit tfs : Long.Shell2[+, T, std.Long, R, std.Char]) = tfs(this.getValue, r.getValue)
     def +  [R](r : Int[R])(implicit tfs : Long.Shell2[+, T, std.Long, R, std.Int]) = tfs(this.getValue, r.getValue)
@@ -405,45 +405,45 @@ object TwoFaceAny {
   }
   implicit object LongLike extends TwoFaceAny.Builder[LongLike, _Long, std.Long, Shell.One.Long, Shell.Two.Long, Shell.Three.Long] {
     def numberOfLeadingZeros[T](t : Long[T])(implicit tfs : Int.Shell1[NumberOfLeadingZeros, T, std.Long]) = tfs(t.getValue)
-    def create[T](value : std.Long) : Ret[T] = new _Long[T](value)
-    def apply[T](implicit id : AcceptNonLiteral[Id[T]]) : Ret[id.Out] = create[id.Out](id.valueWide.asInstanceOf[std.Long])
-    implicit def apply[T <: std.Long](value : T) : Long[T] = macro Builder.Macro.fromNumValue[LongLike]
-    implicit def ev[T, TF[T0] >: Long[T0]](implicit id : AcceptNonLiteral[Id[T]]) : TF[T] = create[T](id.valueWide.asInstanceOf[std.Long])
+    def create[T](value : std.Long) : Long[T] = new _Long[T](value)
+    def apply[T](implicit id : AcceptNonLiteral[Id[T]]) : Long[id.Out] = create[id.Out](id.valueWide.asInstanceOf[std.Long])
+    implicit def apply[T <: std.Long, Out <: T](value : T) : Long[Out] = macro Builder.Macro.fromNumValue[LongLike]
+    implicit def ev[T](implicit id : AcceptNonLiteral[Id[T]]) : Long[T] = create[T](id.valueWide.asInstanceOf[std.Long])
     implicit def tf2Num[T <: std.Long](tf : Long[T]) : T = macro Builder.Macro.toNumValue[LongLike, T]
     implicit def opTF2Num[T <: singleton.ops.impl.Op, Out <: std.Long](tf : Long[T])(implicit id : OpAuxLong[AcceptNonLiteral[Id[T]], Out]) : Out = macro Builder.Macro.toNumValue2[LongLike, Out]
     implicit def unknownTF2Num(tf : LongLike) : std.Long = macro Builder.Macro.toNumValue[LongLike, std.Long]
   }
 
   trait FloatLike extends Any with TwoFaceAny[std.Float] {
-    def == [R <: std.Char, Out >: std.Boolean](r : R)
-    : Boolean[Out] = macro Builder.Macro.equal
-    def == [R <: std.Int, Out >: std.Boolean](r : R)(
+    def == [R <: std.Char, Out <: std.Boolean, Out0 <: Out](r : R)
+    : Boolean[Out0] = macro Builder.Macro.equal[Out]
+    def == [R <: std.Int, Out <: std.Boolean, Out0 <: Out](r : R)(
       implicit di1 : DummyImplicit
-    ) : Boolean[Out] = macro Builder.Macro.equal1
-    def == [R <: std.Long, Out >: std.Boolean](r : R)(
+    ) : Boolean[Out0] = macro Builder.Macro.equal1[Out]
+    def == [R <: std.Long, Out <: std.Boolean, Out0 <: Out](r : R)(
       implicit di1 : DummyImplicit, di2 : DummyImplicit
-    ) : Boolean[Out] = macro Builder.Macro.equal2
-    def == [R <: std.Float, Out >: std.Boolean](r : R) (
+    ) : Boolean[Out0] = macro Builder.Macro.equal2[Out]
+    def == [R <: std.Float, Out <: std.Boolean, Out0 <: Out](r : R) (
       implicit di1 : DummyImplicit, di2 : DummyImplicit, di3 : DummyImplicit
-    ) : Boolean[Out] = macro Builder.Macro.equal3
-    def == [R <: std.Double, Out >: std.Boolean](r : R) (
+    ) : Boolean[Out0] = macro Builder.Macro.equal3[Out]
+    def == [R <: std.Double, Out <: std.Boolean, Out0 <: Out](r : R) (
       implicit di1 : DummyImplicit, di2 : DummyImplicit, di3 : DummyImplicit, di4 : DummyImplicit
-    ) : Boolean[Out] = macro Builder.Macro.equal4
+    ) : Boolean[Out0] = macro Builder.Macro.equal4[Out]
 
-    def != [R <: std.Char, Out >: std.Boolean](r : R)
-    : Boolean[Out] = macro Builder.Macro.nequal
-    def != [R <: std.Int, Out >: std.Boolean](r : R)(
+    def != [R <: std.Char, Out <: std.Boolean, Out0 <: Out](r : R)
+    : Boolean[Out0] = macro Builder.Macro.nequal[Out]
+    def != [R <: std.Int, Out <: std.Boolean, Out0 <: Out](r : R)(
       implicit di1 : DummyImplicit
-    ) : Boolean[Out] = macro Builder.Macro.nequal1
-    def != [R <: std.Long, Out >: std.Boolean](r : R)(
+    ) : Boolean[Out0] = macro Builder.Macro.nequal1[Out]
+    def != [R <: std.Long, Out <: std.Boolean, Out0 <: Out](r : R)(
       implicit di1 : DummyImplicit, di2 : DummyImplicit
-    ) : Boolean[Out] = macro Builder.Macro.nequal2
-    def != [R <: std.Float, Out >: std.Boolean](r : R) (
+    ) : Boolean[Out0] = macro Builder.Macro.nequal2[Out]
+    def != [R <: std.Float, Out <: std.Boolean, Out0 <: Out](r : R) (
       implicit di1 : DummyImplicit, di2 : DummyImplicit, di3 : DummyImplicit
-    ) : Boolean[Out] = macro Builder.Macro.nequal3
-    def != [R <: std.Double, Out >: std.Boolean](r : R) (
+    ) : Boolean[Out0] = macro Builder.Macro.nequal3[Out]
+    def != [R <: std.Double, Out <: std.Boolean, Out0 <: Out](r : R) (
       implicit di1 : DummyImplicit, di2 : DummyImplicit, di3 : DummyImplicit, di4 : DummyImplicit
-    ) : Boolean[Out] = macro Builder.Macro.nequal4
+    ) : Boolean[Out0] = macro Builder.Macro.nequal4[Out]
 
     def +  [R](r : Char[R])(implicit tfs : Float.Shell2[+, T, std.Float, R, std.Char]) = tfs(this.getValue, r.getValue)
     def +  [R](r : Int[R])(implicit tfs : Float.Shell2[+, T, std.Float, R, std.Int]) = tfs(this.getValue, r.getValue)
@@ -517,45 +517,45 @@ object TwoFaceAny {
     @inline def getValue : std.Float = value
   }
   implicit object FloatLike extends TwoFaceAny.Builder[FloatLike, _Float, std.Float, Shell.One.Float, Shell.Two.Float, Shell.Three.Float] {
-    def create[T](value : std.Float) : Ret[T] = new _Float[T](value)
-    def apply[T](implicit id : AcceptNonLiteral[Id[T]]) : Ret[id.Out] = create[id.Out](id.valueWide.asInstanceOf[std.Float])
-    implicit def apply[T <: std.Float](value : T) : Float[T] = macro Builder.Macro.fromNumValue[FloatLike]
-    implicit def ev[T, TF[T0] >: Float[T0]](implicit id : AcceptNonLiteral[Id[T]]) : TF[T] = create[T](id.valueWide.asInstanceOf[std.Float])
+    def create[T](value : std.Float) : Float[T] = new _Float[T](value)
+    def apply[T](implicit id : AcceptNonLiteral[Id[T]]) : Float[id.Out] = create[id.Out](id.valueWide.asInstanceOf[std.Float])
+    implicit def apply[T <: std.Float, Out <: T](value : T) : Float[Out] = macro Builder.Macro.fromNumValue[FloatLike]
+    implicit def ev[T](implicit id : AcceptNonLiteral[Id[T]]) : Float[T] = create[T](id.valueWide.asInstanceOf[std.Float])
     implicit def tf2Num[T <: std.Float](tf : Float[T]) : T = macro Builder.Macro.toNumValue[FloatLike, T]
     implicit def opTF2Num[T <: singleton.ops.impl.Op, Out <: std.Float](tf : Float[T])(implicit id : OpAuxFloat[AcceptNonLiteral[Id[T]], Out]) : Out = macro Builder.Macro.toNumValue2[FloatLike, Out]
     implicit def unknownTF2Num(tf : FloatLike) : std.Float = macro Builder.Macro.toNumValue[FloatLike, std.Float]
   }
 
   trait DoubleLike extends Any with TwoFaceAny[std.Double] {
-    def == [R <: std.Char, Out >: std.Boolean](r : R)
-    : Boolean[Out] = macro Builder.Macro.equal
-    def == [R <: std.Int, Out >: std.Boolean](r : R)(
+    def == [R <: std.Char, Out <: std.Boolean, Out0 <: Out](r : R)
+    : Boolean[Out0] = macro Builder.Macro.equal[Out]
+    def == [R <: std.Int, Out <: std.Boolean, Out0 <: Out](r : R)(
       implicit di1 : DummyImplicit
-    ) : Boolean[Out] = macro Builder.Macro.equal1
-    def == [R <: std.Long, Out >: std.Boolean](r : R)(
+    ) : Boolean[Out0] = macro Builder.Macro.equal1[Out]
+    def == [R <: std.Long, Out <: std.Boolean, Out0 <: Out](r : R)(
       implicit di1 : DummyImplicit, di2 : DummyImplicit
-    ) : Boolean[Out] = macro Builder.Macro.equal2
-    def == [R <: std.Float, Out >: std.Boolean](r : R) (
+    ) : Boolean[Out0] = macro Builder.Macro.equal2[Out]
+    def == [R <: std.Float, Out <: std.Boolean, Out0 <: Out](r : R) (
       implicit di1 : DummyImplicit, di2 : DummyImplicit, di3 : DummyImplicit
-    ) : Boolean[Out] = macro Builder.Macro.equal3
-    def == [R <: std.Double, Out >: std.Boolean](r : R) (
+    ) : Boolean[Out0] = macro Builder.Macro.equal3[Out]
+    def == [R <: std.Double, Out <: std.Boolean, Out0 <: Out](r : R) (
       implicit di1 : DummyImplicit, di2 : DummyImplicit, di3 : DummyImplicit, di4 : DummyImplicit
-    ) : Boolean[Out] = macro Builder.Macro.equal4
+    ) : Boolean[Out0] = macro Builder.Macro.equal4[Out]
 
-    def != [R <: std.Char, Out >: std.Boolean](r : R)
-    : Boolean[Out] = macro Builder.Macro.nequal
-    def != [R <: std.Int, Out >: std.Boolean](r : R)(
+    def != [R <: std.Char, Out <: std.Boolean, Out0 <: Out](r : R)
+    : Boolean[Out0] = macro Builder.Macro.nequal[Out]
+    def != [R <: std.Int, Out <: std.Boolean, Out0 <: Out](r : R)(
       implicit di1 : DummyImplicit
-    ) : Boolean[Out] = macro Builder.Macro.nequal1
-    def != [R <: std.Long, Out >: std.Boolean](r : R)(
+    ) : Boolean[Out0] = macro Builder.Macro.nequal1[Out]
+    def != [R <: std.Long, Out <: std.Boolean, Out0 <: Out](r : R)(
       implicit di1 : DummyImplicit, di2 : DummyImplicit
-    ) : Boolean[Out] = macro Builder.Macro.nequal2
-    def != [R <: std.Float, Out >: std.Boolean](r : R) (
+    ) : Boolean[Out0] = macro Builder.Macro.nequal2[Out]
+    def != [R <: std.Float, Out <: std.Boolean, Out0 <: Out](r : R) (
       implicit di1 : DummyImplicit, di2 : DummyImplicit, di3 : DummyImplicit
-    ) : Boolean[Out] = macro Builder.Macro.nequal3
-    def != [R <: std.Double, Out >: std.Boolean](r : R) (
+    ) : Boolean[Out0] = macro Builder.Macro.nequal3[Out]
+    def != [R <: std.Double, Out <: std.Boolean, Out0 <: Out](r : R) (
       implicit di1 : DummyImplicit, di2 : DummyImplicit, di3 : DummyImplicit, di4 : DummyImplicit
-    ) : Boolean[Out] = macro Builder.Macro.nequal4
+    ) : Boolean[Out0] = macro Builder.Macro.nequal4[Out]
 
     def +  [R](r : Char[R])(implicit tfs : Double.Shell2[+, T, std.Double, R, std.Char]) = tfs(this.getValue, r.getValue)
     def +  [R](r : Int[R])(implicit tfs : Double.Shell2[+, T, std.Double, R, std.Int]) = tfs(this.getValue, r.getValue)
@@ -629,20 +629,20 @@ object TwoFaceAny {
     @inline def getValue : std.Double = value
   }
   implicit object DoubleLike extends TwoFaceAny.Builder[DoubleLike, _Double, std.Double, Shell.One.Double, Shell.Two.Double, Shell.Three.Double] {
-    def create[T](value : std.Double) : Ret[T] = new _Double[T](value)
-    def apply[T](implicit id : AcceptNonLiteral[Id[T]]) : Ret[id.Out] = create[id.Out](id.valueWide.asInstanceOf[std.Double])
-    implicit def apply[T <: std.Double](value : T) : Double[T] = macro Builder.Macro.fromNumValue[DoubleLike]
-    implicit def ev[T, TF[T0] >: Double[T0]](implicit id : AcceptNonLiteral[Id[T]]) : TF[T] = create[T](id.valueWide.asInstanceOf[std.Double])
+    def create[T](value : std.Double) : Double[T] = new _Double[T](value)
+    def apply[T](implicit id : AcceptNonLiteral[Id[T]]) : Double[id.Out] = create[id.Out](id.valueWide.asInstanceOf[std.Double])
+    implicit def apply[T <: std.Double, Out <: T](value : T) : Double[Out] = macro Builder.Macro.fromNumValue[DoubleLike]
+    implicit def ev[T](implicit id : AcceptNonLiteral[Id[T]]) : Double[T] = create[T](id.valueWide.asInstanceOf[std.Double])
     implicit def tf2Num[T <: std.Double](tf : Double[T]) : T = macro Builder.Macro.toNumValue[DoubleLike, T]
     implicit def opTF2Num[T <: singleton.ops.impl.Op, Out <: std.Double](tf : Double[T])(implicit id : OpAuxDouble[AcceptNonLiteral[Id[T]], Out]) : Out = macro Builder.Macro.toNumValue2[DoubleLike, Out]
     implicit def unknownTF2Num(tf : DoubleLike) : std.Double = macro Builder.Macro.toNumValue[DoubleLike, std.Double]
   }
 
   trait StringLike extends Any with TwoFaceAny[std.String] {
-    def == [R <: std.String, Out >: std.Boolean](r : R)
-    : Boolean[Out] = macro Builder.Macro.equal
-    def != [R <: std.String, Out >: std.Boolean](r : R)
-    : Boolean[Out] = macro Builder.Macro.nequal
+    def == [R <: std.String, Out <: std.Boolean, Out0 <: Out](r : R)
+    : Boolean[Out0] = macro Builder.Macro.equal[Out]
+    def != [R <: std.String, Out <: std.Boolean, Out0 <: Out](r : R)
+    : Boolean[Out0] = macro Builder.Macro.nequal[Out]
 
     def +  [R](r : String[R])(implicit tfs : String.Shell2[+, T, std.String, R, std.String]) = tfs(this.getValue, r.getValue)
     def == [R](r : String[R])(implicit tfs : Boolean.Shell2[==, T, std.String, R, std.String]) = tfs(this.getValue, r.getValue)
@@ -666,20 +666,20 @@ object TwoFaceAny {
     @inline def getValue : std.String = value
   }
   implicit object StringLike extends TwoFaceAny.Builder[StringLike, _String, std.String, Shell.One.String, Shell.Two.String, Shell.Three.String] {
-    def create[T](value : std.String) : Ret[T] = new _String[T](value)
-    def apply[T](implicit id : AcceptNonLiteral[Id[T]]) : Ret[id.Out] = create[id.Out](id.valueWide.asInstanceOf[std.String])
-    implicit def apply[T <: std.String](value : T) : String[T] = macro Builder.Macro.fromNumValue[StringLike]
-    implicit def ev[T, TF[T0] >: String[T0]](implicit id : AcceptNonLiteral[Id[T]]) : TF[T] = create[T](id.valueWide.asInstanceOf[std.String])
+    def create[T](value : std.String) : String[T] = new _String[T](value)
+    def apply[T](implicit id : AcceptNonLiteral[Id[T]]) : String[id.Out] = create[id.Out](id.valueWide.asInstanceOf[std.String])
+    implicit def apply[T <: std.String, Out <: T](value : T) : String[Out] = macro Builder.Macro.fromNumValue[StringLike]
+    implicit def ev[T](implicit id : AcceptNonLiteral[Id[T]]) : String[T] = create[T](id.valueWide.asInstanceOf[std.String])
     implicit def tf2Num[T <: std.String](tf : String[T]) : T = macro Builder.Macro.toNumValue[StringLike, T]
     implicit def opTF2Num[T <: singleton.ops.impl.Op, Out <: std.String](tf : String[T])(implicit id : OpAuxString[AcceptNonLiteral[Id[T]], Out]) : Out = macro Builder.Macro.toNumValue2[StringLike, Out]
     implicit def unknownTF2Num(tf : StringLike) : std.String = macro Builder.Macro.toNumValue[StringLike, std.String]
   }
 
   trait BooleanLike extends Any with TwoFaceAny[std.Boolean] {
-    def == [R <: std.Boolean, Out >: std.Boolean](r : R)
-    : Boolean[Out] = macro Builder.Macro.equal
-    def != [R <: std.Boolean, Out >: std.Boolean](r : R)
-    : Boolean[Out] = macro Builder.Macro.nequal
+    def == [R <: std.Boolean, Out <: std.Boolean, Out0 <: Out](r : R)
+    : Boolean[Out0] = macro Builder.Macro.equal[Out]
+    def != [R <: std.Boolean, Out <: std.Boolean, Out0 <: Out](r : R)
+    : Boolean[Out0] = macro Builder.Macro.nequal[Out]
 
     def == [R](r : Boolean[R])(implicit tfs : Boolean.Shell2[==, T, std.Boolean, R, std.Boolean]) = tfs(this.getValue, r.getValue)
     def != [R](r : Boolean[R])(implicit tfs : Boolean.Shell2[!=, T, std.Boolean, R, std.Boolean]) = tfs(this.getValue, r.getValue)
@@ -696,10 +696,10 @@ object TwoFaceAny {
     @inline def getValue : std.Boolean = value
   }
   implicit object BooleanLike extends TwoFaceAny.Builder[BooleanLike, _Boolean, std.Boolean, Shell.One.Boolean, Shell.Two.Boolean, Shell.Three.Boolean] {
-    def create[T](value : std.Boolean) : Ret[T] = new _Boolean[T](value)
-    def apply[T](implicit id : AcceptNonLiteral[Id[T]]) : Ret[id.Out] = create[id.Out](id.valueWide.asInstanceOf[std.Boolean])
-    implicit def apply[T <: std.Boolean](value : T) : Boolean[T] = macro Builder.Macro.fromNumValue[BooleanLike]
-    implicit def ev[T, TF[T0] >: Boolean[T0]](implicit id : AcceptNonLiteral[Id[T]]) : TF[T] = create[T](id.valueWide.asInstanceOf[std.Boolean])
+    def create[T](value : std.Boolean) : Boolean[T] = new _Boolean[T](value)
+    def apply[T](implicit id : AcceptNonLiteral[Id[T]]) : Boolean[id.Out] = create[id.Out](id.valueWide.asInstanceOf[std.Boolean])
+    implicit def apply[T <: std.Boolean, Out <: T](value : T) : Boolean[Out] = macro Builder.Macro.fromNumValue[BooleanLike]
+    implicit def ev[T](implicit id : AcceptNonLiteral[Id[T]]) : Boolean[T] = create[T](id.valueWide.asInstanceOf[std.Boolean])
     implicit def tf2Num[T <: std.Boolean](tf : Boolean[T]) : T = macro Builder.Macro.toNumValue[BooleanLike, T]
     implicit def opTF2Num[T <: singleton.ops.impl.Op, Out <: std.Boolean](tf : Boolean[T])(implicit id : OpAuxBoolean[AcceptNonLiteral[Id[T]], Out]) : Out = macro Builder.Macro.toNumValue2[BooleanLike, Out]
     implicit def unknownTF2Num(tf : BooleanLike) : std.Boolean = macro Builder.Macro.toNumValue[BooleanLike, std.Boolean]

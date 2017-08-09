@@ -135,59 +135,56 @@
 //    }
 //  }
 //
-////  object Method_Three { //Using TwoFace and Checked
-////    import singleton.twoface._
-////
-////    object Test {
-////      class FixedSizeVector[L] private (val length : TwoFace.Int.Aux[L]) {
-////        def concat[L2](that : FixedSizeVector[L2]) =
-////          FixedSizeVector.protCreate(that.length)
-////        override def toString = s"FixedSizeVector($length)"
-////        def pretty(implicit rt: RunTime[L]) = if (rt) s"FixedSizeVector($length)" else s"FixedSizeVector[$length]"
-////      }
-////
-////      object FixedSizeVector {
-////        protected type CondCheckedLength[L] = L > 0
-////        protected type MsgCheckedLength[L] = "Length must be positive (received value of " + ToString[L] + ")"
-//////        @checked0Param[CondCheckedLength, MsgCheckedLength, Int] class CheckedLength[L]
-//////
-//////        implicit object RuntimeCheckedLength extends CheckedLength.Runtime {
-//////          def cond(l : Int) : std.Boolean = l > 0
-//////          def msg(l : Int) : std.String = s"Length must be positive (received value of $l)"
-//////        }
-////
-////        //Protected Constructor (performs unsafe run-time check, if compile-time check is not possible)
-////        protected def protCreate[L](tfLength : TwoFace.Int.Aux[L]) : FixedSizeVector[L] =
-////          new FixedSizeVector[L](tfLength)
-////
-////        //Public Constructors (perform compile-time check, if possible)
-////        def apply[L](checkedLength : TwoFace.Int.Aux[L])(implicit r : Require[L > 0]) =
-////          protCreate(checkedLength) //.unsafeCheck()
-////        implicit def apply[L](implicit checkedLength : TwoFace.Int.Aux[L], r : Require[L > 0], di : DummyImplicit) =
-////          protCreate(checkedLength) //.unsafeCheck()
-////      }
-////    }
-////
-////    object TestVector {
-////      import Test._
-////
-////      //compile-time tests
-////      val ctv5 : FixedSizeVector[5] = FixedSizeVector[5]
-////      val ctv2 : FixedSizeVector[2] = FixedSizeVector(2)
-////      val ctv7 : FixedSizeVector[7] = implicitly[FixedSizeVector[7]]
-////      val ctv9 : FixedSizeVector[9] = ctv2 concat ctv7
-////      shapeless.test.illTyped("FixedSizeVector[0]")
-////
-////      //run-time tests
-//////      var two = 2
-//////      val rtv2 = FixedSizeVector(two)
-//////      val rtv4 = rtv2 concat rtv2 //runtime concat runtime => runtime
-//////      val rtv6 = rtv4 concat ctv2 //runtime concat compile-time => runtime
-//////      var zero = 0
-//////      FixedSizeVector(zero) //Run-time fail
-////
-////    }
-////  }
+//  object Method_Three { //Using TwoFace and Checked
+//    import singleton.twoface._
+//
+//    object Test {
+//      class FixedSizeVector[L] private (val length : TwoFace.Int[L]) {
+//        def concat[L2](that : FixedSizeVector[L2])(implicit tfs : TwoFace.Int.Shell2[+,L,Int,L2,Int]) ={
+//          val newLength = tfs(this.length,that.length)
+//          FixedSizeVector.protCreate[newLength.T](newLength)
+//        }
+//        override def toString = s"FixedSizeVector($length)"
+//        def pretty(implicit rt: RunTime[L]) = if (rt) s"FixedSizeVector($length)" else s"FixedSizeVector[$length]"
+//      }
+//
+//      object FixedSizeVector {
+//        protected type CondCheckedLength[L] = L > 0
+//        protected type MsgCheckedLength[L] = "Length must be positive (received value of " + ToString[L] + ")"
+//        @checked0Param[CondCheckedLength, MsgCheckedLength, Int] class CheckedLength[L]
+//
+//        //Protected Constructor (performs unsafe run-time check, if compile-time check is not possible)
+//        protected def protCreate[L](tfLength : TwoFace.Int[L]) : FixedSizeVector[L] =
+//          new FixedSizeVector[L](tfLength)
+//
+//        //Public Constructors (perform compile-time check, if possible)
+//        def apply[L](checkedLength : CheckedLength[L])(implicit r : Require[L > 0]) =
+//          protCreate[L](checkedLength.unsafeCheck())
+//        implicit def apply[L](implicit checkedLength : CheckedLength[L], r : Require[L > 0], di : DummyImplicit) =
+//          protCreate[L](checkedLength.unsafeCheck())
+//      }
+//    }
+//
+//    object TestVector {
+//      import Test._
+//
+//      //compile-time tests
+//      val ctv5 : FixedSizeVector[5] = FixedSizeVector[5]
+//      val ctv2 : FixedSizeVector[2] = FixedSizeVector(2)
+//      val ctv7 : FixedSizeVector[7] = implicitly[FixedSizeVector[7]]
+//      val ctv9 : FixedSizeVector[9] = ctv2 concat ctv7
+//      shapeless.test.illTyped("FixedSizeVector[0]")
+//
+//      //run-time tests
+//      var two = 2
+////      val rtv2 = FixedSizeVector(two)
+////      val rtv4 = rtv2 concat rtv2 //runtime concat runtime => runtime
+////      val rtv6 = rtv4 concat ctv2 //runtime concat compile-time => runtime
+////      var zero = 0
+////      FixedSizeVector(zero) //Run-time fail
+//
+//    }
+//  }
 //}
 //
 ////object NonLiteralTest {
