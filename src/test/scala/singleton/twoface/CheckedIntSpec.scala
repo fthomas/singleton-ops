@@ -19,7 +19,7 @@ class CheckedIntSpec extends Properties("Checked.Int") {
 
   def foo[T](t : TwoFace.Int[T]) = t
   def smallerThan50[T](t : CheckedSmallerThan50[T]) = {
-//    val a : Int = TwoFace.Int.unsafeTF2Num(t)
+    val a : Int = TwoFace.Int.unsafeTF2Num(t)
     foo(t.unsafeCheck())
   }
 
@@ -29,12 +29,12 @@ class CheckedIntSpec extends Properties("Checked.Int") {
     CheckedSmallerThan50[W.`5`.T]
     CheckedSmallerThan50(TwoFace.Int(5))
     val a = CheckedSmallerThan50[W.`5`.T + W.`3`.T]
-    implicitly[a.T <:< W.`8`.T]
+    implicitly[a.T0 <:< W.`8`.T]
     implicitly[CheckedSmallerThan50[W.`5`.T]]
     val b = implicitly[CheckedSmallerThan50[W.`5`.T + W.`3`.T]]
-    implicitly[b.T <:< (W.`5`.T + W.`3`.T)]
+    implicitly[b.T0 <:< (W.`5`.T + W.`3`.T)]
     val c = smallerThan50(40)
-    implicitly[c.T <:< W.`40`.T]
+    implicitly[c.T0 <:< W.`40`.T]
     smallerThan50(TwoFace.Int(40))
     smallerThan50(TwoFace.Int[W.`30`.T])
     smallerThan50(implicitly[TwoFace.Int[W.`30`.T]])

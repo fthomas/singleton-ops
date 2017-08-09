@@ -7,8 +7,8 @@ import singleton.ops.impl.std
 
 import scala.reflect.macros.whitebox
 
-trait TwoFaceAny[Face] extends Any {
-  type T
+trait TwoFaceAny[Face, T] extends Any {
+  type T0 = T
   def isLiteral(implicit rt : RunTime[T]) : std.Boolean = !rt
   @inline def getValue : Face
   override def toString = getValue.toString
@@ -45,6 +45,8 @@ object TwoFaceAny {
         TwoFaceMaterializer.toNumValue(tf, c.symbolOf[TF], c.weakTypeOf[T])
       def toNumValue2[TF, T](tf : c.Tree)(id : c.Tree)(implicit tTag : c.WeakTypeTag[T]) : c.Tree =
         TwoFaceMaterializer.toNumValue(tf, c.symbolOf[TF], c.weakTypeOf[T])
+      def toNumValue3[TF, T, Out](tf : c.Tree)(implicit tTag : c.WeakTypeTag[T]) : c.Expr[Out] =
+        TwoFaceMaterializer.toNumValue3[Out](tf, c.symbolOf[TF], c.weakTypeOf[T])
 
       def equal[Out <: std.Boolean](r : c.Tree) : c.Expr[Out] =
         TwoFaceMaterializer.equal[Out](c.prefix.tree, r)
@@ -70,8 +72,7 @@ object TwoFaceAny {
     }
   }
 
-  trait Char[T0] extends Any with TwoFaceAny[std.Char] {
-    type T = T0
+  trait Char[T] extends Any with TwoFaceAny[std.Char, T] {
     def == [R <: std.Char, Out <: std.Boolean, Out0 <: Out](r : R)
     : Boolean[Out0] = macro Builder.Macro.equal[Out]
     def == [R <: std.Int, Out <: std.Boolean, Out0 <: Out](r : R)(
@@ -169,7 +170,7 @@ object TwoFaceAny {
 
     def simplify(implicit tfs : Char.Shell1[Id, T, std.Char]) = tfs(this.getValue)
   }
-  final class _Char[T0](val value : std.Char) extends AnyVal with Char[T0] {
+  final class _Char[T](val value : std.Char) extends AnyVal with Char[T] {
     @inline def getValue : std.Char = value
   }
   implicit object Char extends TwoFaceAny.Builder[Char, std.Char, Shell.One.Char, Shell.Two.Char, Shell.Three.Char] {
@@ -183,8 +184,7 @@ object TwoFaceAny {
     implicit def unknownTF2Num(tf : Char[std.Char]) : std.Char = macro Builder.Macro.toNumValue[Char[_], std.Char]
   }
 
-  trait Int[T0] extends Any with TwoFaceAny[std.Int] {
-    type T = T0
+  trait Int[T] extends Any with TwoFaceAny[std.Int, T] {
     def == [R <: std.Char, Out <: std.Boolean, Out0 <: Out](r : R)
     : Boolean[Out0] = macro Builder.Macro.equal[Out]
     def == [R <: std.Int, Out <: std.Boolean, Out0 <: Out](r : R)(
@@ -282,7 +282,7 @@ object TwoFaceAny {
 
     def simplify(implicit tfs : Int.Shell1[Id, T, std.Int]) = tfs(this.getValue)
   }
-  final class _Int[T0](val value : std.Int) extends AnyVal with Int[T0] {
+  final class _Int[T](val value : std.Int) extends AnyVal with Int[T] {
     @inline def getValue : std.Int = value
   }
   implicit object Int extends TwoFaceAny.Builder[Int, std.Int, Shell.One.Int, Shell.Two.Int, Shell.Three.Int] {
@@ -297,8 +297,7 @@ object TwoFaceAny {
     implicit def unknownTF2Num(tf : Int[std.Int]) : std.Int = macro Builder.Macro.toNumValue[Int[_], std.Int]
   }
 
-  trait Long[T0] extends Any with TwoFaceAny[std.Long] {
-    type T = T0
+  trait Long[T] extends Any with TwoFaceAny[std.Long, T] {
     def == [R <: std.Char, Out <: std.Boolean, Out0 <: Out](r : R)
     : Boolean[Out0] = macro Builder.Macro.equal[Out]
     def == [R <: std.Int, Out <: std.Boolean, Out0 <: Out](r : R)(
@@ -397,7 +396,7 @@ object TwoFaceAny {
     def simplify(implicit tfs : Long.Shell1[Id, T, std.Long]) = tfs(this.getValue)
   }
 
-  final class _Long[T0](val value : std.Long) extends AnyVal with Long[T0] {
+  final class _Long[T](val value : std.Long) extends AnyVal with Long[T] {
     @inline def getValue : std.Long = value
   }
   implicit object Long extends TwoFaceAny.Builder[Long, std.Long, Shell.One.Long, Shell.Two.Long, Shell.Three.Long] {
@@ -412,8 +411,7 @@ object TwoFaceAny {
     implicit def unknownTF2Num(tf : Long[std.Long]) : std.Long = macro Builder.Macro.toNumValue[Long[_], std.Long]
   }
 
-  trait Float[T0] extends Any with TwoFaceAny[std.Float] {
-    type T = T0
+  trait Float[T] extends Any with TwoFaceAny[std.Float, T] {
     def == [R <: std.Char, Out <: std.Boolean, Out0 <: Out](r : R)
     : Boolean[Out0] = macro Builder.Macro.equal[Out]
     def == [R <: std.Int, Out <: std.Boolean, Out0 <: Out](r : R)(
@@ -511,7 +509,7 @@ object TwoFaceAny {
 
     def simplify(implicit tfs : Float.Shell1[Id, T, std.Float]) = tfs(this.getValue)
   }
-  final class _Float[T0](val value : std.Float) extends AnyVal with Float[T0] {
+  final class _Float[T](val value : std.Float) extends AnyVal with Float[T] {
     @inline def getValue : std.Float = value
   }
   implicit object Float extends TwoFaceAny.Builder[Float, std.Float, Shell.One.Float, Shell.Two.Float, Shell.Three.Float] {
@@ -525,8 +523,7 @@ object TwoFaceAny {
     implicit def unknownTF2Num(tf : Float[std.Float]) : std.Float = macro Builder.Macro.toNumValue[Float[_], std.Float]
   }
 
-  trait Double[T0] extends Any with TwoFaceAny[std.Double] {
-    type T = T0
+  trait Double[T] extends Any with TwoFaceAny[std.Double, T] {
     def == [R <: std.Char, Out <: std.Boolean, Out0 <: Out](r : R)
     : Boolean[Out0] = macro Builder.Macro.equal[Out]
     def == [R <: std.Int, Out <: std.Boolean, Out0 <: Out](r : R)(
@@ -624,7 +621,7 @@ object TwoFaceAny {
 
     def simplify(implicit tfs : Double.Shell1[Id, T, std.Double]) = tfs(this.getValue)
   }
-  final class _Double[T0](val value : std.Double) extends AnyVal with Double[T0] {
+  final class _Double[T](val value : std.Double) extends AnyVal with Double[T] {
     @inline def getValue : std.Double = value
   }
   implicit object Double extends TwoFaceAny.Builder[Double, std.Double, Shell.One.Double, Shell.Two.Double, Shell.Three.Double] {
@@ -638,8 +635,7 @@ object TwoFaceAny {
     implicit def unknownTF2Num(tf : Double[std.Double]) : std.Double = macro Builder.Macro.toNumValue[Double[_], std.Double]
   }
 
-  trait String[T0] extends Any with TwoFaceAny[std.String] {
-    type T = T0
+  trait String[T] extends Any with TwoFaceAny[std.String, T] {
     def == [R <: std.String, Out <: std.Boolean, Out0 <: Out](r : R)
     : Boolean[Out0] = macro Builder.Macro.equal[Out]
     def != [R <: std.String, Out <: std.Boolean, Out0 <: Out](r : R)
@@ -662,7 +658,7 @@ object TwoFaceAny {
  
     def simplify(implicit tfs : String.Shell1[Id, T, std.String]) = tfs(this.getValue)
   }
-  final class _String[T0](val value : std.String) extends AnyVal with String[T0] {
+  final class _String[T](val value : std.String) extends AnyVal with String[T] {
     @inline def getValue : std.String = value
   }
   implicit object String extends TwoFaceAny.Builder[String, std.String, Shell.One.String, Shell.Two.String, Shell.Three.String] {
@@ -676,8 +672,7 @@ object TwoFaceAny {
     implicit def unknownTF2Num(tf : String[std.String]) : std.String = macro Builder.Macro.toNumValue[String[_], std.String]
   }
 
-  trait Boolean[T0] extends Any with TwoFaceAny[std.Boolean] {
-    type T = T0
+  trait Boolean[T] extends Any with TwoFaceAny[std.Boolean, T] {
     def == [R <: std.Boolean, Out <: std.Boolean, Out0 <: Out](r : R)
     : Boolean[Out0] = macro Builder.Macro.equal[Out]
     def != [R <: std.Boolean, Out <: std.Boolean, Out0 <: Out](r : R)
@@ -693,7 +688,7 @@ object TwoFaceAny {
 
     def simplify(implicit tfs : Boolean.Shell1[Id, T, std.Boolean]) = tfs(this.getValue)
   }
-  final class _Boolean[T0](val value : std.Boolean) extends AnyVal with Boolean[T0] {
+  final class _Boolean[T](val value : std.Boolean) extends AnyVal with Boolean[T] {
     @inline def getValue : std.Boolean = value
   }
   implicit object Boolean extends TwoFaceAny.Builder[Boolean, std.Boolean, Shell.One.Boolean, Shell.Two.Boolean, Shell.Three.Boolean] {

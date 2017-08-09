@@ -7,7 +7,7 @@ import singleton.twoface.TwoFace
 
 import scala.reflect.macros.whitebox
 
-trait Checked1Param[Chk[_,_], Cond[_,_], Msg[_,_], Face, Param, ParamFace] extends Any with TwoFaceAny[Face] {
+trait Checked1Param[Chk[_,_], Cond[_,_], Msg[_,_], Face, T, ParamFace, Param] extends Any with TwoFaceAny[Face, T] {
   def unsafeCheck(p : ParamFace)
   (implicit
    cond : TwoFace.Boolean.Shell2[Cond, Face, Face, ParamFace, ParamFace],
@@ -30,10 +30,10 @@ object Checked1Param {
     : Chk[value.Out, param.Out] = macro Builder.Macro.fromOpApply[Chk[_,_], Cond[_,_], Msg[_,_]]
 
 //    def apply[T <: Face, Param <: ParamFace](value : T)(param : Param)
-//    : Chk[T, Param] = macro Builder.Macro.fromNumValue[Chk[_,_], Cond[_,_], Msg[_,_]]
+//    : Chk[T, Param] = macro Builder.Macro.fromNumValue[Chk[_,_], Cond[_,_], Msg[_,_]
 //
-//    def apply[T0 <: Face, Param <: ParamFace](value : TwoFaceAny[Face]{type T = T0})(param : TwoFaceAny[ParamFace]{type T = Param})
-//    : Chk[T0, Param] = macro Builder.Macro.fromTF[Chk[_,_], Cond[_,_], Msg[_,_]]
+//    def apply[T <: Face, Param <: ParamFace](value : TwoFaceAny[Face]{type T = T})(param : TwoFaceAny[ParamFace]{type T = Param})
+//    : Chk[T, Param] = macro Builder.Macro.fromTF[Chk[_,_], Cond[_,_], Msg[_,_]]
     ////////////////////////////////////////////////////////////////////////////////////////
 
     ////////////////////////////////////////////////////////////////////////////////////////
@@ -45,7 +45,7 @@ object Checked1Param {
     implicit def fromNum[T <: Face, Param <: ParamFace, Out <: T](value : T)(implicit param : AcceptNonLiteral[Id[Param]])
     : Chk[Out, Param] = macro Builder.Macro.fromNumValue[Chk[_,_], Cond[_,_], Msg[_,_]]
 
-    implicit def fromTF[T0 <: Face, Param <: ParamFace, Out <: T0](value : TwoFaceAny[Face]{type T = T0})(implicit param : AcceptNonLiteral[Id[Param]])
+    implicit def fromTF[T <: Face, Param <: ParamFace, Out <: T](value : TwoFaceAny[Face, T])(implicit param : AcceptNonLiteral[Id[Param]])
     : Chk[Out, Param] = macro Builder.Macro.fromTF[Chk[_,_], Cond[_,_], Msg[_,_]]
     ////////////////////////////////////////////////////////////////////////////////////////
   }

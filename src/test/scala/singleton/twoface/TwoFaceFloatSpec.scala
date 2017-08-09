@@ -394,16 +394,16 @@ class TwoFaceFloatSpec extends Properties("TwoFace.Float") {
   def noImplFoo[W](w : TwoFace.Float[W]) = -w //Missing twoface shell implicit
   property("Unavailable Implicit Safe TwoFace Shell") = {
     val ret = noImplFoo(2.0f)
-    implicitly[ret.T <:< Negate[W.`2.0f`.T]]
+    implicitly[ret.T0 <:< Negate[W.`2.0f`.T]]
     val retSimple = ret.simplify
-    implicitly[retSimple.T <:< W.`-2.0f`.T]
+    implicitly[retSimple.T0 <:< W.`-2.0f`.T]
     retSimple.getValue == -2.0f
   }
   property("Unavailable Implicit Unsafe TwoFace Shell") = {
     val ret = noImplFoo(us(2.0f))
-    implicitly[ret.T <:< Negate[Float]]
+    implicitly[ret.T0 <:< Negate[Float]]
     val retSimple = ret.simplify
-    implicitly[retSimple.T <:< Float]
+    implicitly[retSimple.T0 <:< Float]
     retSimple.getValue == -2.0f
   }
 }

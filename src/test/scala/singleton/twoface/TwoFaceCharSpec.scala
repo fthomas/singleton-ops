@@ -341,16 +341,16 @@ class TwoFaceCharSpec extends Properties("TwoFace.Char") {
   def noImplFoo[W](w : TwoFace.Char[W]) = w.toInt //Missing twoface shell implicit
   property("Unavailable Implicit Safe TwoFace Shell") = {
     val ret = noImplFoo('\u0002')
-    implicitly[ret.T <:< ToInt[W.`'\u0002'`.T]]
+    implicitly[ret.T0 <:< ToInt[W.`'\u0002'`.T]]
     val retSimple = ret.simplify.toChar.simplify
-    implicitly[retSimple.T <:< W.`'\u0002'`.T]
+    implicitly[retSimple.T0 <:< W.`'\u0002'`.T]
     retSimple.getValue == 2
   }
   property("Unavailable Implicit Unsafe TwoFace Shell") = {
     val ret = noImplFoo(us('\u0002'))
-    implicitly[ret.T <:< ToInt[Char]]
+    implicitly[ret.T0 <:< ToInt[Char]]
     val retSimple = ret.simplify
-    implicitly[retSimple.T <:< Int]
+    implicitly[retSimple.T0 <:< Int]
     retSimple.getValue == 2
   }
 }

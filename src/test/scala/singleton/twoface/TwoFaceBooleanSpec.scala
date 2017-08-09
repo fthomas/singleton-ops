@@ -104,16 +104,16 @@ class TwoFaceBooleanSpec extends Properties("TwoFace.Boolean") {
   def noImplFoo[W](w : TwoFace.Boolean[W]) = !w //Missing twoface shell implicit
   property("Unavailable Implicit Safe TwoFace Shell") = {
     val ret = noImplFoo(true)
-    implicitly[ret.T <:< ![W.`true`.T]]
+    implicitly[ret.T0 <:< ![W.`true`.T]]
     val retSimple = ret.simplify
-    implicitly[retSimple.T <:< W.`false`.T]
+    implicitly[retSimple.T0 <:< W.`false`.T]
     retSimple.getValue == false
   }
   property("Unavailable Implicit Unsafe TwoFace Shell") = {
     val ret = noImplFoo(us(true))
-    implicitly[ret.T <:< ![Boolean]]
+    implicitly[ret.T0 <:< ![Boolean]]
     val retSimple = ret.simplify
-    implicitly[retSimple.T <:< Boolean]
+    implicitly[retSimple.T0 <:< Boolean]
     retSimple.getValue == false
   }
 }

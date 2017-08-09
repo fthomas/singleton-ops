@@ -312,18 +312,21 @@ trait GeneralMacros {
 
       def unapply(tp: Type)(implicit annotatedSym : TypeSymbol) : Option[Calc] = {
         tp match {
-          case TypeRef(_, sym, args) =>
+          case TypeRef(_, sym, args) if args.nonEmpty && tp.baseClasses.contains(symbolOf[TwoFaceAny[_,_]]) =>
+            if (verboseTraversal) print(s"@@TwoFaceCalc@@\nTP: $tp\nRAW: ${showRaw(tp)}\nBaseCls:${tp.baseClasses}")
             val calcTFType = sym match {
-              case t if t == symbolOf[TwoFaceAny.Char[_]] => Some(CalcTFType.Char)
-              case t if t == symbolOf[TwoFaceAny.Int[_]] => Some(CalcTFType.Int)
-              case t if t == symbolOf[TwoFaceAny.Long[_]] => Some(CalcTFType.Long)
-              case t if t == symbolOf[TwoFaceAny.Float[_]] => Some(CalcTFType.Float)
-              case t if t == symbolOf[TwoFaceAny.Double[_]] => Some(CalcTFType.Double)
-              case t if t == symbolOf[TwoFaceAny.String[_]] => Some(CalcTFType.String)
-              case t if t == symbolOf[TwoFaceAny.Boolean[_]] => Some(CalcTFType.Boolean)
+              case t if tp.baseClasses.contains(symbolOf[TwoFaceAny.Char[_]]) => Some(CalcTFType.Char)
+              case t if tp.baseClasses.contains(symbolOf[TwoFaceAny.Int[_]]) => Some(CalcTFType.Int)
+              case t if tp.baseClasses.contains(symbolOf[TwoFaceAny.Long[_]]) => Some(CalcTFType.Long)
+              case t if tp.baseClasses.contains(symbolOf[TwoFaceAny.Float[_]]) => Some(CalcTFType.Float)
+              case t if tp.baseClasses.contains(symbolOf[TwoFaceAny.Double[_]]) => Some(CalcTFType.Double)
+              case t if tp.baseClasses.contains(symbolOf[TwoFaceAny.String[_]]) => Some(CalcTFType.String)
+              case t if tp.baseClasses.contains(symbolOf[TwoFaceAny.Boolean[_]]) => Some(CalcTFType.Boolean)
               case _ => None
             }
-            if (calcTFType.isDefined) unappyArg(calcTFType, args.head) else None
+            if (calcTFType.isDefined) unappyArg(calcTFType, args.head) else
+
+              None
           case _ => None
         }
       }
@@ -605,7 +608,9 @@ trait GeneralMacros {
     TypeCalc(typedTree.tpe) match {
       case t : CalcLit => t
       case t : CalcType => CalcNLit(t, q"$tfTree.getValue")
-      case _ => extractionFailed(typedTree.tpe)
+      case t =>
+        print(t)
+        extractionFailed(typedTree.tpe)
     }
   }
 
@@ -1333,7 +1338,7 @@ trait GeneralMacros {
       """
     }
     def fromNumValue(numValueTree : c.Tree, tfSym : TypeSymbol) : c.Tree =  {
-      implicit val annotatedSym : TypeSymbol = symbolOf[TwoFaceAny[_]]//not really used
+      implicit val annotatedSym : TypeSymbol = symbolOf[TwoFaceAny[_,_]]//not really used
       genTwoFace(extractValueFromNumTree(numValueTree))
     }
     def toNumValue[Out](tfTree : c.Tree, tfSym : TypeSymbol, tTpe : Type) : c.Tree = {
@@ -1348,8 +1353,20 @@ trait GeneralMacros {
 //      print(genTree)
       genTree
     }
+    def toNumValue3[Out](tfTree : c.Tree, tfSym : TypeSymbol, tTpe : Type) : c.Expr[Out] = {
+      implicit val annotatedSym : TypeSymbol = tfSym
+      val calc = extractValueFromTwoFaceTree(tfTree)
+      val outTpe = calc.tpe
+      val outTree = calc.tree
+      val genTree =
+        q"""
+          $outTree.asInstanceOf[$outTpe]
+        """
+      //      print(genTree)
+     c.Expr[Out](genTree)
+    }
     def equal[Out <: Boolean](tTree : c.Tree, rTree : c.Tree) : c.Expr[Out] = {
-      implicit val annotatedSym : TypeSymbol = symbolOf[TwoFaceAny[_]]//not really used
+      implicit val annotatedSym : TypeSymbol = symbolOf[TwoFaceAny[_,_]]//not really used
       val tCalc = extractValueFromTwoFaceTree(tTree)
       val rCalc = extractValueFromNumTree(rTree)
       val outCalc = opCalc(funcTypes.==, tCalc, rCalc, CalcLit(0))
@@ -1358,7 +1375,7 @@ trait GeneralMacros {
       c.Expr[Out](genTree)
     }
     def nequal[Out <: Boolean](tTree : c.Tree, rTree : c.Tree) : c.Expr[Out] = {
-      implicit val annotatedSym : TypeSymbol = symbolOf[TwoFaceAny[_]]//not really used
+      implicit val annotatedSym : TypeSymbol = symbolOf[TwoFaceAny[_,_]]//not really used
       val tCalc = extractValueFromTwoFaceTree(tTree)
       val rCalc = extractValueFromNumTree(rTree)
       val outCalc = opCalc(funcTypes.!=, tCalc, rCalc, CalcLit(0))

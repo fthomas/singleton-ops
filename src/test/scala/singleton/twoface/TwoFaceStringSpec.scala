@@ -109,16 +109,16 @@ class TwoFaceStringSpec extends Properties("TwoFace.String") {
   def noImplFoo[W](w : TwoFace.String[W]) = w + w //Missing twoface shell implicit
   property("Unavailable Implicit Safe TwoFace Shell") = {
     val ret = noImplFoo("Ma")
-    implicitly[ret.T <:< +[W.`"Ma"`.T,W.`"Ma"`.T]]
+    implicitly[ret.T0 <:< +[W.`"Ma"`.T,W.`"Ma"`.T]]
     val retSimple = ret.simplify
-    implicitly[retSimple.T <:< W.`"MaMa"`.T]
+    implicitly[retSimple.T0 <:< W.`"MaMa"`.T]
     retSimple.getValue == "MaMa"
   }
   property("Unavailable Implicit Unsafe TwoFace Shell") = {
     val ret = noImplFoo(us("Ma"))
-    implicitly[ret.T <:< +[String, String]]
+    implicitly[ret.T0 <:< +[String, String]]
     val retSimple = ret.simplify
-    implicitly[retSimple.T <:< String]
+    implicitly[retSimple.T0 <:< String]
     retSimple.getValue == "MaMa"
   }
 }
