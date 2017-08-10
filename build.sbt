@@ -17,18 +17,26 @@ bintrayOrganization := Some("core-act-ness")
 bintrayRepository := "maven"
 
 /// projects
+lazy val root = project.in(file(".")).
+  aggregate(singleton_opsJVM, singleton_opsJS).
+  settings(
+    publish := {},
+    publishLocal := {}
+  )
 
-lazy val root = project
+lazy val singleton_ops = crossProject
+  .crossType(CrossType.Pure)
   .in(file("."))
   .settings(commonSettings)
   .settings(publishSettings)
   .settings(
     libraryDependencies ++= Seq(
       scalaOrganization.value % "scala-compiler" % scalaVersion.value,
-      "org.typelevel" %% "macro-compat" % macroCompatVersion,
-      compilerPlugin("org.scalamacros" % "paradise" % macroParadiseVersion cross CrossVersion.patch),
-      "com.chuusai" %% "shapeless" % shapelessVersion,
-      "org.scalacheck" %% "scalacheck" % scalaCheckVersion % Test
+      "org.typelevel" %%% "macro-compat" % macroCompatVersion,
+      compilerPlugin(
+        "org.scalamacros" % "paradise" % macroParadiseVersion cross CrossVersion.patch),
+      "com.chuusai" %%% "shapeless" % shapelessVersion,
+      "org.scalacheck" %%% "scalacheck" % scalaCheckVersion % Test
     )
   )
   .settings( //Adds dependency of new-style scalameta and paradise macros
@@ -40,10 +48,11 @@ lazy val root = project
     sources in (Compile,doc) := Seq.empty, // disable scaladoc due to https://github.com/scalameta/paradise/issues/55
     publishArtifact in (Compile, packageDoc) := false, // disable scaladoc
     sbt.addCompilerPlugin("org.scalameta" % "paradise" % macroParadise3Version cross CrossVersion.patch)
-  ).settings(
-  resolvers += Resolver.bintrayRepo("singleton-ops", "maven")
+    resolvers += Resolver.bintrayRepo("singleton-ops", "maven")
+  )
 
-)
+lazy val singleton_opsJVM = singleton_ops.jvm
+lazy val singleton_opsJS  = singleton_ops.js
 
 /// settings
 
