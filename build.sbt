@@ -17,9 +17,10 @@ bintrayOrganization := Some("core-act-ness")
 bintrayRepository := "maven"
 
 /// projects
-lazy val root = project.in(file(".")).
-  aggregate(singleton_opsJVM, singleton_opsJS).
-  settings(
+lazy val root = project.in(file("."))
+  .settings(commonSettings)
+  .aggregate(singleton_opsJVM, singleton_opsJS)
+  .settings(
     publish := {},
     publishLocal := {}
   )
@@ -49,6 +50,9 @@ lazy val singleton_ops = crossProject
     publishArtifact in (Compile, packageDoc) := false, // disable scaladoc
     sbt.addCompilerPlugin("org.scalameta" % "paradise" % macroParadise3Version cross CrossVersion.patch)
     resolvers += Resolver.bintrayRepo("singleton-ops", "maven")
+  )
+  .jsSettings(
+    coverageEnabled := false
   )
 
 lazy val singleton_opsJVM = singleton_ops.jvm
@@ -193,6 +197,8 @@ lazy val miscSettings = Def.settings(
 val validateCommands = Seq(
   "clean",
   //"scalafmtTest",
+  "test:compile",
+  "singleton_opsJS/test",
   "coverage",
   "test",
   "coverageReport",
