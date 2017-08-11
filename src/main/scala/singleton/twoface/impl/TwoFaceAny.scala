@@ -16,18 +16,32 @@ trait TwoFaceAny[Face, T] extends Any {
 
 object TwoFaceAny {
   trait Builder[TF[T], Face, Shl1[_,_,_,_], Shl2[_,_,_,_,_,_], Shl3[_,_,_,_,_,_,_,_]] {
+    //////////////////////////////////////////////////////////////////
     type Shell1[Func[_], Arg1, Arg1Wide] =
       Shl1[Func[Arg1],
            Func[Arg[W.`1`.T, Arg1, Arg1Wide]],
            Arg1, Arg1Wide]
+    type Shell1Aux[Func[_], Arg1, Arg1Wide, RetOut] =
+      Shell1[Func, Arg1, Arg1Wide]{type Out = RetOut}
+    //////////////////////////////////////////////////////////////////
+
+    //////////////////////////////////////////////////////////////////
     type Shell2[Func[_,_], Arg1, Arg1Wide, Arg2, Arg2Wide] =
       Shl2[Func[Arg1, Arg2],
            Func[Arg[W.`1`.T, Arg1, Arg1Wide], Arg[W.`2`.T, Arg2, Arg2Wide]],
            Arg1, Arg1Wide, Arg2, Arg2Wide]
+    type Shell2Aux[Func[_,_], Arg1, Arg1Wide, Arg2, Arg2Wide, RetOut] =
+      Shell2[Func, Arg1, Arg1Wide, Arg2, Arg2Wide]{type Out = RetOut}
+    //////////////////////////////////////////////////////////////////
+
+    //////////////////////////////////////////////////////////////////
     type Shell3[Func[_,_,_], Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide] =
       Shl3[Func[Arg1, Arg2, Arg3],
            Func[Arg[W.`1`.T, Arg1, Arg1Wide], Arg[W.`2`.T, Arg2, Arg2Wide], Arg[W.`3`.T, Arg3, Arg3Wide]],
            Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]
+    type ShellAux[Func[_,_,_], Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide, RetOut] =
+      Shell3[Func, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]{type Out = RetOut}
+    //////////////////////////////////////////////////////////////////
     def create[T](value : Face) : TF[T]
 
     //The implicit conversion from numeric to TwoFace could have been implemented generically, like the following.

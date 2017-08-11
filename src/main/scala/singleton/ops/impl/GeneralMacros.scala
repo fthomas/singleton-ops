@@ -1398,6 +1398,21 @@ trait GeneralMacros {
       val outTpe = calc.tpe
       val outTree = calc.tree
       val outTpeWide = outTpe.widen
+
+      if (condTpe.typeArgs.isEmpty)
+        abort(
+          """
+            |Unable to analyze given `Cond`. Try adding the following workaround lines at the call site:
+            |  type WorkAround0[T]
+            |  object WorkAround0 extends _root_.singleton.twoface.impl.Checked0Param.Builder[Nothing, WorkAround0, WorkAround0, Nothing]
+          """.stripMargin)
+      if (msgTpe.typeArgs.isEmpty)
+        abort(
+          """
+            |Unable to analyze given `Msg`. Try adding the following workaround lines at the call site:
+            |  type WorkAround0[T]
+            |  object WorkAround0 extends _root_.singleton.twoface.impl.Checked0Param.Builder[Nothing, WorkAround0, WorkAround0, Nothing]
+          """.stripMargin)
       val fixedCondTpe = condTpe.substituteTypes(List(condTpe.typeArgs.head.typeSymbol), List(outTpe))
       val fixedMsgTpe = msgTpe.substituteTypes(List(msgTpe.typeArgs.head.typeSymbol), List(outTpe))
 
@@ -1461,6 +1476,22 @@ trait GeneralMacros {
       val outTpe = tCalc.tpe
       val outTree = tCalc.tree
       val outTpeWide = outTpe.widen
+
+      if (condTpe.typeArgs.isEmpty)
+        abort(
+          """
+            |Unable to analyze given `Cond`. Try adding the following workaround lines at the call site:
+            |  type WorkAround1[T,P]
+            |  object WorkAround1 extends _root_.singleton.twoface.impl.Checked1Param.Builder[Nothing, WorkAround1, WorkAround1, Nothing, Nothing]
+          """.stripMargin)
+      if (msgTpe.typeArgs.isEmpty)
+        abort(
+          """
+            |Unable to analyze given `Msg`. Try adding the following workaround lines at the call site:
+            |  type WorkAround1[T,P]
+            |  object WorkAround1 extends _root_.singleton.twoface.impl.Checked1Param.Builder[Nothing, WorkAround1, WorkAround1, Nothing, Nothing]
+          """.stripMargin)
+
       val fixedCondTpe = condTpe.substituteTypes(condTpe.typeArgs.map(t => t.typeSymbol), List(tCalc.tpe, paramCalc.tpe))
       val fixedMsgTpe = msgTpe.substituteTypes(msgTpe.typeArgs.map(t => t.typeSymbol), List(tCalc.tpe, paramCalc.tpe))
 

@@ -19,7 +19,7 @@ class CheckedIntSpec extends Properties("Checked.Int") {
 
   def foo[T](t : TwoFace.Int[T]) = t
   def smallerThan50[T](t : CheckedSmallerThan50[T]) = {
-    val a : Int = TwoFace.Int.unsafeTF2Num(t)
+    val a : Int = t
     foo(t.unsafeCheck())
   }
 
