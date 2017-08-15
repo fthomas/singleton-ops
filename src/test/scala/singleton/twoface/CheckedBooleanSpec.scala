@@ -31,7 +31,7 @@ class CheckedBooleanSpec extends Properties("Checked.Boolean") {
     illRun{condTrue(TwoFace.Boolean(us(false)))}
   }
 
-  def condTrueImpl[T](realValue : Boolean)(implicit t : CheckedTrue.Shell[T]) : Unit = {t(realValue)}
+  def condTrueImpl[T](realValue : Boolean)(implicit t : CheckedTrue.Shell[T]) : Unit = {t.unsafeCheck(realValue)}
 
   property("Shell compile-time checks") = wellTyped {
     condTrueImpl[True](true)
