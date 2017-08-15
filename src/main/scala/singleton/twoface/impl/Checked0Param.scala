@@ -3,25 +3,19 @@ package singleton.twoface.impl
 import macrocompat.bundle
 import singleton.ops._
 import singleton.ops.impl._
-import singleton.twoface.TwoFace
 
 import scala.reflect.macros.whitebox
 
 trait Checked0Param[Chk[_], Cond[_], Msg[_], Face, T] extends Any with TwoFaceAny[Face, T] {
-  def unsafeCheck()
-  (implicit
-   cond : TwoFace.Boolean.Shell1[Cond, Face, Face],
-   msg : TwoFace.String.Shell1[Msg, Face, Face],
-   req : TwoFace.Boolean.Shell2[RequireMsg, Cond[Face], std.Boolean, Msg[Face], std.String]
-  ) : Chk[T] = {
-    req(cond(getValue).getValue, msg(getValue).getValue)
+  def unsafeCheck()(implicit shl : CheckedShell1[Cond, Msg, Face, Face]) : Chk[T] = {
+    shl(getValue)
     this.asInstanceOf[Chk[T]]
   }
 }
 
 object Checked0Param {
   trait Builder[Chk[T], Cond[_], Msg[_], Face] {
-    type Shell[T] <: Checked0ParamShell[Chk, Face, T]
+    type Shell[T] = CheckedShell1[Cond, Msg, T, Face]
 
     ////////////////////////////////////////////////////////////////////////////////////////
     // Manual invocations (usually used to for testing)
@@ -76,19 +70,3 @@ object Checked0Param {
   }
 }
 
-
-trait Checked0ParamShell[Chk[_], Face, T] {
-  def apply(value : Face) : Chk[_]
-}
-
-object Checked0ParamShell {
-  trait Builder[ChkShl[_], Chk[_], Cond[_], Msg[_], Face] {
-    type MsgHelper[T] = ITE[IsNonLiteral[Msg[T]], SomethingBadHappened, Msg[T]]
-    type CondHelper[T] = RequireMsgSym[ITE[IsNonLiteral[Cond[T]], True, Cond[T]], MsgHelper[T],ChkShl[_]]
-    def create[T] : ChkShl[T]
-
-    implicit def impl[T]
-    (implicit vc : CondHelper[T]) :
-    ChkShl[T] = create[T]
-  }
-}

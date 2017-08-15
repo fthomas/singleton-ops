@@ -40,7 +40,7 @@ class CheckedStringSpec extends Properties("Checked.String") {
   }
 
   def lengthSmallerThan5Impl[T](realValue : String)(implicit t : CheckedLengthSmallerThan.Shell[T,W.`5`.T]) : Unit =
-    {t(realValue).unsafeCheck(5)}
+    {t(realValue, 5)}
 
   property("Shell compile-time checks") = wellTyped {
     lengthSmallerThan5Impl[W.`"Hi"`.T](us("Hi"))
