@@ -49,6 +49,7 @@ trait GeneralMacros {
     val Require = symbolOf[OpId.Require]
     val ITE = symbolOf[OpId.ITE]
     val IsNonLiteral = symbolOf[OpId.IsNonLiteral]
+    val GetType = symbolOf[OpId.GetType]
     val ==> = symbolOf[OpId.==>]
     val + = symbolOf[OpId.+]
     val - = symbolOf[OpId.-]
@@ -370,6 +371,9 @@ trait GeneralMacros {
             val args = tp.typeArgs
             val funcType = args.head.typeSymbol.asType
 
+            if (funcType == funcTypes.GetType)
+              return Some(CalcUnknown(args(1)))
+
             //If function is set/get variable we keep the original string,
             //otherwise we get the variable's value
             val aValue = TypeCalc(args(1))
@@ -419,7 +423,10 @@ trait GeneralMacros {
         case Some(t : CalcType.Symbol) => CalcNLit(CalcType.String, q"valueOf[$tp].name")
         case Some(t : CalcTFType) => CalcNLit(t, q"valueOf[$tp].getValue")
         case Some(t : CalcType) => CalcNLit(t, q"valueOf[$tp]")
-        case _ => CalcUnknown(tp)
+        case Some(t : CalcUnknown) => t
+        case _ =>
+          if (verboseTraversal) print(s"@@Unknown@@\nTP: $tp\nRAW: + ${showRaw(tp)}")
+          CalcUnknown(tp)
       }
     }
     
@@ -800,7 +807,8 @@ trait GeneralMacros {
           case CalcUnknown(t) => //redirection of implicit not found annotation is required to the given symbol
             implicit val annotatedSym : TypeSymbol = t.typeSymbol.asType
             abort(msg)
-          case _ => abort(msg)
+          case _ =>
+            abort(msg)
         }
         //directly using the java lib `require` resulted in compiler crash, so we use wrapped require instead
         case CalcNLit.String(msg) => CalcNLit.Boolean(q"{_root_.singleton.ops.impl._require(false, $msg); false}")

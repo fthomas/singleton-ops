@@ -27,6 +27,7 @@ object OpId {
   sealed trait IsBoolean extends OpId
   sealed trait IsSymbol extends OpId
   sealed trait IsNonLiteral extends OpId
+  sealed trait GetType extends OpId
   sealed trait Reverse extends OpId
   sealed trait Negate extends OpId
   sealed trait NumberOfLeadingZeros extends OpId

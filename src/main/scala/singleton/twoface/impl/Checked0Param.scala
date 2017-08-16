@@ -7,7 +7,7 @@ import singleton.ops.impl._
 import scala.reflect.macros.whitebox
 
 trait Checked0Param[Chk[_], Cond[_], Msg[_], Face, T] extends Any with TwoFaceAny[Face, T] {
-  def unsafeCheck()(implicit shl : CheckedShell1[Cond, Msg, Face, Face]) : Chk[T] = {
+  def unsafeCheck()(implicit shl : CheckedShell1[Cond, Msg, Chk[_], Face, Face]) : Chk[T] = {
     shl.unsafeCheck(getValue)
     this.asInstanceOf[Chk[T]]
   }
@@ -15,7 +15,8 @@ trait Checked0Param[Chk[_], Cond[_], Msg[_], Face, T] extends Any with TwoFaceAn
 
 object Checked0Param {
   trait Builder[Chk[T], Cond[_], Msg[_], Face] {
-    type Shell[T] = CheckedShell1[Cond, Msg, T, Face]
+    type Shell[T] = CheckedShell1[Cond, Msg, W.`0`.T, T, Face]
+    type ShellSym[Sym, T] = CheckedShell1[Cond, Msg, Sym, T, Face]
 
     ////////////////////////////////////////////////////////////////////////////////////////
     // Manual invocations (usually used to for testing)

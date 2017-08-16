@@ -43,4 +43,15 @@ class CheckedBooleanSpec extends Properties("Checked.Boolean") {
     condTrueImpl[Boolean](true)
     illRun{condTrueImpl[Boolean](false)}
   }
+
+  trait CheckedUse[T]
+  object CheckedUse {
+    implicit def ev[T](implicit checkedTrue: CheckedTrue.ShellSym[CheckedUse[_], T]) : CheckedUse[T] =
+      new CheckedUse[T] {}
+  }
+
+  property("Shell user message redirect checks") = wellTyped {
+    implicitly[CheckedUse[True]]
+    illTyped("""implicitly[CheckedUse[False]]""", "Failed Check")
+  }
 }

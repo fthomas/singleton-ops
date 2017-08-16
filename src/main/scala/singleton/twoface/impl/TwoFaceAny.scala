@@ -42,6 +42,7 @@ object TwoFaceAny {
     type ShellAux[Func[_,_,_], Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide, RetOut] =
       Shell3[Func, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]{type Out = RetOut}
     //////////////////////////////////////////////////////////////////
+
     def create[T](value : Face) : TF[T]
 
     //The implicit conversion from numeric to TwoFace could have been implemented generically, like the following.
@@ -714,6 +715,13 @@ object TwoFaceAny {
     implicit def opTF2Num[T <: singleton.ops.impl.Op, Out <: std.Boolean](tf : Boolean[T])(implicit id : OpAuxBoolean[AcceptNonLiteral[Id[T]], Out]) : Out = macro Builder.Macro.toNumValue2[Boolean[_], Out]
     implicit def unsafeTF2Num(tf : Boolean[_]) : std.Boolean = macro Builder.Macro.toNumValue[Boolean[_], std.Boolean]
     implicit def unknownTF2Num(tf : Boolean[std.Boolean]) : std.Boolean = macro Builder.Macro.toNumValue[Boolean[_], std.Boolean]
+
+    //////////////////////////////////////////////////////////////////
+    type RequireShell[Cond, Msg, Sym] =
+      Shell.Two.Boolean[RequireMsgSym[Cond, Msg, Sym],
+        RequireMsgSym[Arg[W.`1`.T, Cond, std.Boolean], Arg[W.`2`.T, Msg, std.String], Sym],
+        Cond, std.Boolean, Msg, std.String]
+    //////////////////////////////////////////////////////////////////
   }
 
 }

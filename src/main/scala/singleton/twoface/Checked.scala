@@ -4,8 +4,8 @@ import scala.meta._
 import scala.collection.immutable.Seq
 
 object Checked {
-  type Shell1[Cond[_], Msg[_], Arg1, Arg1Wide] =
-    impl.CheckedShell1[Cond, Msg, Arg1, Arg1Wide]
+  type Shell1[Cond[_], Msg[_], Sym, Arg1, Arg1Wide] =
+    impl.CheckedShell1[Cond, Msg, Sym, Arg1, Arg1Wide]
   type Shell2[Cond[_,_], Msg[_,_], Arg1, Arg1Wide, Arg2, Arg2Wide] =
     impl.CheckedShell2[Cond, Msg, Arg1, Arg1Wide, Arg2, Arg2Wide]
 }
