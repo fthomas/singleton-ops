@@ -52,4 +52,15 @@ class CheckedStringSpec extends Properties("Checked.String") {
     illRun{lengthSmallerThan5Impl[String](us("Hello"))}
   }
 
+  trait CheckedUse[T]
+  object CheckedUse {
+    implicit def ev[T](implicit checkedTrue: CheckedLengthSmallerThan.ShellSym[CheckedUse[_], T, W.`5`.T]) : CheckedUse[T] =
+      new CheckedUse[T] {}
+  }
+
+  property("Shell user message redirect checks") = wellTyped {
+    implicitly[CheckedUse[W.`"Hi"`.T]]
+    illTyped("""implicitly[CheckedUse[W.`"Hello"`.T]]""", "Length of string 'Hello' is not smaller than 5")
+  }
+
 }
