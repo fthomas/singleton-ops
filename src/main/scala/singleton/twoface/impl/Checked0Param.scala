@@ -3,6 +3,7 @@ package singleton.twoface.impl
 import macrocompat.bundle
 import singleton.ops._
 import singleton.ops.impl._
+import singleton.twoface.Checked
 
 import scala.reflect.macros.whitebox
 
@@ -15,8 +16,8 @@ trait Checked0Param[Chk[_], Cond[_], Msg[_], Face, T] extends Any with TwoFaceAn
 
 object Checked0Param {
   trait Builder[Chk[T], Cond[_], Msg[_], Face] {
-    type Shell[T] = CheckedShell1[Cond, Msg, W.`0`.T, T, Face]
-    type ShellSym[Sym, T] = CheckedShell1[Cond, Msg, Sym, T, Face]
+    type Shell[T] = Checked.Shell1[Cond, Msg, T, Face]
+    type ShellSym[Sym, T] = Checked.Shell1Sym[Cond, Msg, Sym, T, Face]
 
     ////////////////////////////////////////////////////////////////////////////////////////
     // Manual invocations (usually used to for testing)

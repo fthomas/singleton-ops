@@ -14,7 +14,7 @@ object CheckedShell1 {
     implicit
     cond : TwoFace.Boolean.Shell1[Cond, Arg1, Arg1Wide],
     msg : TwoFace.String.Shell1[Msg, Arg1, Arg1Wide],
-    req : TwoFace.Boolean.RequireShell[Cond[Arg1], Msg[Arg1], ITE[IsNonLiteral[Sym], GetType[Sym], GetType[CheckedShell1[F,F,_,_,_]]]]
+    req : TwoFace.Boolean.RequireShell[Cond[Arg1], Msg[Arg1], Sym]
   ) : CheckedShell1[Cond, Msg, Sym, Arg1, Arg1Wide] = new CheckedShell1[Cond, Msg, Sym, Arg1, Arg1Wide] {
     def unsafeCheck(arg1: => Arg1Wide): Unit = req(cond(arg1).getValue, msg(arg1).getValue)
   }
