@@ -70,12 +70,13 @@ package object ops {
   /////////////////////////////////////////////////
 
   protected[singleton] type Arg[Num, T, TWide] = OpMacro[OpId.Arg, Num, T, TWide] //Argument for real-time function creation
+  protected[singleton] type GetType[Sym] = OpMacro[OpId.GetType, Sym, NP, NP] //Argument for real-time function creation
   type AcceptNonLiteral[P1] = OpMacro[OpId.AcceptNonLiteral, P1, NP, NP]
   type Id[P1]               = OpMacro[OpId.Id, P1, NP, NP]
   type ![P1]                = OpMacro[OpId.!, P1, NP, NP]
   type Require[Cond]        = OpMacro[OpId.Require, Cond, DefaultRequireMsg, NP]
   type RequireMsg[Cond,Msg] = OpMacro[OpId.Require, Cond, Msg, NP]
-  type RequireMsgSym[Cond,Msg,Sym] = OpMacro[OpId.Require, Cond, Msg, Sym]
+  type RequireMsgSym[Cond,Msg,Sym] = OpMacro[OpId.Require, Cond, Msg, GetType[Sym]]
   type ToNat[P1]            = OpMacro[OpId.ToNat, P1, NP, NP]
   type ToChar[P1]           = OpMacro[OpId.ToChar, P1, NP, NP]
   type ToInt[P1]            = OpMacro[OpId.ToInt, P1, NP, NP]

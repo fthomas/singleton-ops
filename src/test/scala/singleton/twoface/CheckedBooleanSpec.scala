@@ -31,7 +31,7 @@ class CheckedBooleanSpec extends Properties("Checked.Boolean") {
     illRun{condTrue(TwoFace.Boolean(us(false)))}
   }
 
-  def condTrueImpl[T](realValue : Boolean)(implicit t : CheckedTrue.Shell[T]) : Unit = {t(realValue).unsafeCheck()}
+  def condTrueImpl[T](realValue : Boolean)(implicit t : CheckedTrue.Shell[T]) : Unit = {t.unsafeCheck(realValue)}
 
   property("Shell compile-time checks") = wellTyped {
     condTrueImpl[True](true)
@@ -42,5 +42,16 @@ class CheckedBooleanSpec extends Properties("Checked.Boolean") {
   property("Shell run-time checks") = wellTyped {
     condTrueImpl[Boolean](true)
     illRun{condTrueImpl[Boolean](false)}
+  }
+
+  trait CheckedUse[T]
+  object CheckedUse {
+    implicit def ev[T](implicit checkedTrue: CheckedTrue.ShellSym[CheckedUse[_], T]) : CheckedUse[T] =
+      new CheckedUse[T] {}
+  }
+
+  property("Shell user message redirect checks") = wellTyped {
+    implicitly[CheckedUse[True]]
+    illTyped("""implicitly[CheckedUse[False]]""", "Failed Check")
   }
 }

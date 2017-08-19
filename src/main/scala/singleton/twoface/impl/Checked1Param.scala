@@ -3,25 +3,22 @@ package singleton.twoface.impl
 import macrocompat.bundle
 import singleton.ops._
 import singleton.ops.impl._
-import singleton.twoface.TwoFace
+import singleton.twoface.Checked
 
 import scala.reflect.macros.whitebox
 
 trait Checked1Param[Chk[_,_], Cond[_,_], Msg[_,_], Face, T, ParamFace, Param] extends Any with TwoFaceAny[Face, T] {
   def unsafeCheck(p : ParamFace)
-  (implicit
-   cond : TwoFace.Boolean.Shell2[Cond, Face, Face, ParamFace, ParamFace],
-   msg : TwoFace.String.Shell2[Msg, Face, Face, ParamFace, ParamFace],
-   req : TwoFace.Boolean.Shell2[RequireMsg, Cond[Face, ParamFace], std.Boolean, Msg[Face, ParamFace], std.String]
-  ) : Chk[T, Param] = {
-    req(cond(getValue, p).getValue, msg(getValue, p).getValue)
+    (implicit shl : CheckedShell2[Cond, Msg, Chk[_,_], Face, Face, ParamFace, ParamFace]) : Chk[T, Param] = {
+    shl.unsafeCheck(getValue, p)
     this.asInstanceOf[Chk[T, Param]]
   }
 }
 
 object Checked1Param {
   trait Builder[Chk[_,_], Cond[_,_], Msg[_,_], Face, ParamFace] {
-    type Shell[T, Param] <: Checked1ParamShell[Chk, Face, T, Param]
+    type Shell[T, Param] = Checked.Shell2[Cond, Msg, T, Face, Param, ParamFace]
+    type ShellSym[Sym, T, Param] = Checked.Shell2Sym[Cond, Msg, Sym, T, Face, Param, ParamFace]
 
     ////////////////////////////////////////////////////////////////////////////////////////
     // Manual invocations (usually used to for testing)
@@ -76,20 +73,3 @@ object Checked1Param {
   }
 }
 
-
-trait Checked1ParamShell[Chk[_,_], Face, T, Param] {
-  def apply(value : Face) : Chk[_,_]
-}
-
-object Checked1ParamShell {
-  trait Builder[ChkShl[_,_], Chk[_,_], Cond[_,_], Msg[_,_], Face, ParamFace] {
-    type MsgHelper[T, Param] = ITE[IsNonLiteral[Msg[T, Param]], SomethingBadHappened, Msg[T, Param]]
-    type CondHelper[T, Param] =
-      RequireMsgSym[ITE[IsNonLiteral[Cond[T, Param]], True, Cond[T, Param]], MsgHelper[T, Param], ChkShl[_,_]]
-    def create[T, Param] : ChkShl[T, Param]
-
-    implicit def impl[T, Param]
-    (implicit vc : CondHelper[T, Param]) :
-    ChkShl[T, Param] = create[T, Param]
-  }
-}
