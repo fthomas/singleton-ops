@@ -104,9 +104,9 @@ class TwoFaceStringSpec extends Properties("TwoFace.String") {
     def foo[W](width: TwoFace.String[W]) = width
     def foo2[R <: String](r: R) = foo(r)
     val a = foo2(W(fin).value)
-    implicitly[a.T0 =:= Fin]
+    implicitly[a.Out =:= Fin]
     val b = foo2(us(fin))
-    implicitly[b.T0 =:= String]
+    implicitly[b.Out =:= String]
   }
 
   property("Extracting from Safe TwoFace") = {
@@ -119,16 +119,16 @@ class TwoFaceStringSpec extends Properties("TwoFace.String") {
   def noImplFoo[W](w : TwoFace.String[W]) = w + w //Missing twoface shell implicit
   property("Unavailable Implicit Safe TwoFace Shell") = {
     val ret = noImplFoo("Ma")
-    implicitly[ret.T0 <:< +[W.`"Ma"`.T,W.`"Ma"`.T]]
+    implicitly[ret.Out <:< +[W.`"Ma"`.T,W.`"Ma"`.T]]
     val retSimple = ret.simplify
-    implicitly[retSimple.T0 <:< W.`"MaMa"`.T]
+    implicitly[retSimple.Out <:< W.`"MaMa"`.T]
     retSimple.getValue == "MaMa"
   }
   property("Unavailable Implicit Unsafe TwoFace Shell") = {
     val ret = noImplFoo(us("Ma"))
-    implicitly[ret.T0 <:< +[String, String]]
+    implicitly[ret.Out <:< +[String, String]]
     val retSimple = ret.simplify
-    implicitly[retSimple.T0 <:< String]
+    implicitly[retSimple.Out <:< String]
     retSimple.getValue == "MaMa"
   }
 }

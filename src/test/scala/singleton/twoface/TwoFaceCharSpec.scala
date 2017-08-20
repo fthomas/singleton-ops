@@ -336,9 +336,9 @@ class TwoFaceCharSpec extends Properties("TwoFace.Char") {
     def foo[W](width: TwoFace.Char[W]) = width
     def foo2[R <: Char](r: R) = foo(r)
     val a = foo2(W(fin).value)
-    implicitly[a.T0 =:= Fin]
+    implicitly[a.Out =:= Fin]
     val b = foo2(us(fin))
-    implicitly[b.T0 =:= Char]
+    implicitly[b.Out =:= Char]
   }
 
   property("Extracting from Safe TwoFace") = {
@@ -351,16 +351,16 @@ class TwoFaceCharSpec extends Properties("TwoFace.Char") {
   def noImplFoo[W](w : TwoFace.Char[W]) = w.toInt //Missing twoface shell implicit
   property("Unavailable Implicit Safe TwoFace Shell") = {
     val ret = noImplFoo('\u0002')
-    implicitly[ret.T0 <:< ToInt[W.`'\u0002'`.T]]
+    implicitly[ret.Out <:< ToInt[W.`'\u0002'`.T]]
     val retSimple = ret.simplify.toChar.simplify
-    implicitly[retSimple.T0 <:< W.`'\u0002'`.T]
+    implicitly[retSimple.Out <:< W.`'\u0002'`.T]
     retSimple.getValue == 2
   }
   property("Unavailable Implicit Unsafe TwoFace Shell") = {
     val ret = noImplFoo(us('\u0002'))
-    implicitly[ret.T0 <:< ToInt[Char]]
+    implicitly[ret.Out <:< ToInt[Char]]
     val retSimple = ret.simplify
-    implicitly[retSimple.T0 <:< Int]
+    implicitly[retSimple.Out <:< Int]
     retSimple.getValue == 2
   }
 }

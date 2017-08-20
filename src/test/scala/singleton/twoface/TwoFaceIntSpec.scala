@@ -371,9 +371,9 @@ class TwoFaceIntSpec extends Properties("TwoFace.Int") {
     def foo[W](width: TwoFace.Int[W]) = width
     def foo2[R <: Int](r: R) = foo(r)
     val a = foo2(W(fin).value)
-    implicitly[a.T0 =:= Fin]
+    implicitly[a.Out =:= Fin]
     val b = foo2(us(fin))
-    implicitly[b.T0 =:= Int]
+    implicitly[b.Out =:= Int]
   }
 
   property("Extracting from Safe TwoFace") = {
@@ -386,16 +386,16 @@ class TwoFaceIntSpec extends Properties("TwoFace.Int") {
   def noImplFoo[W](w : TwoFace.Int[W]) = -w //Missing twoface shell implicit
   property("Unavailable Implicit Safe TwoFace Shell") = {
     val ret = noImplFoo(2)
-    implicitly[ret.T0 <:< Negate[W.`2`.T]]
+    implicitly[ret.Out <:< Negate[W.`2`.T]]
     val retSimple = ret.simplify
-    implicitly[retSimple.T0 <:< W.`-2`.T]
+    implicitly[retSimple.Out <:< W.`-2`.T]
     retSimple.getValue == -2
   }
   property("Unavailable Implicit Unsafe TwoFace Shell") = {
     val ret = noImplFoo(us(2))
-    implicitly[ret.T0 <:< Negate[Int]]
+    implicitly[ret.Out <:< Negate[Int]]
     val retSimple = ret.simplify
-    implicitly[retSimple.T0 <:< Int]
+    implicitly[retSimple.Out <:< Int]
     retSimple.getValue == -2
   }
 }
