@@ -331,6 +331,16 @@ class TwoFaceCharSpec extends Properties("TwoFace.Char") {
 
   type Fin = W.`'\u0003'`.T
   final val fin = '\u0003'
+
+  property("Extracting from an Upper Bounded Numeric") = wellTyped {
+    def foo[W](width: TwoFace.Char[W]) = width
+    def foo2[R <: Char](r: R) = foo(r)
+    val a = foo2(W(fin).value)
+    implicitly[a.T0 =:= Fin]
+    val b = foo2(us(fin))
+    implicitly[b.T0 =:= Char]
+  }
+
   property("Extracting from Safe TwoFace") = {
     val a = me(TwoFace.Char(fin))
     val ret = shapeless.the[Id[a.T]]

@@ -114,18 +114,19 @@ trait GeneralMacros {
   sealed trait Calc {
     type T
     val tpe : Type
+    val name : String
   }
 
   sealed trait CalcType extends Calc
   object CalcType {
-    sealed trait Char extends CalcType{type T = std.Char; val tpe = typeOf[scala.Char]}
-    sealed trait Int extends CalcType{type T = std.Int; val tpe = typeOf[scala.Int]}
-    sealed trait Long extends CalcType{type T = std.Long; val tpe = typeOf[scala.Long]}
-    sealed trait Float extends CalcType{type T = std.Float; val tpe = typeOf[scala.Float]}
-    sealed trait Double extends CalcType{type T = std.Double; val tpe = typeOf[scala.Double]}
-    sealed trait String extends CalcType{type T = std.String; val tpe = typeOf[java.lang.String]}
-    sealed trait Boolean extends CalcType{type T = std.Boolean; val tpe = typeOf[scala.Boolean]}
-    sealed trait Symbol extends CalcType{type T = std.Symbol; val tpe = typeOf[scala.Symbol]}
+    sealed trait Char extends CalcType{type T = std.Char; val tpe = typeOf[scala.Char]; val name = "Char"}
+    sealed trait Int extends CalcType{type T = std.Int; val tpe = typeOf[scala.Int]; val name = "Int"}
+    sealed trait Long extends CalcType{type T = std.Long; val tpe = typeOf[scala.Long]; val name = "Long"}
+    sealed trait Float extends CalcType{type T = std.Float; val tpe = typeOf[scala.Float]; val name = "Float"}
+    sealed trait Double extends CalcType{type T = std.Double; val tpe = typeOf[scala.Double]; val name = "Double"}
+    sealed trait String extends CalcType{type T = std.String; val tpe = typeOf[java.lang.String]; val name = "String"}
+    sealed trait Boolean extends CalcType{type T = std.Boolean; val tpe = typeOf[scala.Boolean]; val name = "Boolean"}
+    sealed trait Symbol extends CalcType{type T = std.Symbol; val tpe = typeOf[scala.Symbol]; val name = "String"}
     object Char extends Char
     object Int extends Int
     object Long extends Long
@@ -217,16 +218,39 @@ trait GeneralMacros {
     object Boolean extends CalcTFType with CalcType.Boolean
   }
 
+  sealed trait CalcUBType extends Calc
+  object CalcUBType {
+    object Char extends CalcUBType with CalcType.Char
+    object Int extends CalcUBType with CalcType.Int
+    object Long extends CalcUBType with CalcType.Long
+    object Float extends CalcUBType with CalcType.Float
+    object Double extends CalcUBType with CalcType.Double
+    object String extends CalcUBType with CalcType.String
+    object Boolean extends CalcUBType with CalcType.Boolean
+    def apply(calcTypeRef : Calc)(implicit unsupported : TypeSymbol) : CalcUBType = {
+      calcTypeRef match {
+        case (t: CalcType.Char) => Char
+        case (t: CalcType.Int) => Int
+        case (t: CalcType.Long) => Long
+        case (t: CalcType.Float) => Float
+        case (t: CalcType.Double) => Double
+        case (t: CalcType.String) => String
+        case (t: CalcType.Boolean) => Boolean
+        case _ => abort("Unsupported type")
+      }
+    }
+  }
+
   sealed trait CalcNLit extends CalcVal
   object CalcNLit {
     implicit val lift = Liftable[CalcNLit] { p => p.tree }
-    case class Char(override val tree : Tree) extends CalcVal.Char('\u0001', tree) with CalcNLit
-    case class Int(override val tree : Tree) extends CalcVal.Int(1, tree) with CalcNLit
-    case class Long(override val tree : Tree) extends CalcVal.Long(1L, tree) with CalcNLit
-    case class Float(override val tree : Tree) extends CalcVal.Float(1.0f, tree) with CalcNLit
-    case class Double(override val tree : Tree) extends CalcVal.Double(1.0, tree) with CalcNLit
-    case class String(override val tree : Tree) extends CalcVal.String("1", tree) with CalcNLit
-    case class Boolean(override val tree : Tree) extends CalcVal.Boolean(true, tree) with CalcNLit
+    case class Char(override val tree : Tree, override val tpe : Type = CalcType.Char.tpe) extends CalcVal.Char('\u0001', tree) with CalcNLit
+    case class Int(override val tree : Tree, override val tpe : Type = CalcType.Int.tpe) extends CalcVal.Int(1, tree) with CalcNLit
+    case class Long(override val tree : Tree, override val tpe : Type = CalcType.Long.tpe) extends CalcVal.Long(1L, tree) with CalcNLit
+    case class Float(override val tree : Tree, override val tpe : Type = CalcType.Float.tpe) extends CalcVal.Float(1.0f, tree) with CalcNLit
+    case class Double(override val tree : Tree, override val tpe : Type = CalcType.Double.tpe) extends CalcVal.Double(1.0, tree) with CalcNLit
+    case class String(override val tree : Tree, override val tpe : Type = CalcType.String.tpe) extends CalcVal.String("1", tree) with CalcNLit
+    case class Boolean(override val tree : Tree, override val tpe : Type = CalcType.Boolean.tpe) extends CalcVal.Boolean(true, tree) with CalcNLit
 
     def apply[T](valueRef : T, tree : Tree)(implicit unsupported : TypeSymbol) : CalcNLit =
       CalcNLit(CalcLit(valueRef), tree)
@@ -242,10 +266,23 @@ trait GeneralMacros {
         case _ => abort("Unsupported type")
       }
     }
+    def applyTpe(calcTypeRef : Calc, tree : Tree, tpe : Type)(implicit unsupported : TypeSymbol) : CalcNLit = {
+      calcTypeRef match {
+        case (t: CalcType.Char) => Char(tree, tpe)
+        case (t: CalcType.Int) => Int(tree, tpe)
+        case (t: CalcType.Long) => Long(tree, tpe)
+        case (t: CalcType.Float) => Float(tree, tpe)
+        case (t: CalcType.Double) => Double(tree, tpe)
+        case (t: CalcType.String) => String(tree, tpe)
+        case (t: CalcType.Boolean) => Boolean(tree, tpe)
+        case _ => abort("Unsupported type")
+      }
+    }
     def unapply(arg: CalcNLit) : Option[Tree] = Some(arg.tree)
   }
   case class CalcUnknown(t: Type) extends Calc {
     val tpe = t
+    val name = "Unknown"
   }
   object NonLiteralCalc {
     def unapply(tpe: Type): Option[CalcType] = tpe match {
@@ -421,6 +458,7 @@ trait GeneralMacros {
       TypeCalc.unapply(tp) match {
         case Some(t : CalcVal) => t
         case Some(t : CalcType.Symbol) => CalcNLit(CalcType.String, q"valueOf[$tp].name")
+        case Some(t : CalcUBType) => t
         case Some(t : CalcTFType) => CalcNLit(t, q"valueOf[$tp].getValue")
         case Some(t : CalcType) => CalcNLit(t, q"valueOf[$tp]")
         case Some(t : CalcUnknown) => t
@@ -467,13 +505,15 @@ trait GeneralMacros {
             case Some(t : CalcVal) =>
               //Values (literal/non-literal) are OK and returned properly.
               Some(t)
-            case _ =>
+            case Some(t : CalcType) =>
               //There can be cases, like in the following example, where we can extract a non-literal value.
               //  def foo2[W](w : TwoFace.Int[W])(implicit tfs : TwoFace.Int.Shell1[Negate, W, Int]) = -w+1
               //We want to calculate `-w+1`, even though we have not provided an complete implicit.
               //While returning `TwoFace.Int[Int](-w+1)` is possible in this case, we would rather reserve
               //the ability to have a literal return type, so `TwoFace.Int[Negate[W]+1](-w+1)` is returned.
-              //So even if we can have a `Some(CalcType)` returning, we force it as `None`.
+              //So even if we can have a `Some(CalcType)` returning, we force it as an upper-bound calc type.
+              Some(CalcUBType(t))
+            case _ =>
               None
           }
         case SingleType(pre, sym) =>
@@ -605,6 +645,7 @@ trait GeneralMacros {
     val typedTree = c.typecheck(numValueTree)
     TypeCalc(typedTree.tpe) match {
       case t : CalcLit => t
+      case t : CalcUBType => CalcNLit.applyTpe(t, numValueTree, typedTree.tpe)
       case t : CalcType => CalcNLit(t, numValueTree)
       case _ => extractionFailed(typedTree.tpe)
     }
@@ -811,10 +852,10 @@ trait GeneralMacros {
             abort(msg)
         }
         //directly using the java lib `require` resulted in compiler crash, so we use wrapped require instead
-        case CalcNLit.String(msg) => CalcNLit.Boolean(q"{_root_.singleton.ops.impl._require(false, $msg); false}")
+        case CalcNLit.String(msg,_) => CalcNLit.Boolean(q"{_root_.singleton.ops.impl._require(false, $msg); false}")
         case _ => unsupported()
       }
-      case CalcNLit.Boolean(cond) => b match {
+      case CalcNLit.Boolean(cond,_) => b match {
         //directly using the java lib `require` resulted in compiler crash, so we use wrapped require instead
         case CalcVal.String(msg, msgt) => CalcNLit.Boolean(q"{_root_.singleton.ops.impl._require($cond, $msgt); true}")
         case _ => unsupported()
@@ -1304,7 +1345,7 @@ trait GeneralMacros {
       val funcApplyTpe = shellTpe.typeArgs(0)
       val funcArgsTpe = shellTpe.typeArgs(1)
       val (tfValueTree, tfName) = TypeCalc(funcArgsTpe) match {
-        case (t: CalcVal) => (t.tree, t.tpe.widen.typeSymbol.name.toString)
+        case (t: CalcVal) => (t.tree, t.name)
         case _ => extractionFailed(shellTpe)
       }
       val tfTerm = TermName(tfName)
@@ -1336,18 +1377,21 @@ trait GeneralMacros {
   def TwoFaceMaterializer : TwoFaceMaterializer = new TwoFaceMaterializer
 
   final class TwoFaceMaterializer {
-    def genTwoFace(calc : CalcVal) : c.Tree = {
-      val outTpe = calc.tpe
-      val outTree = calc.tree
-      val tfName = wideTypeName(outTpe)
+    def genTwoFace(outTpe : Type, outTree : Tree, tfName : String) : c.Tree = {
       val tfTerm = TermName(tfName)
       q"""
-        _root_.singleton.twoface.TwoFace.$tfTerm.create[$outTpe]($outTree.asInstanceOf[$outTpe])
+        _root_.singleton.twoface.TwoFace.$tfTerm.create[$outTpe]($outTree)
       """
     }
+    def genTwoFace(calc : CalcVal) : c.Tree = {
+      genTwoFace(calc.tpe, calc.tree, calc.name)
+    }
     def fromNumValue(numValueTree : c.Tree, tfSym : TypeSymbol) : c.Tree =  {
-      implicit val annotatedSym : TypeSymbol = symbolOf[TwoFaceAny[_,_]]//not really used
-      genTwoFace(extractValueFromNumTree(numValueTree))
+      implicit val annotatedSym : TypeSymbol = tfSym //not really used
+//      print(tfSym.name)
+      val genTree = genTwoFace(extractValueFromNumTree(numValueTree))
+//      print(genTree)
+      genTree
     }
     def toNumValue[Out](tfTree : c.Tree, tfSym : TypeSymbol, tTpe : Type) : c.Tree = {
       implicit val annotatedSym : TypeSymbol = tfSym
@@ -1361,20 +1405,8 @@ trait GeneralMacros {
 //      print(genTree)
       genTree
     }
-    def toNumValue3[Out](tfTree : c.Tree, tfSym : TypeSymbol, tTpe : Type) : c.Expr[Out] = {
-      implicit val annotatedSym : TypeSymbol = tfSym
-      val calc = extractValueFromTwoFaceTree(tfTree)
-      val outTpe = calc.tpe
-      val outTree = calc.tree
-      val genTree =
-        q"""
-          $outTree.asInstanceOf[$outTpe]
-        """
-      //      print(genTree)
-     c.Expr[Out](genTree)
-    }
     def equal[Out <: Boolean](tTree : c.Tree, rTree : c.Tree) : c.Expr[Out] = {
-      implicit val annotatedSym : TypeSymbol = symbolOf[TwoFaceAny[_,_]]//not really used
+      implicit val annotatedSym : TypeSymbol = symbolOf[TwoFaceAny.Boolean[_]]//not really used
       val tCalc = extractValueFromTwoFaceTree(tTree)
       val rCalc = extractValueFromNumTree(rTree)
       val outCalc = opCalc(funcTypes.==, tCalc, rCalc, CalcLit(0))
@@ -1383,7 +1415,7 @@ trait GeneralMacros {
       c.Expr[Out](genTree)
     }
     def nequal[Out <: Boolean](tTree : c.Tree, rTree : c.Tree) : c.Expr[Out] = {
-      implicit val annotatedSym : TypeSymbol = symbolOf[TwoFaceAny[_,_]]//not really used
+      implicit val annotatedSym : TypeSymbol = symbolOf[TwoFaceAny.Boolean[_]]//not really used
       val tCalc = extractValueFromTwoFaceTree(tTree)
       val rCalc = extractValueFromNumTree(rTree)
       val outCalc = opCalc(funcTypes.!=, tCalc, rCalc, CalcLit(0))

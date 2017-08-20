@@ -54,14 +54,12 @@ object TwoFaceAny {
   @bundle
   object Builder {
     final class Macro(val c: whitebox.Context) extends GeneralMacros {
-      def fromNumValue[TF](value : c.Tree) : c.Tree =
+      def fromNumValue[TF](value : c.Tree)(implicit tfTag : c.WeakTypeTag[TF]) : c.Tree =
         TwoFaceMaterializer.fromNumValue(value, c.symbolOf[TF])
-      def toNumValue[TF, T](tf : c.Tree)(implicit tTag : c.WeakTypeTag[T]) : c.Tree =
+      def toNumValue[TF, T](tf : c.Tree)(implicit tTag : c.WeakTypeTag[T], tfTag : c.WeakTypeTag[TF]) : c.Tree =
         TwoFaceMaterializer.toNumValue(tf, c.symbolOf[TF], c.weakTypeOf[T])
-      def toNumValue2[TF, T](tf : c.Tree)(id : c.Tree)(implicit tTag : c.WeakTypeTag[T]) : c.Tree =
+      def toNumValue2[TF, T](tf : c.Tree)(id : c.Tree)(implicit tTag : c.WeakTypeTag[T], tfTag : c.WeakTypeTag[TF]) : c.Tree =
         TwoFaceMaterializer.toNumValue(tf, c.symbolOf[TF], c.weakTypeOf[T])
-      def toNumValue3[TF, T, Out](tf : c.Tree)(implicit tTag : c.WeakTypeTag[T]) : c.Expr[Out] =
-        TwoFaceMaterializer.toNumValue3[Out](tf, c.symbolOf[TF], c.weakTypeOf[T])
 
       def equal[Out <: std.Boolean](r : c.Tree) : c.Expr[Out] =
         TwoFaceMaterializer.equal[Out](c.prefix.tree, r)

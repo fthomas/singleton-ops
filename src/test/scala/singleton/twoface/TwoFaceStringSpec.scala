@@ -99,6 +99,16 @@ class TwoFaceStringSpec extends Properties("TwoFace.String") {
 
   type Fin = W.`"a"`.T
   final val fin = "a"
+
+  property("Extracting from an Upper Bounded Numeric") = wellTyped {
+    def foo[W](width: TwoFace.String[W]) = width
+    def foo2[R <: String](r: R) = foo(r)
+    val a = foo2(W(fin).value)
+    implicitly[a.T0 =:= Fin]
+    val b = foo2(us(fin))
+    implicitly[b.T0 =:= String]
+  }
+
   property("Extracting from Safe TwoFace") = {
     val a = me(TwoFace.String(fin))
     val ret = shapeless.the[Id[a.T]]

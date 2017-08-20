@@ -358,6 +358,16 @@ class TwoFaceLongSpec extends Properties("TwoFace.Long") {
 
   type Fin = W.`3L`.T
   final val fin = 3L
+
+  property("Extracting from an Upper Bounded Numeric") = wellTyped {
+    def foo[W](width: TwoFace.Long[W]) = width
+    def foo2[R <: Long](r: R) = foo(r)
+    val a = foo2(W(fin).value)
+    implicitly[a.T0 =:= Fin]
+    val b = foo2(us(fin))
+    implicitly[b.T0 =:= Long]
+  }
+
   property("Extracting from Safe TwoFace") = {
     val a = me(TwoFace.Long(fin))
     val ret = shapeless.the[Id[a.T]]

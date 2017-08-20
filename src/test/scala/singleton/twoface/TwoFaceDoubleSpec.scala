@@ -387,6 +387,16 @@ class TwoFaceDoubleSpec extends Properties("TwoFace.Double") {
 
   type Fin = W.`3.0`.T
   final val fin = 3.0
+
+  property("Extracting from an Upper Bounded Numeric") = wellTyped {
+    def foo[W](width: TwoFace.Double[W]) = width
+    def foo2[R <: Double](r: R) = foo(r)
+    val a = foo2(W(fin).value)
+    implicitly[a.T0 =:= Fin]
+    val b = foo2(us(fin))
+    implicitly[b.T0 =:= Double]
+  }
+
   property("Extracting from Safe TwoFace") = {
     val a = me(TwoFace.Double(fin))
     val ret = shapeless.the[Id[a.T]]

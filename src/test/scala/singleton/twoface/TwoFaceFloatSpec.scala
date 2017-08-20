@@ -384,6 +384,16 @@ class TwoFaceFloatSpec extends Properties("TwoFace.Float") {
 
   type Fin = W.`3.0f`.T
   final val fin = 3.0f
+
+  property("Extracting from an Upper Bounded Numeric") = wellTyped {
+    def foo[W](width: TwoFace.Float[W]) = width
+    def foo2[R <: Float](r: R) = foo(r)
+    val a = foo2(W(fin).value)
+    implicitly[a.T0 =:= Fin]
+    val b = foo2(us(fin))
+    implicitly[b.T0 =:= Float]
+  }
+
   property("Extracting from Safe TwoFace") = {
     val a = me(TwoFace.Float(fin))
     val ret = shapeless.the[Id[a.T]]

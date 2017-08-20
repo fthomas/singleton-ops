@@ -94,6 +94,16 @@ class TwoFaceBooleanSpec extends Properties("TwoFace.Boolean") {
 
   type Fin = W.`true`.T
   final val fin = true
+
+  property("Extracting from an Upper Bounded Numeric") = wellTyped {
+    def foo[W](width: TwoFace.Boolean[W]) = width
+    def foo2[R <: Boolean](r: R) = foo(r)
+    val a = foo2(W(fin).value)
+    implicitly[a.T0 =:= Fin]
+    val b = foo2(us(fin))
+    implicitly[b.T0 =:= Boolean]
+  }
+
   property("Extracting from Safe TwoFace") = {
     val a = me(TwoFace.Boolean(fin))
     val ret = shapeless.the[Id[a.T]]
