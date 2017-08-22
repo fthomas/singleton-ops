@@ -7,30 +7,30 @@ import singleton.TestUtils._
 class MinusSpec extends Properties("-") {
   type OP[L,R] = -[L,R]
   type leftNat = shapeless.Nat._3
-  type leftChar = '\u0003'
-  type leftInt = 3
-  type leftLong = 3L
-  type leftFloat = 3.0f
-  type leftDouble = 3.0
-  type leftString = "Something"
-  type leftBoolean = true
+  type leftChar = W.`'\u0003'`.T
+  type leftInt = W.`3`.T
+  type leftLong = W.`3L`.T
+  type leftFloat = W.`3.0f`.T
+  type leftDouble = W.`3.0`.T
+  type leftString = W.`"Something"`.T
+  type leftBoolean = True
 
   type rightNat = shapeless.Nat._2
-  type rightChar = '\u0002'
-  type rightInt = 2
-  type rightLong = 2L
-  type rightFloat = 2.0f
-  type rightDouble = 2.0
-  type rightString = "Else"
-  type rightBoolean = false
+  type rightChar = W.`'\u0002'`.T
+  type rightInt = W.`2`.T
+  type rightLong = W.`2L`.T
+  type rightFloat = W.`2.0f`.T
+  type rightDouble = W.`2.0`.T
+  type rightString = W.`"Else"`.T
+  type rightBoolean = False
 
-  type resultChar = '\u0001'
-  type resultInt = 1
-  type resultLong = 1L
-  type resultFloat = 1.0f
-  type resultDouble = 1.0
-  type resultString = "SomethingElse"
-  type resultBoolean = false
+  type resultChar = W.`'\u0001'`.T
+  type resultInt = W.`1`.T
+  type resultLong = W.`1L`.T
+  type resultFloat = W.`1.0f`.T
+  type resultDouble = W.`1.0`.T
+  type resultString = W.`"SomethingElse"`.T
+  type resultBoolean = W.`false`.T
 
   ////////////////////////////////////////////////////////////////////////
   // Nat op XXX

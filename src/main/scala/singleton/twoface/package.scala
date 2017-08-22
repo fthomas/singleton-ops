@@ -1,63 +1,78 @@
 package singleton
 
-import twoface.impl._
+import singleton.ops._
+import singleton.ops.impl.std
 
 package object twoface {
-  import TwoFaceAny._
-  import singleton.ops._
+  import TwoFace._
 
-  @inline implicit def fromTwoFaceUnsafe[Face, T](tf : TwoFaceAny[Face, T]) : Face = tf.getValue
-  @inline implicit def fromTwoFaceSafe[Face, T <: Face with Singleton](tf : TwoFaceAny[Face, T])
-    (implicit sc: ValueOf[T]) : T {} = valueOf[T]
-//  @inline implicit def fromChecked[F, V, C, M](c : Checked[F, V, C, M]) : F = c.value
+  def ifThenElse[I, T, E](ifArg: Boolean[I], thenArg : Char[T], elseArg : Char[E])
+  (implicit tfs : Char.Shell3[ITE, I, std.Boolean, T, std.Char, E, std.Char]) = tfs(ifArg.getValue, thenArg.getValue, elseArg.getValue)
+  def ifThenElse[I, T, E](ifArg: Boolean[I], thenArg : Int[T], elseArg : Int[E])
+  (implicit tfs : Int.Shell3[ITE, I, std.Boolean, T, std.Int, E, std.Int]) = tfs(ifArg.getValue, thenArg.getValue, elseArg.getValue)
+  def ifThenElse[I, T, E](ifArg: Boolean[I], thenArg : Long[T], elseArg : Long[E])
+  (implicit tfs : Long.Shell3[ITE, I, std.Boolean, T, std.Long, E, std.Long]) = tfs(ifArg.getValue, thenArg.getValue, elseArg.getValue)
+  def ifThenElse[I, T, E](ifArg: Boolean[I], thenArg : Float[T], elseArg : Float[E])
+  (implicit tfs : Float.Shell3[ITE, I, std.Boolean, T, std.Float, E, std.Float]) = tfs(ifArg.getValue, thenArg.getValue, elseArg.getValue)
+  def ifThenElse[I, T, E](ifArg: Boolean[I], thenArg : Double[T], elseArg : Double[E])
+  (implicit tfs : Double.Shell3[ITE, I, std.Boolean, T, std.Double, E, std.Double]) = tfs(ifArg.getValue, thenArg.getValue, elseArg.getValue)
+  def ifThenElse[I, T, E](ifArg: Boolean[I], thenArg : String[T], elseArg : String[E])
+  (implicit tfs : String.Shell3[ITE, I, std.Boolean, T, std.String, E, std.String]) = tfs(ifArg.getValue, thenArg.getValue, elseArg.getValue)
+  def ifThenElse[I, T, E](ifArg: Boolean[I], thenArg : Boolean[T], elseArg : Boolean[E])
+  (implicit tfs : Boolean.Shell3[ITE, I, std.Boolean, T, std.Boolean, E, std.Boolean]) = tfs(ifArg.getValue, thenArg.getValue, elseArg.getValue)
 
+  def require[C, M](cond : Boolean[C], msg : String[M])(implicit tfs : Boolean.Shell2[RequireMsg, C, std.Boolean, M, std.String]) = tfs(cond.getValue, msg.getValue)
 
-  def abs[T](x : Int[T])(implicit tfo : Int.Return[Abs[T]]) = tfo(math.abs(x.getValue))
-  def abs[T](x : Long[T])(implicit tfo : Long.Return[Abs[T]]) = tfo(math.abs(x.getValue))
-  def abs[T](x : Float[T])(implicit tfo : Float.Return[Abs[T]]) = tfo(math.abs(x.getValue))
-  def abs[T](x : Double[T])(implicit tfo : Double.Return[Abs[T]]) = tfo(math.abs(x.getValue))
+  object math {
+    import singleton.ops.math._
+    val Pi = Double.create[Pi](scala.math.Pi)
+    val E = Double.create[E](scala.math.E)
 
-  def pow[TX, TY](x : Float[TX], y : Float[TY])(implicit tfo : Double.Return[Pow[TX, TY]]) =
-    tfo(math.pow(x.getValue.toDouble, y.getValue.toDouble))
-  def pow[TX, TY](x : Float[TX], y : Double[TY])(implicit tfo : Double.Return[Pow[TX, TY]]) =
-    tfo(math.pow(x.getValue.toDouble, y.getValue))
-  def pow[TX, TY](x : Double[TX], y : Float[TY])(implicit tfo : Double.Return[Pow[TX, TY]]) =
-    tfo(math.pow(x.getValue, y.getValue.toDouble))
-  def pow[TX, TY](x : Double[TX], y : Double[TY])(implicit tfo : Double.Return[Pow[TX, TY]]) =
-    tfo(math.pow(x.getValue, y.getValue))
+    def abs[T](t : Int[T])(implicit tfs : Int.Shell1[Abs, T, std.Int]) = tfs(t.getValue)
+    def abs[T](t : Long[T])(implicit tfs : Long.Shell1[Abs, T, std.Long]) = tfs(t.getValue)
+    def abs[T](t : Float[T])(implicit tfs : Float.Shell1[Abs, T, std.Float]) = tfs(t.getValue)
+    def abs[T](t : Double[T])(implicit tfs : Double.Shell1[Abs, T, std.Double]) = tfs(t.getValue)
 
-  def floor[T](x : Float[T])(implicit tfo : Double.Return[Floor[T]]) =
-    tfo(math.floor(x.getValue.toDouble))
-  def floor[T](x : Double[T])(implicit tfo : Double.Return[Floor[T]]) =
-    tfo(math.floor(x.getValue))
+    def min[L, R](l : Int[L], r : Int[R])(implicit tfs : Int.Shell2[Min, L, std.Int, R, std.Int]) = tfs(l.getValue, r.getValue)
+    def min[L, R](l : Long[L], r : Long[R])(implicit tfs : Long.Shell2[Min, L, std.Long, R, std.Long]) = tfs(l.getValue, r.getValue)
+    def min[L, R](l : Float[L], r : Float[R])(implicit tfs : Float.Shell2[Min, L, std.Float, R, std.Float]) = tfs(l.getValue, r.getValue)
+    def min[L, R](l : Double[L], r : Double[R])(implicit tfs : Double.Shell2[Min, L, std.Double, R, std.Double]) = tfs(l.getValue, r.getValue)
 
-  def ceil[T](x : Float[T])(implicit tfo : Double.Return[Ceil[T]]) =
-    tfo(math.ceil(x.getValue.toDouble))
-  def ceil[T](x : Double[T])(implicit tfo : Double.Return[Ceil[T]]) =
-    tfo(math.ceil(x.getValue))
+    def max[L, R](l : Int[L], r : Int[R])(implicit tfs : Int.Shell2[Max, L, std.Int, R, std.Int]) = tfs(l.getValue, r.getValue)
+    def max[L, R](l : Long[L], r : Long[R])(implicit tfs : Long.Shell2[Max, L, std.Long, R, std.Long]) = tfs(l.getValue, r.getValue)
+    def max[L, R](l : Float[L], r : Float[R])(implicit tfs : Float.Shell2[Max, L, std.Float, R, std.Float]) = tfs(l.getValue, r.getValue)
+    def max[L, R](l : Double[L], r : Double[R])(implicit tfs : Double.Shell2[Max, L, std.Double, R, std.Double]) = tfs(l.getValue, r.getValue)
 
-  def round[T](x : Float[T])(implicit tfo : Int.Return[Round[T]]) =
-    tfo(math.round(x.getValue))
-  def round[T](x : Double[T])(implicit tfo : Long.Return[Round[T]]) =
-    tfo(math.round(x.getValue))
+    def pow[L, R](l : Float[L], r : Float[R])(implicit tfs : Double.Shell2[Pow, L, std.Float, R, std.Float]) = tfs(l.getValue, r.getValue)
+    def pow[L, R](l : Float[L], r : Double[R])(implicit tfs : Double.Shell2[Pow, L, std.Float, R, std.Double]) = tfs(l.getValue, r.getValue)
+    def pow[L, R](l : Double[L], r : Float[R])(implicit tfs : Double.Shell2[Pow, L, std.Double, R, std.Float]) = tfs(l.getValue, r.getValue)
+    def pow[L, R](l : Double[L], r : Double[R])(implicit tfs : Double.Shell2[Pow, L, std.Double, R, std.Double]) = tfs(l.getValue, r.getValue)
 
-  def sin[T](x : Float[T])(implicit tfo : Double.Return[Sin[T]]) =
-    tfo(math.sin(x.getValue.toDouble))
-  def sin[T](x : Double[T])(implicit tfo : Double.Return[Sin[T]]) =
-    tfo(math.sin(x.getValue))
+    def floor[T](t : Float[T])(implicit tfs : Double.Shell1[Floor, T, std.Float]) = tfs(t.getValue)
+    def floor[T](t : Double[T])(implicit tfs : Double.Shell1[Floor, T, std.Double]) = tfs(t.getValue)
 
-  def cos[T](x : Float[T])(implicit tfo : Double.Return[Cos[T]]) =
-    tfo(math.cos(x.getValue.toDouble))
-  def cos[T](x : Double[T])(implicit tfo : Double.Return[Cos[T]]) =
-    tfo(math.cos(x.getValue))
+    def ceil[T](t : Float[T])(implicit tfs : Double.Shell1[Ceil, T, std.Float]) = tfs(t.getValue)
+    def ceil[T](t : Double[T])(implicit tfs : Double.Shell1[Ceil, T, std.Double]) = tfs(t.getValue)
 
-  def tan[T](x : Float[T])(implicit tfo : Double.Return[Tan[T]]) =
-    tfo(math.tan(x.getValue.toDouble))
-  def tan[T](x : Double[T])(implicit tfo : Double.Return[Tan[T]]) =
-    tfo(math.tan(x.getValue))
+    def round[T](t : Float[T])(implicit tfs : Int.Shell1[Round, T, std.Float]) = tfs(t.getValue)
+    def round[T](t : Double[T])(implicit tfs : Long.Shell1[Round, T, std.Double]) = tfs(t.getValue)
 
-  def sqrt[T](x : Float[T])(implicit tfo : Double.Return[Sqrt[T]]) =
-    tfo(math.sqrt(x.getValue.toDouble))
-  def sqrt[T](x : Double[T])(implicit tfo : Double.Return[Sqrt[T]]) =
-    tfo(math.sqrt(x.getValue))
+    def sin[T](t : Float[T])(implicit tfs : Double.Shell1[Sin, T, std.Float]) = tfs(t.getValue)
+    def sin[T](t : Double[T])(implicit tfs : Double.Shell1[Sin, T, std.Double]) = tfs(t.getValue)
+
+    def cos[T](t : Float[T])(implicit tfs : Double.Shell1[Cos, T, std.Float]) = tfs(t.getValue)
+    def cos[T](t : Double[T])(implicit tfs : Double.Shell1[Cos, T, std.Double]) = tfs(t.getValue)
+
+    def tan[T](t : Float[T])(implicit tfs : Double.Shell1[Tan, T, std.Float]) = tfs(t.getValue)
+    def tan[T](t : Double[T])(implicit tfs : Double.Shell1[Tan, T, std.Double]) = tfs(t.getValue)
+
+    def sqrt[T](t : Float[T])(implicit tfs : Double.Shell1[Sqrt, T, std.Float]) = tfs(t.getValue)
+    def sqrt[T](t : Double[T])(implicit tfs : Double.Shell1[Sqrt, T, std.Double]) = tfs(t.getValue)
+
+    def log[T](t : Float[T])(implicit tfs : Double.Shell1[Log, T, std.Float]) = tfs(t.getValue)
+    def log[T](t : Double[T])(implicit tfs : Double.Shell1[Log, T, std.Double]) = tfs(t.getValue)
+
+    def log10[T](t : Float[T])(implicit tfs : Double.Shell1[Log10, T, std.Float]) = tfs(t.getValue)
+    def log10[T](t : Double[T])(implicit tfs : Double.Shell1[Log10, T, std.Double]) = tfs(t.getValue)
+  }
 }

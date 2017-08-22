@@ -7,31 +7,30 @@ import singleton.TestUtils._
 class PlusSpec extends Properties("+") {
   type OP[L,R] = +[L,R]
   type leftNat = shapeless.Nat._1
-  type leftChar = '\u0001'
-  type leftInt = 1
-  type leftLong = 1L
-  type leftFloat = 1.0f
-  type leftDouble = 1.0
-  type leftString = "Something"
-  type leftBoolean = true
+  type leftChar = W.`'\u0001'`.T
+  type leftInt = W.`1`.T
+  type leftLong = W.`1L`.T
+  type leftFloat = W.`1.0f`.T
+  type leftDouble = W.`1.0`.T
+  type leftString = W.`"Something"`.T
+  type leftBoolean = True
 
   type rightNat = shapeless.Nat._2
-  type rightChar = '\u0002'
-  type rightInt = 2
-  type rightLong = 2L
-  type rightFloat = 2.0f
-  type rightDouble = 2.0
-  type rightString = "Else"
-  type rightBoolean = false
+  type rightChar = W.`'\u0002'`.T
+  type rightInt = W.`2`.T
+  type rightLong = W.`2L`.T
+  type rightFloat = W.`2.0f`.T
+  type rightDouble = W.`2.0`.T
+  type rightString = W.`"Else"`.T
+  type rightBoolean = False
 
-  type resultNat = shapeless.Nat._3
-  type resultChar = '\u0003'
-  type resultInt = 3
-  type resultLong = 3L
-  type resultFloat = 3.0f
-  type resultDouble = 3.0
-  type resultString = "SomethingElse"
-  type resultBoolean = false
+  type resultChar = W.`'\u0003'`.T
+  type resultInt = W.`3`.T
+  type resultLong = W.`3L`.T
+  type resultFloat = W.`3.0f`.T
+  type resultDouble = W.`3.0`.T
+  type resultString = W.`"SomethingElse"`.T
+  type resultBoolean = W.`false`.T
 
   ////////////////////////////////////////////////////////////////////////
   // Nat op XXX

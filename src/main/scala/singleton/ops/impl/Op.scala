@@ -3,8 +3,8 @@ package singleton.ops.impl
 import shapeless.Nat
 
 trait Op extends Serializable {
-  type Out
   type OutWide
+  type Out
   type OutNat <: Nat
   type OutChar <: Char with Singleton
   type OutInt <: Int with Singleton
@@ -13,14 +13,16 @@ trait Op extends Serializable {
   type OutDouble <: Double with Singleton
   type OutString <: String with Singleton
   type OutBoolean <: Boolean with Singleton
-  val value: Out {}
+  type OutSymbol <: Symbol
+  val value: Out
+  val isLiteral : Boolean
   val valueWide: OutWide
 }
 
-trait OpGen[O <: Op] {type Out; val value : Out}
-object OpGen {
+protected[singleton] trait OpGen[O <: Op] {type Out; val value : Out}
+protected[singleton] object OpGen {
   type Aux[O <: Op, Ret_Out] = OpGen[O] {type Out = Ret_Out}
-  implicit def impl[O <: Op](implicit o: O) : Aux[O, o.Out] = new OpGen[O] {type Out = o.Out; val value = o.value}
+  implicit def impl[O <: Op](implicit o: O) : Aux[O, o.Out] = new OpGen[O] {type Out = o.Out; val value = o.value.asInstanceOf[o.Out]}
 }
 
 trait OpCast[T, O <: Op] {type Out <: T; val value : Out}
@@ -89,3 +91,10 @@ object OpBoolean {
   implicit def conv[O <: Op](op : OpBoolean[O]) : Boolean = op.value
 }
 
+@scala.annotation.implicitNotFound(msg = "Unable to prove type argument is a Symbol.")
+trait OpSymbol[O <: Op] extends OpCast[Symbol, O]
+object OpSymbol {
+  type Aux[O <: Op, Ret_Out <: Symbol] = OpSymbol[O] {type Out = Ret_Out}
+  implicit def impl[O <: Op](implicit o: O) : Aux[O, o.OutSymbol] = new OpSymbol[O] {type Out = o.OutSymbol; val value = o.value.asInstanceOf[o.OutSymbol]}
+  implicit def conv[O <: Op](op : OpSymbol[O]) : Symbol = op.value
+}

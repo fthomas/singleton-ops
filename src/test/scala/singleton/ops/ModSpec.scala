@@ -7,27 +7,27 @@ import singleton.TestUtils._
 class ModSpec extends Properties("%") {
   type OP[L,R] = %[L,R]
   type leftNat = shapeless.Nat._6
-  type leftChar = '\u0006'
-  type leftInt = 6
-  type leftLong = 6L
-  type leftFloat = 6.0f
-  type leftDouble = 6.0
-  type leftString = "Something"
-  type leftBoolean = true
+  type leftChar = W.`'\u0006'`.T
+  type leftInt = W.`6`.T
+  type leftLong = W.`6L`.T
+  type leftFloat = W.`6.0f`.T
+  type leftDouble = W.`6.0`.T
+  type leftString = W.`"Something"`.T
+  type leftBoolean = True
 
   type rightNat = shapeless.Nat._7
-  type rightChar = '\u0007'
-  type rightInt = 7
-  type rightLong = 7L
-  type rightFloat = 7.0f
-  type rightDouble = 7.0
-  type rightString = "Else"
-  type rightBoolean = false
+  type rightChar = W.`'\u0007'`.T
+  type rightInt = W.`7`.T
+  type rightLong = W.`7L`.T
+  type rightFloat = W.`7.0f`.T
+  type rightDouble = W.`7.0`.T
+  type rightString = W.`"Else"`.T
+  type rightBoolean = False
 
-  type resultInt = 6
-  type resultLong = 6L
-  type resultFloat = 6.0f
-  type resultDouble = 6.0
+  type resultInt = W.`6`.T
+  type resultLong = W.`6L`.T
+  type resultFloat = W.`6.0f`.T
+  type resultDouble = W.`6.0`.T
 
   ////////////////////////////////////////////////////////////////////////
   // Nat op XXX

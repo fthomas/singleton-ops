@@ -1,58 +1,81 @@
 package singleton.twoface
-import impl._
+
+import scala.meta._
+import singleton.ops._
+import scala.collection.immutable.Seq
 
 object Checked {
-  final class Char[T, Cond[_,_], Param, Msg[_,_]] private(val value : scala.Char) extends AnyVal with CheckedAny[scala.Char, T] with TwoFaceAny.Char[T] {
-    @inline def getValue : scala.Char = value
-  }
-  object Char extends CheckedAny.Builder[Char, scala.Char] {
-    def create[T, Cond[_,_], Param, Msg[_,_]](value : scala.Char) : Char[T, Cond, Param, Msg] = new Char[T, Cond, Param, Msg](value)
-  }
+  type F1[_]
+  type F2[_,_]
+  type Shell1[Cond[_], Msg[_], Arg1, Arg1Wide] =
+    impl.CheckedShell1[Cond, Msg, impl.CheckedShell1[F1,F1,_,_,_], Arg1, Arg1Wide]
+  type Shell1Sym[Cond[_], Msg[_], Sym, Arg1, Arg1Wide] =
+    impl.CheckedShell1[Cond, Msg, Sym, Arg1, Arg1Wide]
+  type Shell2[Cond[_,_], Msg[_,_], Arg1, Arg1Wide, Arg2, Arg2Wide] =
+    impl.CheckedShell2[Cond, Msg, impl.CheckedShell2[F2,F2,_,_,_,_,_], Arg1, Arg1Wide, Arg2, Arg2Wide]
+  type Shell2Sym[Cond[_,_], Msg[_,_], Sym, Arg1, Arg1Wide, Arg2, Arg2Wide] =
+    impl.CheckedShell2[Cond, Msg, Sym, Arg1, Arg1Wide, Arg2, Arg2Wide]
+}
 
-  final class Int[T, Cond[_,_], Param, Msg[_,_]] private(val value : scala.Int) extends AnyVal with CheckedAny[scala.Int, T] with TwoFaceAny.Int[T] {
-    @inline def getValue : scala.Int = value
+class checked0Param[Cond[_], Msg[_], TFace] extends scala.annotation.StaticAnnotation {
+  inline def apply(defn: Any): Any = meta {
+    defn match {
+      case cls @ Defn.Class(_, name, _, ctor, _) =>
+        val q"type T = $tFaceName" = q"type T = $TFace"
+        val chkNameStr = name.value
+        val chkTypeName = Type.Name(chkNameStr)
+        val chkTermName = Term.Name(chkNameStr)
+        val updatedCls =
+          q"""
+             final class $chkTypeName[T] (val value : $TFace) extends AnyVal with
+               _root_.singleton.twoface.impl.Checked0Param[$chkTypeName, $Cond, $Msg, $TFace, T] with
+               ${Ctor.Name("_root_.singleton.twoface.impl.TwoFaceAny." + tFaceName.toString())}[T] {
+               @inline def getValue : $TFace = value
+             }
+           """
+        val companion =
+          q"""
+             object $chkTermName extends _root_.singleton.twoface.impl.Checked0Param.Builder[$chkTypeName, $Cond, $Msg, $TFace] {
+             }
+           """
+        val termBlock = Term.Block(Seq(updatedCls, companion))
+//        print(termBlock)
+        termBlock
+      case _ =>
+//        println(defn.structure)
+        abort("@checked must annotate a class.")
+    }
   }
-  object Int extends CheckedAny.Builder[Int, scala.Int] {
-    def create[T, Cond[_,_], Param, Msg[_,_]](value : scala.Int) : Int[T, Cond, Param, Msg] = new Int[T, Cond, Param, Msg](value)
-  }
+}
 
-  final class Long[T, Cond[_,_], Param, Msg[_,_]] private(val value : scala.Long) extends AnyVal with CheckedAny[scala.Long, T] with TwoFaceAny.Long[T] {
-    @inline def getValue : scala.Long = value
-  }
-  object Long extends CheckedAny.Builder[Long, scala.Long] {
-    def create[T, Cond[_,_], Param, Msg[_,_]](value : scala.Long) : Long[T, Cond, Param, Msg] = new Long[T, Cond, Param, Msg](value)
-  }
 
-  final class Float[T, Cond[_,_], Param, Msg[_,_]] private(val value : scala.Float) extends AnyVal with CheckedAny[scala.Float, T] with TwoFaceAny.Float[T] {
-    @inline def getValue : scala.Float = value
-  }
-  object Float extends CheckedAny.Builder[Float, scala.Float] {
-    def create[T, Cond[_,_], Param, Msg[_,_]](value : scala.Float) : Float[T, Cond, Param, Msg] = new Float[T, Cond, Param, Msg](value)
-  }
-
-  final class Double[T, Cond[_,_], Param, Msg[_,_]] private(val value : scala.Double) extends AnyVal with CheckedAny[scala.Double, T] with TwoFaceAny.Double[T] {
-    @inline def getValue : scala.Double = value
-  }
-  object Double extends CheckedAny.Builder[Double, scala.Double] {
-    def create[T, Cond[_,_], Param, Msg[_,_]](value : scala.Double) : Double[T, Cond, Param, Msg] = new Double[T, Cond, Param, Msg](value)
-  }
-
-  final class String[T, Cond[_,_], Param, Msg[_,_]] private(val value : java.lang.String) extends AnyVal with CheckedAny[java.lang.String, T] with TwoFaceAny.String[T] {
-    @inline def getValue : java.lang.String = value
-  }
-  object String extends CheckedAny.Builder[String, java.lang.String] {
-    def create[T, Cond[_,_], Param, Msg[_,_]](value : java.lang.String) : String[T, Cond, Param, Msg] = new String[T, Cond, Param, Msg](value)
-  }
-
-  final class Boolean[T, Cond[_,_], Param, Msg[_,_]] private(val value : scala.Boolean) extends AnyVal with CheckedAny[scala.Boolean, T] with TwoFaceAny.Boolean[T] {
-    @inline def getValue : scala.Boolean = value
-  }
-  object Boolean extends CheckedAny.Builder[Boolean, scala.Boolean] {
-    def create[T, Cond[_,_], Param, Msg[_,_]](value : scala.Boolean) : Boolean[T, Cond, Param, Msg] = new Boolean[T, Cond, Param, Msg](value)
-  }
-
-  trait Runtime[TFace, ParamFace, Cond[_,_], Msg[_,_]] {
-    def cond(t : TFace, p : Option[ParamFace]) : scala.Boolean
-    def msg(t : TFace, p : Option[ParamFace]) : java.lang.String
+class checked1Param[Cond[_,_], Msg[_,_], TFace, ParamFace] extends scala.annotation.StaticAnnotation {
+  inline def apply(defn: Any): Any = meta {
+    defn match {
+      case cls @ Defn.Class(_, name, _, ctor, _) =>
+        val q"type T = $tFaceName" = q"type T = $TFace"
+        val chkNameStr = name.value
+        val chkTypeName = Type.Name(chkNameStr)
+        val chkTermName = Term.Name(chkNameStr)
+        val updatedCls =
+          q"""
+             final class $chkTypeName[T, Param] (val value : $TFace) extends AnyVal with
+               _root_.singleton.twoface.impl.Checked1Param[$chkTypeName, $Cond, $Msg, $TFace, T, $ParamFace, Param] with
+               ${Ctor.Name("_root_.singleton.twoface.impl.TwoFaceAny." + tFaceName.toString())}[T] {
+               @inline def getValue : $TFace = value
+             }
+           """
+        val companion =
+          q"""
+             object $chkTermName extends _root_.singleton.twoface.impl.Checked1Param.Builder[$chkTypeName, $Cond, $Msg, $TFace, $ParamFace] {
+             }
+           """
+        val termBlock = Term.Block(Seq(updatedCls, companion))
+        //        print(termBlock)
+        termBlock
+      case _ =>
+        //        println(defn.structure)
+        abort("@checked must annotate a class.")
+    }
   }
 }

@@ -5,9 +5,9 @@ import singleton.TestUtils._
 
 class AndSpec extends Properties("&&") {
   property("truth table") = wellTyped {
-    implicitly[Require[(true && true) == true]]
-    implicitly[Require[(true && false) == false]]
-    implicitly[Require[(false && true) == false]]
-    implicitly[Require[(false && false) == false]]
+    implicitly[Require[(True && True) == True]]
+    implicitly[Require[(True && False) == False]]
+    implicitly[Require[(False && True) == False]]
+    implicitly[Require[(False && False) == False]]
   }
 }

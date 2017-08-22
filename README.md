@@ -24,16 +24,32 @@ val myBadVec = MyVec[-1] //fails compilation, as required
 ---
 ## Using singleton-ops
 
-The latest version of the library is 0.0.4, which is available for Typelevel Scala versions 2.11.8 & 2.12.1.
+The latest version of the library is 0.1.0, which is available for Typelevel Scala v4 for Scala versions 2.11.11 & 2.12.2.
 
 If you're using sbt, add the following to your build:
 
 ```sbt
 libraryDependencies ++= Seq(
-  "eu.timepit" %% "singleton-ops" % "0.0.4"
+  "eu.timepit" %% "singleton-ops" % "0.1.0"
 )
 ```
 **Be sure to follow Typelevel Scala [instructions][typelevel-scala-use], to be able to use literal types in your code.** 
+
+---
+## New in v0.1.0
+* Added `TwoFace` and `Checked` types. Use-case demonstration available at this [thread][twoface-discourse].
+* Forced proper implicit not found error messages to be displayed, when `Require` is applied.
+* Added `RequireMsg` to create custom error message when the implicit requirement is false.
+* Fixed `IsNat` indication to accept all (and only) positive integers.
+* `SafeNat` now forces `ToNat` casting (after proper check of `IsNat`)
+* Added `Id` to allow just referencing the same Out without any modification.
+* Added `FallBack` to provide a non-literal (fallback) type if given type isn't available at compile-time.
+* Added `CompileTime[C]` to require validity of condition `C` at compile-time. 
+If `C` isn't verifiable at compile-time, then the requirement is considered to be true (assuming later check at run-time).
+* Added `RunTime[R]` to provide a safe boolean indication if `R` is **not** available at compile-time. 
+* Increased test coverage significantly!
+* Updated to TypeLevel Scala v4.
+* Updated to SBT v0.13.15.
 
 ---
 #### Supported types:
@@ -90,14 +106,6 @@ libraryDependencies ++= Seq(
 #### Supported control operations:
 * `type ==>[A, B]` (`first A then B`)        
 * `type ITE[I,T,E]` (`If (I) Then (T) Else (E)`)      
-* `type While[Cond, Body, Ret]`  (`While (Cond) Run (Body) and then Return (Ret)`)      
-
-#### Supported assignment operations:
-* `type :=[Name, Value]`        
-* `type +=[Name, Value]`        
-* `type -=[Name, Value]`        
-* `type *=[Name, Value]`        
-* `type /=[Name, Value]`        
 
 #### Supported Aux Pattern interface:
 * `type OpAuxNat[O <: Op,      Ret_Out <: Nat]`
@@ -115,13 +123,13 @@ libraryDependencies ++= Seq(
 * `Int` type operations:
 ```scala
 import singleton.ops._
-def demo[L <: XInt](implicit p : L*L + L) : p.Out {} = p.value
+def demo[L <: XInt](implicit p : L*L + L) : p.Out {} = p.Out
 val b : 30 = demo[5]
 ```
 * `Long` type operations:
 ```scala
 import singleton.ops._
-def demoLong[L1 <: XLong, L2 <: XLong](implicit p : Min[L1*L1, L2+L2]) : p.Out {} = p.value
+def demoLong[L1 <: XLong, L2 <: XLong](implicit p : Min[L1*L1, L2+L2]) : p.Out {} = p.Out
 val bLong1 : 1L = demoLong[1L, 5L]
 val bLong2 : 6L = demoLong[3L, 3L]
 ```
@@ -129,28 +137,28 @@ val bLong2 : 6L = demoLong[3L, 3L]
 * `Double` type operations:
 ```scala
 import singleton.ops._
-def demoDouble[L1 <: XDouble, L2 <: XDouble](implicit p : L1 / L2 + 1.0) : p.Out {} = p.value
+def demoDouble[L1 <: XDouble, L2 <: XDouble](implicit p : L1 / L2 + 1.0) : p.Out {} = p.Out
 val bDouble : 1.2 = demoDouble[1.0, 5.0]
 ```
 
 * Combined `Long` and `Int` type operations:
 ```scala
 import singleton.ops._
-def demoSumLongInt[L1 <: XLong, L2 <: XInt](implicit p : L1 + L2) : p.Out {} = p.value
+def demoSumLongInt[L1 <: XLong, L2 <: XInt](implicit p : L1 + L2) : p.Out {} = p.Out
 val bSumLongInt : 16L = demoSumLongInt[8L, 8]
 ```
 
 * `String` type operations:
 ```scala
 import singleton.ops._
-def demoString[P1 <: XString](implicit op : Reverse[P1] + P1) : op.Out {} = op.value
+def demoString[P1 <: XString](implicit op : Reverse[P1] + P1) : op.Out {} = op.Out
 val bString : "cbaabc" = demoString["abc"]
 ```
 
 * `Boolean` type operations:
 ```scala
 import singleton.ops._
-def demoBoolean[P1 <: XInt](implicit op : P1 < 0) : op.Out{} = op.value
+def demoBoolean[P1 <: XInt](implicit op : P1 < 0) : op.Out{} = op.Out
 val bBoolean1 : true = demoBoolean[-5]
 val bBoolean2 : false = demoBoolean[5]
 val bBoolean3 : false = demoBoolean[0]
@@ -159,12 +167,12 @@ val bBoolean3 : false = demoBoolean[0]
 * `Boolean` type constraints:
 ```scala
 import singleton.ops._
-def demoRequire[P1 <: XInt](implicit op : Require[P1 < 0]) : op.Out{} = op.value
+def demoRequire[P1 <: XInt](implicit op : Require[P1 < 0]) : op.Out{} = op.Out
 scala> demoRequire[-1]
 demoRequire[-1]
 res0: Boolean(true) = true
 scala> demoRequire[1]
-<console>:16: error: could not find implicit value for parameter op: singleton.ops.Require[singleton.ops.<[1,0]]
+<console>:16: error: could not find implicit Out for parameter op: singleton.ops.Require[singleton.ops.<[1,0]]
        demoRequire[1]
 ```
 
@@ -174,17 +182,17 @@ import singleton.ops._
 import shapeless._
 val n = Nat(5)
 //Converting Nat to Int singleton occurs implicitly
-def demoNatToSing[L <: Nat](implicit p : L+L) : p.Out {} = p.value
+def demoNatToSing[L <: Nat](implicit p : L+L) : p.Out {} = p.Out
 val bSing10 : 10 = demoNatToSing[n.N]
 //Converting Int singleton to Nat requires explicit `ToNat`
-def demoSingToNat[L <: XInt](implicit op : ToNat[L+L]) : op.Out = op.value
+def demoSingToNat[L <: XInt](implicit op : ToNat[L+L]) : op.Out = op.Out
 val bNat10 : shapeless.nat._10 = demoSingToNat[5]
 ```
 
 * Working with large numbers doesn't slay the compiler:
 ```scala
 import singleton.ops._
-def bigMul[L1 <: XLong, L2 <: XLong](implicit p : L1 * L2) : p.Out {} = p.value
+def bigMul[L1 <: XLong, L2 <: XLong](implicit p : L1 * L2) : p.Out {} = p.Out
 scala> bigMul[32000L, 6400000L]
 res2: Long = 204800000000
 ```
@@ -205,4 +213,5 @@ GitHub, etc.) to be welcoming environments for everyone.
 [typelevel]: http://typelevel.org/
 [typelevel-coc]: http://typelevel.org/conduct.html
 [typelevel-scala]: https://github.com/typelevel/scala
-[typelevel-scala-use]: https://github.com/typelevel/scala#how-to-use-typelevel-scala
+[typelevel-scala-use]: https://github.com/typelevel/scala#how-to-use-typelevel-scala-4-with-sbt
+[twoface-discourse]: https://contributors.scala-lang.org/t/twoface-Outs-closing-the-gap-between-run-compile-time-functionality/869

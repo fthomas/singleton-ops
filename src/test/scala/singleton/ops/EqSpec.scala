@@ -7,40 +7,37 @@ import org.scalacheck.Prop
 
 class EqSpec extends Properties("==") {
   property("Basic boolean arguments") = wellTyped {
-    implicitly[Require[true == true]]
-    implicitly[Require[false == false]]
+    implicitly[Require[True == True]]
+    implicitly[Require[False == False]]
   }
   property("Basic boolean arguments") = {
-    illTyped("""implicitly[Require[true == false]]""");
-    illTyped("""implicitly[Require[false == true]]""");
+    illTyped("""implicitly[Require[True == False]]""");
+    illTyped("""implicitly[Require[False == True]]""");
     true
   }
 
   type OP[L,R] = ==[L,R]
   type leftNat = shapeless.Nat._1
-  type leftChar = '\u0001'
-  type leftInt = 1
-  type leftLong = 1L
-  type leftFloat = 1.0f
-  type leftDouble = 1.0
-  type leftString = "Something"
-  type leftBoolean = true
+  type leftChar = W.`'\u0001'`.T
+  type leftInt = W.`1`.T
+  type leftLong = W.`1L`.T
+  type leftFloat = W.`1.0f`.T
+  type leftDouble = W.`1.0`.T
+  type leftString = W.`"Something"`.T
+  type leftBoolean = True
 
   type rightNat = shapeless.Nat._1
-  type rightChar = '\u0001'
-  type rightInt = 1
-  type rightLong = 1L
-  type rightFloat = 1.0f
-  type rightDouble = 1.0
-  type rightString = "Else"
-  type rightBoolean = false
-
-  type resultFalse = false
-  type resultTrue = true
+  type rightChar = W.`'\u0001'`.T
+  type rightInt = W.`1`.T
+  type rightLong = W.`1L`.T
+  type rightFloat = W.`1.0f`.T
+  type rightDouble = W.`1.0`.T
+  type rightString = W.`"Else"`.T
+  type rightBoolean = False
 
   def verifyEqNum[L,R](implicit
-                       verifyFalse: Verify[L == Negate[R], resultFalse],
-                       verifyTrue: Verify[L == R, resultTrue]) : Prop = wellTyped {}
+                       verifyFalse: Verify[L == Negate[R], False],
+                       verifyTrue: Verify[L == R, True]) : Prop = wellTyped {}
 
   ////////////////////////////////////////////////////////////////////////
   // Nat op XXX
@@ -130,8 +127,8 @@ class EqSpec extends Properties("==") {
   property("String, Float arguments") = {illTyped("""implicitly[OP[leftString,rightFloat]]"""); true}
   property("String, Double arguments") = {illTyped("""implicitly[OP[leftString,rightDouble]]"""); true}
   property("String, String arguments") = {
-    verifyOp2Args[OP,leftString,leftString,resultTrue]
-    verifyOp2Args[OP,leftString,rightString,resultFalse]
+    verifyOp2Args[OP,leftString,leftString,True]
+    verifyOp2Args[OP,leftString,rightString,False]
   }
   property("String, Boolean arguments") = {illTyped("""implicitly[OP[leftString,rightBoolean]]"""); true}
   ////////////////////////////////////////////////////////////////////////

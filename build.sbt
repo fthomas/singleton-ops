@@ -1,8 +1,8 @@
 /// variables
 
-val groupId = "eu.timepit"
+val groupId = "core-act-ness"
 val projectName = "singleton-ops"
-val rootPkg = "singleton.ops"
+val rootPkg = "singleton"
 val gitPubUrl = s"https://github.com/fthomas/$projectName.git"
 val gitDevUrl = s"git@github.com:fthomas/$projectName.git"
 
@@ -10,6 +10,11 @@ val macroCompatVersion = "1.1.1"
 val macroParadiseVersion = "2.1.0"
 val shapelessVersion = "2.3.2"
 val scalaCheckVersion = "1.13.4"
+val scalaMetaVersion = "1.8.0"
+val macroParadise3Version = "3.0.0-M10"
+
+bintrayOrganization := Some("core-act-ness")
+bintrayRepository := "maven"
 
 /// projects
 
@@ -21,12 +26,24 @@ lazy val root = project
     libraryDependencies ++= Seq(
       scalaOrganization.value % "scala-compiler" % scalaVersion.value,
       "org.typelevel" %% "macro-compat" % macroCompatVersion,
-      compilerPlugin(
-        "org.scalamacros" % "paradise" % macroParadiseVersion cross CrossVersion.patch),
+      compilerPlugin("org.scalamacros" % "paradise" % macroParadiseVersion cross CrossVersion.patch),
       "com.chuusai" %% "shapeless" % shapelessVersion,
       "org.scalacheck" %% "scalacheck" % scalaCheckVersion % Test
     )
   )
+  .settings( //Adds dependency of new-style scalameta and paradise macros
+
+    libraryDependencies += "org.scalameta" %% "scalameta" % scalaMetaVersion % Provided,
+    scalacOptions += "-Xplugin-require:macroparadise",
+    // macroparadise plugin doesn't work in repl
+    scalacOptions in (Compile, console) ~= (_ filterNot (_ contains "paradise")),
+    sources in (Compile,doc) := Seq.empty, // disable scaladoc due to https://github.com/scalameta/paradise/issues/55
+    publishArtifact in (Compile, packageDoc) := false, // disable scaladoc
+    sbt.addCompilerPlugin("org.scalameta" % "paradise" % macroParadise3Version cross CrossVersion.patch)
+  ).settings(
+  resolvers += Resolver.bintrayRepo("singleton-ops", "maven")
+
+)
 
 /// settings
 
@@ -53,7 +70,7 @@ lazy val metadataSettings = Def.settings(
 )
 
 lazy val compileSettings = Def.settings(
-  scalaOrganization := "org.typelevel",
+  scalaOrganization := "org.scala-lang",
   scalacOptions ++= Seq(
     "-deprecation",
     "-encoding",
@@ -67,7 +84,7 @@ lazy val compileSettings = Def.settings(
     "-Xfatal-warnings",
     "-Xfuture",
     "-Xlint:-unused,_",
-    "-Yliteral-types",
+//    "-Yliteral-types",
     "-Yno-adapted-args",
     "-Ywarn-numeric-widen",
     "-Ywarn-unused-import"
@@ -157,7 +174,8 @@ lazy val styleSettings = Def.settings(
 
 lazy val miscSettings = Def.settings(
   initialCommands += s"""
-    import $rootPkg._
+    import $rootPkg.ops._
+    import $rootPkg.twoface._
   """
 )
 

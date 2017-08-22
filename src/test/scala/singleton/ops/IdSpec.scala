@@ -9,31 +9,35 @@ class IdSpec extends Properties("Id") {
     val ret : shapeless.nat._1 = getNat
   }
   property("Char") = {
-    val ret : Char = implicitly[SafeChar[Id['\u0001']]]
+    val ret : Char = implicitly[SafeChar[Id[W.`'\u0001'`.T]]]
     ret == '\u0001'
   }
   property("Int") = {
-    val ret : Int = implicitly[SafeInt[Id[1]]]
+    val ret : Int = implicitly[SafeInt[Id[W.`1`.T]]]
     ret == 1
   }
   property("Long") = {
-    val ret : Long = implicitly[SafeLong[Id[1L]]]
+    val ret : Long = implicitly[SafeLong[Id[W.`1L`.T]]]
     ret == 1L
   }
   property("Float") = {
-    val ret : Float = implicitly[SafeFloat[Id[1.0f]]]
+    val ret : Float = implicitly[SafeFloat[Id[W.`1.0f`.T]]]
     ret == 1.0f
   }
   property("Double") = {
-    val ret : Double = implicitly[SafeDouble[Id[1.0]]]
+    val ret : Double = implicitly[SafeDouble[Id[W.`1.0`.T]]]
     ret == 1.0
   }
   property("String") = {
-    val ret : String = implicitly[SafeString[Id["Something"]]]
+    val ret : String = implicitly[SafeString[Id[W.`"Something"`.T]]]
     ret == "Something"
   }
   property("Boolean") = {
-    val ret : Boolean = implicitly[SafeBoolean[Id[true]]]
+    val ret : Boolean = implicitly[SafeBoolean[Id[W.`true`.T]]]
     ret == true
+  }
+  property("Symbol") = {
+    val ret : Symbol = implicitly[SafeSymbol[Id[W.`"Something"`.T]]]
+    ret == 'Something
   }
 }

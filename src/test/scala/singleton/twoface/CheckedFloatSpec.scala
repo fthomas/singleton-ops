@@ -5,16 +5,14 @@ import shapeless.test.illTyped
 import singleton.TestUtils._
 import singleton.ops._
 
-class CheckedFloatSpec extends Properties("Checked.Float") {
-  type CondSmallerThan50[T, P] = T < P
-  type MsgSmallerThan50[T, P] = "Failed Check"
-  type Param50 = 50.0f
-  type CheckedSmallerThan50[T] = Checked.Float[T, CondSmallerThan50, Param50, MsgSmallerThan50]
+object CheckedFloatSpec {
+  type Cond[T] = T < W.`50.0f`.T
+  type Msg[T] = W.`"Failed Check"`.T
+  @checked0Param[Cond, Msg, Float] class CheckedSmallerThan50[T]
+}
 
-  implicit object RuntimeChecked extends Checked.Runtime[Float, Float, CondSmallerThan50, MsgSmallerThan50] {
-    def cond(l : Float, p : Option[Float]) : scala.Boolean = l < 50.0f
-    def msg(l : Float, p : Option[Float]) : java.lang.String = s"Failed Check"
-  }
+class CheckedFloatSpec extends Properties("Checked.Float") {
+  import CheckedFloatSpec._
 
   def smallerThan50[T](t : CheckedSmallerThan50[T]) : Unit = {t.unsafeCheck()}
 

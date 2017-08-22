@@ -7,30 +7,27 @@ import singleton.TestUtils._
 class STSpec extends Properties("<") {
   type OP[L,R] = <[L,R]
   type leftNat = shapeless.Nat._1
-  type leftChar = '\u0001'
-  type leftInt = 1
-  type leftLong = 1L
-  type leftFloat = 1.0f
-  type leftDouble = 1.0
-  type leftString = "Something"
-  type leftBoolean = true
+  type leftChar = W.`'\u0001'`.T
+  type leftInt = W.`1`.T
+  type leftLong = W.`1L`.T
+  type leftFloat = W.`1.0f`.T
+  type leftDouble = W.`1.0`.T
+  type leftString = W.`"Something"`.T
+  type leftBoolean = True
 
   type rightNat = shapeless.Nat._2
-  type rightChar = '\u0002'
-  type rightInt = 2
-  type rightLong = 2L
-  type rightFloat = 2.0f
-  type rightDouble = 2.0
-  type rightString = "Else"
-  type rightBoolean = false
-
-  type resultFalse = false
-  type resultTrue = true
+  type rightChar = W.`'\u0002'`.T
+  type rightInt = W.`2`.T
+  type rightLong = W.`2L`.T
+  type rightFloat = W.`2.0f`.T
+  type rightDouble = W.`2.0`.T
+  type rightString = W.`"Else"`.T
+  type rightBoolean = False
 
   def verifySTNum[L,R](implicit
-                       verifyFalse: Verify[L < Negate[R], resultFalse],
-                       verifyFalse2: Verify[L < L, resultFalse],
-                       verifyTrue: Verify[L < R, resultTrue]) : Prop = wellTyped {}
+                       verifyFalse: Verify[L < Negate[R], False],
+                       verifyFalse2: Verify[L < L, False],
+                       verifyTrue: Verify[L < R, True]) : Prop = wellTyped {}
 
   ////////////////////////////////////////////////////////////////////////
   // Nat op XXX

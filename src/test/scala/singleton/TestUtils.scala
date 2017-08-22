@@ -40,37 +40,48 @@ object TestUtils {
   def verifyOp1Args[OP[_],L,Expected](implicit verify: Verify[OP[L], Expected]) : Prop = wellTyped {}
   def verifyOp2Args[OP[_,_],L,R,Expected](implicit verify: Verify[OP[L,R], Expected]) : Prop = wellTyped {}
 
-  type VerifyTF[OP, Expected] = Require[ITE[IsNotLiteral[Expected], IsNotLiteral[OP], OP == Expected]]
+  type VerifyTF[OP, Expected] = Require[ITE[IsNonLiteral[Expected], IsNonLiteral[OP], OP == Expected]]
 
-  def verifyTF[OP, Expected](opResult : TwoFace.Char[OP], expectedResult : TwoFace.Char[Expected])
+  def verifyTFChar[OP, Expected](opResult : TwoFace.Char[OP], expectedResult : TwoFace.Char[Expected])
                             (implicit verify : VerifyTF[OP, Expected]) : Prop = {
     opResult.getValue == expectedResult.getValue
   }
-  def verifyTF[OP, Expected](opResult : TwoFace.Int[OP], expectedResult : TwoFace.Int[Expected])
+  def verifyTFInt[OP, Expected](opResult : TwoFace.Int[OP], expectedResult : TwoFace.Int[Expected])
                                (implicit verify : VerifyTF[OP, Expected]) : Prop = {
     opResult.getValue == expectedResult.getValue
   }
-  def verifyTF[OP, Expected](opResult : TwoFace.Long[OP], expectedResult : TwoFace.Long[Expected])
+  def verifyTFLong[OP, Expected](opResult : TwoFace.Long[OP], expectedResult : TwoFace.Long[Expected])
                                (implicit verify : VerifyTF[OP, Expected]) : Prop = {
     opResult.getValue == expectedResult.getValue
   }
-  def verifyTF[OP, Expected](opResult : TwoFace.Float[OP], expectedResult : TwoFace.Float[Expected])
+  def verifyTFFloat[OP, Expected](opResult : TwoFace.Float[OP], expectedResult : TwoFace.Float[Expected])
                                 (implicit verify : VerifyTF[OP, Expected]) : Prop = {
     opResult.getValue == expectedResult.getValue
   }
-  def verifyTF[OP, Expected](opResult : TwoFace.Double[OP], expectedResult : TwoFace.Double[Expected])
+  def verifyTFDouble[OP, Expected](opResult : TwoFace.Double[OP], expectedResult : TwoFace.Double[Expected])
                             (implicit verify : VerifyTF[OP, Expected]) : Prop = {
     opResult.getValue == expectedResult.getValue
   }
-  def verifyTF[OP, Expected](opResult : TwoFace.String[OP], expectedResult : TwoFace.String[Expected])
+  def verifyTFString[OP, Expected](opResult : TwoFace.String[OP], expectedResult : TwoFace.String[Expected])
                             (implicit verify : VerifyTF[OP, Expected]) : Prop = {
     opResult.getValue == expectedResult.getValue
   }
-  def verifyTF[OP, Expected](opResult : TwoFace.Boolean[OP], expectedResult : TwoFace.Boolean[Expected])
+  def verifyTFBoolean[OP, Expected](opResult : TwoFace.Boolean[OP], expectedResult : TwoFace.Boolean[Expected])
                             (implicit verify : VerifyTF[OP, Expected]) : Prop = {
     opResult.getValue == expectedResult.getValue
   }
 
   //nf = unsafe. used to force a not-final value. e.g., nf(3) returns a non-literal 3
-  def us[T](t : T) : T = t
+  def us[T](t : T) : T = {
+    var ret = t
+    ret
+  }
+
+  //Use to get the type of an object, when t.type is impossible
+  trait Me {
+    type T
+  }
+  def me[T0](t : T0) = new Me {
+    type T = T0
+  }
 }
