@@ -24,32 +24,16 @@ val myBadVec = MyVec[-1] //fails compilation, as required
 ---
 ## Using singleton-ops
 
-The latest version of the library is 0.1.0, which is available for Typelevel Scala v4 for Scala versions 2.11.11 & 2.12.2.
+The latest version of the library is 0.0.4, which is available for Typelevel Scala v4 for Scala versions 2.11.11 & 2.12.2.
 
 If you're using sbt, add the following to your build:
 
 ```sbt
 libraryDependencies ++= Seq(
-  "eu.timepit" %% "singleton-ops" % "0.1.0"
+  "eu.timepit" %% "singleton-ops" % "0.0.4"
 )
 ```
 **Be sure to follow Typelevel Scala [instructions][typelevel-scala-use], to be able to use literal types in your code.** 
-
----
-## New in v0.1.0
-* Added `TwoFace` and `Checked` types. Use-case demonstration available at this [thread][twoface-discourse].
-* Forced proper implicit not found error messages to be displayed, when `Require` is applied.
-* Added `RequireMsg` to create custom error message when the implicit requirement is false.
-* Fixed `IsNat` indication to accept all (and only) positive integers.
-* `SafeNat` now forces `ToNat` casting (after proper check of `IsNat`)
-* Added `Id` to allow just referencing the same Out without any modification.
-* Added `FallBack` to provide a non-literal (fallback) type if given type isn't available at compile-time.
-* Added `CompileTime[C]` to require validity of condition `C` at compile-time. 
-If `C` isn't verifiable at compile-time, then the requirement is considered to be true (assuming later check at run-time).
-* Added `RunTime[R]` to provide a safe boolean indication if `R` is **not** available at compile-time. 
-* Increased test coverage significantly!
-* Updated to TypeLevel Scala v4.
-* Updated to SBT v0.13.15.
 
 ---
 #### Supported types:
