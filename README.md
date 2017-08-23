@@ -3,6 +3,7 @@
 [![codecov](https://codecov.io/gh/fthomas/singleton-ops/branch/master/graph/badge.svg)](https://codecov.io/gh/fthomas/singleton-ops)
 [![Join the chat at https://gitter.im/fthomas/singleton-ops](https://badges.gitter.im/fthomas/singleton-ops.svg)](https://gitter.im/fthomas/singleton-ops?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Scaladex](https://index.scala-lang.org/fthomas/singleton-ops/singleton-ops/latest.svg?color=blue)](https://index.scala-lang.org/fthomas/singleton-ops)
+[![Scala.js](https://www.scala-js.org/assets/badges/scalajs-0.6.17.svg)](https://www.scala-js.org)
 
 This library provides type-level operations for [Typelevel Scala][typelevel-scala] with [SIP-23][sip-23].
 ## Simple example:
@@ -33,7 +34,14 @@ libraryDependencies ++= Seq(
   "eu.timepit" %% "singleton-ops" % "0.0.4"
 )
 ```
-**Be sure to follow Typelevel Scala [instructions][typelevel-scala-use], to be able to use literal types in your code.** 
+If you're using scala.js use `%%%` instead
+
+```sbt
+libraryDependencies ++= Seq(
+  "eu.timepit" %%% "singleton-ops" % "0.0.4"
+)
+```
+**Be sure to follow Typelevel Scala [instructions][typelevel-scala-use], to be able to use literal types in your code.**
 
 ---
 #### Supported types:
