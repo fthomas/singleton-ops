@@ -195,6 +195,7 @@ res2: Long = 204800000000
 * [Matthew Pocock](https://github.com/drdozer)
 * [Naoki Aoyama](https://github.com/aoiroaoino)
 * [Oron Port](https://github.com/soronpo)
+* [Carlos Quiroz](https://github.com/cquiroz)
 
 The singleton-ops project supports the [Typelevel][typelevel]
 [code of conduct][typelevel-coc] and wants all of its channels (Gitter,
