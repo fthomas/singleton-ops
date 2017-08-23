@@ -329,7 +329,7 @@ class TwoFaceDoubleSpec extends Properties("TwoFace.Double") {
   property("Safe toFloat") = verifyTFFloat(TwoFace.Double(1.0).toFloat, 1.0f)
   property("Unsafe toFloat") = verifyTFFloat(TwoFace.Double(us(1.0)).toFloat, us(1.0f))
   property("Safe toStringTF") = verifyTFString(TwoFace.Double(1.0).toStringTF, "1.0")
-  property("Unsafe toStringTF") = verifyTFString(TwoFace.Double(us(1.0)).toStringTF, us("1.0"))
+  property("Unsafe toStringTF") = verifyTFString(TwoFace.Double(us(1.5)).toStringTF, us("1.5"))
   property("Safe toSymbol") = {
     val sym = TwoFace.Double(2.0).toSymbol
     sym == scala.Symbol("2.0")
@@ -382,7 +382,7 @@ class TwoFaceDoubleSpec extends Properties("TwoFace.Double") {
   }
 
   property("ToString") = {
-    TwoFace.Double[W.`1.0`.T].toString() == "1.0"
+    TwoFace.Double[W.`1.5`.T].toString() == "1.5"
   }
 
   type Fin = W.`3.0`.T
