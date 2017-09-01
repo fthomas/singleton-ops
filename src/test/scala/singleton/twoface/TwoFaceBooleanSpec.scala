@@ -94,6 +94,16 @@ class TwoFaceBooleanSpec extends Properties("TwoFace.Boolean") {
 
   type Fin = W.`true`.T
   final val fin = true
+
+  property("Extracting from an Upper Bounded Numeric") = wellTyped {
+    def foo[W](width: TwoFace.Boolean[W]) = width
+    def foo2[R <: Boolean](r: R) = foo(r)
+    val a = foo2(W(fin).value)
+    implicitly[a.Out =:= Fin]
+    val b = foo2(us(fin))
+    implicitly[b.Out =:= Boolean]
+  }
+
   property("Extracting from Safe TwoFace") = {
     val a = me(TwoFace.Boolean(fin))
     val ret = shapeless.the[Id[a.T]]
@@ -104,16 +114,16 @@ class TwoFaceBooleanSpec extends Properties("TwoFace.Boolean") {
   def noImplFoo[W](w : TwoFace.Boolean[W]) = !w //Missing twoface shell implicit
   property("Unavailable Implicit Safe TwoFace Shell") = {
     val ret = noImplFoo(true)
-    implicitly[ret.T0 <:< ![W.`true`.T]]
+    implicitly[ret.Out <:< ![W.`true`.T]]
     val retSimple = ret.simplify
-    implicitly[retSimple.T0 <:< W.`false`.T]
+    implicitly[retSimple.Out <:< W.`false`.T]
     retSimple.getValue == false
   }
   property("Unavailable Implicit Unsafe TwoFace Shell") = {
     val ret = noImplFoo(us(true))
-    implicitly[ret.T0 <:< ![Boolean]]
+    implicitly[ret.Out <:< ![Boolean]]
     val retSimple = ret.simplify
-    implicitly[retSimple.T0 <:< Boolean]
+    implicitly[retSimple.Out <:< Boolean]
     retSimple.getValue == false
   }
 }

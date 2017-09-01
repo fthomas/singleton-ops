@@ -329,7 +329,7 @@ class TwoFaceDoubleSpec extends Properties("TwoFace.Double") {
   property("Safe toFloat") = verifyTFFloat(TwoFace.Double(1.0).toFloat, 1.0f)
   property("Unsafe toFloat") = verifyTFFloat(TwoFace.Double(us(1.0)).toFloat, us(1.0f))
   property("Safe toStringTF") = verifyTFString(TwoFace.Double(1.0).toStringTF, "1.0")
-  property("Unsafe toStringTF") = verifyTFString(TwoFace.Double(us(1.0)).toStringTF, us("1.0"))
+  property("Unsafe toStringTF") = verifyTFString(TwoFace.Double(us(1.5)).toStringTF, us("1.5"))
   property("Safe toSymbol") = {
     val sym = TwoFace.Double(2.0).toSymbol
     sym == scala.Symbol("2.0")
@@ -382,11 +382,21 @@ class TwoFaceDoubleSpec extends Properties("TwoFace.Double") {
   }
 
   property("ToString") = {
-    TwoFace.Double[W.`1.0`.T].toString() == "1.0"
+    TwoFace.Double[W.`1.5`.T].toString() == "1.5"
   }
 
   type Fin = W.`3.0`.T
   final val fin = 3.0
+
+  property("Extracting from an Upper Bounded Numeric") = wellTyped {
+    def foo[W](width: TwoFace.Double[W]) = width
+    def foo2[R <: Double](r: R) = foo(r)
+    val a = foo2(W(fin).value)
+    implicitly[a.Out =:= Fin]
+    val b = foo2(us(fin))
+    implicitly[b.Out =:= Double]
+  }
+
   property("Extracting from Safe TwoFace") = {
     val a = me(TwoFace.Double(fin))
     val ret = shapeless.the[Id[a.T]]
@@ -397,16 +407,16 @@ class TwoFaceDoubleSpec extends Properties("TwoFace.Double") {
   def noImplFoo[W](w : TwoFace.Double[W]) = -w //Missing twoface shell implicit
   property("Unavailable Implicit Safe TwoFace Shell") = {
     val ret = noImplFoo(2.0)
-    implicitly[ret.T0 <:< Negate[W.`2.0`.T]]
+    implicitly[ret.Out <:< Negate[W.`2.0`.T]]
     val retSimple = ret.simplify
-    implicitly[retSimple.T0 <:< W.`-2.0`.T]
+    implicitly[retSimple.Out <:< W.`-2.0`.T]
     retSimple.getValue == -2.0
   }
   property("Unavailable Implicit Unsafe TwoFace Shell") = {
     val ret = noImplFoo(us(2.0))
-    implicitly[ret.T0 <:< Negate[Double]]
+    implicitly[ret.Out <:< Negate[Double]]
     val retSimple = ret.simplify
-    implicitly[retSimple.T0 <:< Double]
+    implicitly[retSimple.Out <:< Double]
     retSimple.getValue == -2.0
   }
 }

@@ -17,33 +17,34 @@ bintrayOrganization := Some("core-act-ness")
 bintrayRepository := "maven"
 
 /// projects
+lazy val root = project.in(file("."))
+  .settings(commonSettings)
+  .aggregate(singleton_opsJVM, singleton_opsJS)
+  .settings(noPublishSettings)
+  .settings(
+  )
 
-lazy val root = project
+lazy val singleton_ops = crossProject
+  .crossType(CrossType.Pure)
   .in(file("."))
   .settings(commonSettings)
   .settings(publishSettings)
   .settings(
     libraryDependencies ++= Seq(
       scalaOrganization.value % "scala-compiler" % scalaVersion.value,
-      "org.typelevel" %% "macro-compat" % macroCompatVersion,
-      compilerPlugin("org.scalamacros" % "paradise" % macroParadiseVersion cross CrossVersion.patch),
-      "com.chuusai" %% "shapeless" % shapelessVersion,
-      "org.scalacheck" %% "scalacheck" % scalaCheckVersion % Test
+      "org.typelevel" %%% "macro-compat" % macroCompatVersion,
+      compilerPlugin(
+        "org.scalamacros" % "paradise" % macroParadiseVersion cross CrossVersion.patch),
+      "com.chuusai" %%% "shapeless" % shapelessVersion,
+      "org.scalacheck" %%% "scalacheck" % scalaCheckVersion % Test
     )
   )
-  .settings( //Adds dependency of new-style scalameta and paradise macros
+  .jsSettings(
+    coverageEnabled := false
+  )
 
-    libraryDependencies += "org.scalameta" %% "scalameta" % scalaMetaVersion % Provided,
-    scalacOptions += "-Xplugin-require:macroparadise",
-    // macroparadise plugin doesn't work in repl
-    scalacOptions in (Compile, console) ~= (_ filterNot (_ contains "paradise")),
-    sources in (Compile,doc) := Seq.empty, // disable scaladoc due to https://github.com/scalameta/paradise/issues/55
-    publishArtifact in (Compile, packageDoc) := false, // disable scaladoc
-    sbt.addCompilerPlugin("org.scalameta" % "paradise" % macroParadise3Version cross CrossVersion.patch)
-  ).settings(
-  resolvers += Resolver.bintrayRepo("singleton-ops", "maven")
-
-)
+lazy val singleton_opsJVM = singleton_ops.jvm
+lazy val singleton_opsJS  = singleton_ops.js
 
 /// settings
 
@@ -87,11 +88,27 @@ lazy val compileSettings = Def.settings(
 //    "-Yliteral-types",
     "-Yno-adapted-args",
     "-Ywarn-numeric-widen",
-    "-Ywarn-unused-import"
+    "-Ywarn-unused-import",
 //    "-Ywarn-value-discard"
+    "-Xplugin-require:macroparadise"
   ),
   scalacOptions in (Compile, console) -= "-Ywarn-unused-import",
-  scalacOptions in (Test, console) -= "-Ywarn-unused-import"
+  scalacOptions in (Test, console) -= "-Ywarn-unused-import",
+  libraryDependencies ++= Seq(
+    scalaOrganization.value % "scala-compiler" % scalaVersion.value,
+    "org.typelevel" %%% "macro-compat" % macroCompatVersion,
+    compilerPlugin(
+    "org.scalamacros" % "paradise" % macroParadiseVersion cross CrossVersion.patch),
+    "com.chuusai" %%% "shapeless" % shapelessVersion,
+    "org.scalacheck" %%% "scalacheck" % scalaCheckVersion % Test,
+    "org.scalameta" %%% "scalameta" % scalaMetaVersion % Provided
+  ),
+  // macroparadise plugin doesn't work in repl
+  scalacOptions in (Compile, console) ~= (_ filterNot (_ contains "paradise")),
+  sources in (Compile,doc) := Seq.empty, // disable scaladoc due to https://github.com/scalameta/paradise/issues/55
+  publishArtifact in (Compile, packageDoc) := false, // disable scaladoc
+  sbt.addCompilerPlugin("org.scalameta" % "paradise" % macroParadise3Version cross CrossVersion.patch),
+  resolvers += Resolver.bintrayRepo("singleton-ops", "maven")
 )
 
 lazy val scaladocSettings = Def.settings(
@@ -184,6 +201,8 @@ lazy val miscSettings = Def.settings(
 val validateCommands = Seq(
   "clean",
   //"scalafmtTest",
+  "test:compile",
+  "singleton_opsJS/test",
   "coverage",
   "test",
   "coverageReport",
