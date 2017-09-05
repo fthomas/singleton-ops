@@ -1,6 +1,6 @@
 /// variables
 
-val groupId = "core-act-ness"
+val groupId = "eu.timepit"
 val projectName = "singleton-ops"
 val rootPkg = "singleton"
 val gitPubUrl = s"https://github.com/fthomas/$projectName.git"
@@ -8,13 +8,10 @@ val gitDevUrl = s"git@github.com:fthomas/$projectName.git"
 
 val macroCompatVersion = "1.1.1"
 val macroParadiseVersion = "2.1.0"
+val macroParadise3Version = "3.0.0-M10"
 val shapelessVersion = "2.3.2"
 val scalaCheckVersion = "1.13.4"
 val scalaMetaVersion = "1.8.0"
-val macroParadise3Version = "3.0.0-M10"
-
-bintrayOrganization := Some("core-act-ness")
-bintrayRepository := "maven"
 
 /// projects
 lazy val root = project.in(file("."))
@@ -107,8 +104,7 @@ lazy val compileSettings = Def.settings(
   scalacOptions in (Compile, console) ~= (_ filterNot (_ contains "paradise")),
   sources in (Compile,doc) := Seq.empty, // disable scaladoc due to https://github.com/scalameta/paradise/issues/55
   publishArtifact in (Compile, packageDoc) := false, // disable scaladoc
-  sbt.addCompilerPlugin("org.scalameta" % "paradise" % macroParadise3Version cross CrossVersion.patch),
-  resolvers += Resolver.bintrayRepo("singleton-ops", "maven")
+  sbt.addCompilerPlugin("org.scalameta" % "paradise" % macroParadise3Version cross CrossVersion.patch)
 )
 
 lazy val scaladocSettings = Def.settings(
@@ -142,8 +138,8 @@ lazy val publishSettings = Def.settings(
 )
 
 lazy val noPublishSettings = Def.settings(
-  publish := (),
-  publishLocal := (),
+  publish := {},
+  publishLocal := {},
   publishArtifact := false
 )
 
@@ -174,7 +170,7 @@ lazy val releaseSettings = {
       runClean,
       runTest,
       setReleaseVersion,
-      //updateVersionInReadme,
+      updateVersionInReadme,
       commitReleaseVersion,
       tagRelease,
       publishArtifacts,
