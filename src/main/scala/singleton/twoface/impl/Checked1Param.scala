@@ -3,7 +3,6 @@ package singleton.twoface.impl
 import macrocompat.bundle
 import singleton.ops._
 import singleton.ops.impl._
-import singleton.twoface.Checked
 
 import scala.reflect.macros.whitebox
 
@@ -17,9 +16,13 @@ trait Checked1Param[Chk[_,_], Cond[_,_], Msg[_,_], Face, T, ParamFace, Param] ex
 
 object Checked1Param {
   trait Builder[Chk[_,_], Cond[_,_], Msg[_,_], Face, ParamFace] {
-    type Shell[T, Param] = Checked.Shell2[Cond, Msg, T, Face, Param, ParamFace]
-    type ShellSym[Sym, T, Param] = Checked.Shell2Sym[Cond, Msg, Sym, T, Face, Param, ParamFace]
-
+    type Shell[T, Param] = ShellSym[ShellSym[_,_,_], T, Param]
+    trait ShellSym[Sym, T, Param] extends CheckedShell2[Cond, Msg, Sym, T, Face, Param, ParamFace]
+    object ShellSym extends CheckedShell2Builder[ShellSym, Cond, Msg, Face, ParamFace] {
+      def create[Sym, T, Param](_unsafeCheck: (Face, ParamFace) => Unit): ShellSym[Sym, T, Param] = new ShellSym[Sym, T, Param] {
+        def unsafeCheck(arg1: => Face, arg2: => ParamFace): Unit = _unsafeCheck(arg1, arg2)
+      }
+    }
     ////////////////////////////////////////////////////////////////////////////////////////
     // Manual invocations (usually used to for testing)
     ////////////////////////////////////////////////////////////////////////////////////////
