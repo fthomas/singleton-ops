@@ -168,7 +168,6 @@ lazy val releaseSettings = {
       checkSnapshotDependencies,
       inquireVersions,
       runClean,
-      runTest,
       setReleaseVersion,
       updateVersionInReadme,
       commitReleaseVersion,
