@@ -25,20 +25,20 @@ val myBadVec = MyVec[-1] //fails compilation, as required
 ---
 ## Using singleton-ops
 
-The latest version of the library is 0.2.0, which is available for Typelevel Scala v4 for Scala versions 2.11.11 & 2.12.2.
+The latest version of the library is 0.2.1, which is available for Typelevel Scala v4 for Scala versions 2.11.11 & 2.12.2.
 
 If you're using sbt, add the following to your build:
 
 ```sbt
 libraryDependencies ++= Seq(
-  "eu.timepit" %% "singleton-ops" % "0.2.0"
+  "eu.timepit" %% "singleton-ops" % "0.2.1"
 )
 ```
 If you're using scala.js use `%%%` instead
 
 ```sbt
 libraryDependencies ++= Seq(
-  "eu.timepit" %%% "singleton-ops" % "0.2.0"
+  "eu.timepit" %%% "singleton-ops" % "0.2.1"
 )
 ```
 **Be sure to follow Typelevel Scala [instructions][typelevel-scala-use], to be able to use literal types in your code.**
