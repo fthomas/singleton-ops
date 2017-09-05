@@ -103,7 +103,6 @@ lazy val compileSettings = Def.settings(
   // macroparadise plugin doesn't work in repl
   scalacOptions in (Compile, console) ~= (_ filterNot (_ contains "paradise")),
   sources in (Compile,doc) := Seq.empty, // disable scaladoc due to https://github.com/scalameta/paradise/issues/55
-  publishArtifact in (Compile, packageDoc) := false, // disable scaladoc
   sbt.addCompilerPlugin("org.scalameta" % "paradise" % macroParadise3Version cross CrossVersion.patch)
 )
 
