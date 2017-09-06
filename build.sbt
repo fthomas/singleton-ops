@@ -1,3 +1,5 @@
+import scala.sys.process._
+
 /// variables
 
 val groupId = "eu.timepit"
