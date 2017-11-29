@@ -347,9 +347,9 @@ class TwoFaceLongSpec extends Properties("TwoFace.Long") {
   }
 
   property("Wrong Implicit Conversions") = wellTyped {
-    illTyped("""val a : TwoFace.Long[W.`3L`.T] = implicitly[TwoFace.Long[W.`2L`.T + W.`2L`.T]]""")
-    illTyped("""val b : TwoFace.Long[W.`3L`.T + W.`0L`.T] = implicitly[TwoFace.Long[W.`2L`.T + W.`2L`.T]]""")
-    illTyped("""val c : TwoFace.Long[W.`3L`.T + W.`0L`.T] = implicitly[TwoFace.Long[W.`4L`.T]]""")
+    illTyped("""val impl = implicitly[TwoFace.Long[W.`2L`.T + W.`2L`.T]]; val a : TwoFace.Long[W.`3L`.T] = impl""")
+    illTyped("""val impl = implicitly[TwoFace.Long[W.`2L`.T + W.`2L`.T]]; val b : TwoFace.Long[W.`3L`.T + W.`0L`.T] = impl""")
+    illTyped("""val impl = implicitly[TwoFace.Long[W.`4L`.T]]; val c : TwoFace.Long[W.`3L`.T + W.`0L`.T] = impl""")
   }
 
   property("ToString") = {

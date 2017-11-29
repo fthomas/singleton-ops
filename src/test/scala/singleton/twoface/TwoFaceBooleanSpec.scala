@@ -84,8 +84,8 @@ class TwoFaceBooleanSpec extends Properties("TwoFace.Boolean") {
   }
 
   property("Wrong Implicit Conversions") = wellTyped {
-    illTyped("""val a : TwoFace.Boolean[W.`true`.T] = implicitly[TwoFace.Boolean[W.`false`.T && W.`true`.T]]""")
-    illTyped("""val b : TwoFace.Boolean[W.`false`.T && W.`true`.T] = implicitly[TwoFace.Boolean[W.`true`.T]]""")
+    illTyped("""val impl = implicitly[TwoFace.Boolean[W.`false`.T && W.`true`.T]]; val a : TwoFace.Boolean[W.`true`.T] = impl""")
+    illTyped("""val impl = implicitly[TwoFace.Boolean[W.`true`.T]]; val b : TwoFace.Boolean[W.`false`.T && W.`true`.T] = impl""")
   }
 
   property("ToString") = {

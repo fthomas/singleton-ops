@@ -371,11 +371,10 @@ class TwoFaceFloatSpec extends Properties("TwoFace.Float") {
     val e : Float = TwoFace.Float(us(3.0f))
   }
 
-  property("Wrong Implicit Conversions") = {
-    illTyped("""val a : TwoFace.Float[W.`3.0f`.T] = implicitly[TwoFace.Float[W.`2.0f`.T + W.`2.0f`.T]]""")
-    illTyped("""val b : TwoFace.Float[W.`3.0f`.T + W.`0.0f`.T] = implicitly[TwoFace.Float[W.`2.0f`.T + W.`2.0f`.T]]""")
-    illTyped("""val c : TwoFace.Float[W.`3.0f`.T + W.`0.0f`.T] = implicitly[TwoFace.Float[W.`4.0f`.T]]""")
-    true
+  property("Wrong Implicit Conversions") = wellTyped {
+    illTyped("""val impl = implicitly[TwoFace.Float[W.`2.0f`.T + W.`2.0f`.T]]; val a : TwoFace.Float[W.`3.0f`.T] = impl""")
+    illTyped("""val impl = implicitly[TwoFace.Float[W.`2.0f`.T + W.`2.0f`.T]]; val b : TwoFace.Float[W.`3.0f`.T + W.`0.0f`.T] = impl""")
+    illTyped("""val impl = implicitly[TwoFace.Float[W.`4.0f`.T]]; val c : TwoFace.Float[W.`3.0f`.T + W.`0.0f`.T] = impl""")
   }
 
   property("ToString") = {
