@@ -93,8 +93,8 @@ class TwoFaceStringSpec extends Properties("TwoFace.String") {
   }
 
   property("Wrong Implicit Conversions") = wellTyped {
-    illTyped("""val a : TwoFace.String[W.`"Some"`.T] = implicitly[TwoFace.String[W.`"Som"`.T + W.`"E"`.T]]""")
-    illTyped("""val b : TwoFace.String[W.`"Some"`.T + W.`"thing"`.T] = implicitly[TwoFace.String[W.`"SomeThing"`.T]]""")
+    illTyped("""val impl = implicitly[TwoFace.String[W.`"Som"`.T + W.`"E"`.T]]; val a : TwoFace.String[W.`"Some"`.T] = impl""")
+    illTyped("""val impl = implicitly[TwoFace.String[W.`"SomeThing"`.T]]; val b : TwoFace.String[W.`"Some"`.T + W.`"thing"`.T] = impl""")
   }
 
   type Fin = W.`"a"`.T

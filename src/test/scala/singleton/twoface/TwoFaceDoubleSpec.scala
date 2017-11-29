@@ -374,11 +374,10 @@ class TwoFaceDoubleSpec extends Properties("TwoFace.Double") {
     val e : Double = TwoFace.Double(us(3.0))
   }
 
-  property("Wrong Implicit Conversions") = {
-    illTyped("""val a : TwoFace.Double[W.`3.0`.T] = implicitly[TwoFace.Double[W.`2.0`.T + W.`2.0`.T]]""")
-    illTyped("""val b : TwoFace.Double[W.`3.0`.T + W.`0.0`.T] = implicitly[TwoFace.Double[W.`2.0`.T + W.`2.0`.T]]""")
-    illTyped("""val c : TwoFace.Double[W.`3.0`.T + W.`0.0`.T] = implicitly[TwoFace.Double[W.`4.0`.T]]""")
-    true
+  property("Wrong Implicit Conversions") = wellTyped {
+    illTyped("""val impl = implicitly[TwoFace.Double[W.`2.0`.T + W.`2.0`.T]]; val a : TwoFace.Double[W.`3.0`.T] = impl""")
+    illTyped("""val impl = implicitly[TwoFace.Double[W.`2.0`.T + W.`2.0`.T]]; val b : TwoFace.Double[W.`3.0`.T + W.`0.0`.T] = impl""")
+    illTyped("""val impl = implicitly[TwoFace.Double[W.`4.0`.T]]; val c : TwoFace.Double[W.`3.0`.T + W.`0.0`.T] = impl""")
   }
 
   property("ToString") = {

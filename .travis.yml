@@ -1,8 +1,8 @@
 language: scala
 sudo: required
 scala:
-# - 2.11.11-bin-typelevel-4
- - 2.12.3
+ - 2.11.11
+ - 2.12.4
 jdk:
  - oraclejdk8
 cache:
@@ -10,6 +10,6 @@ cache:
    - "$HOME/.ivy2/cache"
    - "$HOME/.sbt/boot/"
 script:
- - sbt ++$TRAVIS_SCALA_VERSION validate
+ - travis_wait 60 sbt ++$TRAVIS_SCALA_VERSION validate
 after_success:
  - bash <(curl -s https://codecov.io/bash)
