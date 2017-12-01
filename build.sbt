@@ -21,6 +21,8 @@ lazy val root = project.in(file("."))
   .aggregate(singleton_opsJVM, singleton_opsJS)
   .settings(noPublishSettings)
   .settings(
+    sources in Compile := Seq.empty,
+    sources in Test := Seq.empty
   )
 
 lazy val singleton_ops = crossProject
@@ -200,7 +202,7 @@ val validateCommands = Seq(
   "test:compile",
   "singleton_opsJS/test",
   "coverage",
-  "test",
+  "singleton_opsJVM/test",
   "coverageReport",
   "coverageOff",
   "doc"
