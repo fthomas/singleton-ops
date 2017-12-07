@@ -6,7 +6,7 @@ import singleton.ops.impl._
 
 import scala.reflect.macros.whitebox
 
-trait Checked1Param[Chk[_,_], Cond[_,_], Msg[_,_], Face, T, ParamFace, Param] extends Any with TwoFaceAny[Face, T] {
+trait Checked1ParamAny[Chk[_,_], Cond[_,_], Msg[_,_], Face, T, ParamFace, Param] extends Any with TwoFaceAny[Face, T] {
   def unsafeCheck(p : ParamFace)
     (implicit shl : CheckedShell2[Cond, Msg, Chk[_,_], Face, Face, ParamFace, ParamFace]) : Chk[T, Param] = {
     shl.unsafeCheck(getValue, p)
@@ -14,7 +14,7 @@ trait Checked1Param[Chk[_,_], Cond[_,_], Msg[_,_], Face, T, ParamFace, Param] ex
   }
 }
 
-object Checked1Param {
+object Checked1ParamAny {
   trait Builder[Chk[_,_], Cond[_,_], Msg[_,_], Face, ParamFace] {
     type Shell[T, Param] = ShellSym[ShellSym[_,_,_], T, Param]
     trait ShellSym[Sym, T, Param] extends CheckedShell2[Cond, Msg, Sym, T, Face, Param, ParamFace]
@@ -42,10 +42,10 @@ object Checked1Param {
     implicit def ev[T, Param](implicit value : AcceptNonLiteral[Id[T]], param : AcceptNonLiteral[Id[Param]])
     : Chk[T, Param] = macro Builder.Macro.fromOpImpl[T, Param, Chk[_,_], Cond[_,_], Msg[_,_]]
 
-    implicit def fromNum[T <: Face, Param <: ParamFace, Out <: T](value : T)(implicit param : AcceptNonLiteral[Id[Param]])
+    implicit def fromNum[T >: Face, Param, Out <: T](value : T)(implicit param : AcceptNonLiteral[Id[Param]])
     : Chk[Out, Param] = macro Builder.Macro.fromNumValue[Chk[_,_], Cond[_,_], Msg[_,_]]
 
-    implicit def fromTF[T <: Face, Param <: ParamFace, Out <: T](value : TwoFaceAny[Face, T])(implicit param : AcceptNonLiteral[Id[Param]])
+    implicit def fromTF[T >: Face, Param, Out <: T](value : TwoFaceAny[Face, T])(implicit param : AcceptNonLiteral[Id[Param]])
     : Chk[Out, Param] = macro Builder.Macro.fromTF[Chk[_,_], Cond[_,_], Msg[_,_]]
     ////////////////////////////////////////////////////////////////////////////////////////
   }

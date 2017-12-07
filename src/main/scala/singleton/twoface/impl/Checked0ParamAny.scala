@@ -6,14 +6,14 @@ import singleton.ops.impl._
 
 import scala.reflect.macros.whitebox
 
-trait Checked0Param[Chk[_], Cond[_], Msg[_], Face, T] extends Any with TwoFaceAny[Face, T] {
+trait Checked0ParamAny[Chk[_], Cond[_], Msg[_], Face, T] extends Any with TwoFaceAny[Face, T] {
   def unsafeCheck()(implicit shl : CheckedShell1[Cond, Msg, Chk[_], Face, Face]) : Chk[T] = {
     shl.unsafeCheck(getValue)
     this.asInstanceOf[Chk[T]]
   }
 }
 
-object Checked0Param {
+object Checked0ParamAny {
   trait Builder[Chk[T], Cond[_], Msg[_], Face] {
     type Shell[T] = ShellSym[ShellSym[_,_], T]
     trait ShellSym[Sym, T] extends CheckedShell1[Cond, Msg, Sym, T, Face]
@@ -42,10 +42,10 @@ object Checked0Param {
     implicit def ev[T](implicit value : AcceptNonLiteral[Id[T]])
     : Chk[T] = macro Builder.Macro.fromOpImpl[T, Chk[_], Cond[_], Msg[_]]
 
-    implicit def fromNum[T <: Face, Out <: T](value : T)
+    implicit def fromNum[T >: Face, Out <: T](value : T)
     : Chk[Out] = macro Builder.Macro.fromNumValue[Chk[_], Cond[_], Msg[_]]
 
-    implicit def fromTF[T <: Face, Out <: T](value : TwoFaceAny[Face, T])
+    implicit def fromTF[T >: Face, Out <: T](value : TwoFaceAny[Face, T])
     : Chk[Out] = macro Builder.Macro.fromTF[Chk[_], Cond[_], Msg[_]]
     ////////////////////////////////////////////////////////////////////////////////////////
   }
