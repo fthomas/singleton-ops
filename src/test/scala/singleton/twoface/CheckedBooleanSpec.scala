@@ -6,16 +6,16 @@ import singleton.TestUtils._
 import singleton.ops._
 
 object CheckedBooleanSpec {
-  type Cond[T] = T
-  type Msg[T] = W.`"Failed Check"`.T
-  @checked0Param[Cond, Msg, Boolean] class CheckedTrue[T]
-  illTyped("""@checked0Param[Cond, Msg, Boolean] trait CheckedTrueBad[T]""")
+  object JustTrue extends Checked0Param.Boolean {
+    type Cond[T] = T
+    type Msg[T] = W.`"Failed Check"`.T
+  }
 }
 
 class CheckedBooleanSpec extends Properties("Checked.Boolean") {
   import CheckedBooleanSpec._
 
-  def condTrue[T](t : CheckedTrue[T]) : Unit = {t.unsafeCheck()}
+  def condTrue[T](t : JustTrue.Checked[T]) : Unit = {t.unsafeCheck()}
 
   property("Compile-time checks") = wellTyped {
     condTrue(true)
@@ -31,7 +31,7 @@ class CheckedBooleanSpec extends Properties("Checked.Boolean") {
     illRun{condTrue(TwoFace.Boolean(us(false)))}
   }
 
-  def condTrueImpl[T](realValue : Boolean)(implicit t : CheckedTrue.Shell[T]) : Unit = {t.unsafeCheck(realValue)}
+  def condTrueImpl[T](realValue : Boolean)(implicit t : JustTrue.CheckedShell[T]) : Unit = {t.unsafeCheck(realValue)}
 
   property("Shell compile-time checks") = wellTyped {
     condTrueImpl[True](true)
@@ -46,7 +46,7 @@ class CheckedBooleanSpec extends Properties("Checked.Boolean") {
 
   trait CheckedUse[T]
   object CheckedUse {
-    implicit def ev[T](implicit checkedTrue: CheckedTrue.ShellSym[CheckedUse[_], T]) : CheckedUse[T] =
+    implicit def ev[T](implicit checkedTrue: JustTrue.CheckedShellSym[CheckedUse[_], T]) : CheckedUse[T] =
       new CheckedUse[T] {}
   }
 
