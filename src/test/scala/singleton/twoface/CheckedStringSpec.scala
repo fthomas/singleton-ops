@@ -14,7 +14,7 @@ object CheckedStringSpec {
       @inline def getValue : String = value
     }
     object Checked extends Checked1Param.String.CO[Checked, Cond, Msg, ParamFace]
-    object WorkAround extends impl.Checked1ParamAny.Builder[Nothing, Nothing, Nothing, Nothing, Nothing]
+    object WorkAround extends singleton.twoface.impl.Checked1ParamAny.Builder[Nothing, Nothing, Nothing, Nothing, Nothing]
   }
 }
 

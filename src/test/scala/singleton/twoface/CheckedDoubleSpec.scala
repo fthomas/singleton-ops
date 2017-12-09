@@ -13,7 +13,7 @@ object CheckedDoubleSpec {
       @inline def getValue : Double = value
     }
     object Checked extends Checked0Param.Double.CO[Checked, Cond, Msg]
-    object WorkAround extends impl.Checked0ParamAny.Builder[Nothing, Nothing, Nothing, Nothing]
+    object WorkAround extends singleton.twoface.impl.Checked0ParamAny.Builder[Nothing, Nothing, Nothing, Nothing]
   }
 }
 

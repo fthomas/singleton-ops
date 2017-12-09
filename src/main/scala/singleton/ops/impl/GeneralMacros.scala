@@ -1443,13 +1443,13 @@ trait GeneralMacros {
         abort(
           """
             |Unable to analyze given `Cond`. Try adding the following workaround line at the call site:
-            |    object CheckedWorkAround extends impl.Checked0ParamAny.Builder[Nothing, Nothing, Nothing, Nothing]
+            |    object CheckedWorkAround extends singleton.twoface.impl.Checked0ParamAny.Builder[Nothing, Nothing, Nothing, Nothing]
           """.stripMargin)
       if (msgTpe.typeArgs.isEmpty)
         abort(
           """
             |Unable to analyze given `Msg`. Try adding the following workaround line at the call site:
-            |    object CheckedWorkAround extends impl.Checked0ParamAny.Builder[Nothing, Nothing, Nothing, Nothing]
+            |    object CheckedWorkAround extends singleton.twoface.impl.Checked0ParamAny.Builder[Nothing, Nothing, Nothing, Nothing]
           """.stripMargin)
       val fixedCondTpe = condTpe.substituteTypes(List(condTpe.typeArgs.head.typeSymbol), List(outTpe))
       val fixedMsgTpe = msgTpe.substituteTypes(List(msgTpe.typeArgs.head.typeSymbol), List(outTpe))
@@ -1519,13 +1519,13 @@ trait GeneralMacros {
         abort(
           """
             |Unable to analyze given `Cond`. Try adding the following workaround line at the call site:
-            |    object CheckedWorkAround extends impl.Checked1ParamAny.Builder[Nothing, Nothing, Nothing, Nothing, Nothing]
+            |    object CheckedWorkAround extends singleton.twoface.impl.Checked1ParamAny.Builder[Nothing, Nothing, Nothing, Nothing, Nothing]
           """.stripMargin)
       if (msgTpe.typeArgs.isEmpty)
         abort(
           """
             |Unable to analyze given `Msg`. Try adding the following workaround line at the call site:
-            |    object CheckedWorkAround extends impl.Checked1ParamAny.Builder[Nothing, Nothing, Nothing, Nothing, Nothing]
+            |    object CheckedWorkAround extends singleton.twoface.impl.Checked1ParamAny.Builder[Nothing, Nothing, Nothing, Nothing, Nothing]
           """.stripMargin)
 
       val fixedCondTpe = condTpe.substituteTypes(condTpe.typeArgs.map(t => t.typeSymbol), List(tCalc.tpe, paramCalc.tpe))

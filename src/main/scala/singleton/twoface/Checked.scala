@@ -63,7 +63,7 @@ object Checked1Param {
   //    @inline def getValue : Char = value
   //  }
   //  object Checked extends Checked1Param.Char.CO[Checked, Cond, Msg, ParamFace]
-  //  object WorkAround extends impl.Checked1ParamAny.Builder[Nothing, Nothing, Nothing, Nothing, Nothing]
+  //  object WorkAround extends singleton.twoface.impl.Checked1ParamAny.Builder[Nothing, Nothing, Nothing, Nothing, Nothing]
   //}
   ///////////////////////////////////////////////
   object Char {
@@ -83,7 +83,7 @@ object Checked1Param {
   //    @inline def getValue : Int = value
   //  }
   //  object Checked extends Checked1Param.Int.CO[Checked, Cond, Msg, ParamFace]
-  //  object WorkAround extends impl.Checked1ParamAny.Builder[Nothing, Nothing, Nothing, Nothing, Nothing]
+  //  object WorkAround extends singleton.twoface.impl.Checked1ParamAny.Builder[Nothing, Nothing, Nothing, Nothing, Nothing]
   //}
   ///////////////////////////////////////////////
   object Int {
@@ -103,7 +103,7 @@ object Checked1Param {
   //    @inline def getValue : Long = value
   //  }
   //  object Checked extends Checked1Param.Long.CO[Checked, Cond, Msg, ParamFace]
-  //  object WorkAround extends impl.Checked1ParamAny.Builder[Nothing, Nothing, Nothing, Nothing, Nothing]
+  //  object WorkAround extends singleton.twoface.impl.Checked1ParamAny.Builder[Nothing, Nothing, Nothing, Nothing, Nothing]
   //}
   ///////////////////////////////////////////////
   object Long {
@@ -123,7 +123,7 @@ object Checked1Param {
   //    @inline def getValue : Float = value
   //  }
   //  object Checked extends Checked1Param.Float.CO[Checked, Cond, Msg, ParamFace]
-  //  object WorkAround extends impl.Checked1ParamAny.Builder[Nothing, Nothing, Nothing, Nothing, Nothing]
+  //  object WorkAround extends singleton.twoface.impl.Checked1ParamAny.Builder[Nothing, Nothing, Nothing, Nothing, Nothing]
   //}
   ///////////////////////////////////////////////
   object Float {
@@ -143,7 +143,7 @@ object Checked1Param {
   //    @inline def getValue : Double = value
   //  }
   //  object Checked extends Checked1Param.Double.CO[Checked, Cond, Msg, ParamFace]
-  //  object WorkAround extends impl.Checked1ParamAny.Builder[Nothing, Nothing, Nothing, Nothing, Nothing]
+  //  object WorkAround extends singleton.twoface.impl.Checked1ParamAny.Builder[Nothing, Nothing, Nothing, Nothing, Nothing]
   //}
   ///////////////////////////////////////////////
   object Double {
@@ -163,7 +163,7 @@ object Checked1Param {
   //    @inline def getValue : String = value
   //  }
   //  object Checked extends Checked1Param.String.CO[Checked, Cond, Msg, ParamFace]
-  //  object WorkAround extends impl.Checked1ParamAny.Builder[Nothing, Nothing, Nothing, Nothing, Nothing]
+  //  object WorkAround extends singleton.twoface.impl.Checked1ParamAny.Builder[Nothing, Nothing, Nothing, Nothing, Nothing]
   //}
   ///////////////////////////////////////////////
   object String {
@@ -183,7 +183,7 @@ object Checked1Param {
   //    @inline def getValue : Boolean = value
   //  }
   //  object Checked extends Checked1Param.Boolean.CO[Checked, Cond, Msg, ParamFace]
-  //  object WorkAround extends impl.Checked1ParamAny.Builder[Nothing, Nothing, Nothing, Nothing, Nothing]
+  //  object WorkAround extends singleton.twoface.impl.Checked1ParamAny.Builder[Nothing, Nothing, Nothing, Nothing, Nothing]
   //}
   ///////////////////////////////////////////////
   object Boolean {

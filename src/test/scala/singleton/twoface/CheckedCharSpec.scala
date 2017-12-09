@@ -13,7 +13,7 @@ object CheckedCharSpec {
       @inline def getValue : Char = value
     }
     object Checked extends Checked0Param.Char.CO[Checked, Cond, Msg]
-    object WorkAround extends impl.Checked0ParamAny.Builder[Nothing, Nothing, Nothing, Nothing]
+    object WorkAround extends singleton.twoface.impl.Checked0ParamAny.Builder[Nothing, Nothing, Nothing, Nothing]
   }
 }
 

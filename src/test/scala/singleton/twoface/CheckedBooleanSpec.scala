@@ -13,7 +13,7 @@ object CheckedBooleanSpec {
       @inline def getValue : Boolean = value
     }
     object Checked extends Checked0Param.Boolean.CO[Checked, Cond, Msg]
-    object WorkAround extends impl.Checked0ParamAny.Builder[Nothing, Nothing, Nothing, Nothing]
+    object WorkAround extends singleton.twoface.impl.Checked0ParamAny.Builder[Nothing, Nothing, Nothing, Nothing]
   }
 }
 
