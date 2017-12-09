@@ -9,10 +9,10 @@ object CheckedLongSpec {
   object SmallerThan50 {
     type Cond[T] = T < W.`50L`.T
     type Msg[T] = W.`"Failed Check"`.T
-    final class Check[T](val value : Long) extends AnyVal with Checked0Param.Long.CC[Check, Cond, Msg, T] {
+    final class Checked[T](val value : Long) extends AnyVal with Checked0Param.Long.CC[Checked, Cond, Msg, T] {
       @inline def getValue : Long = value
     }
-    object Check extends Checked0Param.Long.CO[Check, Cond, Msg]
+    object Checked extends Checked0Param.Long.CO[Checked, Cond, Msg]
     object WorkAround extends impl.Checked0ParamAny.Builder[Nothing, Nothing, Nothing, Nothing]
   }
 }
@@ -20,7 +20,7 @@ object CheckedLongSpec {
 class CheckedLongSpec extends Properties("Checked.Long") {
   import CheckedLongSpec._
 
-  def smallerThan50[T](t : SmallerThan50.Check[T]) : Unit = {t.unsafeCheck()}
+  def smallerThan50[T](t : SmallerThan50.Checked[T]) : Unit = {t.unsafeCheck()}
 
   property("Compile-time checks") = wellTyped {
     smallerThan50(40L)

@@ -9,10 +9,10 @@ object CheckedFloatSpec {
   object SmallerThan50 {
     type Cond[T] = T < W.`50.0f`.T
     type Msg[T] = W.`"Failed Check"`.T
-    final class Check[T](val value : Float) extends AnyVal with Checked0Param.Float.CC[Check, Cond, Msg, T] {
+    final class Checked[T](val value : Float) extends AnyVal with Checked0Param.Float.CC[Checked, Cond, Msg, T] {
       @inline def getValue : Float = value
     }
-    object Check extends Checked0Param.Float.CO[Check, Cond, Msg]
+    object Checked extends Checked0Param.Float.CO[Checked, Cond, Msg]
     object WorkAround extends impl.Checked0ParamAny.Builder[Nothing, Nothing, Nothing, Nothing]
   }
 }
@@ -20,7 +20,7 @@ object CheckedFloatSpec {
 class CheckedFloatSpec extends Properties("Checked.Float") {
   import CheckedFloatSpec._
 
-  def smallerThan50[T](t : SmallerThan50.Check[T]) : Unit = {t.unsafeCheck()}
+  def smallerThan50[T](t : SmallerThan50.Checked[T]) : Unit = {t.unsafeCheck()}
 
   property("Compile-time checks") = wellTyped {
     smallerThan50(40.0f)

@@ -9,10 +9,10 @@ object CheckedCharSpec {
   object SmallerThan50 {
     type Cond[T] = T < W.`'\u0032'`.T
     type Msg[T] = W.`"Failed Check"`.T
-    final class Check[T](val value : Char) extends AnyVal with Checked0Param.Char.CC[Check, Cond, Msg, T] {
+    final class Checked[T](val value : Char) extends AnyVal with Checked0Param.Char.CC[Checked, Cond, Msg, T] {
       @inline def getValue : Char = value
     }
-    object Check extends Checked0Param.Char.CO[Check, Cond, Msg]
+    object Checked extends Checked0Param.Char.CO[Checked, Cond, Msg]
     object WorkAround extends impl.Checked0ParamAny.Builder[Nothing, Nothing, Nothing, Nothing]
   }
 }
@@ -20,7 +20,7 @@ object CheckedCharSpec {
 class CheckedCharSpec extends Properties("Checked.Char") {
   import CheckedCharSpec._
 
-  def smallerThan50[T](t : SmallerThan50.Check[T]) : Unit = {t.unsafeCheck()}
+  def smallerThan50[T](t : SmallerThan50.Checked[T]) : Unit = {t.unsafeCheck()}
 
   property("Compile-time checks") = wellTyped {
     smallerThan50('\u0020')

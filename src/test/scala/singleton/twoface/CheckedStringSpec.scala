@@ -10,10 +10,10 @@ object CheckedStringSpec {
     type Cond[T, P] = Length[T] < P
     type Msg[T, P] = W.`"Length of string '"`.T + T + W.`"' is not smaller than "`.T + ToString[P]
     type ParamFace = Int
-    final class Check[T, Param](val value : String) extends AnyVal with Checked1Param.String.CC[Check, Cond, Msg, T, ParamFace, Param] {
+    final class Checked[T, Param](val value : String) extends AnyVal with Checked1Param.String.CC[Checked, Cond, Msg, T, ParamFace, Param] {
       @inline def getValue : String = value
     }
-    object Check extends Checked1Param.String.CO[Check, Cond, Msg, ParamFace]
+    object Checked extends Checked1Param.String.CO[Checked, Cond, Msg, ParamFace]
     object WorkAround extends impl.Checked1ParamAny.Builder[Nothing, Nothing, Nothing, Nothing, Nothing]
   }
 }
@@ -22,7 +22,7 @@ class CheckedStringSpec extends Properties("Checked.String") {
   import CheckedStringSpec._
 
   def foo[T](t : TwoFace.String[T]) : Unit = {}
-  def lengthSmallerThan5[T](t : LengthSmallerThan.Check[T,W.`5`.T]) : Unit = {
+  def lengthSmallerThan5[T](t : LengthSmallerThan.Checked[T,W.`5`.T]) : Unit = {
     val temp : String = t
     foo(t.unsafeCheck(5))
   }
@@ -30,12 +30,12 @@ class CheckedStringSpec extends Properties("Checked.String") {
   property("Compile-time checks") = wellTyped {
     lengthSmallerThan5("Hi")
     lengthSmallerThan5(TwoFace.String("Hi"))
-    LengthSmallerThan.Check[W.`"Hi"`.T, W.`5`.T]
-    implicitly[LengthSmallerThan.Check[W.`"Hi"`.T, W.`5`.T]]
+    LengthSmallerThan.Checked[W.`"Hi"`.T, W.`5`.T]
+    implicitly[LengthSmallerThan.Checked[W.`"Hi"`.T, W.`5`.T]]
     illTyped("""lengthSmallerThan5("Hello")""","Length of string 'Hello' is not smaller than 5")
     illTyped("""lengthSmallerThan5(TwoFace.String("Hello"))""","Length of string 'Hello' is not smaller than 5")
-    illTyped("""LengthSmallerThan.Check[W.`"Hello"`.T, W.`5`.T]""","Length of string 'Hello' is not smaller than 5")
-    illTyped("""implicitly[LengthSmallerThan.Check[W.`"Hello"`.T, W.`5`.T]]""","Length of string 'Hello' is not smaller than 5")
+    illTyped("""LengthSmallerThan.Checked[W.`"Hello"`.T, W.`5`.T]""","Length of string 'Hello' is not smaller than 5")
+    illTyped("""implicitly[LengthSmallerThan.Checked[W.`"Hello"`.T, W.`5`.T]]""","Length of string 'Hello' is not smaller than 5")
   }
 
   property("Run-time checks") = wellTyped {
@@ -45,7 +45,7 @@ class CheckedStringSpec extends Properties("Checked.String") {
     illRun{lengthSmallerThan5(TwoFace.String(us("Hello")))}
   }
 
-  def lengthSmallerThan5Impl[T](realValue : String)(implicit t : LengthSmallerThan.Check.Shell[T,W.`5`.T]) : Unit =
+  def lengthSmallerThan5Impl[T](realValue : String)(implicit t : LengthSmallerThan.Checked.Shell[T,W.`5`.T]) : Unit =
     {t.unsafeCheck(realValue, 5)}
 
   property("Shell compile-time checks") = wellTyped {
@@ -60,7 +60,7 @@ class CheckedStringSpec extends Properties("Checked.String") {
 
   trait CheckedUse[T]
   object CheckedUse {
-    implicit def ev[T](implicit checkedTrue: LengthSmallerThan.Check.ShellSym[CheckedUse[_], T, W.`5`.T]) : CheckedUse[T] =
+    implicit def ev[T](implicit checkedTrue: LengthSmallerThan.Checked.ShellSym[CheckedUse[_], T, W.`5`.T]) : CheckedUse[T] =
       new CheckedUse[T] {}
   }
 
