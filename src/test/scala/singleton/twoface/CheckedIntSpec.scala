@@ -6,7 +6,7 @@ import singleton.TestUtils._
 import singleton.ops._
 
 object CheckedIntSpec {
-  object SmallerThan50 extends impl.Checked0ParamAny.Int.Alias {
+  object SmallerThan50 extends Checked0Param.Int {
     type Cond[T] = T < W.`50`.T
     type Msg[T] = W.`"Failed Check"`.T
   }

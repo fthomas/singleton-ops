@@ -64,11 +64,41 @@ object Checked0ParamAny {
     }
   }
 
+  final class Char[Cond[_], Msg[_], T](val value : std.Char) extends
+    Checked0ParamAny[Char, Cond, Msg, std.Char, T] with TwoFaceAny.Char[T] {
+    @inline def getValue : std.Char = value
+  }
+  object Char extends Builder[Char, std.Char]
+
   final class Int[Cond[_], Msg[_], T](val value : std.Int) extends
     Checked0ParamAny[Int, Cond, Msg, std.Int, T] with TwoFaceAny.Int[T] {
     @inline def getValue : std.Int = value
   }
   object Int extends Builder[Int, std.Int]
+
+  final class Long[Cond[_], Msg[_], T](val value : std.Long) extends
+    Checked0ParamAny[Long, Cond, Msg, std.Long, T] with TwoFaceAny.Long[T] {
+    @inline def getValue : std.Long = value
+  }
+  object Long extends Builder[Long, std.Long]
+
+  final class Float[Cond[_], Msg[_], T](val value : std.Float) extends
+    Checked0ParamAny[Float, Cond, Msg, std.Float, T] with TwoFaceAny.Float[T] {
+    @inline def getValue : std.Float = value
+  }
+  object Float extends Builder[Float, std.Float]
+
+  final class Double[Cond[_], Msg[_], T](val value : std.Double) extends
+    Checked0ParamAny[Double, Cond, Msg, std.Double, T] with TwoFaceAny.Double[T] {
+    @inline def getValue : std.Double = value
+  }
+  object Double extends Builder[Double, std.Double]
+
+  final class String[Cond[_], Msg[_], T](val value : std.String) extends
+    Checked0ParamAny[String, Cond, Msg, std.String, T] with TwoFaceAny.String[T] {
+    @inline def getValue : std.String = value
+  }
+  object String extends Builder[String, std.String]
 
   final class Boolean[Cond[_], Msg[_], T](val value : std.Boolean) extends
     Checked0ParamAny[Boolean, Cond, Msg, std.Boolean, T] with TwoFaceAny.Boolean[T] {

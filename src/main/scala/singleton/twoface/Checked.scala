@@ -1,5 +1,5 @@
 package singleton.twoface
-//import impl._
+import impl._
 //import singleton.ops.impl.std
 
 object Checked {
@@ -15,6 +15,15 @@ object Checked {
     impl.CheckedShell2[Cond, Msg, Sym, Arg1, Arg1Wide, Arg2, Arg2Wide]
 }
 
+object Checked0Param {
+  trait Char    extends Checked0ParamAny.Char.Alias
+  trait Int     extends Checked0ParamAny.Int.Alias
+  trait Long    extends Checked0ParamAny.Long.Alias
+  trait Float   extends Checked0ParamAny.Float.Alias
+  trait Double  extends Checked0ParamAny.Double.Alias
+  trait String  extends Checked0ParamAny.String.Alias
+  trait Boolean extends Checked0ParamAny.Boolean.Alias
+}
 //object Checked0Param {
 //  //CC: traits used for the checked class
 //  //CO: traits used for the checked companion object
