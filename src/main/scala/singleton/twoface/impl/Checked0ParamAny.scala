@@ -7,7 +7,7 @@ import singleton.ops.impl._
 import scala.reflect.macros.whitebox
 
 trait Checked0ParamAny[Chk[Cond0[_], Msg0[_], T0], Cond[_], Msg[_], Face, T] extends Any with TwoFaceAny[Face, T] {
-  def unsafeCheck()(implicit shl : CheckedShell1[Cond, Msg, Chk[Cond, Msg, _], Face, Face]) : Chk[Cond, Msg, T] = {
+  def unsafeCheck()(implicit shl : CheckedShell1[Cond, Msg, Chk[Cond,Msg,_], Face, Face]) : Chk[Cond, Msg, T] = {
     shl.unsafeCheck(getValue)
     this.asInstanceOf[Chk[Cond, Msg, T]]
   }
@@ -25,42 +25,42 @@ object Checked0ParamAny {
 
     ////////////////////////////////////////////////////////////////////////////////////////
     // Generic Implicit Conversions
-    // Not used generically, but repeated to avoid IntelliJ issue
+    // Currently triggers good-code-red IntelliJ issue
     // https://youtrack.jetbrains.com/issue/SCL-13089
     ////////////////////////////////////////////////////////////////////////////////////////
     implicit def ev[Cond[_], Msg[_], T](implicit value : AcceptNonLiteral[Id[T]])
-    : Chk[Cond, Msg, T] = macro Builder.Macro.fromOpImpl[T, Chk[Cond, Msg, _], Cond[_], Msg[_]]
+    : Chk[Cond, Msg, T] = macro Builder.Macro.fromOpImpl[Chk[Cond,Msg,_], Cond[_], Msg[_], T]
 
     implicit def fromNum[Cond[_], Msg[_], T >: Face, Out <: T](value : T)
-    : Chk[Cond, Msg, Out] = macro Builder.Macro.fromNumValue[Chk[Cond, Msg, _], Cond[_], Msg[_]]
+    : Chk[Cond, Msg, Out] = macro Builder.Macro.fromNumValue[Chk[Cond,Msg,_], Cond[_], Msg[_], T]
 
     implicit def fromTF[Cond[_], Msg[_], T >: Face, Out <: T](value : TwoFaceAny[Face, T])
-    : Chk[Cond, Msg, Out] = macro Builder.Macro.fromTF[Chk[Cond, Msg, _], Cond[_], Msg[_]]
+    : Chk[Cond, Msg, Out] = macro Builder.Macro.fromTF[Chk[Cond,Msg,_], Cond[_], Msg[_], T]
     ////////////////////////////////////////////////////////////////////////////////////////
   }
 
   @bundle
   object Builder {
     final class Macro(val c: whitebox.Context) extends GeneralMacros {
-      def fromOpApply[Chk, Cond, Msg](value : c.Tree)(
+      def fromOpApply[Chk, Cond, Msg, T](value : c.Tree)(
         implicit
-        chk : c.WeakTypeTag[Chk], cond : c.WeakTypeTag[Cond], msg : c.WeakTypeTag[Msg]
-      ): c.Tree = Checked0ParamMaterializer[Chk, Cond, Msg].fromOpApply(value)
+        chk : c.WeakTypeTag[Chk], cond : c.WeakTypeTag[Cond], msg : c.WeakTypeTag[Msg], t : c.WeakTypeTag[T]
+      ): c.Tree = Checked0ParamMaterializer[Chk, Cond, Msg, T].fromOpApply(value)
 
-      def fromOpImpl[T, Chk, Cond, Msg](value : c.Tree)(
+      def fromOpImpl[Chk, Cond, Msg, T](value : c.Tree)(
         implicit
-        t : c.WeakTypeTag[T], chk : c.WeakTypeTag[Chk], cond : c.WeakTypeTag[Cond], msg : c.WeakTypeTag[Msg]
-      ): c.Tree = Checked0ParamMaterializer[Chk, Cond, Msg].fromOpImpl(value, c.weakTypeOf[T])
+        chk : c.WeakTypeTag[Chk], cond : c.WeakTypeTag[Cond], msg : c.WeakTypeTag[Msg], t : c.WeakTypeTag[T]
+      ): c.Tree = Checked0ParamMaterializer[Chk, Cond, Msg, T].fromOpImpl(value)
 
-      def fromNumValue[Chk, Cond, Msg](value : c.Tree)(
+      def fromNumValue[Chk, Cond, Msg, T](value : c.Tree)(
         implicit
-        chk : c.WeakTypeTag[Chk], cond : c.WeakTypeTag[Cond], msg : c.WeakTypeTag[Msg]
-      ): c.Tree = Checked0ParamMaterializer[Chk, Cond, Msg].fromNumValue(value)
+        chk : c.WeakTypeTag[Chk], cond : c.WeakTypeTag[Cond], msg : c.WeakTypeTag[Msg], t : c.WeakTypeTag[T]
+      ): c.Tree = Checked0ParamMaterializer[Chk, Cond, Msg, T].fromNumValue(value)
 
-      def fromTF[Chk, Cond, Msg](value : c.Tree)(
+      def fromTF[Chk, Cond, Msg, T](value : c.Tree)(
         implicit
-        chk : c.WeakTypeTag[Chk], cond : c.WeakTypeTag[Cond], msg : c.WeakTypeTag[Msg]
-      ): c.Tree = Checked0ParamMaterializer[Chk, Cond, Msg].fromTF(value)
+        chk : c.WeakTypeTag[Chk], cond : c.WeakTypeTag[Cond], msg : c.WeakTypeTag[Msg], t : c.WeakTypeTag[T]
+      ): c.Tree = Checked0ParamMaterializer[Chk, Cond, Msg, T].fromTF(value)
     }
   }
 

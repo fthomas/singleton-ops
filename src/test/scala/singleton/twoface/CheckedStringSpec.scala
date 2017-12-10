@@ -6,14 +6,10 @@
 //import singleton.ops._
 //
 //object CheckedStringSpec {
-//  object LengthSmallerThan {
+//  object LengthSmallerThan extends Checked1Param.String {
 //    type Cond[T, P] = Length[T] < P
 //    type Msg[T, P] = W.`"Length of string '"`.T + T + W.`"' is not smaller than "`.T + ToString[P]
 //    type ParamFace = Int
-//    final class Checked[T, Param](val value : String) extends AnyVal with Checked1Param.String.CC[Checked, Cond, Msg, T, ParamFace, Param] {
-//      @inline def getValue : String = value
-//    }
-//    object Checked extends Checked1Param.String.CO[Checked, Cond, Msg, ParamFace]
 //  }
 //}
 //
@@ -29,11 +25,9 @@
 //  property("Compile-time checks") = wellTyped {
 //    lengthSmallerThan5("Hi")
 //    lengthSmallerThan5(TwoFace.String("Hi"))
-//    LengthSmallerThan.Checked[W.`"Hi"`.T, W.`5`.T]
 //    implicitly[LengthSmallerThan.Checked[W.`"Hi"`.T, W.`5`.T]]
 //    illTyped("""lengthSmallerThan5("Hello")""","Length of string 'Hello' is not smaller than 5")
 //    illTyped("""lengthSmallerThan5(TwoFace.String("Hello"))""","Length of string 'Hello' is not smaller than 5")
-//    illTyped("""LengthSmallerThan.Checked[W.`"Hello"`.T, W.`5`.T]""","Length of string 'Hello' is not smaller than 5")
 //    illTyped("""implicitly[LengthSmallerThan.Checked[W.`"Hello"`.T, W.`5`.T]]""","Length of string 'Hello' is not smaller than 5")
 //  }
 //
@@ -44,7 +38,7 @@
 //    illRun{lengthSmallerThan5(TwoFace.String(us("Hello")))}
 //  }
 //
-//  def lengthSmallerThan5Impl[T](realValue : String)(implicit t : LengthSmallerThan.Checked.Shell[T,W.`5`.T]) : Unit =
+//  def lengthSmallerThan5Impl[T](realValue : String)(implicit t : LengthSmallerThan.CheckedShell[T,W.`5`.T]) : Unit =
 //    {t.unsafeCheck(realValue, 5)}
 //
 //  property("Shell compile-time checks") = wellTyped {
@@ -59,7 +53,7 @@
 //
 //  trait CheckedUse[T]
 //  object CheckedUse {
-//    implicit def ev[T](implicit checkedTrue: LengthSmallerThan.Checked.ShellSym[CheckedUse[_], T, W.`5`.T]) : CheckedUse[T] =
+//    implicit def ev[T](implicit checkedTrue: LengthSmallerThan.CheckedShellSym[CheckedUse[_], T, W.`5`.T]) : CheckedUse[T] =
 //      new CheckedUse[T] {}
 //  }
 //

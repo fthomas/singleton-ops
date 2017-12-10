@@ -6,47 +6,38 @@ import singleton.ops.impl._
 
 import scala.reflect.macros.whitebox
 
-trait Checked1ParamAny[Chk[_,_], Cond[_,_], Msg[_,_], Face, T, ParamFace, Param] extends Any with TwoFaceAny[Face, T] {
+trait Checked1ParamAny[Chk[Cond0[_,_], Msg0[_,_], T0, ParamFace0, Param0], Cond[_,_], Msg[_,_], Face, T, ParamFace, Param] extends Any with TwoFaceAny[Face, T] {
   def unsafeCheck(p : ParamFace)
-    (implicit shl : CheckedShell2[Cond, Msg, Chk[_,_], Face, Face, ParamFace, ParamFace]) : Chk[T, Param] = {
+    (implicit shl : CheckedShell2[Cond, Msg, Chk[Cond,Msg,_,_,_], Face, Face, ParamFace, ParamFace]) : Chk[Cond, Msg, T, ParamFace, Param] = {
     shl.unsafeCheck(getValue, p)
-    this.asInstanceOf[Chk[T, Param]]
+    this.asInstanceOf[Chk[Cond, Msg, T, ParamFace, Param]]
   }
 }
 
 object Checked1ParamAny {
-  trait Builder[Chk[_,_], Cond[_,_], Msg[_,_], Face, ParamFace] {
-    type Shell[T, Param] = ShellSym[ShellSym[_,_,_], T, Param]
-    trait ShellSym[Sym, T, Param] extends CheckedShell2[Cond, Msg, Sym, T, Face, Param, ParamFace]
-    object ShellSym extends CheckedShell2Builder[ShellSym, Cond, Msg, Face, ParamFace] {
-      def create[Sym, T, Param](_unsafeCheck: (Face, ParamFace) => Unit): ShellSym[Sym, T, Param] = new ShellSym[Sym, T, Param] {
-        def unsafeCheck(arg1: => Face, arg2: => ParamFace): Unit = _unsafeCheck(arg1, arg2)
-      }
+  trait Builder[Chk[Cond0[_,_], Msg0[_,_], T0, ParamFace0, Param0], Face] {
+    trait Alias {
+      type Cond[T, Param]
+      type Msg[T, Param]
+      type ParamFace
+      type Checked[T, Param] = Chk[Cond, Msg, T, ParamFace, Param]
+      type CheckedShell[T, Param] = CheckedShellSym[CheckedShellSym[_,_,_], T, Param]
+      type CheckedShellSym[Sym, T, Param] = CheckedShell2[Cond, Msg, Sym, T, Face, Param, ParamFace]
     }
-    ////////////////////////////////////////////////////////////////////////////////////////
-    // Manual invocations (usually used to for testing)
-    ////////////////////////////////////////////////////////////////////////////////////////
-    def apply[T, Param](implicit value : AcceptNonLiteral[Id[T]], param : AcceptNonLiteral[Id[Param]])
-    : Chk[value.Out, param.Out] = macro Builder.Macro.fromOpApply[Chk[_,_], Cond[_,_], Msg[_,_]]
-
-//    def apply[T <: Face, Param <: ParamFace](value : T)(param : Param)
-//    : Chk[T, Param] = macro Builder.Macro.fromNumValue[Chk[_,_], Cond[_,_], Msg[_,_]
-//
-//    def apply[T <: Face, Param <: ParamFace](value : TwoFaceAny[Face]{type T = T})(param : TwoFaceAny[ParamFace]{type T = Param})
-//    : Chk[T, Param] = macro Builder.Macro.fromTF[Chk[_,_], Cond[_,_], Msg[_,_]]
-    ////////////////////////////////////////////////////////////////////////////////////////
 
     ////////////////////////////////////////////////////////////////////////////////////////
-    // Implicit Conversions
+    // Generic Implicit Conversions
+    // Currently triggers good-code-red IntelliJ issue
+    // https://youtrack.jetbrains.com/issue/SCL-13089
     ////////////////////////////////////////////////////////////////////////////////////////
-    implicit def ev[T, Param](implicit value : AcceptNonLiteral[Id[T]], param : AcceptNonLiteral[Id[Param]])
-    : Chk[T, Param] = macro Builder.Macro.fromOpImpl[T, Param, Chk[_,_], Cond[_,_], Msg[_,_]]
+    implicit def ev[Cond[_,_], Msg[_,_], T, ParamFace, Param](implicit value : AcceptNonLiteral[Id[T]], param : AcceptNonLiteral[Id[Param]])
+    : Chk[Cond, Msg, T, ParamFace, Param] = macro Builder.Macro.fromOpImpl[T, Param, Chk[Cond,Msg,_,_,_], Cond[_,_], Msg[_,_]]
 
-    implicit def fromNum[T >: Face, Param, Out <: T](value : T)(implicit param : AcceptNonLiteral[Id[Param]])
-    : Chk[Out, Param] = macro Builder.Macro.fromNumValue[Chk[_,_], Cond[_,_], Msg[_,_]]
+    implicit def fromNum[Cond[_,_], Msg[_,_], T >: Face, ParamFace, Param, Out <: T](value : T)(implicit param : AcceptNonLiteral[Id[Param]])
+    : Chk[Cond, Msg, Out, ParamFace, Param] = macro Builder.Macro.fromNumValue[Chk[Cond,Msg,_,_,_], Cond[_,_], Msg[_,_]]
 
-    implicit def fromTF[T >: Face, Param, Out <: T](value : TwoFaceAny[Face, T])(implicit param : AcceptNonLiteral[Id[Param]])
-    : Chk[Out, Param] = macro Builder.Macro.fromTF[Chk[_,_], Cond[_,_], Msg[_,_]]
+    implicit def fromTF[Cond[_,_], Msg[_,_], T >: Face, ParamFace, Param, Out <: T](value : TwoFaceAny[Face, T])(implicit param : AcceptNonLiteral[Id[Param]])
+    : Chk[Cond, Msg, Out, ParamFace, Param] = macro Builder.Macro.fromTF[Chk[Cond,Msg,_,_,_], Cond[_,_], Msg[_,_]]
     ////////////////////////////////////////////////////////////////////////////////////////
   }
 
@@ -74,5 +65,13 @@ object Checked1ParamAny {
       ): c.Tree = Checked1ParamMaterializer[Chk, Cond, Msg].fromTF(value, param)
     }
   }
+
+
+  final class String[Cond[_,_], Msg[_,_], T, ParamFace, Param](val value : std.String) extends
+    Checked1ParamAny[String, Cond, Msg, std.String, T, ParamFace, Param] with TwoFaceAny.String[T] {
+    @inline def getValue : std.String = value
+  }
+  object String extends Builder[String, std.String]
+
 }
 

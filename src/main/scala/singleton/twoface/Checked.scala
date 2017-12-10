@@ -24,6 +24,10 @@ object Checked0Param {
   trait String  extends Checked0ParamAny.String.Alias
   trait Boolean extends Checked0ParamAny.Boolean.Alias
 }
+
+object Checked1Param {
+  trait String  extends Checked1ParamAny.String.Alias
+}
 //object Checked0Param {
 //  //CC: traits used for the checked class
 //  //CO: traits used for the checked companion object
