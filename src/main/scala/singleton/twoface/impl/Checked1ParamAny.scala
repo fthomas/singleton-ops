@@ -30,9 +30,6 @@ object Checked1ParamAny {
     // Currently triggers good-code-red IntelliJ issue
     // https://youtrack.jetbrains.com/issue/SCL-13089
     ////////////////////////////////////////////////////////////////////////////////////////
-    implicit def ev[Cond[_,_], Msg[_,_], T, ParamFace, Param](implicit value : AcceptNonLiteral[Id[T]], param : AcceptNonLiteral[Id[Param]])
-    : Chk[Cond, Msg, T, ParamFace, Param] = macro Builder.Macro.fromOpImpl[Chk[Cond,Msg,_,_,_], Cond[_,_], Msg[_,_], T, ParamFace, Param]
-
     implicit def fromNum[Cond[_,_], Msg[_,_], T >: Face, ParamFace, Param, Out <: T](value : T)(implicit param : AcceptNonLiteral[Id[Param]])
     : Chk[Cond, Msg, Out, ParamFace, Param] = macro Builder.Macro.fromNumValue[Chk[Cond,Msg,_,_,_], Cond[_,_], Msg[_,_], T, ParamFace, Param]
 
@@ -67,11 +64,46 @@ object Checked1ParamAny {
   }
 
 
+  final class Char[Cond[_,_], Msg[_,_], T, ParamFace, Param](val value : std.Char) extends
+    Checked1ParamAny[Char, Cond, Msg, std.Char, T, ParamFace, Param] with TwoFaceAny.Char[T] {
+    @inline def getValue : std.Char = value
+  }
+  object Char extends Builder[String, std.String]
+  
+  final class Int[Cond[_,_], Msg[_,_], T, ParamFace, Param](val value : std.Int) extends
+    Checked1ParamAny[Int, Cond, Msg, std.Int, T, ParamFace, Param] with TwoFaceAny.Int[T] {
+    @inline def getValue : std.Int = value
+  }
+  object Int extends Builder[Int, std.Int]
+  
+  final class Long[Cond[_,_], Msg[_,_], T, ParamFace, Param](val value : std.Long) extends
+    Checked1ParamAny[Long, Cond, Msg, std.Long, T, ParamFace, Param] with TwoFaceAny.Long[T] {
+    @inline def getValue : std.Long = value
+  }
+  object Long extends Builder[Long, std.Long]
+  
+  final class Float[Cond[_,_], Msg[_,_], T, ParamFace, Param](val value : std.Float) extends
+    Checked1ParamAny[Float, Cond, Msg, std.Float, T, ParamFace, Param] with TwoFaceAny.Float[T] {
+    @inline def getValue : std.Float = value
+  }
+  object Float extends Builder[Float, std.Float]
+  
+  final class Double[Cond[_,_], Msg[_,_], T, ParamFace, Param](val value : std.Double) extends
+    Checked1ParamAny[Double, Cond, Msg, std.Double, T, ParamFace, Param] with TwoFaceAny.Double[T] {
+    @inline def getValue : std.Double = value
+  }
+  object Double extends Builder[Double, std.Double]
+  
   final class String[Cond[_,_], Msg[_,_], T, ParamFace, Param](val value : std.String) extends
     Checked1ParamAny[String, Cond, Msg, std.String, T, ParamFace, Param] with TwoFaceAny.String[T] {
     @inline def getValue : std.String = value
   }
   object String extends Builder[String, std.String]
-
+  
+  final class Boolean[Cond[_,_], Msg[_,_], T, ParamFace, Param](val value : std.Boolean) extends
+    Checked1ParamAny[Boolean, Cond, Msg, std.Boolean, T, ParamFace, Param] with TwoFaceAny.Boolean[T] {
+    @inline def getValue : std.Boolean = value
+  }
+  object Boolean extends Builder[Boolean, std.Boolean]
 }
 
