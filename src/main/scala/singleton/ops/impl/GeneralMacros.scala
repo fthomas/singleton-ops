@@ -1439,20 +1439,8 @@ trait GeneralMacros {
       val outTree = calc.tree
       val outTpeWide = outTpe.widen
 
-      if (condTpe.typeArgs.isEmpty)
-        abort(
-          """
-            |Unable to analyze given `Cond`. Try adding the following workaround line at the call site:
-            |    object CheckedWorkAround0 extends singleton.twoface.impl.Checked0ParamAny.Builder[Nothing, Nothing, Nothing, Nothing]
-          """.stripMargin)
-      if (msgTpe.typeArgs.isEmpty)
-        abort(
-          """
-            |Unable to analyze given `Msg`. Try adding the following workaround line at the call site:
-            |    object CheckedWorkAround0 extends singleton.twoface.impl.Checked0ParamAny.Builder[Nothing, Nothing, Nothing, Nothing]
-          """.stripMargin)
-      val fixedCondTpe = condTpe.substituteTypes(List(condTpe.typeArgs.head.typeSymbol), List(outTpe))
-      val fixedMsgTpe = msgTpe.substituteTypes(List(msgTpe.typeArgs.head.typeSymbol), List(outTpe))
+      val fixedCondTpe = appliedType(condTpe.typeConstructor, outTpe).dealias
+      val fixedMsgTpe = appliedType(msgTpe.typeConstructor, outTpe).dealias
 
       val condCalc = TypeCalc(fixedCondTpe) match {
         case t : CalcVal => t
@@ -1467,7 +1455,7 @@ trait GeneralMacros {
       val reqCalc = opCalc(funcTypes.Require, condCalc, msgCalc, CalcLit(0))
 
       q"""
-         (new $chkSym[$chkArgTpe]($outTree.asInstanceOf[$outTpe]))
+         (new $chkSym[$condTpe, $msgTpe, $chkArgTpe]($outTree.asInstanceOf[$outTpe]))
        """
     }
     def newChecked(calc : CalcVal)(implicit annotatedSym : TypeSymbol) : c.Tree = newChecked(calc, calc.tpe)
@@ -1515,21 +1503,8 @@ trait GeneralMacros {
       val outTree = tCalc.tree
       val outTpeWide = outTpe.widen
 
-      if (condTpe.typeArgs.isEmpty)
-        abort(
-          """
-            |Unable to analyze given `Cond`. Try adding the following workaround line at the call site:
-            |    object CheckedWorkAround1 extends singleton.twoface.impl.Checked1ParamAny.Builder[Nothing, Nothing, Nothing, Nothing, Nothing]
-          """.stripMargin)
-      if (msgTpe.typeArgs.isEmpty)
-        abort(
-          """
-            |Unable to analyze given `Msg`. Try adding the following workaround line at the call site:
-            |    object CheckedWorkAround1 extends singleton.twoface.impl.Checked1ParamAny.Builder[Nothing, Nothing, Nothing, Nothing, Nothing]
-          """.stripMargin)
-
-      val fixedCondTpe = condTpe.substituteTypes(condTpe.typeArgs.map(t => t.typeSymbol), List(tCalc.tpe, paramCalc.tpe))
-      val fixedMsgTpe = msgTpe.substituteTypes(msgTpe.typeArgs.map(t => t.typeSymbol), List(tCalc.tpe, paramCalc.tpe))
+      val fixedCondTpe = appliedType(condTpe.typeConstructor, tCalc.tpe, paramCalc.tpe).dealias
+      val fixedMsgTpe = appliedType(msgTpe.typeConstructor, tCalc.tpe, paramCalc.tpe).dealias
 
       val condCalc = TypeCalc(fixedCondTpe) match {
         case t : CalcVal => t

@@ -6,47 +6,36 @@ import singleton.ops.impl._
 
 import scala.reflect.macros.whitebox
 
-trait Checked0ParamAny[Chk[_], Cond[_], Msg[_], Face, T] extends Any with TwoFaceAny[Face, T] {
-  def unsafeCheck()(implicit shl : CheckedShell1[Cond, Msg, Chk[_], Face, Face]) : Chk[T] = {
+trait Checked0ParamAny[Chk[Cond0[_], Msg0[_], T0], Cond[_], Msg[_], Face, T] extends Any with TwoFaceAny[Face, T] {
+  def unsafeCheck()(implicit shl : CheckedShell1[Cond, Msg, Chk[Cond, Msg, _], Face, Face]) : Chk[Cond, Msg, T] = {
     shl.unsafeCheck(getValue)
-    this.asInstanceOf[Chk[T]]
+    this.asInstanceOf[Chk[Cond, Msg, T]]
   }
 }
 
 object Checked0ParamAny {
-  trait Builder[Chk[T], Cond[_], Msg[_], Face] {
-    type Shell[T] = ShellSym[ShellSym[_,_], T]
-    trait ShellSym[Sym, T] extends CheckedShell1[Cond, Msg, Sym, T, Face]
-    object ShellSym extends CheckedShell1Builder[ShellSym, Cond, Msg, Face] {
-      def create[Sym, T](_unsafeCheck: Face => Unit) : ShellSym[Sym, T] = new ShellSym[Sym, T] {
-        def unsafeCheck(arg1: => Face): Unit = _unsafeCheck(arg1)
-      }
+  trait Builder[Chk[Cond0[_], Msg0[_], T0], Face] {
+    trait Alias {
+      type Cond[T]
+      type Msg[T]
+      type Checked[T] = Chk[Cond, Msg, T]
+      type CheckedShell[T] = CheckedShellSym[CheckedShellSym[_,_], T]
+      type CheckedShellSym[Sym, T] = CheckedShell1[Cond, Msg, Sym, T, Face]
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////
-    // Manual invocations (usually used to for testing)
+    // Generic Implicit Conversions
+    // Not used generically, but repeated to avoid IntelliJ issue
+    // https://youtrack.jetbrains.com/issue/SCL-13089
     ////////////////////////////////////////////////////////////////////////////////////////
-    def apply[T](implicit value : AcceptNonLiteral[Id[T]])
-    : Chk[value.Out] = macro Builder.Macro.fromOpApply[Chk[_], Cond[_], Msg[_]]
+    implicit def ev[Cond[_], Msg[_], T](implicit value : AcceptNonLiteral[Id[T]])
+    : Chk[Cond, Msg, T] = macro Builder.Macro.fromOpImpl[T, Chk[Cond, Msg, _], Cond[_], Msg[_]]
 
-    def apply[T <: Face, Out <: T](value : T)
-    : Chk[Out] = macro Builder.Macro.fromNumValue[Chk[_], Cond[_], Msg[_]]
+    implicit def fromNum[Cond[_], Msg[_], T >: Face, Out <: T](value : T)
+    : Chk[Cond, Msg, Out] = macro Builder.Macro.fromNumValue[Chk[Cond, Msg, _], Cond[_], Msg[_]]
 
-    def apply[T <: Face, Out <: T](value : TwoFaceAny[Face, T])
-    : Chk[Out] = macro Builder.Macro.fromTF[Chk[_], Cond[_], Msg[_]]
-    ////////////////////////////////////////////////////////////////////////////////////////
-
-    ////////////////////////////////////////////////////////////////////////////////////////
-    // Implicit Conversions
-    ////////////////////////////////////////////////////////////////////////////////////////
-    implicit def ev[T](implicit value : AcceptNonLiteral[Id[T]])
-    : Chk[T] = macro Builder.Macro.fromOpImpl[T, Chk[_], Cond[_], Msg[_]]
-
-    implicit def fromNum[T >: Face, Out <: T](value : T)
-    : Chk[Out] = macro Builder.Macro.fromNumValue[Chk[_], Cond[_], Msg[_]]
-
-    implicit def fromTF[T >: Face, Out <: T](value : TwoFaceAny[Face, T])
-    : Chk[Out] = macro Builder.Macro.fromTF[Chk[_], Cond[_], Msg[_]]
+    implicit def fromTF[Cond[_], Msg[_], T >: Face, Out <: T](value : TwoFaceAny[Face, T])
+    : Chk[Cond, Msg, Out] = macro Builder.Macro.fromTF[Chk[Cond, Msg, _], Cond[_], Msg[_]]
     ////////////////////////////////////////////////////////////////////////////////////////
   }
 
@@ -74,5 +63,17 @@ object Checked0ParamAny {
       ): c.Tree = Checked0ParamMaterializer[Chk, Cond, Msg].fromTF(value)
     }
   }
+
+  final class Int[Cond[_], Msg[_], T](val value : std.Int) extends
+    Checked0ParamAny[Int, Cond, Msg, std.Int, T] with TwoFaceAny.Int[T] {
+    @inline def getValue : std.Int = value
+  }
+  object Int extends Builder[Int, std.Int]
+
+  final class Boolean[Cond[_], Msg[_], T](val value : std.Boolean) extends
+    Checked0ParamAny[Boolean, Cond, Msg, std.Boolean, T] with TwoFaceAny.Boolean[T] {
+    @inline def getValue : std.Boolean = value
+  }
+  object Boolean extends Builder[Boolean, std.Boolean]
 }
 
