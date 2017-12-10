@@ -341,7 +341,7 @@ trait GeneralMacros {
     // Calculates the TwoFace values
     ////////////////////////////////////////////////////////////////////////
     object TwoFaceCalc {
-      def unappyArg(calcTFType : Option[CalcTFType], tfArgType : Type)(implicit annotatedSym : TypeSymbol): Option[Calc] = {
+      def unapplyArg(calcTFType : Option[CalcTFType], tfArgType : Type)(implicit annotatedSym : TypeSymbol): Option[Calc] = {
         TypeCalc.unapply(tfArgType) match {
           case Some(t : CalcLit) => Some(t)
           case _ => calcTFType
@@ -349,8 +349,9 @@ trait GeneralMacros {
       }
 
       def unapply(tp: Type)(implicit annotatedSym : TypeSymbol) : Option[Calc] = {
+        val tfAnySym = symbolOf[TwoFaceAny[_,_]]
         tp match {
-          case TypeRef(_, sym, args) if args.nonEmpty && tp.baseClasses.contains(symbolOf[TwoFaceAny[_,_]]) =>
+          case TypeRef(_, sym, args) if args.nonEmpty && tp.baseClasses.contains(tfAnySym) =>
             if (verboseTraversal) print(s"@@TwoFaceCalc@@\nTP: $tp\nRAW: ${showRaw(tp)}\nBaseCls:${tp.baseClasses}")
             val calcTFType = sym match {
               case t if tp.baseClasses.contains(symbolOf[TwoFaceAny.Char[_]]) => Some(CalcTFType.Char)
@@ -362,8 +363,9 @@ trait GeneralMacros {
               case t if tp.baseClasses.contains(symbolOf[TwoFaceAny.Boolean[_]]) => Some(CalcTFType.Boolean)
               case _ => None
             }
-            if (calcTFType.isDefined) unappyArg(calcTFType, args.head) else
-
+            if (calcTFType.isDefined)
+              unapplyArg(calcTFType, tp.baseType(tfAnySym).typeArgs(1))
+            else
               None
           case _ => None
         }
