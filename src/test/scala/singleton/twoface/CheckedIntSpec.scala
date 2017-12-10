@@ -21,7 +21,6 @@ class CheckedIntSpec extends Properties("Checked.Int") {
     foo(t.unsafeCheck())
   }
 
-
   property("Compile-time checks") = wellTyped {
     implicitly[SmallerThan50.Checked[W.`5`.T]]
     val b = implicitly[SmallerThan50.Checked[W.`5`.T + W.`3`.T]]
@@ -33,6 +32,7 @@ class CheckedIntSpec extends Properties("Checked.Int") {
     smallerThan50(implicitly[TwoFace.Int[W.`30`.T]])
     illTyped("""smallerThan50(50)""" ,"Failed Check")
     illTyped("""smallerThan50(TwoFace.Int(50))""", "Failed Check")
+//    illTyped("""implicitly[SmallerThan50.Checked[W.`50`.T]]""", "Failed Check")
   }
 
   property("Run-time checks") = wellTyped {

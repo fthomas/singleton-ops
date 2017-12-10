@@ -31,38 +31,38 @@ object Checked1ParamAny {
     // https://youtrack.jetbrains.com/issue/SCL-13089
     ////////////////////////////////////////////////////////////////////////////////////////
     implicit def ev[Cond[_,_], Msg[_,_], T, ParamFace, Param](implicit value : AcceptNonLiteral[Id[T]], param : AcceptNonLiteral[Id[Param]])
-    : Chk[Cond, Msg, T, ParamFace, Param] = macro Builder.Macro.fromOpImpl[T, Param, Chk[Cond,Msg,_,_,_], Cond[_,_], Msg[_,_]]
+    : Chk[Cond, Msg, T, ParamFace, Param] = macro Builder.Macro.fromOpImpl[Chk[Cond,Msg,_,_,_], Cond[_,_], Msg[_,_], T, ParamFace, Param]
 
     implicit def fromNum[Cond[_,_], Msg[_,_], T >: Face, ParamFace, Param, Out <: T](value : T)(implicit param : AcceptNonLiteral[Id[Param]])
-    : Chk[Cond, Msg, Out, ParamFace, Param] = macro Builder.Macro.fromNumValue[Chk[Cond,Msg,_,_,_], Cond[_,_], Msg[_,_]]
+    : Chk[Cond, Msg, Out, ParamFace, Param] = macro Builder.Macro.fromNumValue[Chk[Cond,Msg,_,_,_], Cond[_,_], Msg[_,_], T, ParamFace, Param]
 
     implicit def fromTF[Cond[_,_], Msg[_,_], T >: Face, ParamFace, Param, Out <: T](value : TwoFaceAny[Face, T])(implicit param : AcceptNonLiteral[Id[Param]])
-    : Chk[Cond, Msg, Out, ParamFace, Param] = macro Builder.Macro.fromTF[Chk[Cond,Msg,_,_,_], Cond[_,_], Msg[_,_]]
+    : Chk[Cond, Msg, Out, ParamFace, Param] = macro Builder.Macro.fromTF[Chk[Cond,Msg,_,_,_], Cond[_,_], Msg[_,_], T, ParamFace, Param]
     ////////////////////////////////////////////////////////////////////////////////////////
   }
 
   @bundle
   object Builder {
     final class Macro(val c: whitebox.Context) extends GeneralMacros {
-      def fromOpApply[Chk, Cond, Msg](value : c.Tree, param : c.Tree)(
+      def fromOpApply[Chk, Cond, Msg, T, ParamFace, Param](value : c.Tree, param : c.Tree)(
         implicit
-        chk : c.WeakTypeTag[Chk], cond : c.WeakTypeTag[Cond], msg : c.WeakTypeTag[Msg]
-      ): c.Tree = Checked1ParamMaterializer[Chk, Cond, Msg].fromOpApply(value, param)
+        chk : c.WeakTypeTag[Chk], cond : c.WeakTypeTag[Cond], msg : c.WeakTypeTag[Msg], t : c.WeakTypeTag[T], paramFace : c.WeakTypeTag[ParamFace], p : c.WeakTypeTag[Param]
+      ): c.Tree = Checked1ParamMaterializer[Chk, Cond, Msg, T, ParamFace, Param].fromOpApply(value, param)
 
-      def fromOpImpl[T, Param, Chk, Cond, Msg](value : c.Tree, param : c.Tree)(
+      def fromOpImpl[Chk, Cond, Msg, T, ParamFace, Param](value : c.Tree, param : c.Tree)(
         implicit
-        t : c.WeakTypeTag[T], p : c.WeakTypeTag[Param], chk : c.WeakTypeTag[Chk], cond : c.WeakTypeTag[Cond], msg : c.WeakTypeTag[Msg]
-      ): c.Tree = Checked1ParamMaterializer[Chk, Cond, Msg].fromOpImpl(value, c.weakTypeOf[T], param, c.weakTypeOf[Param])
+        chk : c.WeakTypeTag[Chk], cond : c.WeakTypeTag[Cond], msg : c.WeakTypeTag[Msg], t : c.WeakTypeTag[T], paramFace : c.WeakTypeTag[ParamFace], p : c.WeakTypeTag[Param]
+      ): c.Tree = Checked1ParamMaterializer[Chk, Cond, Msg, T, ParamFace, Param].fromOpImpl(value, param)
 
-      def fromNumValue[Chk, Cond, Msg](value : c.Tree)(param : c.Tree)(
+      def fromNumValue[Chk, Cond, Msg, T, ParamFace, Param](value : c.Tree)(param : c.Tree)(
         implicit
-        chk : c.WeakTypeTag[Chk], cond : c.WeakTypeTag[Cond], msg : c.WeakTypeTag[Msg]
-      ): c.Tree = Checked1ParamMaterializer[Chk, Cond, Msg].fromNumValue(value, param)
+        chk : c.WeakTypeTag[Chk], cond : c.WeakTypeTag[Cond], msg : c.WeakTypeTag[Msg], t : c.WeakTypeTag[T], paramFace : c.WeakTypeTag[ParamFace], p : c.WeakTypeTag[Param]
+      ): c.Tree = Checked1ParamMaterializer[Chk, Cond, Msg, T, ParamFace, Param].fromNumValue(value, param)
 
-      def fromTF[Chk, Cond, Msg](value : c.Tree)(param : c.Tree)(
+      def fromTF[Chk, Cond, Msg, T, ParamFace, Param](value : c.Tree)(param : c.Tree)(
         implicit
-        chk : c.WeakTypeTag[Chk], cond : c.WeakTypeTag[Cond], msg : c.WeakTypeTag[Msg]
-      ): c.Tree = Checked1ParamMaterializer[Chk, Cond, Msg].fromTF(value, param)
+        chk : c.WeakTypeTag[Chk], cond : c.WeakTypeTag[Cond], msg : c.WeakTypeTag[Msg], t : c.WeakTypeTag[T], paramFace : c.WeakTypeTag[ParamFace], p : c.WeakTypeTag[Param]
+      ): c.Tree = Checked1ParamMaterializer[Chk, Cond, Msg, T, ParamFace, Param].fromTF(value, param)
     }
   }
 
