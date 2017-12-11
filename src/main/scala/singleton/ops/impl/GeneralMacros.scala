@@ -1461,15 +1461,11 @@ trait GeneralMacros {
        """
     }
     def newChecked(calc : CalcVal)(implicit annotatedSym : TypeSymbol) : c.Tree = newChecked(calc, calc.tpe)
-    def fromOpApply(opTree : c.Tree) : c.Tree = {
-      implicit val annotatedSym : TypeSymbol = chkSym
-      val numValueCalc = extractValueFromOpTree(opTree)
-      val genTree = newChecked(numValueCalc)
-//      print(genTree)
-      genTree
-    }
     def fromOpImpl(opTree : c.Tree) : c.Tree = {
-      implicit val annotatedSym : TypeSymbol = chkSym
+      implicit val annotatedSym : TypeSymbol = c.enclosingImplicits.head.pt match {
+        case TypeRef(pre,sym,args) => sym.asType
+        case _ => chkSym
+      }
       val numValueCalc = extractValueFromOpTree(opTree)
       val genTree = newChecked(numValueCalc, tTpe)
 //      print(genTree)
@@ -1526,16 +1522,11 @@ trait GeneralMacros {
     }
     def newChecked(tCalc : CalcVal, paramCalc : CalcVal)(implicit annotatedSym : TypeSymbol) : c.Tree =
       newChecked(tCalc, tCalc.tpe, paramCalc, paramCalc.tpe)
-    def fromOpApply(tOpTree : c.Tree, paramOpTree : c.Tree) : c.Tree = {
-      implicit val annotatedSym : TypeSymbol = chkSym
-      val tCalc = extractValueFromOpTree(tOpTree)
-      val paramCalc = extractValueFromOpTree(paramOpTree)
-      val genTree = newChecked(tCalc, paramCalc)
-//      print(genTree)
-      genTree
-    }
     def fromOpImpl(tOpTree : c.Tree, paramOpTree : c.Tree) : c.Tree = {
-      implicit val annotatedSym : TypeSymbol = chkSym
+      implicit val annotatedSym : TypeSymbol = c.enclosingImplicits.head.pt match {
+        case TypeRef(pre,sym,args) => sym.asType
+        case _ => chkSym
+      }
       val tCalc = extractValueFromOpTree(tOpTree)
       val paramCalc = extractValueFromOpTree(paramOpTree)
       val genTree = newChecked(tCalc, tTpe, paramCalc, paramTpe)

@@ -28,6 +28,9 @@ object Checked0ParamAny {
     // Currently triggers good-code-red IntelliJ issue
     // https://youtrack.jetbrains.com/issue/SCL-13089
     ////////////////////////////////////////////////////////////////////////////////////////
+    implicit def ev[Cond[_], Msg[_], T](implicit value : AcceptNonLiteral[Id[T]])
+    : Chk[Cond, Msg, T] = macro Builder.Macro.fromOpImpl[Chk[Cond,Msg,_], Cond[_], Msg[_], T]
+
     implicit def fromNum[Cond[_], Msg[_], T >: Face, Out <: T](value : T)
     : Chk[Cond, Msg, Out] = macro Builder.Macro.fromNumValue[Chk[Cond,Msg,_], Cond[_], Msg[_], T]
 
@@ -39,11 +42,6 @@ object Checked0ParamAny {
   @bundle
   object Builder {
     final class Macro(val c: whitebox.Context) extends GeneralMacros {
-      def fromOpApply[Chk, Cond, Msg, T](value : c.Tree)(
-        implicit
-        chk : c.WeakTypeTag[Chk], cond : c.WeakTypeTag[Cond], msg : c.WeakTypeTag[Msg], t : c.WeakTypeTag[T]
-      ): c.Tree = Checked0ParamMaterializer[Chk, Cond, Msg, T].fromOpApply(value)
-
       def fromOpImpl[Chk, Cond, Msg, T](value : c.Tree)(
         implicit
         chk : c.WeakTypeTag[Chk], cond : c.WeakTypeTag[Cond], msg : c.WeakTypeTag[Msg], t : c.WeakTypeTag[T]
