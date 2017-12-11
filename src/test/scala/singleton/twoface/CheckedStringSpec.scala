@@ -25,8 +25,10 @@ class CheckedStringSpec extends Properties("Checked.String") {
   property("Compile-time checks") = wellTyped {
     lengthSmallerThan5("Hi")
     lengthSmallerThan5(TwoFace.String("Hi"))
+    implicitly[LengthSmallerThan.Checked[W.`"Hi"`.T,W.`5`.T]]
     illTyped("""lengthSmallerThan5("Hello")""","Length of string 'Hello' is not smaller than 5")
     illTyped("""lengthSmallerThan5(TwoFace.String("Hello"))""","Length of string 'Hello' is not smaller than 5")
+    illTyped("""implicitly[LengthSmallerThan.Checked[W.`"Hello"`.T,W.`5`.T]]""","Length of string 'Hello' is not smaller than 5")
   }
 
   property("Run-time checks") = wellTyped {
