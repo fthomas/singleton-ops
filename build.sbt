@@ -10,10 +10,8 @@ val gitDevUrl = s"git@github.com:fthomas/$projectName.git"
 
 val macroCompatVersion = "1.1.1"
 val macroParadiseVersion = "2.1.0"
-val macroParadise3Version = "3.0.0-M10"
 val shapelessVersion = "2.3.2"
 val scalaCheckVersion = "1.13.4"
-val scalaMetaVersion = "1.8.0"
 
 /// projects
 lazy val root = project.in(file("."))
@@ -101,13 +99,8 @@ lazy val compileSettings = Def.settings(
     compilerPlugin(
     "org.scalamacros" % "paradise" % macroParadiseVersion cross CrossVersion.patch),
     "com.chuusai" %%% "shapeless" % shapelessVersion,
-    "org.scalacheck" %%% "scalacheck" % scalaCheckVersion % Test,
-    "org.scalameta" %%% "scalameta" % scalaMetaVersion % Provided
-  ),
-  // macroparadise plugin doesn't work in repl
-  scalacOptions in (Compile, console) ~= (_ filterNot (_ contains "paradise")),
-  sources in (Compile,doc) := Seq.empty, // disable scaladoc due to https://github.com/scalameta/paradise/issues/55
-  sbt.addCompilerPlugin("org.scalameta" % "paradise" % macroParadise3Version cross CrossVersion.patch)
+    "org.scalacheck" %%% "scalacheck" % scalaCheckVersion % Test
+  )
 )
 
 lazy val scaladocSettings = Def.settings(

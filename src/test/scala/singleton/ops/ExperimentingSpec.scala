@@ -211,8 +211,8 @@
 ////  type CondSmallerThan50[T, P] = T < P
 ////  type MsgSmallerThan50[T, P] = "This is bad " + ToString[T]
 ////  type Param50 = 50
-////  type CheckedSmallerThan50[T] = Checked.Int[T, CondSmallerThan50, Param50, MsgSmallerThan50]
-////  def smallerThan50[T](t : CheckedSmallerThan50[T]) : Unit = {
+////  type SmallerThan50.Check[T] = Checked.Int[T, CondSmallerThan50, Param50, MsgSmallerThan50]
+////  def smallerThan50[T](t : SmallerThan50.Check[T]) : Unit = {
 ////    require(t < 50, "") //if (rt_check)
 ////  }
 ////

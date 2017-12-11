@@ -6,15 +6,16 @@ import singleton.TestUtils._
 import singleton.ops._
 
 object CheckedCharSpec {
-  type Cond[T] = T < W.`'\u0032'`.T
-  type Msg[T] = W.`"Failed Check"`.T
-  @checked0Param[Cond, Msg, Char] class CheckedSmallerThan50[T]
+  object SmallerThan50 extends Checked0Param.Char {
+    type Cond[T] = T < W.`'\u0032'`.T
+    type Msg[T] = W.`"Failed Check"`.T
+  }
 }
 
 class CheckedCharSpec extends Properties("Checked.Char") {
   import CheckedCharSpec._
 
-  def smallerThan50[T](t : CheckedSmallerThan50[T]) : Unit = {t.unsafeCheck()}
+  def smallerThan50[T](t : SmallerThan50.Checked[T]) : Unit = {t.unsafeCheck()}
 
   property("Compile-time checks") = wellTyped {
     smallerThan50('\u0020')

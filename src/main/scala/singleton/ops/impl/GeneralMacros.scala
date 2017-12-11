@@ -341,7 +341,7 @@ trait GeneralMacros {
     // Calculates the TwoFace values
     ////////////////////////////////////////////////////////////////////////
     object TwoFaceCalc {
-      def unappyArg(calcTFType : Option[CalcTFType], tfArgType : Type)(implicit annotatedSym : TypeSymbol): Option[Calc] = {
+      def unapplyArg(calcTFType : Option[CalcTFType], tfArgType : Type)(implicit annotatedSym : TypeSymbol): Option[Calc] = {
         TypeCalc.unapply(tfArgType) match {
           case Some(t : CalcLit) => Some(t)
           case _ => calcTFType
@@ -349,8 +349,9 @@ trait GeneralMacros {
       }
 
       def unapply(tp: Type)(implicit annotatedSym : TypeSymbol) : Option[Calc] = {
+        val tfAnySym = symbolOf[TwoFaceAny[_,_]]
         tp match {
-          case TypeRef(_, sym, args) if args.nonEmpty && tp.baseClasses.contains(symbolOf[TwoFaceAny[_,_]]) =>
+          case TypeRef(_, sym, args) if args.nonEmpty && tp.baseClasses.contains(tfAnySym) =>
             if (verboseTraversal) print(s"@@TwoFaceCalc@@\nTP: $tp\nRAW: ${showRaw(tp)}\nBaseCls:${tp.baseClasses}")
             val calcTFType = sym match {
               case t if tp.baseClasses.contains(symbolOf[TwoFaceAny.Char[_]]) => Some(CalcTFType.Char)
@@ -362,8 +363,9 @@ trait GeneralMacros {
               case t if tp.baseClasses.contains(symbolOf[TwoFaceAny.Boolean[_]]) => Some(CalcTFType.Boolean)
               case _ => None
             }
-            if (calcTFType.isDefined) unappyArg(calcTFType, args.head) else
-
+            if (calcTFType.isDefined)
+              unapplyArg(calcTFType, tp.baseType(tfAnySym).typeArgs(1))
+            else
               None
           case _ => None
         }
@@ -1430,31 +1432,17 @@ trait GeneralMacros {
   ///////////////////////////////////////////////////////////////////////////////////////////
   // Checked0Param TwoFace
   ///////////////////////////////////////////////////////////////////////////////////////////
-  def Checked0ParamMaterializer[Chk, Cond, Msg](implicit chk : c.WeakTypeTag[Chk], cond : c.WeakTypeTag[Cond], msg : c.WeakTypeTag[Msg]) :
-  Checked0ParamMaterializer[Chk, Cond, Msg] = new Checked0ParamMaterializer[Chk, Cond, Msg](symbolOf[Chk], weakTypeOf[Cond], weakTypeOf[Msg])
+  def Checked0ParamMaterializer[Chk, Cond, Msg, T](implicit chk : c.WeakTypeTag[Chk], cond : c.WeakTypeTag[Cond], msg : c.WeakTypeTag[Msg], t : c.WeakTypeTag[T]) :
+  Checked0ParamMaterializer[Chk, Cond, Msg, T] = new Checked0ParamMaterializer[Chk, Cond, Msg, T](symbolOf[Chk], weakTypeOf[Cond], weakTypeOf[Msg], weakTypeOf[T])
 
-  final class Checked0ParamMaterializer[Chk, Cond, Msg](chkSym : TypeSymbol, condTpe : Type, msgTpe : Type) {
+  final class Checked0ParamMaterializer[Chk, Cond, Msg, T](chkSym : TypeSymbol, condTpe : Type, msgTpe : Type, tTpe : Type) {
     def newChecked(calc : CalcVal, chkArgTpe : Type)(implicit annotatedSym : TypeSymbol) : c.Tree = {
       val outTpe = calc.tpe
       val outTree = calc.tree
       val outTpeWide = outTpe.widen
 
-      if (condTpe.typeArgs.isEmpty)
-        abort(
-          """
-            |Unable to analyze given `Cond`. Try adding the following workaround lines at the call site:
-            |  type WorkAround0[T]
-            |  object WorkAround0 extends _root_.singleton.twoface.impl.Checked0Param.Builder[Nothing, WorkAround0, WorkAround0, Nothing]
-          """.stripMargin)
-      if (msgTpe.typeArgs.isEmpty)
-        abort(
-          """
-            |Unable to analyze given `Msg`. Try adding the following workaround lines at the call site:
-            |  type WorkAround0[T]
-            |  object WorkAround0 extends _root_.singleton.twoface.impl.Checked0Param.Builder[Nothing, WorkAround0, WorkAround0, Nothing]
-          """.stripMargin)
-      val fixedCondTpe = condTpe.substituteTypes(List(condTpe.typeArgs.head.typeSymbol), List(outTpe))
-      val fixedMsgTpe = msgTpe.substituteTypes(List(msgTpe.typeArgs.head.typeSymbol), List(outTpe))
+      val fixedCondTpe = appliedType(condTpe.typeConstructor, outTpe).dealias
+      val fixedMsgTpe = appliedType(msgTpe.typeConstructor, outTpe).dealias
 
       val condCalc = TypeCalc(fixedCondTpe) match {
         case t : CalcVal => t
@@ -1469,7 +1457,7 @@ trait GeneralMacros {
       val reqCalc = opCalc(funcTypes.Require, condCalc, msgCalc, CalcLit(0))
 
       q"""
-         (new $chkSym[$chkArgTpe]($outTree.asInstanceOf[$outTpe]))
+         (new $chkSym[$condTpe, $msgTpe, $chkArgTpe]($outTree.asInstanceOf[$outTpe]))
        """
     }
     def newChecked(calc : CalcVal)(implicit annotatedSym : TypeSymbol) : c.Tree = newChecked(calc, calc.tpe)
@@ -1480,7 +1468,7 @@ trait GeneralMacros {
 //      print(genTree)
       genTree
     }
-    def fromOpImpl(opTree : c.Tree, tTpe : Type) : c.Tree = {
+    def fromOpImpl(opTree : c.Tree) : c.Tree = {
       implicit val annotatedSym : TypeSymbol = chkSym
       val numValueCalc = extractValueFromOpTree(opTree)
       val genTree = newChecked(numValueCalc, tTpe)
@@ -1508,32 +1496,17 @@ trait GeneralMacros {
   ///////////////////////////////////////////////////////////////////////////////////////////
   // Checked1Param TwoFace
   ///////////////////////////////////////////////////////////////////////////////////////////
-  def Checked1ParamMaterializer[Chk, Cond, Msg](implicit chk : c.WeakTypeTag[Chk], cond : c.WeakTypeTag[Cond], msg : c.WeakTypeTag[Msg]) :
-  Checked1ParamMaterializer[Chk, Cond, Msg] = new Checked1ParamMaterializer[Chk, Cond, Msg](symbolOf[Chk], weakTypeOf[Cond], weakTypeOf[Msg])
+  def Checked1ParamMaterializer[Chk, Cond, Msg, T, ParamFace, Param](implicit chk : c.WeakTypeTag[Chk], cond : c.WeakTypeTag[Cond], msg : c.WeakTypeTag[Msg], t : c.WeakTypeTag[T], paramFace : c.WeakTypeTag[ParamFace], p : c.WeakTypeTag[Param]) :
+  Checked1ParamMaterializer[Chk, Cond, Msg, T, ParamFace, Param] = new Checked1ParamMaterializer[Chk, Cond, Msg, T, ParamFace, Param](symbolOf[Chk], weakTypeOf[Cond], weakTypeOf[Msg], weakTypeOf[T], weakTypeOf[ParamFace], weakTypeOf[Param])
 
-  final class Checked1ParamMaterializer[Chk, Cond, Msg](chkSym : TypeSymbol, condTpe : Type, msgTpe : Type) {
+  final class Checked1ParamMaterializer[Chk, Cond, Msg, T, ParamFace, Param](chkSym : TypeSymbol, condTpe : Type, msgTpe : Type, tTpe : Type, paramFaceTpe : Type, paramTpe : Type) {
     def newChecked(tCalc : CalcVal, tTpe : Type, paramCalc : CalcVal, paramTpe : Type)(implicit annotatedSym : TypeSymbol) : c.Tree = {
       val outTpe = tCalc.tpe
       val outTree = tCalc.tree
       val outTpeWide = outTpe.widen
 
-      if (condTpe.typeArgs.isEmpty)
-        abort(
-          """
-            |Unable to analyze given `Cond`. Try adding the following workaround lines at the call site:
-            |  type WorkAround1[T,P]
-            |  object WorkAround1 extends _root_.singleton.twoface.impl.Checked1Param.Builder[Nothing, WorkAround1, WorkAround1, Nothing, Nothing]
-          """.stripMargin)
-      if (msgTpe.typeArgs.isEmpty)
-        abort(
-          """
-            |Unable to analyze given `Msg`. Try adding the following workaround lines at the call site:
-            |  type WorkAround1[T,P]
-            |  object WorkAround1 extends _root_.singleton.twoface.impl.Checked1Param.Builder[Nothing, WorkAround1, WorkAround1, Nothing, Nothing]
-          """.stripMargin)
-
-      val fixedCondTpe = condTpe.substituteTypes(condTpe.typeArgs.map(t => t.typeSymbol), List(tCalc.tpe, paramCalc.tpe))
-      val fixedMsgTpe = msgTpe.substituteTypes(msgTpe.typeArgs.map(t => t.typeSymbol), List(tCalc.tpe, paramCalc.tpe))
+      val fixedCondTpe = appliedType(condTpe.typeConstructor, tCalc.tpe, paramCalc.tpe).dealias
+      val fixedMsgTpe = appliedType(msgTpe.typeConstructor, tCalc.tpe, paramCalc.tpe).dealias
 
       val condCalc = TypeCalc(fixedCondTpe) match {
         case t : CalcVal => t
@@ -1548,7 +1521,7 @@ trait GeneralMacros {
       val reqCalc = opCalc(funcTypes.Require, condCalc, msgCalc, CalcLit(0))
 
       q"""
-         (new $chkSym[$tTpe, $paramTpe]($outTree.asInstanceOf[$outTpe]))
+         (new $chkSym[$condTpe, $msgTpe, $tTpe, $paramFaceTpe, $paramTpe]($outTree.asInstanceOf[$outTpe]))
        """
     }
     def newChecked(tCalc : CalcVal, paramCalc : CalcVal)(implicit annotatedSym : TypeSymbol) : c.Tree =
@@ -1561,7 +1534,7 @@ trait GeneralMacros {
 //      print(genTree)
       genTree
     }
-    def fromOpImpl(tOpTree : c.Tree, tTpe : Type, paramOpTree : c.Tree, paramTpe : Type) : c.Tree = {
+    def fromOpImpl(tOpTree : c.Tree, paramOpTree : c.Tree) : c.Tree = {
       implicit val annotatedSym : TypeSymbol = chkSym
       val tCalc = extractValueFromOpTree(tOpTree)
       val paramCalc = extractValueFromOpTree(paramOpTree)

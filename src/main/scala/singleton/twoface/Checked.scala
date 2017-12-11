@@ -1,8 +1,5 @@
 package singleton.twoface
-
-import scala.meta._
-import singleton.ops._
-import scala.collection.immutable.Seq
+import impl._
 
 object Checked {
   type F1[_]
@@ -17,65 +14,22 @@ object Checked {
     impl.CheckedShell2[Cond, Msg, Sym, Arg1, Arg1Wide, Arg2, Arg2Wide]
 }
 
-class checked0Param[Cond[_], Msg[_], TFace] extends scala.annotation.StaticAnnotation {
-  inline def apply(defn: Any): Any = meta {
-    defn match {
-      case cls @ Defn.Class(_, name, _, ctor, _) =>
-        val q"type T = $tFaceName" = q"type T = $TFace"
-        val chkNameStr = name.value
-        val chkTypeName = Type.Name(chkNameStr)
-        val chkTermName = Term.Name(chkNameStr)
-        val updatedCls =
-          q"""
-             final class $chkTypeName[T] (val value : $TFace) extends AnyVal with
-               _root_.singleton.twoface.impl.Checked0Param[$chkTypeName, $Cond, $Msg, $TFace, T] with
-               ${Ctor.Name("_root_.singleton.twoface.impl.TwoFaceAny." + tFaceName.toString())}[T] {
-               @inline def getValue : $TFace = value
-             }
-           """
-        val companion =
-          q"""
-             object $chkTermName extends _root_.singleton.twoface.impl.Checked0Param.Builder[$chkTypeName, $Cond, $Msg, $TFace] {
-             }
-           """
-        val termBlock = Term.Block(Seq(updatedCls, companion))
-//        print(termBlock)
-        termBlock
-      case _ =>
-//        println(defn.structure)
-        abort("@checked must annotate a class.")
-    }
-  }
+object Checked0Param {
+  trait Char    extends Checked0ParamAny.Char.Alias
+  trait Int     extends Checked0ParamAny.Int.Alias
+  trait Long    extends Checked0ParamAny.Long.Alias
+  trait Float   extends Checked0ParamAny.Float.Alias
+  trait Double  extends Checked0ParamAny.Double.Alias
+  trait String  extends Checked0ParamAny.String.Alias
+  trait Boolean extends Checked0ParamAny.Boolean.Alias
 }
 
-
-class checked1Param[Cond[_,_], Msg[_,_], TFace, ParamFace] extends scala.annotation.StaticAnnotation {
-  inline def apply(defn: Any): Any = meta {
-    defn match {
-      case cls @ Defn.Class(_, name, _, ctor, _) =>
-        val q"type T = $tFaceName" = q"type T = $TFace"
-        val chkNameStr = name.value
-        val chkTypeName = Type.Name(chkNameStr)
-        val chkTermName = Term.Name(chkNameStr)
-        val updatedCls =
-          q"""
-             final class $chkTypeName[T, Param] (val value : $TFace) extends AnyVal with
-               _root_.singleton.twoface.impl.Checked1Param[$chkTypeName, $Cond, $Msg, $TFace, T, $ParamFace, Param] with
-               ${Ctor.Name("_root_.singleton.twoface.impl.TwoFaceAny." + tFaceName.toString())}[T] {
-               @inline def getValue : $TFace = value
-             }
-           """
-        val companion =
-          q"""
-             object $chkTermName extends _root_.singleton.twoface.impl.Checked1Param.Builder[$chkTypeName, $Cond, $Msg, $TFace, $ParamFace] {
-             }
-           """
-        val termBlock = Term.Block(Seq(updatedCls, companion))
-        //        print(termBlock)
-        termBlock
-      case _ =>
-        //        println(defn.structure)
-        abort("@checked must annotate a class.")
-    }
-  }
+object Checked1Param {
+  trait Char    extends Checked1ParamAny.Char.Alias
+  trait Int     extends Checked1ParamAny.Int.Alias
+  trait Long    extends Checked1ParamAny.Long.Alias
+  trait Float   extends Checked1ParamAny.Float.Alias
+  trait Double  extends Checked1ParamAny.Double.Alias
+  trait String  extends Checked1ParamAny.String.Alias
+  trait Boolean extends Checked1ParamAny.Boolean.Alias
 }
