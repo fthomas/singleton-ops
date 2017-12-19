@@ -18,9 +18,9 @@ object Checked0ParamAny {
     trait Alias {
       type Cond[T]
       type Msg[T]
-      type Checked[T] = Chk[Cond, Msg, T]
-      type CheckedShell[T] = CheckedShellSym[CheckedShellSym[_,_], T]
-      type CheckedShellSym[Sym, T] = CheckedShell1[Cond, Msg, Sym, T, Face]
+      final type Checked[T] = Chk[Cond, Msg, T]
+      final type CheckedShell[T] = CheckedShellSym[CheckedShellSym[_,_], T]
+      final type CheckedShellSym[Sym, T] = CheckedShell1[Cond, Msg, Sym, T, Face]
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////
