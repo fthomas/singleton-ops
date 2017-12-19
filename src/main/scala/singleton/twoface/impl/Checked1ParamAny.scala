@@ -20,9 +20,9 @@ object Checked1ParamAny {
       type Cond[T, Param]
       type Msg[T, Param]
       type ParamFace
-      type Checked[T, Param] = Chk[Cond, Msg, T, ParamFace, Param]
-      type CheckedShell[T, Param] = CheckedShellSym[CheckedShellSym[_,_,_], T, Param]
-      type CheckedShellSym[Sym, T, Param] = CheckedShell2[Cond, Msg, Sym, T, Face, Param, ParamFace]
+      final type Checked[T, Param] = Chk[Cond, Msg, T, ParamFace, Param]
+      final type CheckedShell[T, Param] = CheckedShellSym[CheckedShellSym[_,_,_], T, Param]
+      final type CheckedShellSym[Sym, T, Param] = CheckedShell2[Cond, Msg, Sym, T, Face, Param, ParamFace]
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////
