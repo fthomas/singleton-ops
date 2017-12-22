@@ -351,6 +351,11 @@ class TwoFaceIntSpec extends Properties("TwoFace.Int") {
     val conv9 : TwoFace.Int[W.`3`.T + W.`0`.T] = implicitly[TwoFace.Int[W.`3`.T]]
     val conv10 : Int = TwoFace.Int(us(3))
     val conv11 : W.`3`.T = implicitly[TwoFace.Int[Id[W.`3`.T]]]
+    //widening
+    val conv12 : TwoFace.Int[Int] = 3
+    val conv13 : TwoFace.Int[Int] = TwoFace.Int[W.`3`.T]
+    val conv14 : TwoFace.Int[Int] = TwoFace.Int(3)
+    val conv15 : TwoFace.Int[Int] = implicitly[TwoFace.Int[W.`3`.T]]
   }
 
   property("Wrong Implicit Conversions") = wellTyped {

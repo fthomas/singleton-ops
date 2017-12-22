@@ -36,6 +36,9 @@ object Checked0ParamAny {
 
     implicit def fromTF[Cond[_], Msg[_], T >: Face, Out <: T](value : TwoFaceAny[Face, T])
     : Chk[Cond, Msg, Out] = macro Builder.Macro.fromTF[Chk[Cond,Msg,_], Cond[_], Msg[_], T]
+
+    implicit def widen[Cond[_], Msg[_], T](value : Chk[Cond, Msg, T])
+    : Chk[Cond, Msg, Face] = macro Builder.Macro.widen[Chk[Cond,Msg,_], Cond[_], Msg[_], Face]
     ////////////////////////////////////////////////////////////////////////////////////////
   }
 
@@ -56,6 +59,11 @@ object Checked0ParamAny {
         implicit
         chk : c.WeakTypeTag[Chk], cond : c.WeakTypeTag[Cond], msg : c.WeakTypeTag[Msg], t : c.WeakTypeTag[T]
       ): c.Tree = Checked0ParamMaterializer[Chk, Cond, Msg, T].fromTF(value)
+
+      def widen[Chk, Cond, Msg, T](value : c.Tree)(
+        implicit
+        chk : c.WeakTypeTag[Chk], cond : c.WeakTypeTag[Cond], msg : c.WeakTypeTag[Msg], t : c.WeakTypeTag[T]
+      ): c.Tree = Checked0ParamMaterializer[Chk, Cond, Msg, T].widen(value)
     }
   }
 

@@ -81,6 +81,7 @@ class TwoFaceBooleanSpec extends Properties("TwoFace.Boolean") {
     val c : TwoFace.Boolean[W.`true`.T && W.`true`.T] = implicitly[TwoFace.Boolean[W.`true`.T]]
     val d : W.`true`.T = TwoFace.Boolean(true)
     val e : Boolean = TwoFace.Boolean(us(false))
+    val f : TwoFace.Boolean[Boolean] = false
   }
 
   property("Wrong Implicit Conversions") = wellTyped {

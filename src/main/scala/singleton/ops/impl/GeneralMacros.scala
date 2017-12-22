@@ -1395,7 +1395,7 @@ trait GeneralMacros {
 //      print(genTree)
       genTree
     }
-    def toNumValue[Out](tfTree : c.Tree, tfSym : TypeSymbol, tTpe : Type) : c.Tree = {
+    def toNumValue(tfTree : c.Tree, tfSym : TypeSymbol, tTpe : Type) : c.Tree = {
       implicit val annotatedSym : TypeSymbol = tfSym
       val calc = extractValueFromTwoFaceTree(tfTree)
       val outTpe = calc.tpe
@@ -1485,6 +1485,13 @@ trait GeneralMacros {
 //      print(genTree)
       genTree
     }
+    def widen(chkTree : c.Tree) : c.Tree = {
+      implicit val annotatedSym : TypeSymbol = chkSym
+      val tfValueCalc = extractValueFromTwoFaceTree(chkTree)
+      val genTree = newChecked(tfValueCalc, tTpe)
+      //      print(genTree)
+      genTree
+    }
   }
   ///////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1547,6 +1554,14 @@ trait GeneralMacros {
       val paramCalc = extractValueFromOpTree(paramOpTree)
       val genTree = newChecked(tCalc, paramCalc)
 //      print(genTree)
+      genTree
+    }
+    def widen(tTFTree : c.Tree, paramOpTree : c.Tree) : c.Tree = {
+      implicit val annotatedSym : TypeSymbol = chkSym
+      val tCalc = extractValueFromTwoFaceTree(tTFTree)
+      val paramCalc = extractValueFromOpTree(paramOpTree)
+      val genTree = newChecked(tCalc, tTpe, paramCalc, paramTpe)
+      //      print(genTree)
       genTree
     }
   }
