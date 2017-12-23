@@ -90,6 +90,7 @@ class TwoFaceStringSpec extends Properties("TwoFace.String") {
     val c : TwoFace.String[W.`"Some"`.T + W.`"thing"`.T] = implicitly[TwoFace.String[W.`"Something"`.T]]
     val d : W.`"Some"`.T = TwoFace.String("Some")
     val e : String = TwoFace.String(us("Some"))
+    val f : TwoFace.String[String] = "Some"
   }
 
   property("Wrong Implicit Conversions") = wellTyped {

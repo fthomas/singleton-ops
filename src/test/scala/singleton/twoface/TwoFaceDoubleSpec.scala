@@ -372,6 +372,7 @@ class TwoFaceDoubleSpec extends Properties("TwoFace.Double") {
     val c : TwoFace.Double[W.`3.0`.T + W.`0.0`.T] = implicitly[TwoFace.Double[W.`3.0`.T]]
     val d : W.`3.0`.T = TwoFace.Double(3.0)
     val e : Double = TwoFace.Double(us(3.0))
+    val f : TwoFace.Double[Double] = 3.0
   }
 
   property("Wrong Implicit Conversions") = wellTyped {

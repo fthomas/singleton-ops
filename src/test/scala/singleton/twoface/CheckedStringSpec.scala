@@ -21,21 +21,32 @@ class CheckedStringSpec extends Properties("Checked.String") {
     val temp : String = t
     foo(t.unsafeCheck(5))
   }
+  def lengthSmallerThan5Seq(tSeq : LengthSmallerThan.Checked[String,W.`5`.T]*) : Unit = {
+    for (t <- tSeq) {
+      val temp : String = t
+      foo(t.unsafeCheck(5))
+    }
+  }
 
   property("Compile-time checks") = wellTyped {
     lengthSmallerThan5("Hi")
     lengthSmallerThan5(TwoFace.String("Hi"))
     implicitly[LengthSmallerThan.Checked[W.`"Hi"`.T,W.`5`.T]]
+    lengthSmallerThan5Seq("Hi", "Hey")
     illTyped("""lengthSmallerThan5("Hello")""","Length of string 'Hello' is not smaller than 5")
     illTyped("""lengthSmallerThan5(TwoFace.String("Hello"))""","Length of string 'Hello' is not smaller than 5")
     illTyped("""implicitly[LengthSmallerThan.Checked[W.`"Hello"`.T,W.`5`.T]]""","Length of string 'Hello' is not smaller than 5")
+    illTyped("""lengthSmallerThan5Seq("Hi", "Hey", "Hello")""","Length of string 'Hello' is not smaller than 5")
   }
 
   property("Run-time checks") = wellTyped {
     lengthSmallerThan5(us("Hi"))
     lengthSmallerThan5(TwoFace.String(us("Hi")))
+    lengthSmallerThan5Seq(us("Hi"), "Hey")
     illRun{lengthSmallerThan5(us("Hello"))}
     illRun{lengthSmallerThan5(TwoFace.String(us("Hello")))}
+    val usHello = "Hello"
+    illRun{lengthSmallerThan5Seq(us("Hi"), "Hey", usHello)}
   }
 
   def lengthSmallerThan5Impl[T](realValue : String)(implicit t : LengthSmallerThan.CheckedShell[T,W.`5`.T]) : Unit =

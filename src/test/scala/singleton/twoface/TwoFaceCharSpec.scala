@@ -323,6 +323,7 @@ class TwoFaceCharSpec extends Properties("TwoFace.Char") {
   property("Implicit Conversions") = wellTyped {
     val d : W.`'\u0003'`.T = TwoFace.Char('\u0003')
     val e : Char = TwoFace.Char(us('\u0003'))
+    val f : TwoFace.Char[Char] = '\u0003'
   }
 
   property("ToString") = {
