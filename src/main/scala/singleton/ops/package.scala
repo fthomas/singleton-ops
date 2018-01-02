@@ -72,6 +72,8 @@ package object ops {
   protected[singleton] type Arg[Num, T, TWide] = OpMacro[OpId.Arg, Num, T, TWide] //Argument for real-time function creation
   protected[singleton] type GetType[Sym] = OpMacro[OpId.GetType, Sym, NP, NP] //Argument for real-time function creation
   type AcceptNonLiteral[P1] = OpMacro[OpId.AcceptNonLiteral, P1, NP, NP]
+  type GetImplicitArgType[ArgIdx] = OpMacro[OpId.GetImplicitArgType, ArgIdx, NP, NP] //Use to get argument type of an implicit conversion
+  type GIAT0                = GetImplicitArgType[W.`0`.T]
   type Id[P1]               = OpMacro[OpId.Id, P1, NP, NP]
   type ![P1]                = OpMacro[OpId.!, P1, NP, NP]
   type Require[Cond]        = OpMacro[OpId.Require, Cond, DefaultRequireMsg, NP]
@@ -232,5 +234,4 @@ package object ops {
       ]
    ) : C[T1, T2, T3] = ct
   /////////////////////////////////////////////////
-
 }
