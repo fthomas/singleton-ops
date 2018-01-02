@@ -14,6 +14,7 @@ trait GeneralMacros {
   object funcTypes {
     val Arg = symbolOf[OpId.Arg]
     val AcceptNonLiteral = symbolOf[OpId.AcceptNonLiteral]
+    val GetImplicitArgType = symbolOf[OpId.GetImplicitArgType]
     val Id = symbolOf[OpId.Id]
     val ToNat = symbolOf[OpId.ToNat]
     val ToChar = symbolOf[OpId.ToChar]
@@ -664,6 +665,15 @@ trait GeneralMacros {
     }
   }
 
+  def extractFromImplicitArg(argIdx : Int)(implicit annotatedSym : TypeSymbol) : CalcVal = {
+    c.enclosingImplicits.head.tree match {
+      case Apply(fun, args) =>
+        if (argIdx < args.length) extractValueFromNumTree(args(argIdx))
+        else abort("Implicit argument index is larger than the total number of arguments")
+      case _ => abort("Unexpected tree to extract argument from. Only implicit conversion calls are supported.")
+    }
+  }
+
   def wideTypeName(tpe : Type) : String = tpe.widen.typeSymbol.name.toString
   ///////////////////////////////////////////////////////////////////////////////////////////
   // Three operands (Generic)
@@ -681,6 +691,10 @@ trait GeneralMacros {
     }
 
     def AcceptNonLiteral = a
+    def GetImplicitArgType = a match {
+      case CalcLit.Int(t) if (t >= 0) => extractFromImplicitArg(t)
+      case _ => unsupported()
+    }
     def Id = a
     def ToNat = ToInt //Same handling, but also has a special case to handle this in MaterializeOpAuxGen
     def ToChar = a match {
@@ -1254,6 +1268,7 @@ trait GeneralMacros {
 
     funcType match {
       case funcTypes.AcceptNonLiteral => AcceptNonLiteral
+      case funcTypes.GetImplicitArgType => GetImplicitArgType
       case funcTypes.Id => Id
       case funcTypes.ToNat => ToNat
       case funcTypes.ToChar => ToChar
