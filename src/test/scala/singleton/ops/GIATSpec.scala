@@ -8,9 +8,8 @@ class GIATSpec extends Properties("GIATSpec") {
   trait Conv {
     val value : Any
   }
-  type CheckSmallThan50 = CompileTime[GIAT0 < W.`50`.T]
 
-  implicit class ConvInt(val value : Int)(implicit chk : CheckSmallThan50) extends Conv
+  implicit class ConvInt(val value : Int)(implicit chk : CompileTime[GIAT0 < W.`50`.T]) extends Conv
   def smallerThan50(f : Conv) : Unit = {}
 
   implicit class BadConvLong(val value : Long)(implicit f : GetImplicitArgType[W.`10`.T]) extends Conv
@@ -20,6 +19,7 @@ class GIATSpec extends Properties("GIATSpec") {
     smallerThan50(1)
   }
   property("smallerThan50(51) Compile-time fail") = wellTyped {
+    illTyped("smallerThan50(51)")
   }
   property("Unsupported") = wellTyped {
     illTyped("implicitly[GIAT0]") //cannot be invoked without implicit conversion
