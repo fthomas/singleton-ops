@@ -36,13 +36,13 @@ object GetArg {
   type Aux[ArgIdx, Out0] = GetArg[ArgIdx]{type Out = Out0}
 
   @scala.annotation.implicitNotFound("Argument with index ${ArgIdx} not found")
-  protected trait GetArg[ArgIdx] {
+  trait GetArg[ArgIdx] {
     type Out
     val value : Out
   }
 
   @ bundle
-  protected object GetArg {
+  object GetArg {
     implicit def call[ArgIdx]: GetArg[ArgIdx] = macro Macro.impl[ArgIdx]
 
     final class Macro(val c: whitebox.Context) extends GeneralMacros {
