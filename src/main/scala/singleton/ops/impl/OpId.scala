@@ -4,7 +4,7 @@ sealed trait OpId
 object OpId {
   sealed trait Arg extends OpId //Argument
   sealed trait AcceptNonLiteral extends OpId
-  sealed trait GetImplicitArgType extends OpId
+  sealed trait GetArg extends OpId
   sealed trait ITE extends OpId //If-Then-Else
   sealed trait ==> extends OpId
   sealed trait Id extends OpId

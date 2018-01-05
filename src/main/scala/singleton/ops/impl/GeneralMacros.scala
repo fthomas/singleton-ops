@@ -14,7 +14,7 @@ trait GeneralMacros {
   object funcTypes {
     val Arg = symbolOf[OpId.Arg]
     val AcceptNonLiteral = symbolOf[OpId.AcceptNonLiteral]
-    val GetImplicitArgType = symbolOf[OpId.GetImplicitArgType]
+    val GetArg = symbolOf[OpId.GetArg]
     val Id = symbolOf[OpId.Id]
     val ToNat = symbolOf[OpId.ToNat]
     val ToChar = symbolOf[OpId.ToChar]
@@ -470,7 +470,7 @@ trait GeneralMacros {
           CalcUnknown(tp)
       }
     }
-    
+
     def unapply(tp: Type)(implicit annotatedSym : TypeSymbol): Option[Calc] = {
       val g = c.universe.asInstanceOf[SymbolTable]
       implicit def fixSymbolOps(sym: Symbol): g.Symbol = sym.asInstanceOf[g.Symbol]
@@ -665,16 +665,48 @@ trait GeneralMacros {
     }
   }
 
-  def extractFromImplicitArg(argIdx : Int)(implicit annotatedSym : TypeSymbol) : CalcVal = {
-    c.enclosingImplicits.head.tree match {
-      case Apply(fun, args) =>
-        if (argIdx < args.length) extractValueFromNumTree(args(argIdx))
-        else abort("Implicit argument index is larger than the total number of arguments")
-      case _ => abort("Unexpected tree to extract argument from. Only implicit conversion calls are supported.")
+  def wideTypeName(tpe : Type) : String = tpe.widen.typeSymbol.name.toString
+
+  ///////////////////////////////////////////////////////////////////////////////////////////
+  // Get Argument
+  ///////////////////////////////////////////////////////////////////////////////////////////
+  def materializeGetArg(gaSym : TypeSymbol, auxSym : TypeSymbol, aiTpe : Type) : c.Tree = {
+    implicit val annotatedSym : TypeSymbol = auxSym
+    val argIdx : Int = TypeCalc(aiTpe) match {
+      case CalcLit.Int(t) => t
+      case _ => abort(s"Invalid argument index. Found $aiTpe")
     }
+    val valueTree : Tree = getArgTree(argIdx)
+    val outTpe : Type = c.typecheck(valueTree).tpe
+
+    val genTree = q"""
+        new $gaSym[$aiTpe]{
+          type Out = $outTpe
+          val value : Out = $valueTree
+        }
+     """
+//    print(genTree)
+    genTree
   }
 
-  def wideTypeName(tpe : Type) : String = tpe.widen.typeSymbol.name.toString
+  def getArgTree(argIdx : Int)(implicit annotatedSym : TypeSymbol) : c.Tree = {
+    def getAllArgs(tree : Tree) : List[Tree] = {
+      tree match {
+        case Apply(fun, args) => getAllArgs(fun) ++ args
+        case t : Literal => List(t)
+        case _ => List()
+      }
+    }
+    val allArgs = getAllArgs(c.enclosingImplicits.last.tree)
+    if (argIdx < allArgs.length) allArgs(argIdx)
+    else abort(s"Argument index($argIdx) is not smaller than the total number of arguments(${allArgs.length})")
+  }
+
+  def extractFromArg(argIdx : Int)(implicit annotatedSym : TypeSymbol) : CalcVal = {
+    extractValueFromNumTree(getArgTree(argIdx))
+  }
+  ///////////////////////////////////////////////////////////////////////////////////////////
+
   ///////////////////////////////////////////////////////////////////////////////////////////
   // Three operands (Generic)
   ///////////////////////////////////////////////////////////////////////////////////////////
@@ -691,8 +723,8 @@ trait GeneralMacros {
     }
 
     def AcceptNonLiteral = a
-    def GetImplicitArgType = a match {
-      case CalcLit.Int(t) if (t >= 0) => extractFromImplicitArg(t)
+    def GetArg = a match {
+      case CalcLit.Int(t) if (t >= 0) => extractFromArg(t)
       case _ => unsupported()
     }
     def Id = a
@@ -1268,7 +1300,7 @@ trait GeneralMacros {
 
     funcType match {
       case funcTypes.AcceptNonLiteral => AcceptNonLiteral
-      case funcTypes.GetImplicitArgType => GetImplicitArgType
+      case funcTypes.GetArg => GetArg
       case funcTypes.Id => Id
       case funcTypes.ToNat => ToNat
       case funcTypes.ToChar => ToChar

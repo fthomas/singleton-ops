@@ -27,3 +27,28 @@ object OpMacro {
 //  (implicit op : OpMacro[N, S1, S2, S3]) : ValueOf[OpMacro[N, S1, S2, S3]] = new ValueOf(op)
 }
 /*******************************************************************************************************/
+
+
+/********************************************************************************************************
+  * Get function/class argument's type
+  *******************************************************************************************************/
+object GetArg {
+  type Aux[ArgIdx, Out0] = GetArg[ArgIdx]{type Out = Out0}
+
+  @scala.annotation.implicitNotFound("Argument with index ${ArgIdx} not found")
+  protected trait GetArg[ArgIdx] {
+    type Out
+    val value : Out
+  }
+
+  @ bundle
+  protected object GetArg {
+    implicit def call[ArgIdx]: GetArg[ArgIdx] = macro Macro.impl[ArgIdx]
+
+    final class Macro(val c: whitebox.Context) extends GeneralMacros {
+      def impl[ArgIdx : c.WeakTypeTag]: c.Tree =
+        materializeGetArg(c.symbolOf[GetArg[_]], c.symbolOf[Aux[_,_]], c.weakTypeOf[ArgIdx])
+    }
+  }
+}
+/*******************************************************************************************************/
