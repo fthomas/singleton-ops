@@ -48,9 +48,11 @@ object Shell {
     }
     @bundle
     object Char {
-      implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide]:
-      Char[FuncApply, FuncArgs, Arg1, Arg1Wide] =
-      macro Macro.shell[FuncApply, FuncArgs, Arg1, Arg1Wide]
+      type Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Out0] = 
+        Char[FuncApply, FuncArgs, Arg1, Arg1Wide]{type Out = Out0}
+      implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide, Out] : 
+        Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Out] =
+        macro Macro.shell[FuncApply, FuncArgs, Arg1, Arg1Wide]
 
       final class Macro(val c: whitebox.Context) extends GeneralMacros {
         def shell[FuncApply, FuncArgs, Arg1, Arg1Wide]
@@ -67,8 +69,10 @@ object Shell {
     }
     @bundle
     object Int {
-      implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide]:
-      Int[FuncApply, FuncArgs, Arg1, Arg1Wide] =
+      type Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Out0] =
+        Int[FuncApply, FuncArgs, Arg1, Arg1Wide]{type Out = Out0}
+      implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide, Out] :
+      Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Out] =
       macro Macro.shell[FuncApply, FuncArgs, Arg1, Arg1Wide]
 
       final class Macro(val c: whitebox.Context) extends GeneralMacros {
@@ -86,8 +90,10 @@ object Shell {
     }
     @bundle
     object Long {
-      implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide]:
-      Long[FuncApply, FuncArgs, Arg1, Arg1Wide] =
+      type Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Out0] =
+        Long[FuncApply, FuncArgs, Arg1, Arg1Wide]{type Out = Out0}
+      implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide, Out] :
+      Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Out] =
       macro Macro.shell[FuncApply, FuncArgs, Arg1, Arg1Wide]
 
       final class Macro(val c: whitebox.Context) extends GeneralMacros {
@@ -105,8 +111,10 @@ object Shell {
     }
     @bundle
     object Float {
-      implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide]:
-      Float[FuncApply, FuncArgs, Arg1, Arg1Wide] =
+      type Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Out0] =
+        Float[FuncApply, FuncArgs, Arg1, Arg1Wide]{type Out = Out0}
+      implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide, Out] :
+      Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Out] =
       macro Macro.shell[FuncApply, FuncArgs, Arg1, Arg1Wide]
 
       final class Macro(val c: whitebox.Context) extends GeneralMacros {
@@ -124,8 +132,10 @@ object Shell {
     }
     @bundle
     object Double {
-      implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide]:
-      Double[FuncApply, FuncArgs, Arg1, Arg1Wide] =
+      type Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Out0] =
+        Double[FuncApply, FuncArgs, Arg1, Arg1Wide]{type Out = Out0}
+      implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide, Out] :
+      Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Out] =
       macro Macro.shell[FuncApply, FuncArgs, Arg1, Arg1Wide]
 
       final class Macro(val c: whitebox.Context) extends GeneralMacros {
@@ -143,8 +153,10 @@ object Shell {
     }
     @bundle
     object String {
-      implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide]:
-      String[FuncApply, FuncArgs, Arg1, Arg1Wide] =
+      type Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Out0] =
+        String[FuncApply, FuncArgs, Arg1, Arg1Wide]{type Out = Out0}
+      implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide, Out] :
+      Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Out] =
       macro Macro.shell[FuncApply, FuncArgs, Arg1, Arg1Wide]
 
       final class Macro(val c: whitebox.Context) extends GeneralMacros {
@@ -162,8 +174,10 @@ object Shell {
     }
     @bundle
     object Boolean {
-      implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide]:
-      Boolean[FuncApply, FuncArgs, Arg1, Arg1Wide] =
+      type Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Out0] =
+        Boolean[FuncApply, FuncArgs, Arg1, Arg1Wide]{type Out = Out0}
+      implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide, Out] :
+      Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Out] =
       macro Macro.shell[FuncApply, FuncArgs, Arg1, Arg1Wide]
 
       final class Macro(val c: whitebox.Context) extends GeneralMacros {
@@ -209,8 +223,10 @@ object Shell {
     }
     @bundle
     object Char {
-      implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]:
-      Char[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] =
+      type Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Out0] =
+        Char[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]{type Out = Out0}
+      implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Out]:
+      Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Out] =
       macro Macro.shell[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
 
       final class Macro(val c: whitebox.Context) extends GeneralMacros {
@@ -229,8 +245,10 @@ object Shell {
     }
     @bundle
     object Int {
-      implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]:
-      Int[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] =
+      type Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Out0] =
+        Int[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]{type Out = Out0}
+      implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Out]:
+      Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Out] =
       macro Macro.shell[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
 
       final class Macro(val c: whitebox.Context) extends GeneralMacros {
@@ -249,8 +267,10 @@ object Shell {
     }
     @bundle
     object Long {
-      implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]:
-      Long[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] =
+      type Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Out0] =
+        Long[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]{type Out = Out0}
+      implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Out]:
+      Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Out] =
       macro Macro.shell[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
 
       final class Macro(val c: whitebox.Context) extends GeneralMacros {
@@ -269,8 +289,10 @@ object Shell {
     }
     @bundle
     object Float {
-      implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]:
-      Float[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] =
+      type Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Out0] =
+        Float[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]{type Out = Out0}
+      implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Out]:
+      Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Out] =
       macro Macro.shell[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
 
       final class Macro(val c: whitebox.Context) extends GeneralMacros {
@@ -289,8 +311,10 @@ object Shell {
     }
     @bundle
     object Double {
-      implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]:
-      Double[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] =
+      type Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Out0] =
+        Double[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]{type Out = Out0}
+      implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Out]:
+      Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Out] =
       macro Macro.shell[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
 
       final class Macro(val c: whitebox.Context) extends GeneralMacros {
@@ -309,8 +333,10 @@ object Shell {
     }
     @bundle
     object String {
-      implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]:
-      String[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] =
+      type Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Out0] =
+        String[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]{type Out = Out0}
+      implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Out]:
+      Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Out] =
       macro Macro.shell[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
 
       final class Macro(val c: whitebox.Context) extends GeneralMacros {
@@ -329,8 +355,10 @@ object Shell {
     }
     @bundle
     object Boolean {
-      implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]:
-      Boolean[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] =
+      type Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Out0] =
+        Boolean[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]{type Out = Out0}
+      implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Out]:
+      Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Out] =
       macro Macro.shell[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]
 
       final class Macro(val c: whitebox.Context) extends GeneralMacros {
