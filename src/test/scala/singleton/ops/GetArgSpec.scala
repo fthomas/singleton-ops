@@ -58,7 +58,7 @@ class GetArgSpec extends Properties("GetArgSpec") {
     class Able[R](val right : R)
 
     object Able {
-      implicit def ofXInt[R <: Int](right : Int)(implicit arg: GetArg.Aux[W.`0`.T, R]) : Able[R] = new Able[R](arg.value)
+      implicit def ofXInt[R <: Int](right : Int)(implicit arg: GetArg.Aux[W.`0`.T, R]) : Able[R] = new Able[R](arg)
     }
   }
   def foo(i: Int) = i

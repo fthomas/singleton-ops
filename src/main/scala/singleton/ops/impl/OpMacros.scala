@@ -110,6 +110,7 @@ object GetArg {
       def impl[ArgIdx : c.WeakTypeTag]: c.Tree =
         materializeGetArg(c.symbolOf[GetArg[_]], c.symbolOf[Aux[_,_]], c.weakTypeOf[ArgIdx])
     }
+    implicit def toArgValue[I, Out](i : Aux[I, Out]) : Out = i.value
   }
 }
 /*******************************************************************************************************/
