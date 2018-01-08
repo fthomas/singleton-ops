@@ -104,7 +104,7 @@ object GetArg {
 
   @ bundle
   object GetArg {
-    implicit def call[ArgIdx]: GetArg[ArgIdx] = macro Macro.impl[ArgIdx]
+    implicit def call[ArgIdx, Out]: Aux[ArgIdx, Out] = macro Macro.impl[ArgIdx]
 
     final class Macro(val c: whitebox.Context) extends GeneralMacros {
       def impl[ArgIdx : c.WeakTypeTag]: c.Tree =

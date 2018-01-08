@@ -690,14 +690,28 @@ trait GeneralMacros {
   }
 
   def getArgTree(argIdx : Int)(implicit annotatedSym : TypeSymbol) : c.Tree = {
+    def isMethodMacroCall : Boolean = c.enclosingImplicits.last.sym.isMacro
     def getAllArgs(tree : Tree) : List[Tree] = {
       tree match {
-        case Apply(fun, args) => getAllArgs(fun) ++ args
+        case Apply(Select(q,n), args) => if (isMethodMacroCall) args else List(tree)
+        case t : Select => List(t)
         case t : Literal => List(t)
+        case _ => getAllArgsRecur(tree)
+      }
+
+    }
+    def getAllArgsRecur(tree : Tree) : List[Tree] = {
+      tree match {
+        case Apply(fun, args) => getAllArgsRecur(fun) ++ args
         case _ => List()
       }
     }
     val allArgs = getAllArgs(c.enclosingImplicits.last.tree)
+//    print("enclosingImpl:" + c.enclosingImplicits.last)
+//    print("tree:" + c.enclosingImplicits.last.tree)
+//    print("rawTree:" + showRaw(c.enclosingImplicits.last.tree))
+//    print("args" + allArgs)
+//    print("rawArgs" + showRaw(allArgs))
     if (argIdx < allArgs.length) allArgs(argIdx)
     else abort(s"Argument index($argIdx) is not smaller than the total number of arguments(${allArgs.length})")
   }
