@@ -75,9 +75,6 @@ package object ops {
   type GetArg[ArgIdx]       = OpMacro[OpId.GetArg, ArgIdx, NP, NP] //Use to get argument type of an implicit conversion
   val  GetArg               = impl.GetArg
   type GetArg0              = GetArg[W.`0`.T]
-  object GetArg0 {
-    type Aux[Out]           = GetArg.Aux[W.`0`.T, Out]
-  }
   type Id[P1]               = OpMacro[OpId.Id, P1, NP, NP]
   type ![P1]                = OpMacro[OpId.!, P1, NP, NP]
   type Require[Cond]        = OpMacro[OpId.Require, Cond, DefaultRequireMsg, NP]
