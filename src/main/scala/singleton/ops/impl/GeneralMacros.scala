@@ -418,6 +418,51 @@ trait GeneralMacros {
             //otherwise we get the variable's value
             val aValue = TypeCalc(args(1))
             val retVal = (funcType, aValue) match {
+              case (funcTypes.IsNat, _) =>
+                aValue match {
+                  case CalcLit.Int(t) if t >= 0 => Some(CalcLit(true))
+                  case _ => Some(CalcLit(false))
+                }
+              case (funcTypes.IsChar, _) =>
+                aValue match {
+                  case t : CalcType.Char => Some(CalcLit(true))
+                  case _ => Some(CalcLit(false))
+                }
+              case (funcTypes.IsInt, _) =>
+                aValue match {
+                  case t : CalcType.Int => Some(CalcLit(true))
+                  case _ => Some(CalcLit(false))
+                }
+              case (funcTypes.IsLong, _) =>
+                aValue match {
+                  case t : CalcType.Long => Some(CalcLit(true))
+                  case _ => Some(CalcLit(false))
+                }
+              case (funcTypes.IsFloat, _) =>
+                aValue match {
+                  case t : CalcType.Float => Some(CalcLit(true))
+                  case _ => Some(CalcLit(false))
+                }
+              case (funcTypes.IsDouble, _) =>
+                aValue match {
+                  case t : CalcType.Double => Some(CalcLit(true))
+                  case _ => Some(CalcLit(false))
+                }
+              case (funcTypes.IsString, _) =>
+                aValue match {
+                  case t : CalcType.String => Some(CalcLit(true))
+                  case _ => Some(CalcLit(false))
+                }
+              case (funcTypes.IsBoolean, _) =>
+                aValue match {
+                  case t : CalcType.Boolean => Some(CalcLit(true))
+                  case _ => Some(CalcLit(false))
+                }
+              case (funcTypes.IsSymbol, _) =>
+                aValue match {
+                  case t : CalcType.String => Some(CalcLit(true))
+                  case _ => Some(CalcLit(false))
+                }
               case (funcTypes.IsNonLiteral, _) => //Looking for non literals
                 aValue match {
                   case t : CalcLit => Some(CalcLit(false))
@@ -797,39 +842,6 @@ trait GeneralMacros {
       case CalcVal.Boolean(t, tt) => CalcVal(t.toString, q"$tt.toString")
     }
     def ToSymbol = ToString //Same handling, but has also has a special case in MaterializeOpAuxGen
-    def IsNat = a match {
-      case CalcLit.Int(t) => CalcLit(t >= 0)
-      case _ => CalcLit(false)
-    }
-    def IsChar = a match {
-      case t : CalcType.Char => CalcLit(true)
-      case _ => CalcLit(false)
-    }
-    def IsInt = a match {
-      case t : CalcType.Int => CalcLit(true)
-      case _ => CalcLit(false)
-    }
-    def IsLong = a match {
-      case t : CalcType.Long => CalcLit(true)
-      case _ => CalcLit(false)
-    }
-    def IsFloat = a match {
-      case t : CalcType.Float => CalcLit(true)
-      case _ => CalcLit(false)
-    }
-    def IsDouble = a match {
-      case t : CalcType.Double => CalcLit(true)
-      case _ => CalcLit(false)
-    }
-    def IsString = a match {
-      case t : CalcType.String => CalcLit(true)
-      case _ => CalcLit(false)
-    }
-    def IsBoolean = a match {
-      case t : CalcType.Boolean => CalcLit(true)
-      case _ => CalcLit(false)
-    }
-    def IsSymbol = IsString
     def Negate = a match {
       case CalcVal.Char(t, tt) => CalcVal(-t, q"-$tt")
       case CalcVal.Int(t, tt) => CalcVal(-t, q"-$tt")
@@ -1324,15 +1336,6 @@ trait GeneralMacros {
       case funcTypes.ToDouble => ToDouble
       case funcTypes.ToString => ToString
       case funcTypes.ToSymbol => ToSymbol
-      case funcTypes.IsNat => IsNat
-      case funcTypes.IsChar => IsChar
-      case funcTypes.IsInt => IsInt
-      case funcTypes.IsLong => IsLong
-      case funcTypes.IsFloat => IsFloat
-      case funcTypes.IsDouble => IsDouble
-      case funcTypes.IsString => IsString
-      case funcTypes.IsBoolean => IsBoolean
-      case funcTypes.IsSymbol => IsSymbol
       case funcTypes.Negate => Negate
       case funcTypes.Abs => Abs
       case funcTypes.NumberOfLeadingZeros => NumberOfLeadingZeros
@@ -1510,9 +1513,12 @@ trait GeneralMacros {
         case _ => extractionFailed(fixedCondTpe)
       }
 
-      val msgCalc = TypeCalc(fixedMsgTpe) match {
-        case t : CalcVal => t
-        case _ => extractionFailed(fixedMsgTpe)
+      val msgCalc = condCalc match {
+        case (CalcLit.Boolean(true)) => CalcLit.String("") //Not calculating message if condition is constant true
+        case _ => TypeCalc(fixedMsgTpe) match {
+          case t : CalcVal => t
+          case _ => extractionFailed(fixedMsgTpe)
+        }
       }
 
       val reqCalc = opCalc(funcTypes.Require, condCalc, msgCalc, CalcLit(0))
@@ -1577,9 +1583,12 @@ trait GeneralMacros {
         case _ => extractionFailed(fixedCondTpe)
       }
 
-      val msgCalc = TypeCalc(fixedMsgTpe) match {
-        case t : CalcVal => t
-        case _ => extractionFailed(fixedMsgTpe)
+      val msgCalc = condCalc match {
+        case (CalcLit.Boolean(true)) => CalcLit.String("") //Not calculating message if condition is constant true
+        case _ => TypeCalc(fixedMsgTpe) match {
+          case t : CalcVal => t
+          case _ => extractionFailed(fixedMsgTpe)
+        }
       }
 
       val reqCalc = opCalc(funcTypes.Require, condCalc, msgCalc, CalcLit(0))
