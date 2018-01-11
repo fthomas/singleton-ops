@@ -38,16 +38,15 @@ class EqSpec extends Properties("==") {
   def verifyEqNum[L,R](implicit
                        verifyFalse: Verify[L == Negate[R], False],
                        verifyTrue: Verify[L == R, True]) : Prop = wellTyped {}
+  def verifyChar[L,R](implicit
+                       verifyFalse: Verify[L == ToChar[Negate[R]], False],
+                       verifyTrue: Verify[L == R, True]) : Prop = wellTyped {}
 
   ////////////////////////////////////////////////////////////////////////
   // Nat op XXX
   ////////////////////////////////////////////////////////////////////////
   property("Nat, Nat arguments") = verifyEqNum[leftNat,rightNat]
-  property("Nat, Char arguments") = verifyEqNum[leftNat,rightChar]
   property("Nat, Int arguments") = verifyEqNum[leftNat,rightInt]
-  property("Nat, Long arguments") = verifyEqNum[leftNat,rightLong]
-  property("Nat, Float arguments") = verifyEqNum[leftNat,rightFloat]
-  property("Nat, Double arguments") = verifyEqNum[leftNat,rightDouble]
   property("Nat, String arguments") = {illTyped("""implicitly[OP[leftNat,rightString]]"""); true}
   property("Nat, Boolean arguments") = {illTyped("""implicitly[OP[leftNat,rightBoolean]]"""); true}
   ////////////////////////////////////////////////////////////////////////
@@ -55,12 +54,7 @@ class EqSpec extends Properties("==") {
   ////////////////////////////////////////////////////////////////////////
   // Char op XXX
   ////////////////////////////////////////////////////////////////////////
-  property("Char, Nat arguments") = verifyEqNum[leftChar,rightNat]
-  property("Char, Char arguments") = verifyEqNum[leftChar,rightChar]
-  property("Char, Int arguments") = verifyEqNum[leftChar,rightInt]
-  property("Char, Long arguments") = verifyEqNum[leftChar,rightLong]
-  property("Char, Float arguments") = verifyEqNum[leftChar,rightFloat]
-  property("Char, Double arguments") = verifyEqNum[leftChar,rightDouble]
+  property("Char, Char arguments") = verifyChar[leftChar,rightChar]
   property("Char, String arguments") = {illTyped("""implicitly[OP[leftChar,rightString]]"""); true}
   property("Char, Boolean arguments") = {illTyped("""implicitly[OP[leftChar,rightBoolean]]"""); true}
   ////////////////////////////////////////////////////////////////////////
@@ -69,11 +63,7 @@ class EqSpec extends Properties("==") {
   // Int op XXX
   ////////////////////////////////////////////////////////////////////////
   property("Int, Nat arguments") = verifyEqNum[leftInt,rightNat]
-  property("Int, Char arguments") = verifyEqNum[leftInt,rightChar]
   property("Int, Int arguments") = verifyEqNum[leftInt,rightInt]
-  property("Int, Long arguments") = verifyEqNum[leftInt,rightLong]
-  property("Int, Float arguments") = verifyEqNum[leftInt,rightFloat]
-  property("Int, Double arguments") = verifyEqNum[leftInt,rightDouble]
   property("Int, String arguments") = {illTyped("""implicitly[OP[leftInt,rightString]]"""); true}
   property("Int, Boolean arguments") = {illTyped("""implicitly[OP[leftInt,rightBoolean]]"""); true}
   ////////////////////////////////////////////////////////////////////////
@@ -81,12 +71,7 @@ class EqSpec extends Properties("==") {
   ////////////////////////////////////////////////////////////////////////
   // Long op XXX
   ////////////////////////////////////////////////////////////////////////
-  property("Long, Nat arguments") = verifyEqNum[leftLong,rightNat]
-  property("Long, Char arguments") = verifyEqNum[leftLong,rightChar]
-  property("Long, Int arguments") = verifyEqNum[leftLong,rightInt]
   property("Long, Long arguments") = verifyEqNum[leftLong,rightLong]
-  property("Long, Float arguments") = verifyEqNum[leftLong,rightFloat]
-  property("Long, Double arguments") = verifyEqNum[leftLong,rightDouble]
   property("Long, String arguments") = {illTyped("""implicitly[OP[leftLong,rightString]]"""); true}
   property("Long, Boolean arguments") = {illTyped("""implicitly[OP[leftLong,rightBoolean]]"""); true}
   ////////////////////////////////////////////////////////////////////////
@@ -94,12 +79,7 @@ class EqSpec extends Properties("==") {
   ////////////////////////////////////////////////////////////////////////
   // Float op XXX
   ////////////////////////////////////////////////////////////////////////
-  property("Float, Nat arguments") = verifyEqNum[leftFloat,rightNat]
-  property("Float, Char arguments") = verifyEqNum[leftFloat,rightChar]
-  property("Float, Int arguments") = verifyEqNum[leftFloat,rightInt]
-  property("Float, Long arguments") = verifyEqNum[leftFloat,rightLong]
   property("Float, Float arguments") = verifyEqNum[leftFloat,rightFloat]
-  property("Float, Double arguments") = verifyEqNum[leftFloat,rightDouble]
   property("Float, String arguments") = {illTyped("""implicitly[OP[leftFloat,rightString]]"""); true}
   property("Float, Boolean arguments") = {illTyped("""implicitly[OP[leftFloat,rightBoolean]]"""); true}
   ////////////////////////////////////////////////////////////////////////
@@ -107,11 +87,6 @@ class EqSpec extends Properties("==") {
   ////////////////////////////////////////////////////////////////////////
   // Double op XXX
   ////////////////////////////////////////////////////////////////////////
-  property("Double, Nat arguments") = verifyEqNum[leftDouble,rightNat]
-  property("Double, Char arguments") = verifyEqNum[leftDouble,rightChar]
-  property("Double, Int arguments") = verifyEqNum[leftDouble,rightInt]
-  property("Double, Long arguments") = verifyEqNum[leftDouble,rightLong]
-  property("Double, Float arguments") = verifyEqNum[leftDouble,rightFloat]
   property("Double, Double arguments") = verifyEqNum[leftDouble,rightDouble]
   property("Double, String arguments") = {illTyped("""implicitly[OP[leftDouble,rightString]]"""); true}
   property("Double, Boolean arguments") = {illTyped("""implicitly[OP[leftDouble,rightBoolean]]"""); true}

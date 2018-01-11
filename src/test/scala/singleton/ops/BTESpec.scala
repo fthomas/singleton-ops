@@ -25,7 +25,7 @@ class BTESpec extends Properties(">=") {
   type rightBoolean = False
 
   def verifyBTENum[L,R](implicit
-                        verifyFalse: Verify[Negate[L] >= R, False],
+                        verifyFalse: Verify[R >= L, False],
                         verifyTrue: Verify[L >= L, True],
                         verifyTrue2: Verify[L >= R, True]) : Prop = wellTyped {}
 
@@ -33,11 +33,7 @@ class BTESpec extends Properties(">=") {
   // Nat op XXX
   ////////////////////////////////////////////////////////////////////////
   property("Nat, Nat arguments") = verifyBTENum[leftNat,rightNat]
-  property("Nat, Char arguments") = verifyBTENum[leftNat,rightChar]
   property("Nat, Int arguments") = verifyBTENum[leftNat,rightInt]
-  property("Nat, Long arguments") = verifyBTENum[leftNat,rightLong]
-  property("Nat, Float arguments") = verifyBTENum[leftNat,rightFloat]
-  property("Nat, Double arguments") = verifyBTENum[leftNat,rightDouble]
   property("Nat, String arguments") = {illTyped("""implicitly[OP[leftNat,rightString]]"""); true}
   property("Nat, Boolean arguments") = {illTyped("""implicitly[OP[leftNat,rightBoolean]]"""); true}
   ////////////////////////////////////////////////////////////////////////
@@ -45,12 +41,7 @@ class BTESpec extends Properties(">=") {
   ////////////////////////////////////////////////////////////////////////
   // Char op XXX
   ////////////////////////////////////////////////////////////////////////
-  property("Char, Nat arguments") = verifyBTENum[leftChar,rightNat]
   property("Char, Char arguments") = verifyBTENum[leftChar,rightChar]
-  property("Char, Int arguments") = verifyBTENum[leftChar,rightInt]
-  property("Char, Long arguments") = verifyBTENum[leftChar,rightLong]
-  property("Char, Float arguments") = verifyBTENum[leftChar,rightFloat]
-  property("Char, Double arguments") = verifyBTENum[leftChar,rightDouble]
   property("Char, String arguments") = {illTyped("""implicitly[OP[leftChar,rightString]]"""); true}
   property("Char, Boolean arguments") = {illTyped("""implicitly[OP[leftChar,rightBoolean]]"""); true}
   ////////////////////////////////////////////////////////////////////////
@@ -59,11 +50,7 @@ class BTESpec extends Properties(">=") {
   // Int op XXX
   ////////////////////////////////////////////////////////////////////////
   property("Int, Nat arguments") = verifyBTENum[leftInt,rightNat]
-  property("Int, Char arguments") = verifyBTENum[leftInt,rightChar]
   property("Int, Int arguments") = verifyBTENum[leftInt,rightInt]
-  property("Int, Long arguments") = verifyBTENum[leftInt,rightLong]
-  property("Int, Float arguments") = verifyBTENum[leftInt,rightFloat]
-  property("Int, Double arguments") = verifyBTENum[leftInt,rightDouble]
   property("Int, String arguments") = {illTyped("""implicitly[OP[leftInt,rightString]]"""); true}
   property("Int, Boolean arguments") = {illTyped("""implicitly[OP[leftInt,rightBoolean]]"""); true}
   ////////////////////////////////////////////////////////////////////////
@@ -71,12 +58,7 @@ class BTESpec extends Properties(">=") {
   ////////////////////////////////////////////////////////////////////////
   // Long op XXX
   ////////////////////////////////////////////////////////////////////////
-  property("Long, Nat arguments") = verifyBTENum[leftLong,rightNat]
-  property("Long, Char arguments") = verifyBTENum[leftLong,rightChar]
-  property("Long, Int arguments") = verifyBTENum[leftLong,rightInt]
   property("Long, Long arguments") = verifyBTENum[leftLong,rightLong]
-  property("Long, Float arguments") = verifyBTENum[leftLong,rightFloat]
-  property("Long, Double arguments") = verifyBTENum[leftLong,rightDouble]
   property("Long, String arguments") = {illTyped("""implicitly[OP[leftLong,rightString]]"""); true}
   property("Long, Boolean arguments") = {illTyped("""implicitly[OP[leftLong,rightBoolean]]"""); true}
   ////////////////////////////////////////////////////////////////////////
@@ -84,12 +66,7 @@ class BTESpec extends Properties(">=") {
   ////////////////////////////////////////////////////////////////////////
   // Float op XXX
   ////////////////////////////////////////////////////////////////////////
-  property("Float, Nat arguments") = verifyBTENum[leftFloat,rightNat]
-  property("Float, Char arguments") = verifyBTENum[leftFloat,rightChar]
-  property("Float, Int arguments") = verifyBTENum[leftFloat,rightInt]
-  property("Float, Long arguments") = verifyBTENum[leftFloat,rightLong]
   property("Float, Float arguments") = verifyBTENum[leftFloat,rightFloat]
-  property("Float, Double arguments") = verifyBTENum[leftFloat,rightDouble]
   property("Float, String arguments") = {illTyped("""implicitly[OP[leftFloat,rightString]]"""); true}
   property("Float, Boolean arguments") = {illTyped("""implicitly[OP[leftFloat,rightBoolean]]"""); true}
   ////////////////////////////////////////////////////////////////////////
@@ -97,11 +74,6 @@ class BTESpec extends Properties(">=") {
   ////////////////////////////////////////////////////////////////////////
   // Double op XXX
   ////////////////////////////////////////////////////////////////////////
-  property("Double, Nat arguments") = verifyBTENum[leftDouble,rightNat]
-  property("Double, Char arguments") = verifyBTENum[leftDouble,rightChar]
-  property("Double, Int arguments") = verifyBTENum[leftDouble,rightInt]
-  property("Double, Long arguments") = verifyBTENum[leftDouble,rightLong]
-  property("Double, Float arguments") = verifyBTENum[leftDouble,rightFloat]
   property("Double, Double arguments") = verifyBTENum[leftDouble,rightDouble]
   property("Double, String arguments") = {illTyped("""implicitly[OP[leftDouble,rightString]]"""); true}
   property("Double, Boolean arguments") = {illTyped("""implicitly[OP[leftDouble,rightBoolean]]"""); true}
