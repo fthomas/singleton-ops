@@ -16,7 +16,7 @@ val scalaCheckVersion = "1.13.5"
 /// projects
 lazy val root = project.in(file("."))
   .settings(commonSettings)
-  .aggregate(singleton_opsJVM)
+  .aggregate(singleton_opsJVM, singleton_opsJS)
   .settings(noPublishSettings)
   .settings(
     sources in Compile := Seq.empty,
@@ -38,12 +38,12 @@ lazy val singleton_ops = crossProject
       "org.scalacheck" %%% "scalacheck" % scalaCheckVersion % Test
     )
   )
-//  .jsSettings(
-//    coverageEnabled := false
-//  )
+  .jsSettings(
+    coverageEnabled := false
+  )
 
 lazy val singleton_opsJVM = singleton_ops.jvm
-//lazy val singleton_opsJS  = singleton_ops.js
+lazy val singleton_opsJS  = singleton_ops.js
 
 /// settings
 
@@ -193,7 +193,7 @@ val validateCommands = Seq(
   "clean",
   //"scalafmtTest",
   "test:compile",
-//  "singleton_opsJS/test",
+  "singleton_opsJS/test",
   "coverage",
   "singleton_opsJVM/test",
   "coverageReport",
