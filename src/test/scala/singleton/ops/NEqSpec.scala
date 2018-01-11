@@ -37,16 +37,15 @@ class NEqSpec extends Properties("!=") {
   def verifyNEqNum[L,R](implicit
                         verifyFalse: Verify[L != Negate[R], True],
                         verifyTrue: Verify[L != R, False]) : Prop = wellTyped {}
+  def verifyChar[L,R](implicit
+                        verifyFalse: Verify[L != ToChar[Negate[R]], True],
+                        verifyTrue: Verify[L != R, False]) : Prop = wellTyped {}
 
   ////////////////////////////////////////////////////////////////////////
   // Nat op XXX
   ////////////////////////////////////////////////////////////////////////
   property("Nat, Nat arguments") = verifyNEqNum[leftNat,rightNat]
-  property("Nat, Char arguments") = verifyNEqNum[leftNat,rightChar]
   property("Nat, Int arguments") = verifyNEqNum[leftNat,rightInt]
-  property("Nat, Long arguments") = verifyNEqNum[leftNat,rightLong]
-  property("Nat, Float arguments") = verifyNEqNum[leftNat,rightFloat]
-  property("Nat, Double arguments") = verifyNEqNum[leftNat,rightDouble]
   property("Nat, String arguments") = {illTyped("""implicitly[OP[leftNat,rightString]]"""); true}
   property("Nat, Boolean arguments") = {illTyped("""implicitly[OP[leftNat,rightBoolean]]"""); true}
   ////////////////////////////////////////////////////////////////////////
@@ -54,12 +53,7 @@ class NEqSpec extends Properties("!=") {
   ////////////////////////////////////////////////////////////////////////
   // Char op XXX
   ////////////////////////////////////////////////////////////////////////
-  property("Char, Nat arguments") = verifyNEqNum[leftChar,rightNat]
-  property("Char, Char arguments") = verifyNEqNum[leftChar,rightChar]
-  property("Char, Int arguments") = verifyNEqNum[leftChar,rightInt]
-  property("Char, Long arguments") = verifyNEqNum[leftChar,rightLong]
-  property("Char, Float arguments") = verifyNEqNum[leftChar,rightFloat]
-  property("Char, Double arguments") = verifyNEqNum[leftChar,rightDouble]
+  property("Char, Char arguments") = verifyChar[leftChar,rightChar]
   property("Char, String arguments") = {illTyped("""implicitly[OP[leftChar,rightString]]"""); true}
   property("Char, Boolean arguments") = {illTyped("""implicitly[OP[leftChar,rightBoolean]]"""); true}
   ////////////////////////////////////////////////////////////////////////
@@ -68,11 +62,7 @@ class NEqSpec extends Properties("!=") {
   // Int op XXX
   ////////////////////////////////////////////////////////////////////////
   property("Int, Nat arguments") = verifyNEqNum[leftInt,rightNat]
-  property("Int, Char arguments") = verifyNEqNum[leftInt,rightChar]
   property("Int, Int arguments") = verifyNEqNum[leftInt,rightInt]
-  property("Int, Long arguments") = verifyNEqNum[leftInt,rightLong]
-  property("Int, Float arguments") = verifyNEqNum[leftInt,rightFloat]
-  property("Int, Double arguments") = verifyNEqNum[leftInt,rightDouble]
   property("Int, String arguments") = {illTyped("""implicitly[OP[leftInt,rightString]]"""); true}
   property("Int, Boolean arguments") = {illTyped("""implicitly[OP[leftInt,rightBoolean]]"""); true}
   ////////////////////////////////////////////////////////////////////////
@@ -80,12 +70,7 @@ class NEqSpec extends Properties("!=") {
   ////////////////////////////////////////////////////////////////////////
   // Long op XXX
   ////////////////////////////////////////////////////////////////////////
-  property("Long, Nat arguments") = verifyNEqNum[leftLong,rightNat]
-  property("Long, Char arguments") = verifyNEqNum[leftLong,rightChar]
-  property("Long, Int arguments") = verifyNEqNum[leftLong,rightInt]
   property("Long, Long arguments") = verifyNEqNum[leftLong,rightLong]
-  property("Long, Float arguments") = verifyNEqNum[leftLong,rightFloat]
-  property("Long, Double arguments") = verifyNEqNum[leftLong,rightDouble]
   property("Long, String arguments") = {illTyped("""implicitly[OP[leftLong,rightString]]"""); true}
   property("Long, Boolean arguments") = {illTyped("""implicitly[OP[leftLong,rightBoolean]]"""); true}
   ////////////////////////////////////////////////////////////////////////
@@ -93,12 +78,7 @@ class NEqSpec extends Properties("!=") {
   ////////////////////////////////////////////////////////////////////////
   // Float op XXX
   ////////////////////////////////////////////////////////////////////////
-  property("Float, Nat arguments") = verifyNEqNum[leftFloat,rightNat]
-  property("Float, Char arguments") = verifyNEqNum[leftFloat,rightChar]
-  property("Float, Int arguments") = verifyNEqNum[leftFloat,rightInt]
-  property("Float, Long arguments") = verifyNEqNum[leftFloat,rightLong]
   property("Float, Float arguments") = verifyNEqNum[leftFloat,rightFloat]
-  property("Float, Double arguments") = verifyNEqNum[leftFloat,rightDouble]
   property("Float, String arguments") = {illTyped("""implicitly[OP[leftFloat,rightString]]"""); true}
   property("Float, Boolean arguments") = {illTyped("""implicitly[OP[leftFloat,rightBoolean]]"""); true}
   ////////////////////////////////////////////////////////////////////////
@@ -106,11 +86,6 @@ class NEqSpec extends Properties("!=") {
   ////////////////////////////////////////////////////////////////////////
   // Double op XXX
   ////////////////////////////////////////////////////////////////////////
-  property("Double, Nat arguments") = verifyNEqNum[leftDouble,rightNat]
-  property("Double, Char arguments") = verifyNEqNum[leftDouble,rightChar]
-  property("Double, Int arguments") = verifyNEqNum[leftDouble,rightInt]
-  property("Double, Long arguments") = verifyNEqNum[leftDouble,rightLong]
-  property("Double, Float arguments") = verifyNEqNum[leftDouble,rightFloat]
   property("Double, Double arguments") = verifyNEqNum[leftDouble,rightDouble]
   property("Double, String arguments") = {illTyped("""implicitly[OP[leftDouble,rightString]]"""); true}
   property("Double, Boolean arguments") = {illTyped("""implicitly[OP[leftDouble,rightBoolean]]"""); true}
