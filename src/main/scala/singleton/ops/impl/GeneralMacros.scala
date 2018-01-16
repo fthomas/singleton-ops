@@ -753,15 +753,16 @@ trait GeneralMacros {
 
     def getAllLHSArgs(tree : Tree)(implicit annotatedSym : TypeSymbol) : List[Tree] = tree match {
       case Apply(TypeApply(Select(t, _), _), _) => getAllArgs(t, true)
+      case Select(t, _) => getAllArgs(t, true)
       case _ => abort("Left-hand-side tree not found")
     }
 
     def apply(argIdx : Int, lhs : Boolean)(implicit annotatedSym : TypeSymbol) : c.Tree = {
       val tree = c.enclosingImplicits.last.tree
-      val allArgs = if (lhs) getAllLHSArgs(tree) else getAllArgs(tree, lhs)
 //      print(">>>>>>> enclosingImpl: " + c.enclosingImplicits.last)
 //      print("tree: " + c.enclosingImplicits.last.tree)
 //      print("rawTree: " + showRaw(c.enclosingImplicits.last.tree))
+      val allArgs = if (lhs) getAllLHSArgs(tree) else getAllArgs(tree, lhs)
 //      print("args: " + allArgs)
 //      print("<<<<<<< rawArgs" + showRaw(allArgs))
       if (argIdx < allArgs.length) allArgs(argIdx)
