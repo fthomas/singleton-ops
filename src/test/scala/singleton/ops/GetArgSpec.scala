@@ -21,7 +21,7 @@ class GetArgSpec extends Properties("GetArgSpec") {
     illTyped("smallerThan50(51)")
   }
   property("Unsupported GetArg") = wellTyped {
-    illTyped("implicitly[GAT0]") //cannot be invoked without implicit conversion
+    illTyped("implicitly[GetArg0]") //cannot be invoked without implicit conversion
     illTyped("smallerThan50(1L)") //Argument index too large in `BadConvLong`
     illTyped("implicitly[GetArg[W.`0.1`.T]]") //Bad argument (Double instead of Int)
   }

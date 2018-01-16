@@ -108,7 +108,33 @@ object GetArg {
 
     final class Macro(val c: whitebox.Context) extends GeneralMacros {
       def impl[ArgIdx : c.WeakTypeTag]: c.Tree =
-        materializeGetArg(c.symbolOf[GetArg[_]], c.symbolOf[Aux[_,_]], c.weakTypeOf[ArgIdx])
+        MaterializeGetArg(c.symbolOf[GetArg[_]], c.symbolOf[Aux[_,_]], c.weakTypeOf[ArgIdx], false)
+    }
+    implicit def toArgValue[I, Out](i : Aux[I, Out]) : Out = i.value
+  }
+}
+/*******************************************************************************************************/
+
+
+/********************************************************************************************************
+  * Get function/class argument's type
+  *******************************************************************************************************/
+object GetLHSArg {
+  type Aux[ArgIdx, Out0] = GetLHSArg[ArgIdx]{type Out = Out0}
+
+  @scala.annotation.implicitNotFound("Argument with index ${ArgIdx} not found")
+  trait GetLHSArg[ArgIdx] {
+    type Out
+    val value : Out
+  }
+
+  @ bundle
+  object GetLHSArg {
+    implicit def call[ArgIdx, Out]: Aux[ArgIdx, Out] = macro Macro.impl[ArgIdx]
+
+    final class Macro(val c: whitebox.Context) extends GeneralMacros {
+      def impl[ArgIdx : c.WeakTypeTag]: c.Tree =
+        MaterializeGetArg(c.symbolOf[GetLHSArg[_]], c.symbolOf[Aux[_,_]], c.weakTypeOf[ArgIdx], true)
     }
     implicit def toArgValue[I, Out](i : Aux[I, Out]) : Out = i.value
   }
