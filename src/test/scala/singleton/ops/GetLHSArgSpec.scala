@@ -42,14 +42,14 @@ class GetLHSArgSpec extends Properties("GetLHSArgSpec") {
   }
 
   class Foo(value0 : Any, value1 : Any)(value2 : Any)(value3 : Any){
-    def getArg[I <: XInt](idx : I)(implicit g : GetLHSArg[I]) : g.Out = g.value
+    def getArg[I <: Int](idx : I)(implicit g : GetLHSArg[I]) : g.Out = g.value
   }
 
   property("Multiple LHS arguments") = wellTyped {
-    val out0 : W.`1`.T = new Foo(1, "me")(3L)(true) getArg 0
-    val out1 : W.`"me"`.T  = new Foo(1, "me")(3L)(true) getArg 1
-    val out2 : W.`3L`.T  = new Foo(1, "me")(3L)(true) getArg 2
-    val out3 : W.`true`.T  = new Foo(1, "me")(3L)(true) getArg 3
+    val out0 : W.`1`.T = new Foo(1, "me")(3L)(true) getArg W(0).value
+    val out1 : W.`"me"`.T  = new Foo(1, "me")(3L)(true) getArg W(1).value
+    val out2 : W.`3L`.T  = new Foo(1, "me")(3L)(true) getArg W(2).value
+    val out3 : W.`true`.T  = new Foo(1, "me")(3L)(true) getArg W(3).value
   }
 
 
