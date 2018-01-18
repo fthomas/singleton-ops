@@ -15,6 +15,7 @@ trait GeneralMacros {
     val Arg = symbolOf[OpId.Arg]
     val AcceptNonLiteral = symbolOf[OpId.AcceptNonLiteral]
     val GetArg = symbolOf[OpId.GetArg]
+    val GetLHSArg = symbolOf[OpId.GetLHSArg]
     val Id = symbolOf[OpId.Id]
     val ToNat = symbolOf[OpId.ToNat]
     val ToChar = symbolOf[OpId.ToChar]
@@ -715,54 +716,62 @@ trait GeneralMacros {
   ///////////////////////////////////////////////////////////////////////////////////////////
   // Get Argument
   ///////////////////////////////////////////////////////////////////////////////////////////
-  def materializeGetArg(gaSym : TypeSymbol, auxSym : TypeSymbol, aiTpe : Type) : c.Tree = {
-    implicit val annotatedSym : TypeSymbol = auxSym
-    val argIdx : Int = TypeCalc(aiTpe) match {
-      case CalcLit.Int(t) => t
-      case _ => abort(s"Invalid argument index. Found $aiTpe")
-    }
-    val valueTree : Tree = getArgTree(argIdx)
-    val outTpe : Type = c.typecheck(valueTree).tpe
+  object MaterializeGetArg {
+    def apply(gaSym : TypeSymbol, auxSym : TypeSymbol, aiTpe : Type, lhs : Boolean) : c.Tree = {
+      implicit val annotatedSym : TypeSymbol = auxSym
+      val argIdx : Int = TypeCalc(aiTpe) match {
+        case CalcLit.Int(t) => t
+        case _ => abort(s"Invalid argument index. Found $aiTpe")
+      }
+      val valueTree : Tree = GetArgTree(argIdx, lhs)
+      val outTpe : Type = c.typecheck(valueTree).tpe
 
-    val genTree = q"""
+      val genTree = q"""
         new $gaSym[$aiTpe]{
           type Out = $outTpe
           val value : Out = $valueTree
         }
      """
-//    print(genTree)
-    genTree
+      //    print(genTree)
+      genTree
+    }
   }
 
-  def getArgTree(argIdx : Int)(implicit annotatedSym : TypeSymbol) : c.Tree = {
+  object GetArgTree {
     def isMethodMacroCall : Boolean = c.enclosingImplicits.last.sym.isMacro
-    def getAllArgs(tree : Tree) : List[Tree] = {
-      tree match {
-        case Apply(Select(q,n), args) => if (isMethodMacroCall) args else List(tree)
-        case t : Select => List(t)
-        case t : Literal => List(t)
-        case _ => getAllArgsRecur(tree)
-      }
+    def getAllArgs(tree : Tree, lhs : Boolean) : List[Tree] = tree match {
+      case Apply(Select(q,n), args) => if (isMethodMacroCall || lhs) args else List(tree)
+      case t : Select => List(t)
+      case t : Literal => List(t)
+      case _ => getAllArgsRecur(tree)
+    }
 
+    def getAllArgsRecur(tree : Tree) : List[Tree] = tree match {
+      case Apply(fun, args) => getAllArgsRecur(fun) ++ args
+      case _ => List()
     }
-    def getAllArgsRecur(tree : Tree) : List[Tree] = {
-      tree match {
-        case Apply(fun, args) => getAllArgsRecur(fun) ++ args
-        case _ => List()
-      }
+
+    def getAllLHSArgs(tree : Tree)(implicit annotatedSym : TypeSymbol) : List[Tree] = tree match {
+      case Apply(TypeApply(Select(t, _), _), _) => getAllArgs(t, true)
+      case Select(t, _) => getAllArgs(t, true)
+      case _ => abort("Left-hand-side tree not found")
     }
-    val allArgs = getAllArgs(c.enclosingImplicits.last.tree)
-//    print("enclosingImpl:" + c.enclosingImplicits.last)
-//    print("tree:" + c.enclosingImplicits.last.tree)
-//    print("rawTree:" + showRaw(c.enclosingImplicits.last.tree))
-//    print("args" + allArgs)
-//    print("rawArgs" + showRaw(allArgs))
-    if (argIdx < allArgs.length) allArgs(argIdx)
-    else abort(s"Argument index($argIdx) is not smaller than the total number of arguments(${allArgs.length})")
+
+    def apply(argIdx : Int, lhs : Boolean)(implicit annotatedSym : TypeSymbol) : c.Tree = {
+      val tree = c.enclosingImplicits.last.tree
+//      print(">>>>>>> enclosingImpl: " + c.enclosingImplicits.last)
+//      print("tree: " + c.enclosingImplicits.last.tree)
+//      print("rawTree: " + showRaw(c.enclosingImplicits.last.tree))
+      val allArgs = if (lhs) getAllLHSArgs(tree) else getAllArgs(tree, lhs)
+//      print("args: " + allArgs)
+//      print("<<<<<<< rawArgs" + showRaw(allArgs))
+      if (argIdx < allArgs.length) allArgs(argIdx)
+      else abort(s"Argument index($argIdx) is not smaller than the total number of arguments(${allArgs.length})")
+    }
   }
 
-  def extractFromArg(argIdx : Int)(implicit annotatedSym : TypeSymbol) : CalcVal = {
-    extractValueFromNumTree(getArgTree(argIdx))
+  def extractFromArg(argIdx : Int, lhs : Boolean)(implicit annotatedSym : TypeSymbol) : CalcVal = {
+    extractValueFromNumTree(GetArgTree(argIdx, lhs))
   }
   ///////////////////////////////////////////////////////////////////////////////////////////
 
@@ -783,7 +792,11 @@ trait GeneralMacros {
 
     def AcceptNonLiteral = a
     def GetArg = a match {
-      case CalcLit.Int(t) if (t >= 0) => extractFromArg(t)
+      case CalcLit.Int(t) if (t >= 0) => extractFromArg(t, false)
+      case _ => unsupported()
+    }
+    def GetLHSArg = a match {
+      case CalcLit.Int(t) if (t >= 0) => extractFromArg(t, true)
       case _ => unsupported()
     }
     def Id = a
@@ -1093,6 +1106,7 @@ trait GeneralMacros {
     funcType match {
       case funcTypes.AcceptNonLiteral => AcceptNonLiteral
       case funcTypes.GetArg => GetArg
+      case funcTypes.GetLHSArg => GetLHSArg
       case funcTypes.Id => Id
       case funcTypes.ToNat => ToNat
       case funcTypes.ToChar => ToChar
