@@ -594,8 +594,10 @@ trait GeneralMacros {
     setAnnotation(msg)
     c.abort(c.enclosingPosition, msg)
   }
-  def warning(msg: String): Unit =
-    print(s"Warning:${c.enclosingPosition}    $msg\n")
+
+  def buildWarningMsgLoc : String = s"${c.enclosingPosition.source.path}:${c.enclosingPosition.line}:${c.enclosingPosition.column}"
+  def buildWarningMsg(msg: String): String = s"Warning: $buildWarningMsgLoc    $msg"
+  def buildWarningMsg(msg: Tree): Tree = q""" "Warning: " + $buildWarningMsgLoc + "    " + $msg """
 
   def constantTreeOf[T](t : T) : Tree = Literal(Constant(t))
 
@@ -939,7 +941,7 @@ trait GeneralMacros {
       case CalcLit.Boolean(false) => b match {
         case CalcLit.String(msg) => cArg match {
           case CalcUnknown(t) => if (t.typeSymbol == symbolOf[Warn]) {
-            warning(msg)
+            println(buildWarningMsg(msg))
             CalcLit(false)
           } else {
             //redirection of implicit not found annotation is required to the given symbol
@@ -952,8 +954,7 @@ trait GeneralMacros {
         //directly using the java lib `require` resulted in compiler crash, so we use wrapped require instead
         case CalcNLit.String(msg,_) => cArg match {
           case CalcUnknown(t) if t.typeSymbol == symbolOf[Warn] =>
-            val msgPos = Literal(Constant("Warning:" + c.enclosingPosition + "    " + msg))
-            CalcNLit.Boolean(q"""{println($msgPos); false}""")
+            CalcNLit.Boolean(q"""{println(${buildWarningMsg(msg)}); false}""")
           case _ =>
             CalcNLit.Boolean(q"{_root_.singleton.ops.impl._require(false, $msg); false}")
         }
@@ -963,12 +964,11 @@ trait GeneralMacros {
         //directly using the java lib `require` resulted in compiler crash, so we use wrapped require instead
         case CalcVal.String(msg, msgt) => cArg match {
           case CalcUnknown(t) if t == symbolOf[Warn] =>
-            val msgPos = Literal(Constant("Warning:" + c.enclosingPosition + "    " + msg))
             CalcNLit.Boolean(
               q"""{
                   if ($cond) true
                   else {
-                    println($msgPos)
+                    println(${buildWarningMsg(msgt)})
                     false
                   }
                 }""")
