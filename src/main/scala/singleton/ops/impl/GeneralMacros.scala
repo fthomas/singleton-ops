@@ -16,6 +16,7 @@ trait GeneralMacros {
     val AcceptNonLiteral = symbolOf[OpId.AcceptNonLiteral]
     val GetArg = symbolOf[OpId.GetArg]
     val GetLHSArg = symbolOf[OpId.GetLHSArg]
+    val ImplicitFound = symbolOf[OpId.ImplicitFound]
     val Id = symbolOf[OpId.Id]
     val ToNat = symbolOf[OpId.ToNat]
     val ToChar = symbolOf[OpId.ToChar]
@@ -419,6 +420,17 @@ trait GeneralMacros {
             //otherwise we get the variable's value
             val aValue = TypeCalc(args(1))
             val retVal = (funcType, aValue) match {
+              case (funcTypes.ImplicitFound, _) =>
+                aValue match {
+                  case CalcUnknown(t) => try {
+                    c.typecheck(q"implicitly[$t]")
+                    Some(CalcLit(true))
+                  } catch {
+                    case e : Throwable =>
+                      Some(CalcLit(false))
+                  }
+                  case _ => Some(CalcLit(false))
+                }
               case (funcTypes.IsNat, _) =>
                 aValue match {
                   case CalcLit.Int(t) if t >= 0 => Some(CalcLit(true))
@@ -582,6 +594,8 @@ trait GeneralMacros {
     setAnnotation(msg)
     c.abort(c.enclosingPosition, msg)
   }
+  def warning(msg: String): Unit =
+    print(s"Warning:${c.enclosingPosition}    $msg\n")
 
   def constantTreeOf[T](t : T) : Tree = Literal(Constant(t))
 
@@ -781,11 +795,11 @@ trait GeneralMacros {
   def materializeOpGen[F](implicit ev0: c.WeakTypeTag[F]): MaterializeOpAuxGen =
     new MaterializeOpAuxGen(weakTypeOf[F])
 
-  def opCalc(funcType : TypeSymbol, a : CalcVal, b : CalcVal, c : Calc)(implicit annotatedSym : TypeSymbol) : CalcVal = {
-    def unsupported() = abort(s"Unsupported $funcType[$a, $b, $c]")
+  def opCalc(funcType : TypeSymbol, a : CalcVal, b : CalcVal, cArg : Calc)(implicit annotatedSym : TypeSymbol) : CalcVal = {
+    def unsupported() = abort(s"Unsupported $funcType[$a, $b, $cArg]")
 
     //The output val is literal if all arguments are literal. Otherwise, it is non-literal.
-    implicit val cvKind : CalcVal.Kind = (a, b, c) match {
+    implicit val cvKind : CalcVal.Kind = (a, b, cArg) match {
       case (_ : CalcLit, _ : CalcLit, _ : CalcLit) => CalcVal.Lit
       case _ => CalcVal.NLit
     }
@@ -923,25 +937,49 @@ trait GeneralMacros {
     def Require = a match {
       case CalcLit.Boolean(true) => CalcLit(true)
       case CalcLit.Boolean(false) => b match {
-        case CalcLit.String(msg) => c match {
-          case CalcUnknown(t) => //redirection of implicit not found annotation is required to the given symbol
+        case CalcLit.String(msg) => cArg match {
+          case CalcUnknown(t) => if (t.typeSymbol == symbolOf[Warn]) {
+            warning(msg)
+            CalcLit(false)
+          } else {
+            //redirection of implicit not found annotation is required to the given symbol
             implicit val annotatedSym : TypeSymbol = t.typeSymbol.asType
             abort(msg)
+          }
           case _ =>
             abort(msg)
         }
         //directly using the java lib `require` resulted in compiler crash, so we use wrapped require instead
-        case CalcNLit.String(msg,_) => CalcNLit.Boolean(q"{_root_.singleton.ops.impl._require(false, $msg); false}")
+        case CalcNLit.String(msg,_) => cArg match {
+          case CalcUnknown(t) if t.typeSymbol == symbolOf[Warn] =>
+            val msgPos = Literal(Constant("Warning:" + c.enclosingPosition + "    " + msg))
+            CalcNLit.Boolean(q"""{println($msgPos); false}""")
+          case _ =>
+            CalcNLit.Boolean(q"{_root_.singleton.ops.impl._require(false, $msg); false}")
+        }
         case _ => unsupported()
       }
       case CalcNLit.Boolean(cond,_) => b match {
         //directly using the java lib `require` resulted in compiler crash, so we use wrapped require instead
-        case CalcVal.String(msg, msgt) => CalcNLit.Boolean(q"{_root_.singleton.ops.impl._require($cond, $msgt); true}")
+        case CalcVal.String(msg, msgt) => cArg match {
+          case CalcUnknown(t) if t == symbolOf[Warn] =>
+            val msgPos = Literal(Constant("Warning:" + c.enclosingPosition + "    " + msg))
+            CalcNLit.Boolean(
+              q"""{
+                  if ($cond) true
+                  else {
+                    println($msgPos)
+                    false
+                  }
+                }""")
+          case _ =>
+            CalcNLit.Boolean(q"{_root_.singleton.ops.impl._require($cond, $msgt); true}")
+        }
         case _ => unsupported()
       }
       case _ => unsupported()
     }
-    def ITE = (a, b, c) match {
+    def ITE = (a, b, cArg) match {
       //Also has special case handling inside unapply
       case (CalcVal.Boolean(it,itt), CalcVal.Char(tt,ttt), CalcVal.Char(et,ett)) =>
         CalcVal(if(it) tt else et, q"if ($itt) $ttt else $ett")
@@ -1152,7 +1190,7 @@ trait GeneralMacros {
       case funcTypes.Substring => Substring
       case funcTypes.CharAt => CharAt
       case funcTypes.Length => Length
-      case _ => abort(s"Unsupported $funcType[$a, $b, $c]")
+      case _ => abort(s"Unsupported $funcType[$a, $b, $cArg]")
     }
   }
 
