@@ -769,6 +769,7 @@ trait GeneralMacros {
 
     def getAllLHSArgs(tree : Tree)(implicit annotatedSym : TypeSymbol) : List[Tree] = tree match {
       case Apply(TypeApply(Select(t, _), _), _) => getAllArgs(t, true)
+      case TypeApply(Select(t, _), _) => getAllArgs(t, true)
       case Select(t, _) => getAllArgs(t, true)
       case _ => abort("Left-hand-side tree not found")
     }
