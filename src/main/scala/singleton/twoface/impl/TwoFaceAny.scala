@@ -184,7 +184,8 @@ object TwoFaceAny {
   implicit object Char extends TwoFaceAny.Builder[Char, std.Char, Shell.One.Char, Shell.Two.Char, Shell.Three.Char] {
     def create[T](value : std.Char) : Char[T] = new _Char[T](value)
     def apply[T](implicit id : AcceptNonLiteral[Id[T]]) : Char[id.Out] = create[id.Out](id.valueWide.asInstanceOf[std.Char])
-    implicit def apply[T <: std.Char, Out <: T](value : T) : Char[Out] = macro Builder.Macro.fromNumValue[Char[_]]
+    implicit def apply(value : std.Char) : Char[std.Char] = create[std.Char](value)
+    implicit def apply[T <: std.Char with Singleton](value : T)(implicit di : DummyImplicit) : Char[T] = create[T](value)
     implicit def ev[T](implicit id : AcceptNonLiteral[Id[T]]) : Char[T] = create[T](id.valueWide.asInstanceOf[std.Char])
     implicit def widen[T](tf : Char[T]) : Char[std.Char] = create[std.Char](tf.getValue)
     implicit def tf2Num[T <: std.Char](tf : Char[T]) : T = macro Builder.Macro.toNumValue[Char[_], T]
@@ -280,7 +281,8 @@ object TwoFaceAny {
     def numberOfLeadingZeros[T](t : Int[T])(implicit tfs : Int.Shell1[NumberOfLeadingZeros, T, std.Int]) = tfs(t.getValue)
     def create[T](value : std.Int) : Int[T] = new _Int[T](value)
     def apply[T](implicit id : AcceptNonLiteral[Id[T]]) : Int[id.Out] = create[id.Out](id.valueWide.asInstanceOf[std.Int])
-    implicit def apply[T <: std.Int, Out <: T](value : T) : Int[Out] = macro Builder.Macro.fromNumValue[Int[_]]
+    implicit def apply(value : std.Int) : Int[std.Int] = create[std.Int](value)
+    implicit def apply[T <: std.Int with Singleton](value : T)(implicit di : DummyImplicit) : Int[T] = create[T](value)
     implicit def ev[T](implicit id : AcceptNonLiteral[Id[T]]) : Int[T] = create[T](id.valueWide.asInstanceOf[std.Int])
     implicit def widen[T](tf : Int[T]) : Int[std.Int] = create[std.Int](tf.getValue)
     implicit def tf2Num[T <: std.Int](tf : Int[T]) : T = macro Builder.Macro.toNumValue[Int[_], T]
@@ -377,7 +379,8 @@ object TwoFaceAny {
     def numberOfLeadingZeros[T](t : Long[T])(implicit tfs : Int.Shell1[NumberOfLeadingZeros, T, std.Long]) = tfs(t.getValue)
     def create[T](value : std.Long) : Long[T] = new _Long[T](value)
     def apply[T](implicit id : AcceptNonLiteral[Id[T]]) : Long[id.Out] = create[id.Out](id.valueWide.asInstanceOf[std.Long])
-    implicit def apply[T <: std.Long, Out <: T](value : T) : Long[Out] = macro Builder.Macro.fromNumValue[Long[_]]
+    implicit def apply(value : std.Long) : Long[std.Long] = create[std.Long](value)
+    implicit def apply[T <: std.Long with Singleton](value : T)(implicit di : DummyImplicit) : Long[T] = create[T](value)
     implicit def ev[T](implicit id : AcceptNonLiteral[Id[T]]) : Long[T] = create[T](id.valueWide.asInstanceOf[std.Long])
     implicit def widen[T](tf : Long[T]) : Long[std.Long] = create[std.Long](tf.getValue)
     implicit def tf2Num[T <: std.Long](tf : Long[T]) : T = macro Builder.Macro.toNumValue[Long[_], T]
@@ -472,7 +475,8 @@ object TwoFaceAny {
   implicit object Float extends TwoFaceAny.Builder[Float, std.Float, Shell.One.Float, Shell.Two.Float, Shell.Three.Float] {
     def create[T](value : std.Float) : Float[T] = new _Float[T](value)
     def apply[T](implicit id : AcceptNonLiteral[Id[T]]) : Float[id.Out] = create[id.Out](id.valueWide.asInstanceOf[std.Float])
-    implicit def apply[T <: std.Float, Out <: T](value : T) : Float[Out] = macro Builder.Macro.fromNumValue[Float[_]]
+    implicit def apply(value : std.Float) : Float[std.Float] = create[std.Float](value)
+    implicit def apply[T <: std.Float with Singleton](value : T)(implicit di : DummyImplicit) : Float[T] = create[T](value)
     implicit def ev[T](implicit id : AcceptNonLiteral[Id[T]]) : Float[T] = create[T](id.valueWide.asInstanceOf[std.Float])
     implicit def widen[T](tf : Float[T]) : Float[std.Float] = create[std.Float](tf.getValue)
     implicit def tf2Num[T <: std.Float](tf : Float[T]) : T = macro Builder.Macro.toNumValue[Float[_], T]
@@ -567,7 +571,8 @@ object TwoFaceAny {
   implicit object Double extends TwoFaceAny.Builder[Double, std.Double, Shell.One.Double, Shell.Two.Double, Shell.Three.Double] {
     def create[T](value : std.Double) : Double[T] = new _Double[T](value)
     def apply[T](implicit id : AcceptNonLiteral[Id[T]]) : Double[id.Out] = create[id.Out](id.valueWide.asInstanceOf[std.Double])
-    implicit def apply[T <: std.Double, Out <: T](value : T) : Double[Out] = macro Builder.Macro.fromNumValue[Double[_]]
+    implicit def apply(value : std.Double) : Double[std.Double] = create[std.Double](value)
+    implicit def apply[T <: std.Double with Singleton](value : T)(implicit di : DummyImplicit) : Double[T] = create[T](value)
     implicit def ev[T](implicit id : AcceptNonLiteral[Id[T]]) : Double[T] = create[T](id.valueWide.asInstanceOf[std.Double])
     implicit def widen[T](tf : Double[T]) : Double[std.Double] = create[std.Double](tf.getValue)
     implicit def tf2Num[T <: std.Double](tf : Double[T]) : T = macro Builder.Macro.toNumValue[Double[_], T]
@@ -603,7 +608,8 @@ object TwoFaceAny {
   implicit object String extends TwoFaceAny.Builder[String, std.String, Shell.One.String, Shell.Two.String, Shell.Three.String] {
     def create[T](value : std.String) : String[T] = new _String[T](value)
     def apply[T](implicit id : AcceptNonLiteral[Id[T]]) : String[id.Out] = create[id.Out](id.valueWide.asInstanceOf[std.String])
-    implicit def apply[T <: std.String, Out <: T](value : T) : String[Out] = macro Builder.Macro.fromNumValue[String[_]]
+    implicit def apply(value : std.String) : String[std.String] = create[std.String](value)
+    implicit def apply[T <: std.String with Singleton](value : T)(implicit di : DummyImplicit) : String[T] = create[T](value)
     implicit def ev[T](implicit id : AcceptNonLiteral[Id[T]]) : String[T] = create[T](id.valueWide.asInstanceOf[std.String])
     implicit def widen[T](tf : String[T]) : String[std.String] = create[std.String](tf.getValue)
     implicit def tf2Num[T <: std.String](tf : String[T]) : T = macro Builder.Macro.toNumValue[String[_], T]
@@ -631,8 +637,8 @@ object TwoFaceAny {
   }
   implicit object Boolean extends TwoFaceAny.Builder[Boolean, std.Boolean, Shell.One.Boolean, Shell.Two.Boolean, Shell.Three.Boolean] {
     def create[T](value : std.Boolean) : Boolean[T] = new _Boolean[T](value)
-    def apply[T](implicit id : AcceptNonLiteral[Id[T]]) : Boolean[id.Out] = create[id.Out](id.valueWide.asInstanceOf[std.Boolean])
-    implicit def apply[T <: std.Boolean, Out <: T](value : T) : Boolean[Out] = macro Builder.Macro.fromNumValue[Boolean[_]]
+    implicit def apply(value : std.Boolean) : Boolean[std.Boolean] = create[std.Boolean](value)
+    implicit def apply[T <: std.Boolean with Singleton](value : T)(implicit di : DummyImplicit) : Boolean[T] = create[T](value)
     implicit def ev[T](implicit id : AcceptNonLiteral[Id[T]]) : Boolean[T] = create[T](id.valueWide.asInstanceOf[std.Boolean])
     implicit def widen[T](tf : Boolean[T]) : Boolean[std.Boolean] = create[std.Boolean](tf.getValue)
     implicit def tf2Num[T <: std.Boolean](tf : Boolean[T]) : T = macro Builder.Macro.toNumValue[Boolean[_], T]

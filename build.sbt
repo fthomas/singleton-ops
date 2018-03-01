@@ -10,13 +10,13 @@ val gitDevUrl = s"git@github.com:fthomas/$projectName.git"
 
 val macroCompatVersion = "1.1.1"
 val macroParadiseVersion = "2.1.0"
-val shapelessVersion = "2.3.2"
+val shapelessVersion = "2.3.3"
 val scalaCheckVersion = "1.13.5"
 
 /// projects
 lazy val root = project.in(file("."))
   .settings(commonSettings)
-  .aggregate(singleton_opsJVM, singleton_opsJS)
+  .aggregate(singleton_opsJVM)
   .settings(noPublishSettings)
   .settings(
     sources in Compile := Seq.empty,
@@ -43,7 +43,7 @@ lazy val singleton_ops = crossProject
   )
 
 lazy val singleton_opsJVM = singleton_ops.jvm
-lazy val singleton_opsJS  = singleton_ops.js
+//lazy val singleton_opsJS  = singleton_ops.js
 
 /// settings
 
@@ -76,6 +76,7 @@ lazy val compileSettings = Def.settings(
     "-encoding",
     "UTF-8",
     "-feature",
+    "-Xsource:2.13",
     "-language:existentials",
     "-language:experimental.macros",
     "-language:higherKinds",
@@ -193,7 +194,7 @@ val validateCommands = Seq(
   "clean",
   //"scalafmtTest",
   "test:compile",
-  "singleton_opsJS/test",
+//  "singleton_opsJS/test",
   "coverage",
   "singleton_opsJVM/test",
   "coverageReport",
