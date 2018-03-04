@@ -10,7 +10,7 @@ val gitDevUrl = s"git@github.com:fthomas/$projectName.git"
 
 val macroCompatVersion = "1.1.1"
 val macroParadiseVersion = "2.1.0"
-val shapelessVersion = "2.3.2"
+val shapelessVersion = "2.3.3"
 val scalaCheckVersion = "1.13.5"
 
 /// projects
