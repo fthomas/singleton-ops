@@ -8,7 +8,7 @@ import singleton.ops.math._
 //Unsupported operation check to increase coverage
 class UnsupportedSpec extends Properties("UnsupportedSpec") {
   property("ToNat") = wellTyped {illTyped("""implicitly[ToNat[W.`true`.T]]""")}
-  property("ToNat with negative number") = wellTyped {illTyped("""implicitly[ToNat[W.`-1`.T]]""")}
+  property("ToNat with negative number") = wellTyped {illTyped("""implicitly[ToNat[W.`-1`.T]]""","Nat cannot be a negative literal. Found: -1")}
   property("ToChar") = wellTyped {illTyped("""implicitly[ToChar[W.`true`.T]]""")}
   property("ToInt") = wellTyped {illTyped("""implicitly[ToInt[W.`true`.T]]""")}
   property("ToLong") = wellTyped {illTyped("""implicitly[ToLong[W.`true`.T]]""")}
