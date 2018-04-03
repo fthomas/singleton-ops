@@ -1222,7 +1222,9 @@ trait GeneralMacros {
       val opResult = TypeCalc(opTpe)
 
       val genTree = (funcType, opResult) match {
-        case (funcTypes.ToNat, CalcLit.Int(t)) => genOpTreeNat(opTpe, t)
+        case (funcTypes.ToNat, CalcLit.Int(t)) =>
+          if (t < 0) abort(s"Nat cannot be a negative literal. Found: $t")
+          else genOpTreeNat(opTpe, t)
         case (funcTypes.ToSymbol, CalcLit.String(t)) => genOpTreeSymbol(opTpe, t)
         case (_, CalcLit(t)) => genOpTreeLit(opTpe, t)
         case (funcTypes.AcceptNonLiteral, t : CalcNLit) => genOpTreeNLit(opTpe, t)
