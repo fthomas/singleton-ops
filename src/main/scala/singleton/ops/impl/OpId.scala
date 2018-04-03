@@ -8,6 +8,7 @@ object OpId {
   sealed trait GetArg extends OpId
   sealed trait GetLHSArg extends OpId
   sealed trait ImplicitFound extends OpId
+  sealed trait EnumCount extends OpId
   sealed trait ITE extends OpId //If-Then-Else
   sealed trait ==> extends OpId
   sealed trait Id extends OpId

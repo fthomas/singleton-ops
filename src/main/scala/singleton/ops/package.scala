@@ -75,6 +75,7 @@ package object ops {
   type GetArg[ArgIdx]       = OpMacro[OpId.GetArg, ArgIdx, NP, NP] //Use to get argument type of class/definition
   type GetLHSArg[ArgIdx]    = OpMacro[OpId.GetLHSArg, ArgIdx, NP, NP] //Use to get argument type of the left-hand-side
   type ImplicitFound[Sym]   = OpMacro[OpId.ImplicitFound, GetType[Sym], NP, NP] //Implicit Found boolean indication
+  type EnumCount[Sym]       = OpMacro[OpId.EnumCount, GetType[Sym], NP, NP] //Number of direct subclasses
   final val  GetArg         = impl.GetArg
   final val  GetLHSArg      = impl.GetLHSArg
   type GetArg0              = GetArg[W.`0`.T]

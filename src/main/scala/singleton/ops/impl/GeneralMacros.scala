@@ -17,6 +17,7 @@ trait GeneralMacros {
     val GetArg = symbolOf[OpId.GetArg]
     val GetLHSArg = symbolOf[OpId.GetLHSArg]
     val ImplicitFound = symbolOf[OpId.ImplicitFound]
+    val EnumCount = symbolOf[OpId.EnumCount]
     val Id = symbolOf[OpId.Id]
     val ToNat = symbolOf[OpId.ToNat]
     val ToChar = symbolOf[OpId.ToChar]
@@ -432,6 +433,11 @@ trait GeneralMacros {
                       Some(CalcLit(false))
                   }
                   case _ => Some(CalcLit(false))
+                }
+              case (funcTypes.EnumCount, _) =>
+                aValue match {
+                  case CalcUnknown(t) => Some(CalcLit(t.typeSymbol.asClass.knownDirectSubclasses.size))
+                  case _ => Some(CalcLit(0))
                 }
               case (funcTypes.IsNat, _) =>
                 aValue match {
