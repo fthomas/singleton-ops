@@ -17,7 +17,7 @@ class CheckedStringSpec extends Properties("Checked.String") {
   import CheckedStringSpec._
 
   def foo[T](t : TwoFace.String[T]) : Unit = {}
-  def lengthSmallerThan5[T](t : LengthSmallerThan.Checked[T,W.`5`.T]) : Unit = {
+  def lengthSmallerThan5[T](t : LengthSmallerThan.Checked[T,Id[W.`5`.T]]) : Unit = {
     val temp : String = t
     foo(t.unsafeCheck(5))
   }

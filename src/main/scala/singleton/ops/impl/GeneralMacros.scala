@@ -419,8 +419,7 @@ trait GeneralMacros {
     ////////////////////////////////////////////////////////////////////////
     object OpCalc {
       def unapply(tp: Type)(implicit annotatedSym : TypeSymbol): Option[Calc] = {
-        VerboseTraversal.incIdent
-        val tpCalc = tp match {
+        tp match {
           case TypeRef(_, sym, args) if sym == symbolOf[OpMacro[_,_,_,_]] =>
             VerboseTraversal(s"@@OpCalc@@\nTP: $tp\nRAW: + ${showRaw(tp)}")
             val args = tp.typeArgs
@@ -526,8 +525,6 @@ trait GeneralMacros {
             retVal
           case _ => None
         }
-        VerboseTraversal.decIdent
-        tpCalc
       }
     }
     ////////////////////////////////////////////////////////////////////////
@@ -551,7 +548,8 @@ trait GeneralMacros {
       implicit def fixSymbolOps(sym: Symbol): g.Symbol = sym.asInstanceOf[g.Symbol]
 
       VerboseTraversal(s"${c.enclosingPosition}\nTP: $tp\nRAW: ${showRaw(tp)}")
-      tp match {
+      VerboseTraversal.incIdent
+      val tpCalc = tp match {
         ////////////////////////////////////////////////////////////////////////
         // Value cases
         ////////////////////////////////////////////////////////////////////////
@@ -596,6 +594,8 @@ trait GeneralMacros {
 //          println("Exhausted search at: " + showRaw(tp))
           None
       }
+      VerboseTraversal.decIdent
+      tpCalc
     }
   }
   ////////////////////////////////////////////////////////////////////
@@ -1413,10 +1413,9 @@ trait GeneralMacros {
   Checked1ParamMaterializer[Chk, Cond, Msg, T, ParamFace, Param] = new Checked1ParamMaterializer[Chk, Cond, Msg, T, ParamFace, Param](symbolOf[Chk], weakTypeOf[Cond], weakTypeOf[Msg], weakTypeOf[T], weakTypeOf[ParamFace], weakTypeOf[Param])
 
   final class Checked1ParamMaterializer[Chk, Cond, Msg, T, ParamFace, Param](chkSym : TypeSymbol, condTpe : Type, msgTpe : Type, tTpe : Type, paramFaceTpe : Type, paramTpe : Type) {
-    def newChecked(tCalc : CalcVal, tTpe : Type, paramCalc : CalcVal, paramTpe : Type)(implicit annotatedSym : TypeSymbol) : c.Tree = {
+    def newChecked(tCalc : CalcVal, chkArgTpe : Type, paramCalc : CalcVal)(implicit annotatedSym : TypeSymbol) : c.Tree = {
       val outTpe = tCalc.tpe
       val outTree = tCalc.tree
-      val outTpeWide = outTpe.widen
 
       val fixedCondTpe = appliedType(condTpe.typeConstructor, tCalc.tpe, paramCalc.tpe).dealias
       val fixedMsgTpe = appliedType(msgTpe.typeConstructor, tCalc.tpe, paramCalc.tpe).dealias
@@ -1437,11 +1436,11 @@ trait GeneralMacros {
       val reqCalc = opCalc(funcTypes.Require, condCalc, msgCalc, CalcLit(0))
 
       q"""
-         (new $chkSym[$condTpe, $msgTpe, $tTpe, $paramFaceTpe, $paramTpe]($outTree.asInstanceOf[$outTpe]))
+         (new $chkSym[$condTpe, $msgTpe, $chkArgTpe, $paramFaceTpe, $paramTpe]($outTree.asInstanceOf[$outTpe]))
        """
     }
     def newChecked(tCalc : CalcVal, paramCalc : CalcVal)(implicit annotatedSym : TypeSymbol) : c.Tree =
-      newChecked(tCalc, tCalc.tpe, paramCalc, paramCalc.tpe)
+      newChecked(tCalc, tCalc.tpe, paramCalc)
     def fromOpImpl(tOpTree : c.Tree, paramOpTree : c.Tree) : c.Tree = {
       implicit val annotatedSym : TypeSymbol = c.enclosingImplicits.head.pt match {
         case TypeRef(pre,sym,args) => sym.asType
@@ -1449,7 +1448,7 @@ trait GeneralMacros {
       }
       val tCalc = extractValueFromOpTree(tOpTree)
       val paramCalc = extractValueFromOpTree(paramOpTree)
-      val genTree = newChecked(tCalc, tTpe, paramCalc, paramTpe)
+      val genTree = newChecked(tCalc, tTpe, paramCalc)
 //      println(genTree)
       genTree
     }
@@ -1473,7 +1472,7 @@ trait GeneralMacros {
       implicit val annotatedSym : TypeSymbol = chkSym
       val tCalc = extractValueFromTwoFaceTree(tTFTree)
       val paramCalc = extractValueFromOpTree(paramOpTree)
-      val genTree = newChecked(tCalc, tTpe, paramCalc, paramTpe)
+      val genTree = newChecked(tCalc, tTpe, paramCalc)
       //      println(genTree)
       genTree
     }
