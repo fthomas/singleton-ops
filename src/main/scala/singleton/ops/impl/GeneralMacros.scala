@@ -312,12 +312,23 @@ trait GeneralMacros {
   // https://github.com/paulp/psply/blob/master/src/main/scala/PsplyMacros.scala
   ////////////////////////////////////////////////////////////////////
   import scala.reflect.internal.SymbolTable
+  
+  object VerboseTraversal {
+    private val verboseTraversal = false
+    private val indentSize = 2
+    private var indent : Int = 0
+    private def indentStr : String =  List.fill(indent * indentSize)(' ').mkString
+    def incIdent : Unit = indent = indent + 1
+    def decIdent : Unit = indent = indent - 1
+    def apply(s : String) : Unit = {
+      if (verboseTraversal) println(indentStr + s.replaceAll("\n",s"\n$indentStr"))
+    }
+  }
 
   /** Typecheck singleton types so as to obtain indirectly
     *  available known-at-compile-time values.
     */
   object TypeCalc {
-    val verboseTraversal = false
     ////////////////////////////////////////////////////////////////////////
     // Calculates the integer value of Shapeless Nat
     ////////////////////////////////////////////////////////////////////////
@@ -356,7 +367,7 @@ trait GeneralMacros {
         val tfAnySym = symbolOf[TwoFaceAny[_,_]]
         tp match {
           case TypeRef(_, sym, args) if args.nonEmpty && tp.baseClasses.contains(tfAnySym) =>
-            if (verboseTraversal) print(s"@@TwoFaceCalc@@\nTP: $tp\nRAW: ${showRaw(tp)}\nBaseCls:${tp.baseClasses}")
+            VerboseTraversal(s"@@TwoFaceCalc@@\nTP: $tp\nRAW: ${showRaw(tp)}\nBaseCls:${tp.baseClasses}")
             val calcTFType = sym match {
               case t if tp.baseClasses.contains(symbolOf[TwoFaceAny.Char[_]]) => Some(CalcTFType.Char)
               case t if tp.baseClasses.contains(symbolOf[TwoFaceAny.Int[_]]) => Some(CalcTFType.Int)
@@ -408,9 +419,10 @@ trait GeneralMacros {
     ////////////////////////////////////////////////////////////////////////
     object OpCalc {
       def unapply(tp: Type)(implicit annotatedSym : TypeSymbol): Option[Calc] = {
-        tp match {
+        VerboseTraversal.incIdent
+        val tpCalc = tp match {
           case TypeRef(_, sym, args) if sym == symbolOf[OpMacro[_,_,_,_]] =>
-            if (verboseTraversal) print(s"@@OpCalc@@\nTP: $tp\nRAW: + ${showRaw(tp)}")
+            VerboseTraversal(s"@@OpCalc@@\nTP: $tp\nRAW: + ${showRaw(tp)}")
             val args = tp.typeArgs
             lazy val aValue = TypeCalc(args(1))
             lazy val bValue = TypeCalc(args(2))
@@ -514,6 +526,8 @@ trait GeneralMacros {
             retVal
           case _ => None
         }
+        VerboseTraversal.decIdent
+        tpCalc
       }
     }
     ////////////////////////////////////////////////////////////////////////
@@ -527,7 +541,7 @@ trait GeneralMacros {
         case Some(t : CalcType) => CalcNLit(t, q"valueOf[$tp]")
         case Some(t : CalcUnknown) => t
         case _ =>
-          if (verboseTraversal) print(s"@@Unknown@@\nTP: $tp\nRAW: + ${showRaw(tp)}")
+          VerboseTraversal(s"@@Unknown@@\nTP: $tp\nRAW: + ${showRaw(tp)}")
           CalcUnknown(tp)
       }
     }
@@ -536,7 +550,7 @@ trait GeneralMacros {
       val g = c.universe.asInstanceOf[SymbolTable]
       implicit def fixSymbolOps(sym: Symbol): g.Symbol = sym.asInstanceOf[g.Symbol]
 
-      if (verboseTraversal) print(s"${c.enclosingPosition}\nTP: $tp\nRAW: ${showRaw(tp)}")
+      VerboseTraversal(s"${c.enclosingPosition}\nTP: $tp\nRAW: ${showRaw(tp)}")
       tp match {
         ////////////////////////////////////////////////////////////////////////
         // Value cases
@@ -579,7 +593,7 @@ trait GeneralMacros {
         ////////////////////////////////////////////////////////////////////////
 
         case _ =>
-//          print("Exhausted search at: " + showRaw(tp))
+//          println("Exhausted search at: " + showRaw(tp))
           None
       }
     }
@@ -719,7 +733,7 @@ trait GeneralMacros {
       case t : CalcLit => t
       case t : CalcType => CalcNLit(t, q"$tfTree.getValue")
       case t =>
-        print(t)
+        println(t)
         extractionFailed(typedTree.tpe)
     }
   }
@@ -745,7 +759,7 @@ trait GeneralMacros {
           val value : Out = $valueTree
         }
      """
-      //    print(genTree)
+      //    println(genTree)
       genTree
     }
   }
@@ -773,12 +787,12 @@ trait GeneralMacros {
 
     def apply(argIdx : Int, lhs : Boolean)(implicit annotatedSym : TypeSymbol) : c.Tree = {
       val tree = c.enclosingImplicits.last.tree
-//      print(">>>>>>> enclosingImpl: " + c.enclosingImplicits.last)
-//      print("tree: " + c.enclosingImplicits.last.tree)
-//      print("rawTree: " + showRaw(c.enclosingImplicits.last.tree))
+//      println(">>>>>>> enclosingImpl: " + c.enclosingImplicits.last)
+//      println("tree: " + c.enclosingImplicits.last.tree)
+//      println("rawTree: " + showRaw(c.enclosingImplicits.last.tree))
       val allArgs = if (lhs) getAllLHSArgs(tree) else getAllArgs(tree, lhs)
-//      print("args: " + allArgs)
-//      print("<<<<<<< rawArgs" + showRaw(allArgs))
+//      println("args: " + allArgs)
+//      println("<<<<<<< rawArgs" + showRaw(allArgs))
       if (argIdx < allArgs.length) allArgs(argIdx)
       else abort(s"Argument index($argIdx) is not smaller than the total number of arguments(${allArgs.length})")
     }
@@ -1239,7 +1253,7 @@ trait GeneralMacros {
         case _ => extractionFailed(opTpe)
       }
 
-//      print(genTree)
+//      println(genTree)
       genTree
     }
   }
@@ -1277,7 +1291,7 @@ trait GeneralMacros {
            }
          }
         """
-//      print(showCode(genTree))
+//      println(showCode(genTree))
       genTree
     }
   }
@@ -1301,9 +1315,9 @@ trait GeneralMacros {
     }
     def fromNumValue(numValueTree : c.Tree, tfSym : TypeSymbol) : c.Tree =  {
       implicit val annotatedSym : TypeSymbol = tfSym //not really used
-//      print(tfSym.name)
+//      println(tfSym.name)
       val genTree = genTwoFace(extractValueFromNumTree(numValueTree))
-//      print(genTree)
+//      println(genTree)
       genTree
     }
     def toNumValue(tfTree : c.Tree, tfSym : TypeSymbol, tTpe : Type) : c.Tree = {
@@ -1315,7 +1329,7 @@ trait GeneralMacros {
         q"""
           $outTree.asInstanceOf[$tTpe]
         """
-//      print(genTree)
+//      println(genTree)
       genTree
     }
   }
@@ -1364,28 +1378,28 @@ trait GeneralMacros {
       }
       val numValueCalc = extractValueFromOpTree(opTree)
       val genTree = newChecked(numValueCalc, tTpe)
-//      print(genTree)
+//      println(genTree)
       genTree
     }
     def fromNumValue(numValueTree : c.Tree) : c.Tree = {
       implicit val annotatedSym : TypeSymbol = chkSym
       val numValueCalc = extractValueFromNumTree(numValueTree)
       val genTree = newChecked(numValueCalc)
-//      print(genTree)
+//      println(genTree)
       genTree
     }
     def fromTF(tfTree : c.Tree) : c.Tree = {
       implicit val annotatedSym : TypeSymbol = chkSym
       val tfValueCalc = extractValueFromTwoFaceTree(tfTree)
       val genTree = newChecked(tfValueCalc)
-//      print(genTree)
+//      println(genTree)
       genTree
     }
     def widen(chkTree : c.Tree) : c.Tree = {
       implicit val annotatedSym : TypeSymbol = chkSym
       val tfValueCalc = extractValueFromTwoFaceTree(chkTree)
       val genTree = newChecked(tfValueCalc, tTpe)
-      //      print(genTree)
+      //      println(genTree)
       genTree
     }
   }
@@ -1436,7 +1450,7 @@ trait GeneralMacros {
       val tCalc = extractValueFromOpTree(tOpTree)
       val paramCalc = extractValueFromOpTree(paramOpTree)
       val genTree = newChecked(tCalc, tTpe, paramCalc, paramTpe)
-//      print(genTree)
+//      println(genTree)
       genTree
     }
     def fromNumValue(tNumTree : c.Tree, paramOpTree : c.Tree) : c.Tree = {
@@ -1444,7 +1458,7 @@ trait GeneralMacros {
       val tCalc = extractValueFromNumTree(tNumTree)
       val paramCalc = extractValueFromOpTree(paramOpTree)
       val genTree = newChecked(tCalc, paramCalc)
-//      print(genTree)
+//      println(genTree)
       genTree
     }
     def fromTF(tTFTree : c.Tree, paramOpTree : c.Tree) : c.Tree = {
@@ -1452,7 +1466,7 @@ trait GeneralMacros {
       val tCalc = extractValueFromTwoFaceTree(tTFTree)
       val paramCalc = extractValueFromOpTree(paramOpTree)
       val genTree = newChecked(tCalc, paramCalc)
-//      print(genTree)
+//      println(genTree)
       genTree
     }
     def widen(tTFTree : c.Tree, paramOpTree : c.Tree) : c.Tree = {
@@ -1460,7 +1474,7 @@ trait GeneralMacros {
       val tCalc = extractValueFromTwoFaceTree(tTFTree)
       val paramCalc = extractValueFromOpTree(paramOpTree)
       val genTree = newChecked(tCalc, tTpe, paramCalc, paramTpe)
-      //      print(genTree)
+      //      println(genTree)
       genTree
     }
   }
