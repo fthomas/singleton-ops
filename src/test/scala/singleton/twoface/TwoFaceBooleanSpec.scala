@@ -49,12 +49,14 @@ class TwoFaceBooleanSpec extends Properties("TwoFace.Boolean") {
   property("Unsafe Boolean != Unsafe Boolean") = verifyTFBoolean(TwoFace.Boolean(us(false)) != TwoFace.Boolean(us(false)), us(false))
 
   property("Safe Boolean && Safe Boolean") = verifyTFBoolean(TwoFace.Boolean(true) && TwoFace.Boolean(true), true)
-  property("Safe Boolean && Unsafe Boolean") = verifyTFBoolean(TwoFace.Boolean(false) && TwoFace.Boolean(us(true)), us(false))
+  property("Safe Boolean (true) && Unsafe Boolean") = verifyTFBoolean(TwoFace.Boolean(true) && TwoFace.Boolean(us(true)), us(true))
+  property("Safe Boolean (false) && Unsafe Boolean") = verifyTFBoolean(TwoFace.Boolean(false) && TwoFace.Boolean(us(true)), false)
   property("Unsafe Boolean && Safe Boolean") = verifyTFBoolean(TwoFace.Boolean(us(false)) && TwoFace.Boolean(true), us(false))
   property("Unsafe Boolean && Unsafe Boolean") = verifyTFBoolean(TwoFace.Boolean(us(false)) && TwoFace.Boolean(us(false)), us(false))
 
   property("Safe Boolean || Safe Boolean") = verifyTFBoolean(TwoFace.Boolean(true) || TwoFace.Boolean(true), true)
-  property("Safe Boolean || Unsafe Boolean") = verifyTFBoolean(TwoFace.Boolean(false) || TwoFace.Boolean(us(true)), us(true))
+  property("Safe Boolean (true) || Unsafe Boolean") = verifyTFBoolean(TwoFace.Boolean(true) || TwoFace.Boolean(us(true)), true)
+  property("Safe Boolean (false) || Unsafe Boolean") = verifyTFBoolean(TwoFace.Boolean(false) || TwoFace.Boolean(us(true)), us(true))
   property("Unsafe Boolean || Safe Boolean") = verifyTFBoolean(TwoFace.Boolean(us(false)) || TwoFace.Boolean(true), us(true))
   property("Unsafe Boolean || Unsafe Boolean") = verifyTFBoolean(TwoFace.Boolean(us(false)) || TwoFace.Boolean(us(false)), us(false))
 

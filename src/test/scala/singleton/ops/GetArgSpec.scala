@@ -14,6 +14,10 @@ class GetArgSpec extends Properties("GetArgSpec") {
 
   implicit class BadConvLong(val value : Long)(implicit f : GetArg[W.`10`.T]) extends Conv
 
+  implicit class FromInt[V <: Int](value : V) {
+    def extendable[L <: Int](implicit left : GetLHSArg.Aux[W.`0`.T, L]) : FromInt[L] = new FromInt[L](left.value)
+  }
+
   property("smallerThan50(1) OK") = wellTyped {
     smallerThan50(1)
   }
@@ -24,6 +28,9 @@ class GetArgSpec extends Properties("GetArgSpec") {
     illTyped("implicitly[GetArg0]") //cannot be invoked without implicit conversion
     illTyped("smallerThan50(1L)") //Argument index too large in `BadConvLong`
     illTyped("implicitly[GetArg[W.`0.1`.T]]") //Bad argument (Double instead of Int)
+  }
+  property("Implicit conversion with applied type") = wellTyped {
+    1.extendable
   }
 
 
@@ -78,6 +85,5 @@ class GetArgSpec extends Properties("GetArgSpec") {
     Foo.Able.ofXInt(foo(one))
     Foo.Able.ofXInt(foo(one + one))
   }
-
 
 }
