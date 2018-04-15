@@ -566,17 +566,16 @@ trait GeneralMacros {
         // Tree traversal
         ////////////////////////////////////////////////////////////////////////
         case tp @ ExistentialType(_, _) => unapply(tp.underlying)
-        case TypeBounds(lo, hi) =>
+        case TypeBounds(lo, hi) => unapply(hi) match {
           //There can be cases, like in the following example, where we can extract a non-literal value.
           //  def foo2[W](w : TwoFace.Int[W])(implicit tfs : TwoFace.Int.Shell1[Negate, W, Int]) = -w+1
           //We want to calculate `-w+1`, even though we have not provided a complete implicit.
           //While returning `TwoFace.Int[Int](-w+1)` is possible in this case, we would rather reserve
           //the ability to have a literal return type, so `TwoFace.Int[Negate[W]+1](-w+1)` is returned.
           //So even if we can have a `Some(CalcType)` returning, we force it as an upper-bound calc type.
-          NonLiteralCalc.unapply(hi) match {
-            case Some(t) => Some(CalcUBType(t))
-            case _ => if (hi.baseClasses.contains(symbolOf[java.lang.String])) Some(CalcUBType.String) else None
-          }
+          case Some(t) => Some(CalcUBType(t))
+          case _ => None
+        }
         case RefinedType(parents, scope) =>
           parents.iterator map unapply collectFirst { case Some(x) => x }
         case NullaryMethodType(tpe) => unapply(tpe)
