@@ -30,7 +30,7 @@ object Checked1ParamAny {
     // Currently triggers good-code-red IntelliJ issue
     // https://youtrack.jetbrains.com/issue/SCL-13089
     ////////////////////////////////////////////////////////////////////////////////////////
-    implicit def ev[Cond[_,_], Msg[_,_], ParamFace, T, Param](implicit value : AcceptNonLiteral[Id[T]], param : AcceptNonLiteral[Id[Param]])
+    implicit def ev[Cond[_,_], Msg[_,_], ParamFace, T, Param](implicit value : AcceptNonLiteral[Id[T]])
     : Chk[Cond, Msg, T, ParamFace, Param] = macro Builder.Macro.fromOpImpl[Chk[Cond,Msg,_,_,_], Cond[_,_], Msg[_,_], T, ParamFace, Param]
 
     implicit def fromNum[Cond[_,_], Msg[_,_], T >: Face, ParamFace, Param, Out <: T](value : T)
@@ -47,10 +47,10 @@ object Checked1ParamAny {
   @bundle
   object Builder {
     final class Macro(val c: whitebox.Context) extends GeneralMacros {
-      def fromOpImpl[Chk, Cond, Msg, T, ParamFace, Param](value : c.Tree, param : c.Tree)(
+      def fromOpImpl[Chk, Cond, Msg, T, ParamFace, Param](value : c.Tree)(
         implicit
         chk : c.WeakTypeTag[Chk], cond : c.WeakTypeTag[Cond], msg : c.WeakTypeTag[Msg], t : c.WeakTypeTag[T], paramFace : c.WeakTypeTag[ParamFace], p : c.WeakTypeTag[Param]
-      ): c.Tree = Checked1ParamMaterializer[Chk, Cond, Msg, T, ParamFace, Param].fromOpImpl(value, param)
+      ): c.Tree = Checked1ParamMaterializer[Chk, Cond, Msg, T, ParamFace, Param].fromOpImpl(value)
 
       def fromNumValue[Chk, Cond, Msg, T, ParamFace, Param](value : c.Tree)(
         implicit
