@@ -27,6 +27,10 @@ class CheckedStringSpec extends Properties("Checked.String") {
       foo(t.unsafeCheck(5))
     }
   }
+  def lengthSmallerThanFive[T](t : LengthSmallerThan.Checked[T, Int]) : Unit = {
+    val temp : String = t
+    foo(t.unsafeCheck(5))
+  }
 
   property("Compile-time checks") = wellTyped {
     lengthSmallerThan5("Hi")
@@ -42,9 +46,13 @@ class CheckedStringSpec extends Properties("Checked.String") {
   property("Run-time checks") = wellTyped {
     lengthSmallerThan5(us("Hi"))
     lengthSmallerThan5(TwoFace.String(us("Hi")))
+    lengthSmallerThanFive("Hi")
+    lengthSmallerThanFive(TwoFace.String("Hi"))
     lengthSmallerThan5Seq(us("Hi"), "Hey")
     illRun{lengthSmallerThan5(us("Hello"))}
     illRun{lengthSmallerThan5(TwoFace.String(us("Hello")))}
+    illRun{lengthSmallerThanFive("Hello")}
+    illRun{lengthSmallerThanFive(TwoFace.String("Hello"))}
     val usHello = "Hello"
     illRun{lengthSmallerThan5Seq(us("Hi"), "Hey", usHello)}
   }

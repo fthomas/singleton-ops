@@ -1451,26 +1451,35 @@ trait GeneralMacros {
 //      println(genTree)
       genTree
     }
-    def fromNumValue(tNumTree : c.Tree, paramOpTree : c.Tree) : c.Tree = {
+    def fromNumValue(tNumTree : c.Tree) : c.Tree = {
       implicit val annotatedSym : TypeSymbol = chkSym
       val tCalc = extractValueFromNumTree(tNumTree)
-      val paramCalc = extractValueFromOpTree(paramOpTree)
+      val paramCalc = TypeCalc(paramTpe) match {
+        case t : CalcVal => t
+        case _ => extractionFailed(paramTpe)
+      }
       val genTree = newChecked(tCalc, paramCalc)
 //      println(genTree)
       genTree
     }
-    def fromTF(tTFTree : c.Tree, paramOpTree : c.Tree) : c.Tree = {
+    def fromTF(tTFTree : c.Tree) : c.Tree = {
       implicit val annotatedSym : TypeSymbol = chkSym
       val tCalc = extractValueFromTwoFaceTree(tTFTree)
-      val paramCalc = extractValueFromOpTree(paramOpTree)
+      val paramCalc = TypeCalc(paramTpe) match {
+        case t : CalcVal => t
+        case _ => extractionFailed(paramTpe)
+      }
       val genTree = newChecked(tCalc, paramCalc)
 //      println(genTree)
       genTree
     }
-    def widen(tTFTree : c.Tree, paramOpTree : c.Tree) : c.Tree = {
+    def widen(tTFTree : c.Tree) : c.Tree = {
       implicit val annotatedSym : TypeSymbol = chkSym
       val tCalc = extractValueFromTwoFaceTree(tTFTree)
-      val paramCalc = extractValueFromOpTree(paramOpTree)
+      val paramCalc = TypeCalc(paramTpe) match {
+        case t : CalcVal => t
+        case _ => extractionFailed(paramTpe)
+      }
       val genTree = newChecked(tCalc, tTpe, paramCalc)
       //      println(genTree)
       genTree
