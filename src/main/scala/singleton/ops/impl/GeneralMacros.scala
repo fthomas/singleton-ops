@@ -567,6 +567,7 @@ trait GeneralMacros {
         ////////////////////////////////////////////////////////////////////////
         case tp @ ExistentialType(_, _) => unapply(tp.underlying)
         case TypeBounds(lo, hi) => unapply(hi) match {
+          case Some(t : CalcLit) => Some(t)
           //There can be cases, like in the following example, where we can extract a non-literal value.
           //  def foo2[W](w : TwoFace.Int[W])(implicit tfs : TwoFace.Int.Shell1[Negate, W, Int]) = -w+1
           //We want to calculate `-w+1`, even though we have not provided a complete implicit.
