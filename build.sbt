@@ -100,7 +100,7 @@ lazy val compileSettings = Def.settings(
   ),
   libraryDependencies ++= {
     // TODO https://github.com/rickynils/scalacheck/issues/410
-    if (scalaVersion.value != "2.13.0-M4") {
+    if (scalaVersion.value != "2.13.0-M5") {
       Seq("org.scalacheck" %%% "scalacheck" % scalaCheckVersion % Test)
     } else {
       Nil
