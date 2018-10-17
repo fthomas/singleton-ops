@@ -521,7 +521,7 @@ trait GeneralMacros {
       val g = c.universe.asInstanceOf[SymbolTable]
       implicit def fixSymbolOps(sym: Symbol): g.Symbol = sym.asInstanceOf[g.Symbol]
 
-      if (verboseTraversal) print(tp + " RAW " + showRaw(tp))
+      if (verboseTraversal) print(s"$tp RAW ${showRaw(tp)}")
       tp match {
         ////////////////////////////////////////////////////////////////////////
         // Value cases
