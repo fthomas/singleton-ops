@@ -43,6 +43,7 @@ class IdSpec extends Properties("Id") {
   property("UpperBound") = {
     trait Foo[T] {
       type Width <: T
+      val value : Int
     }
     val ret = new Foo[W.`1`.T]{
       val value : Int = implicitly[SafeInt[Id[Width]]]
