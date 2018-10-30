@@ -312,7 +312,7 @@ trait GeneralMacros {
   // https://github.com/paulp/psply/blob/master/src/main/scala/PsplyMacros.scala
   ////////////////////////////////////////////////////////////////////
   import scala.reflect.internal.SymbolTable
-  
+
   object VerboseTraversal {
     private val verboseTraversal = false
     private val indentSize = 2

@@ -1,4 +1,5 @@
 //import scala.sys.process._
+import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 
 /// variables
 
@@ -9,9 +10,9 @@ val gitPubUrl = s"https://github.com/fthomas/$projectName.git"
 val gitDevUrl = s"git@github.com:fthomas/$projectName.git"
 
 val macroCompatVersion = "1.1.1"
-val macroParadiseVersion = "2.1.0"
+val macroParadiseVersion = "2.1.1"
 val shapelessVersion = "2.3.3"
-val scalaCheckVersion = "1.13.5"
+val scalaCheckVersion = "1.14.0"
 
 /// projects
 lazy val root = project.in(file("."))
@@ -23,21 +24,11 @@ lazy val root = project.in(file("."))
     sources in Test := Seq.empty
   )
 
-lazy val singleton_ops = crossProject
+lazy val singleton_ops = crossProject(JVMPlatform, JSPlatform)
   .crossType(CrossType.Pure)
   .in(file("."))
   .settings(commonSettings)
   .settings(publishSettings)
-  .settings(
-    libraryDependencies ++= Seq(
-      scalaOrganization.value % "scala-compiler" % scalaVersion.value,
-      "org.typelevel" %%% "macro-compat" % macroCompatVersion,
-      compilerPlugin(
-        "org.scalamacros" % "paradise" % macroParadiseVersion cross CrossVersion.patch),
-      "com.chuusai" %%% "shapeless" % shapelessVersion,
-      "org.scalacheck" %%% "scalacheck" % scalaCheckVersion % Test
-    )
-  )
   .jsSettings(
     coverageEnabled := false
   )
@@ -76,32 +67,57 @@ lazy val compileSettings = Def.settings(
     "-encoding",
     "UTF-8",
     "-feature",
-    "-Xsource:2.13",
     "-language:existentials",
     "-language:experimental.macros",
     "-language:higherKinds",
     "-language:implicitConversions",
     "-unchecked",
-//    "-Xfatal-warnings",
+    "-Xfatal-warnings",
     "-Xfuture",
 //    "-Xlint:-unused,_",
 //    "-Yliteral-types",
-    "-Yno-adapted-args",
-    "-Ywarn-numeric-widen",
-    "-Ywarn-unused-import",
+    "-Ywarn-numeric-widen"
 //    "-Ywarn-value-discard"
-    "-Xplugin-require:macroparadise"
   ),
+  scalacOptions ++= {
+    CrossVersion.partialVersion(scalaVersion.value) match {
+      case Some((2, v)) if v >= 13 =>
+        Nil
+      case _ =>
+        Seq(
+          "-Yno-adapted-args",
+          "-Ywarn-unused-import",
+          "-Xplugin-require:macroparadise"
+        )
+    }
+  },
   scalacOptions in (Compile, console) -= "-Ywarn-unused-import",
   scalacOptions in (Test, console) -= "-Ywarn-unused-import",
   libraryDependencies ++= Seq(
     scalaOrganization.value % "scala-compiler" % scalaVersion.value,
     "org.typelevel" %%% "macro-compat" % macroCompatVersion,
-    compilerPlugin(
-    "org.scalamacros" % "paradise" % macroParadiseVersion cross CrossVersion.patch),
-    "com.chuusai" %%% "shapeless" % shapelessVersion,
-    "org.scalacheck" %%% "scalacheck" % scalaCheckVersion % Test
-  )
+    "com.chuusai" %%% "shapeless" % shapelessVersion
+  ),
+  libraryDependencies ++= {
+    // TODO https://github.com/rickynils/scalacheck/issues/410
+    if (scalaVersion.value != "2.13.0-M4") {
+      Seq("org.scalacheck" %%% "scalacheck" % scalaCheckVersion % Test)
+    } else {
+      Nil
+    }
+  },
+  libraryDependencies ++= {
+    CrossVersion.partialVersion(scalaVersion.value) match {
+      // if scala 2.13+ is used, macro annotations are merged into scala-reflect
+      // https://github.com/scala/scala/pull/6606
+      case Some((2, v)) if v >= 13 =>
+        Seq()
+      case _ =>
+        Seq(
+          compilerPlugin("org.scalamacros" % "paradise" % macroParadiseVersion cross CrossVersion.patch)
+        )
+    }
+  }
 )
 
 lazy val scaladocSettings = Def.settings(
