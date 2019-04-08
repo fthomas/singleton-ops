@@ -3,9 +3,13 @@ sudo: required
 scala:
  - 2.11.12
  - 2.12.8
- - 2.13.0-RC1
 jdk:
  - oraclejdk8
+matrix:
+  include:
+  - scala: 2.13.0-RC1
+    script:
+    - travis_wait 60 sbt ++$TRAVIS_SCALA_VERSION test
 cache:
   directories:
    - "$HOME/.ivy2/cache"
