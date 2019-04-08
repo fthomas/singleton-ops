@@ -7,7 +7,7 @@ jdk:
  - oraclejdk8
 matrix:
   include:
-  - scala: 2.13.0-M5
+  - scala: 2.13.0-RC1
     script:
     # TODO https://github.com/rickynils/scalacheck/issues/410
     - travis_wait 60 sbt ++$TRAVIS_SCALA_VERSION compile

@@ -73,7 +73,6 @@ lazy val compileSettings = Def.settings(
     "-language:implicitConversions",
     "-unchecked",
     "-Xfatal-warnings",
-    "-Xfuture",
 //    "-Xlint:-unused,_",
 //    "-Yliteral-types",
     "-Ywarn-numeric-widen"
