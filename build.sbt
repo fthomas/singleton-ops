@@ -73,7 +73,6 @@ lazy val compileSettings = Def.settings(
     "-language:implicitConversions",
     "-unchecked",
     "-Xfatal-warnings",
-    "-Xfuture",
 //    "-Xlint:-unused,_",
 //    "-Yliteral-types",
     "-Ywarn-numeric-widen"
@@ -96,16 +95,9 @@ lazy val compileSettings = Def.settings(
   libraryDependencies ++= Seq(
     scalaOrganization.value % "scala-compiler" % scalaVersion.value,
     "org.typelevel" %%% "macro-compat" % macroCompatVersion,
-    "com.chuusai" %%% "shapeless" % shapelessVersion
+    "com.chuusai" %%% "shapeless" % shapelessVersion,
+    "org.scalacheck" %%% "scalacheck" % scalaCheckVersion % Test
   ),
-  libraryDependencies ++= {
-    // TODO https://github.com/rickynils/scalacheck/issues/410
-    if (scalaVersion.value != "2.13.0-M4") {
-      Seq("org.scalacheck" %%% "scalacheck" % scalaCheckVersion % Test)
-    } else {
-      Nil
-    }
-  },
   libraryDependencies ++= {
     CrossVersion.partialVersion(scalaVersion.value) match {
       // if scala 2.13+ is used, macro annotations are merged into scala-reflect
