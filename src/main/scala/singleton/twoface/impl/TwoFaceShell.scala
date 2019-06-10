@@ -1,7 +1,6 @@
 package singleton.twoface.impl
 import singleton.twoface.TwoFace
 
-import macrocompat.bundle
 import singleton.ops.impl.GeneralMacros
 import scala.reflect.macros.whitebox
 
@@ -22,7 +21,6 @@ object Shell {
 //    def apply(arg1 : => Arg1Wide) : TF[Out]
 //  }
 //
-//  @bundle
   object One { //One Parameter Shell
     type F[_]
 //    type Lt[FuncApply, FuncArgs, Arg1, Arg1Wide, Ret_Out, Ret_TF[T]] =
@@ -46,7 +44,6 @@ object Shell {
       type Out
       def apply(arg1 : => Arg1Wide) : TwoFace.Char[Out]
     }
-    @bundle
     object Char {
       type Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Out0] = 
         Char[FuncApply, FuncArgs, Arg1, Arg1Wide]{type Out = Out0}
@@ -67,7 +64,6 @@ object Shell {
       type Out
       def apply(arg1 : => Arg1Wide) : TwoFace.Int[Out]
     }
-    @bundle
     object Int {
       type Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Out0] =
         Int[FuncApply, FuncArgs, Arg1, Arg1Wide]{type Out = Out0}
@@ -88,7 +84,6 @@ object Shell {
       type Out
       def apply(arg1 : => Arg1Wide) : TwoFace.Long[Out]
     }
-    @bundle
     object Long {
       type Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Out0] =
         Long[FuncApply, FuncArgs, Arg1, Arg1Wide]{type Out = Out0}
@@ -109,7 +104,6 @@ object Shell {
       type Out
       def apply(arg1 : => Arg1Wide) : TwoFace.Float[Out]
     }
-    @bundle
     object Float {
       type Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Out0] =
         Float[FuncApply, FuncArgs, Arg1, Arg1Wide]{type Out = Out0}
@@ -130,7 +124,6 @@ object Shell {
       type Out
       def apply(arg1 : => Arg1Wide) : TwoFace.Double[Out]
     }
-    @bundle
     object Double {
       type Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Out0] =
         Double[FuncApply, FuncArgs, Arg1, Arg1Wide]{type Out = Out0}
@@ -151,7 +144,6 @@ object Shell {
       type Out
       def apply(arg1 : => Arg1Wide) : TwoFace.String[Out]
     }
-    @bundle
     object String {
       type Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Out0] =
         String[FuncApply, FuncArgs, Arg1, Arg1Wide]{type Out = Out0}
@@ -172,7 +164,6 @@ object Shell {
       type Out
       def apply(arg1 : => Arg1Wide) : TwoFace.Boolean[Out]
     }
-    @bundle
     object Boolean {
       type Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Out0] =
         Boolean[FuncApply, FuncArgs, Arg1, Arg1Wide]{type Out = Out0}
@@ -221,7 +212,6 @@ object Shell {
       type Out
       def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide) : TwoFace.Char[Out]
     }
-    @bundle
     object Char {
       type Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Out0] =
         Char[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]{type Out = Out0}
@@ -243,7 +233,6 @@ object Shell {
       type Out
       def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide) : TwoFace.Int[Out]
     }
-    @bundle
     object Int {
       type Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Out0] =
         Int[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]{type Out = Out0}
@@ -265,7 +254,6 @@ object Shell {
       type Out
       def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide) : TwoFace.Long[Out]
     }
-    @bundle
     object Long {
       type Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Out0] =
         Long[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]{type Out = Out0}
@@ -287,7 +275,6 @@ object Shell {
       type Out
       def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide) : TwoFace.Float[Out]
     }
-    @bundle
     object Float {
       type Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Out0] =
         Float[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]{type Out = Out0}
@@ -309,7 +296,6 @@ object Shell {
       type Out
       def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide) : TwoFace.Double[Out]
     }
-    @bundle
     object Double {
       type Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Out0] =
         Double[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]{type Out = Out0}
@@ -331,7 +317,6 @@ object Shell {
       type Out
       def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide) : TwoFace.String[Out]
     }
-    @bundle
     object String {
       type Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Out0] =
         String[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]{type Out = Out0}
@@ -353,7 +338,6 @@ object Shell {
       type Out
       def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide) : TwoFace.Boolean[Out]
     }
-    @bundle
     object Boolean {
       type Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Out0] =
         Boolean[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide]{type Out = Out0}
@@ -380,7 +364,6 @@ object Shell {
 //    def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide, arg3 : => Arg3Wide) : TF[Out]
 //  }
 
-  @bundle
   object Three { //Two Parameters Shell
     type F[_,_,_]
 //    type Lt[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide, Ret_Out, Ret_TF[T]] =
@@ -406,7 +389,6 @@ object Shell {
       type Out
       def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide, arg3 : => Arg3Wide) : TwoFace.Char[Out]
     }
-    @bundle
     object Char {
       type Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide, Out0] =
         Char[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]{type Out = Out0}
@@ -429,7 +411,6 @@ object Shell {
       type Out
       def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide, arg3 : => Arg3Wide) : TwoFace.Int[Out]
     }
-    @bundle
     object Int {
       type Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide, Out0] =
         Int[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]{type Out = Out0}
@@ -452,7 +433,6 @@ object Shell {
       type Out
       def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide, arg3 : => Arg3Wide) : TwoFace.Long[Out]
     }
-    @bundle
     object Long {
       type Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide, Out0] =
         Long[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]{type Out = Out0}
@@ -475,7 +455,6 @@ object Shell {
       type Out
       def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide, arg3 : => Arg3Wide) : TwoFace.Float[Out]
     }
-    @bundle
     object Float {
       type Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide, Out0] =
         Float[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]{type Out = Out0}
@@ -498,7 +477,6 @@ object Shell {
       type Out
       def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide, arg3 : => Arg3Wide) : TwoFace.Double[Out]
     }
-    @bundle
     object Double {
       type Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide, Out0] =
         Double[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]{type Out = Out0}
@@ -521,7 +499,6 @@ object Shell {
       type Out
       def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide, arg3 : => Arg3Wide) : TwoFace.String[Out]
     }
-    @bundle
     object String {
       type Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide, Out0] =
         String[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]{type Out = Out0}
@@ -544,7 +521,6 @@ object Shell {
       type Out
       def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide, arg3 : => Arg3Wide) : TwoFace.Boolean[Out]
     }
-    @bundle
     object Boolean {
       type Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide, Out0] =
         Boolean[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide]{type Out = Out0}

@@ -2,15 +2,14 @@ language: scala
 sudo: required
 scala:
  - 2.11.12
- - 2.12.7
+ - 2.12.8
 jdk:
  - oraclejdk8
 matrix:
   include:
-  - scala: 2.13.0-M5
+  - scala: 2.13.0
     script:
-    # TODO https://github.com/rickynils/scalacheck/issues/410
-    - travis_wait 60 sbt ++$TRAVIS_SCALA_VERSION compile
+    - travis_wait 60 sbt ++$TRAVIS_SCALA_VERSION test
 cache:
   directories:
    - "$HOME/.ivy2/cache"

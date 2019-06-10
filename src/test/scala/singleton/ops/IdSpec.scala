@@ -38,7 +38,7 @@ class IdSpec extends Properties("Id") {
   }
   property("Symbol") = {
     val ret : Symbol = implicitly[SafeSymbol[Id[W.`"Something"`.T]]]
-    ret == 'Something
+    ret == Symbol("Something")
   }
   property("UpperBound") = {
     trait Foo[T] {

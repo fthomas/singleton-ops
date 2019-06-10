@@ -1,4 +1,4 @@
-//import scala.sys.process._
+import scala.sys.process._
 import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 
 /// variables
@@ -9,7 +9,6 @@ val rootPkg = "singleton"
 val gitPubUrl = s"https://github.com/fthomas/$projectName.git"
 val gitDevUrl = s"git@github.com:fthomas/$projectName.git"
 
-val macroCompatVersion = "1.1.1"
 val macroParadiseVersion = "2.1.1"
 val shapelessVersion = "2.3.3"
 val scalaCheckVersion = "1.14.0"
@@ -73,7 +72,6 @@ lazy val compileSettings = Def.settings(
     "-language:implicitConversions",
     "-unchecked",
     "-Xfatal-warnings",
-    "-Xfuture",
 //    "-Xlint:-unused,_",
 //    "-Yliteral-types",
     "-Ywarn-numeric-widen"
@@ -95,17 +93,9 @@ lazy val compileSettings = Def.settings(
   scalacOptions in (Test, console) -= "-Ywarn-unused-import",
   libraryDependencies ++= Seq(
     scalaOrganization.value % "scala-compiler" % scalaVersion.value,
-    "org.typelevel" %%% "macro-compat" % macroCompatVersion,
-    "com.chuusai" %%% "shapeless" % shapelessVersion
+    "com.chuusai" %%% "shapeless" % shapelessVersion,
+    "org.scalacheck" %%% "scalacheck" % scalaCheckVersion % Test
   ),
-  libraryDependencies ++= {
-    // TODO https://github.com/rickynils/scalacheck/issues/410
-    if (scalaVersion.value != "2.13.0-M4") {
-      Seq("org.scalacheck" %%% "scalacheck" % scalaCheckVersion % Test)
-    } else {
-      Nil
-    }
-  },
   libraryDependencies ++= {
     CrossVersion.partialVersion(scalaVersion.value) match {
       // if scala 2.13+ is used, macro annotations are merged into scala-reflect

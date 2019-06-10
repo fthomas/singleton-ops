@@ -1,6 +1,5 @@
 package singleton.twoface.impl
 
-import macrocompat.bundle
 import singleton.ops._
 import singleton.ops.impl.GeneralMacros
 import singleton.ops.impl.std
@@ -86,7 +85,6 @@ object TwoFaceAny {
   }
 
 
-  @bundle
   object Builder {
     final class Macro(val c: whitebox.Context) extends GeneralMacros {
       def fromNumValue[TF](value : c.Tree)(implicit tfTag : c.WeakTypeTag[TF]) : c.Tree =

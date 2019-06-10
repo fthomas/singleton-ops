@@ -1,5 +1,4 @@
 package singleton.ops.impl
-import macrocompat.bundle
 import scala.reflect.macros.whitebox
 
 /********************************************************************************************************
@@ -8,7 +7,6 @@ import scala.reflect.macros.whitebox
 @scala.annotation.implicitNotFound("Literal operation has failed.")
 trait OpMacro[N, S1, S2, S3] extends Op
 
-@ bundle
 object OpMacro {
   type Aux[
   N, 
@@ -102,7 +100,6 @@ object GetArg {
     val value : Out
   }
 
-  @ bundle
   object GetArg {
     implicit def call[ArgIdx, Out]: Aux[ArgIdx, Out] = macro Macro.impl[ArgIdx]
 
@@ -128,7 +125,6 @@ object GetLHSArg {
     val value : Out
   }
 
-  @ bundle
   object GetLHSArg {
     implicit def call[ArgIdx, Out]: Aux[ArgIdx, Out] = macro Macro.impl[ArgIdx]
 

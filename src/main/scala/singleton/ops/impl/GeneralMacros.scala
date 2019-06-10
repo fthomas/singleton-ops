@@ -1,11 +1,9 @@
 package singleton.ops.impl
-import macrocompat.bundle
 import shapeless.tag
 import shapeless.tag.@@
 import singleton.twoface.impl.TwoFaceAny
 
 import scala.reflect.macros.whitebox
-@bundle
 trait GeneralMacros {
   val c: whitebox.Context
 

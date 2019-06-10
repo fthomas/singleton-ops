@@ -85,7 +85,7 @@ class ToConversionSpec extends Properties("ToConversion") {
   property("Boolean to String") = verifyOp1Args[ToString,True,W.`"true"`.T]
 
   import shapeless.syntax.singleton._
-  val sym = 'foo.narrow
+  val sym = Symbol("foo").narrow
   property("Symbol to String") = verifyOp1Args[ToString,sym.type,W.`"foo"`.T]
 
 }
