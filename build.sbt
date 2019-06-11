@@ -1,4 +1,4 @@
-//import scala.sys.process._
+import scala.sys.process._
 import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 
 /// variables
@@ -9,7 +9,6 @@ val rootPkg = "singleton"
 val gitPubUrl = s"https://github.com/fthomas/$projectName.git"
 val gitDevUrl = s"git@github.com:fthomas/$projectName.git"
 
-val macroCompatVersion = "1.1.1"
 val macroParadiseVersion = "2.1.1"
 val shapelessVersion = "2.3.3"
 val scalaCheckVersion = "1.14.0"
@@ -94,7 +93,6 @@ lazy val compileSettings = Def.settings(
   scalacOptions in (Test, console) -= "-Ywarn-unused-import",
   libraryDependencies ++= Seq(
     scalaOrganization.value % "scala-compiler" % scalaVersion.value,
-    "org.typelevel" %%% "macro-compat" % macroCompatVersion,
     "com.chuusai" %%% "shapeless" % shapelessVersion,
     "org.scalacheck" %%% "scalacheck" % scalaCheckVersion % Test
   ),

@@ -40,4 +40,14 @@ class IdSpec extends Properties("Id") {
     val ret : Symbol = implicitly[SafeSymbol[Id[W.`"Something"`.T]]]
     ret == Symbol("Something")
   }
+  property("UpperBound") = {
+    trait Foo[T] {
+      type Width <: T
+      val value : Int
+    }
+    val ret = new Foo[W.`1`.T]{
+      val value : Int = implicitly[SafeInt[Id[Width]]]
+    }
+    ret.value == 1
+  }
 }

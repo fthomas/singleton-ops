@@ -1,6 +1,5 @@
 package singleton.twoface.impl
 
-import macrocompat.bundle
 import singleton.ops._
 import singleton.ops.impl._
 
@@ -42,7 +41,6 @@ object Checked0ParamAny {
     ////////////////////////////////////////////////////////////////////////////////////////
   }
 
-  @bundle
   object Builder {
     final class Macro(val c: whitebox.Context) extends GeneralMacros {
       def fromOpImpl[Chk, Cond, Msg, T](value : c.Tree)(

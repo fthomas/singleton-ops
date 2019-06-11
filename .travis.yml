@@ -7,7 +7,7 @@ jdk:
  - oraclejdk8
 matrix:
   include:
-  - scala: 2.13.0-RC1
+  - scala: 2.13.0
     script:
     - travis_wait 60 sbt ++$TRAVIS_SCALA_VERSION test
 cache:

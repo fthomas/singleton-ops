@@ -74,6 +74,8 @@ package object ops {
   type AcceptNonLiteral[P1] = OpMacro[OpId.AcceptNonLiteral, P1, NP, NP]
   type GetArg[ArgIdx]       = OpMacro[OpId.GetArg, ArgIdx, NP, NP] //Use to get argument type of class/definition
   type GetLHSArg[ArgIdx]    = OpMacro[OpId.GetLHSArg, ArgIdx, NP, NP] //Use to get argument type of the left-hand-side
+  type ImplicitFound[Sym]   = OpMacro[OpId.ImplicitFound, GetType[Sym], NP, NP] //Implicit Found boolean indication
+  type EnumCount[Sym]       = OpMacro[OpId.EnumCount, GetType[Sym], NP, NP] //Number of direct subclasses
   final val  GetArg         = impl.GetArg
   final val  GetLHSArg      = impl.GetLHSArg
   type GetArg0              = GetArg[W.`0`.T]
@@ -83,6 +85,7 @@ package object ops {
   type Require[Cond]        = OpMacro[OpId.Require, Cond, DefaultRequireMsg, NP]
   type RequireMsg[Cond,Msg] = OpMacro[OpId.Require, Cond, Msg, NP]
   type RequireMsgSym[Cond,Msg,Sym] = OpMacro[OpId.Require, Cond, Msg, GetType[Sym]]
+  type Warn                 = impl.Warn
   type ToNat[P1]            = OpMacro[OpId.ToNat, P1, NP, NP]
   type ToChar[P1]           = OpMacro[OpId.ToChar, P1, NP, NP]
   type ToInt[P1]            = OpMacro[OpId.ToInt, P1, NP, NP]
