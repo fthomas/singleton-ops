@@ -25,7 +25,7 @@ val myBadVec = MyVec[-1] //fails compilation, as required
 ---
 ## Using singleton-ops
 
-The latest version of the library is 0.4.0, which is available for Typelevel Scala v4 for Scala versions 2.11.12 & 2.12.4.
+The latest version of the library is 0.4.0, which is available for Scala versions 2.11.12, 2.12.8, and 2.13.0.
 
 If you're using sbt, add the following to your build:
 
