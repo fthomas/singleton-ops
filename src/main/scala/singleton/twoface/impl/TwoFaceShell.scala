@@ -40,14 +40,13 @@ object Shell {
 //    }
 //
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
-    trait Char[FuncApply, FuncArgs, Arg1, Arg1Wide] {
-      type Out
+    trait Char[FuncApply, FuncArgs, Arg1, Arg1Wide] extends HasOut {
       def apply(arg1 : => Arg1Wide) : TwoFace.Char[Out]
     }
     object Char {
-      type Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Out0] = 
+      type Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Out0] =
         Char[FuncApply, FuncArgs, Arg1, Arg1Wide]{type Out = Out0}
-      implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide, Out] : 
+      implicit def ev[FuncApply, FuncArgs, Arg1, Arg1Wide, Out] :
         Aux[FuncApply, FuncArgs, Arg1, Arg1Wide, Out] =
         macro Macro.shell[FuncApply, FuncArgs, Arg1, Arg1Wide]
 
@@ -60,8 +59,7 @@ object Shell {
     }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
-    trait Int[FuncApply, FuncArgs, Arg1, Arg1Wide] {
-      type Out
+    trait Int[FuncApply, FuncArgs, Arg1, Arg1Wide] extends HasOut {
       def apply(arg1 : => Arg1Wide) : TwoFace.Int[Out]
     }
     object Int {
@@ -80,8 +78,7 @@ object Shell {
     }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
-    trait Long[FuncApply, FuncArgs, Arg1, Arg1Wide] {
-      type Out
+    trait Long[FuncApply, FuncArgs, Arg1, Arg1Wide] extends HasOut {
       def apply(arg1 : => Arg1Wide) : TwoFace.Long[Out]
     }
     object Long {
@@ -100,8 +97,7 @@ object Shell {
     }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
-    trait Float[FuncApply, FuncArgs, Arg1, Arg1Wide] {
-      type Out
+    trait Float[FuncApply, FuncArgs, Arg1, Arg1Wide] extends HasOut {
       def apply(arg1 : => Arg1Wide) : TwoFace.Float[Out]
     }
     object Float {
@@ -120,8 +116,7 @@ object Shell {
     }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
-    trait Double[FuncApply, FuncArgs, Arg1, Arg1Wide] {
-      type Out
+    trait Double[FuncApply, FuncArgs, Arg1, Arg1Wide] extends HasOut {
       def apply(arg1 : => Arg1Wide) : TwoFace.Double[Out]
     }
     object Double {
@@ -140,8 +135,7 @@ object Shell {
     }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
-    trait String[FuncApply, FuncArgs, Arg1, Arg1Wide] {
-      type Out
+    trait String[FuncApply, FuncArgs, Arg1, Arg1Wide] extends HasOut {
       def apply(arg1 : => Arg1Wide) : TwoFace.String[Out]
     }
     object String {
@@ -160,8 +154,7 @@ object Shell {
     }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
-    trait Boolean[FuncApply, FuncArgs, Arg1, Arg1Wide] {
-      type Out
+    trait Boolean[FuncApply, FuncArgs, Arg1, Arg1Wide] extends HasOut {
       def apply(arg1 : => Arg1Wide) : TwoFace.Boolean[Out]
     }
     object Boolean {
@@ -182,7 +175,7 @@ object Shell {
 
 
 //  @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
-//  trait Two[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] {
+//  trait Two[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] extends HasOut {
 //    type Out
 //    type TF[T]
 //    def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide) : TF[Out]
@@ -191,7 +184,7 @@ object Shell {
   object Two { //Two Parameters Shell
     type F[_,_]
 //    type Lt[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Ret_Out, Ret_TF[T]] =
-//      Two[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] {
+//      Two[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] extends HasOut {
 //        type Out = Ret_Out
 //        type TF[T] = Ret_TF[T]
 //      }
@@ -208,8 +201,7 @@ object Shell {
 //    }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
-    trait Char[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] {
-      type Out
+    trait Char[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] extends HasOut {
       def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide) : TwoFace.Char[Out]
     }
     object Char {
@@ -229,8 +221,7 @@ object Shell {
     }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
-    trait Int[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] {
-      type Out
+    trait Int[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] extends HasOut {
       def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide) : TwoFace.Int[Out]
     }
     object Int {
@@ -250,8 +241,7 @@ object Shell {
     }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
-    trait Long[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] {
-      type Out
+    trait Long[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] extends HasOut {
       def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide) : TwoFace.Long[Out]
     }
     object Long {
@@ -271,8 +261,7 @@ object Shell {
     }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
-    trait Float[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] {
-      type Out
+    trait Float[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] extends HasOut {
       def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide) : TwoFace.Float[Out]
     }
     object Float {
@@ -292,8 +281,7 @@ object Shell {
     }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
-    trait Double[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] {
-      type Out
+    trait Double[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] extends HasOut {
       def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide) : TwoFace.Double[Out]
     }
     object Double {
@@ -313,8 +301,7 @@ object Shell {
     }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
-    trait String[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] {
-      type Out
+    trait String[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] extends HasOut {
       def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide) : TwoFace.String[Out]
     }
     object String {
@@ -334,8 +321,7 @@ object Shell {
     }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
-    trait Boolean[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] {
-      type Out
+    trait Boolean[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide] extends HasOut {
       def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide) : TwoFace.Boolean[Out]
     }
     object Boolean {
@@ -385,8 +371,7 @@ object Shell {
 //    }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
-    trait Char[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide] {
-      type Out
+    trait Char[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide] extends HasOut {
       def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide, arg3 : => Arg3Wide) : TwoFace.Char[Out]
     }
     object Char {
@@ -407,8 +392,7 @@ object Shell {
     }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
-    trait Int[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide] {
-      type Out
+    trait Int[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide] extends HasOut {
       def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide, arg3 : => Arg3Wide) : TwoFace.Int[Out]
     }
     object Int {
@@ -429,8 +413,7 @@ object Shell {
     }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
-    trait Long[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide] {
-      type Out
+    trait Long[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide] extends HasOut {
       def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide, arg3 : => Arg3Wide) : TwoFace.Long[Out]
     }
     object Long {
@@ -451,8 +434,7 @@ object Shell {
     }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
-    trait Float[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide] {
-      type Out
+    trait Float[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide] extends HasOut {
       def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide, arg3 : => Arg3Wide) : TwoFace.Float[Out]
     }
     object Float {
@@ -473,8 +455,7 @@ object Shell {
     }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
-    trait Double[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide] {
-      type Out
+    trait Double[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide] extends HasOut {
       def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide, arg3 : => Arg3Wide) : TwoFace.Double[Out]
     }
     object Double {
@@ -495,8 +476,7 @@ object Shell {
     }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
-    trait String[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide] {
-      type Out
+    trait String[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide] extends HasOut {
       def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide, arg3 : => Arg3Wide) : TwoFace.String[Out]
     }
     object String {
@@ -517,8 +497,7 @@ object Shell {
     }
 
     @scala.annotation.implicitNotFound("Unable to create shell for TwoFace")
-    trait Boolean[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide] {
-      type Out
+    trait Boolean[FuncApply, FuncArgs, Arg1, Arg1Wide, Arg2, Arg2Wide, Arg3, Arg3Wide] extends HasOut {
       def apply(arg1 : => Arg1Wide, arg2 : => Arg2Wide, arg3 : => Arg3Wide) : TwoFace.Boolean[Out]
     }
     object Boolean {

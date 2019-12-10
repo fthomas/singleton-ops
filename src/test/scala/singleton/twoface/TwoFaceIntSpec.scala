@@ -220,7 +220,11 @@ class TwoFaceIntSpec extends Properties("TwoFace.Int") {
   property("Safe Int == Unsafe Char") = verifyTFBoolean(TwoFace.Int(7) == TwoFace.Char(us('\u0007')), us(true))
   property("Unsafe Int == Safe Char") = verifyTFBoolean(TwoFace.Int(us(7)) == TwoFace.Char('\u0007'), us(true))
   property("Unsafe Int == Unsafe Char") = verifyTFBoolean(TwoFace.Int(us(7)) == TwoFace.Char(us('\u0007')), us(true))
-  property("Safe Int == Safe Int") = verifyTFBoolean(TwoFace.Int(7) == TwoFace.Int(7), true)
+  property("Safe Int == Safe Int") = {
+    val result = TwoFace.Int(7) == TwoFace.Int(7)
+    implicitly[result.Out =:= W.`true`.T]
+    result.getValue
+  }
   property("Safe Int == Unsafe Int") = verifyTFBoolean(TwoFace.Int(7) == TwoFace.Int(us(7)), us(true))
   property("Unsafe Int == Safe Int") = verifyTFBoolean(TwoFace.Int(us(7)) == TwoFace.Int(7), us(true))
   property("Unsafe Int == Unsafe Int") = verifyTFBoolean(TwoFace.Int(us(7)) == TwoFace.Int(us(7)), us(true))
@@ -401,5 +405,13 @@ class TwoFaceIntSpec extends Properties("TwoFace.Int") {
     val retSimple = ret.simplify
     implicitly[retSimple.Out <:< Int]
     retSimple.getValue == -2
+  }
+
+  case class TwoFaceContainer[W](tf : TwoFace.Int[W])
+  property("TwoFace case class container equals") = {
+    val f1a = TwoFaceContainer(TwoFace.Int(1))
+    val f1b = TwoFaceContainer(TwoFace.Int(1))
+    val f2 = TwoFaceContainer(TwoFace.Int(2))
+    (f1a == f1b) && !(f1a == f2) && (f1b != f2) && !(f2 != f2)
   }
 }
