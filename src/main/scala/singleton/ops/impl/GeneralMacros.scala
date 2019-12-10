@@ -1267,6 +1267,11 @@ trait GeneralMacros {
   final class TwoFaceShellMaterializer[Shell](shellTpe : Type) {
     def shell(shellAliasTpe : TypeSymbol) : c.Tree = {
       implicit val annotatedSym : TypeSymbol = shellAliasTpe
+      val owner = c.internal.enclosingOwner
+      if (owner.asTerm.name.toString == "equals" && owner.owner.isClass && owner.owner.asClass.isCaseClass) {
+        abort("A case class equals workaround is required. See https://github.com/scala/bug/issues/10536")
+      }
+
       val funcApplyTpe = shellTpe.typeArgs(0)
       val funcArgsTpe = shellTpe.typeArgs(1)
       val (tfValueTree, tfName) = TypeCalc(funcArgsTpe) match {
