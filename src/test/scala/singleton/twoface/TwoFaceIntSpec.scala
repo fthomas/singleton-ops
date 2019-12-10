@@ -222,7 +222,7 @@ class TwoFaceIntSpec extends Properties("TwoFace.Int") {
   property("Unsafe Int == Unsafe Char") = verifyTFBoolean(TwoFace.Int(us(7)) == TwoFace.Char(us('\u0007')), us(true))
   property("Safe Int == Safe Int") = {
     val result = TwoFace.Int(7) == TwoFace.Int(7)
-    implicitly[result.type <:< TwoFace.Boolean[true]]
+    implicitly[result.type <:< TwoFace.Boolean[W.`true`.T]]
     result.getValue
   }
   property("Safe Int == Unsafe Int") = verifyTFBoolean(TwoFace.Int(7) == TwoFace.Int(us(7)), us(true))
