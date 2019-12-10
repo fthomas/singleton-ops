@@ -31,7 +31,11 @@ class TwoFaceStringSpec extends Properties("TwoFace.String") {
   property("Unsafe String + Safe String") = verifyTFString(TwoFace.String(us("Some")) + TwoFace.String("thing"), us("Something"))
   property("Unsafe String + Unsafe String") = verifyTFString(TwoFace.String(us("Some")) + TwoFace.String(us("thing")), us("Something"))
 
-  property("Safe String == Regular Safe String") = verifyTFBoolean(TwoFace.String("Some") == ("Some"), true)
+  property("Safe String == Regular Safe String") = {
+    val result = TwoFace.String("Some") == TwoFace.String("Some")
+    implicitly[result.Out =:= W.`true`.T]
+    result.getValue
+  }
   property("Safe String == Regular Unsafe String") = verifyTFBoolean(TwoFace.String("Some") == (us("Some")), us(true))
   property("Unsafe String == Regular Safe String") = verifyTFBoolean(TwoFace.String(us("Some")) == ("Some"), us(true))
   property("Unsafe String == Regular Unsafe String") = verifyTFBoolean(TwoFace.String(us("Some")) == (us("Some")), us(true))
@@ -40,16 +44,6 @@ class TwoFaceStringSpec extends Properties("TwoFace.String") {
   property("Safe String != Regular Unsafe String") = verifyTFBoolean(TwoFace.String("Some") != (us("Some")), us(false))
   property("Unsafe String != Regular Safe String") = verifyTFBoolean(TwoFace.String(us("Some")) != ("Some"), us(false))
   property("Unsafe String != Regular Unsafe String") = verifyTFBoolean(TwoFace.String(us("Some")) != (us("Some")), us(false))
-
-  property("Safe String == Safe String") = verifyTFBoolean(TwoFace.String("Some") == TwoFace.String("Some"), true)
-  property("Safe String == Unsafe String") = verifyTFBoolean(TwoFace.String("Some") == TwoFace.String(us("Some")), us(true))
-  property("Unsafe String == Safe String") = verifyTFBoolean(TwoFace.String(us("Some")) == TwoFace.String("Some"), us(true))
-  property("Unsafe String == Unsafe String") = verifyTFBoolean(TwoFace.String(us("Some")) == TwoFace.String(us("Some")), us(true))
-
-  property("Safe String != Safe String") = verifyTFBoolean(TwoFace.String("Some") != TwoFace.String("Some"), false)
-  property("Safe String != Unsafe String") = verifyTFBoolean(TwoFace.String("Some") != TwoFace.String(us("Some")), us(false))
-  property("Unsafe String != Safe String") = verifyTFBoolean(TwoFace.String(us("Some")) != TwoFace.String("Some"), us(false))
-  property("Unsafe String != Unsafe String") = verifyTFBoolean(TwoFace.String(us("Some")) != TwoFace.String(us("Some")), us(false))
 
   property("Safe String substring Safe Int") = verifyTFString(TwoFace.String("Something") substring TwoFace.Int(4), "thing")
   property("Safe String substring Unsafe Int") = verifyTFString(TwoFace.String("Something") substring TwoFace.Int(us(4)), us("thing"))

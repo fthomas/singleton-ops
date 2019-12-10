@@ -1,8 +1,7 @@
 package singleton.twoface.impl
 
 import singleton.ops._
-import singleton.ops.impl.GeneralMacros
-import singleton.ops.impl.std
+import singleton.ops.impl.{GeneralMacros, std}
 
 import scala.reflect.macros.whitebox
 
@@ -14,7 +13,7 @@ trait TwoFaceAny[Face, T] extends Any {
 }
 
 object TwoFaceAny {
-  trait Builder[TF[T], Face, Shl1[_,_,_,_], Shl2[_,_,_,_,_,_], Shl3[_,_,_,_,_,_,_,_]] {
+  trait Builder[TF[T], Face, Shl1[_,_,_,_] <: HasOut, Shl2[_,_,_,_,_,_] <: HasOut, Shl3[_,_,_,_,_,_,_,_] <: HasOut] {
     //////////////////////////////////////////////////////////////////
     type Shell1[Func[_], Arg1, Arg1Wide] =
       Shl1[Func[Arg1],
@@ -154,7 +153,8 @@ object TwoFaceAny {
     def >= [R](r : Long[R])(implicit tfs : Boolean.ShellL[>=, T, std.Char, R, std.Long]) = tfs(this.getValue, r.getValue)
     def >= [R](r : Float[R])(implicit tfs : Boolean.ShellF[>=, T, std.Char, R, std.Float]) = tfs(this.getValue, r.getValue)
     def >= [R](r : Double[R])(implicit tfs : Boolean.ShellD[>=, T, std.Char, R, std.Double]) = tfs(this.getValue, r.getValue)
-    def == [R](r : Char[R])(implicit tfs : Boolean.Shell2[==, T, std.Char, R, std.Char]) = tfs(this.getValue, r.getValue)
+    def == [R](r : Char[R])(implicit ccs : CaseClassSkipper[Boolean.Shell2[==, T, std.Char, R, std.Char]]) =
+      ccs(tfs => tfs(this.getValue, r.getValue), this.getValue.asInstanceOf[Any] == r.getValue.asInstanceOf[Any])
     def == [R](r : Int[R])(implicit tfs : Boolean.ShellI[==, T, std.Char, R, std.Int]) = tfs(this.getValue, r.getValue)
     def == [R](r : Long[R])(implicit tfs : Boolean.ShellL[==, T, std.Char, R, std.Long]) = tfs(this.getValue, r.getValue)
     def == [R](r : Float[R])(implicit tfs : Boolean.ShellF[==, T, std.Char, R, std.Float]) = tfs(this.getValue, r.getValue)
@@ -250,7 +250,8 @@ object TwoFaceAny {
     def >= [R](r : Float[R])(implicit tfs : Boolean.ShellF[>=, T, std.Int, R, std.Float]) = tfs(this.getValue, r.getValue)
     def >= [R](r : Double[R])(implicit tfs : Boolean.ShellD[>=, T, std.Int, R, std.Double]) = tfs(this.getValue, r.getValue)
     def == [R](r : Char[R])(implicit tfs : Boolean.ShellI[==, T, std.Int, R, std.Char]) = tfs(this.getValue, r.getValue)
-    def == [R](r : Int[R])(implicit tfs : Boolean.Shell2[==, T, std.Int, R, std.Int]) = tfs(this.getValue, r.getValue)
+    def == [R](r : Int[R])(implicit ccs : CaseClassSkipper[Boolean.Shell2[==, T, std.Int, R, std.Int]]) =
+      ccs(tfs => tfs(this.getValue, r.getValue), this.getValue.asInstanceOf[Any] == r.getValue.asInstanceOf[Any])
     def == [R](r : Long[R])(implicit tfs : Boolean.ShellL[==, T, std.Int, R, std.Long]) = tfs(this.getValue, r.getValue)
     def == [R](r : Float[R])(implicit tfs : Boolean.ShellF[==, T, std.Int, R, std.Float]) = tfs(this.getValue, r.getValue)
     def == [R](r : Double[R])(implicit tfs : Boolean.ShellD[==, T, std.Int, R, std.Double]) = tfs(this.getValue, r.getValue)
@@ -347,7 +348,8 @@ object TwoFaceAny {
     def >= [R](r : Double[R])(implicit tfs : Boolean.ShellD[>=, T, std.Long, R, std.Double]) = tfs(this.getValue, r.getValue)
     def == [R](r : Char[R])(implicit tfs : Boolean.ShellL[==, T, std.Long, R, std.Char]) = tfs(this.getValue, r.getValue)
     def == [R](r : Int[R])(implicit tfs : Boolean.ShellL[==, T, std.Long, R, std.Int]) = tfs(this.getValue, r.getValue)
-    def == [R](r : Long[R])(implicit tfs : Boolean.Shell2[==, T, std.Long, R, std.Long]) = tfs(this.getValue, r.getValue)
+    def == [R](r : Long[R])(implicit ccs : CaseClassSkipper[Boolean.Shell2[==, T, std.Long, R, std.Long]]) =
+      ccs(tfs => tfs(this.getValue, r.getValue), this.getValue.asInstanceOf[Any] == r.getValue.asInstanceOf[Any])
     def == [R](r : Float[R])(implicit tfs : Boolean.ShellF[==, T, std.Long, R, std.Float]) = tfs(this.getValue, r.getValue)
     def == [R](r : Double[R])(implicit tfs : Boolean.ShellD[==, T, std.Long, R, std.Double]) = tfs(this.getValue, r.getValue)
     def != [R](r : Char[R])(implicit tfs : Boolean.ShellL[!=, T, std.Long, R, std.Char]) = tfs(this.getValue, r.getValue)
@@ -445,7 +447,8 @@ object TwoFaceAny {
     def == [R](r : Char[R])(implicit tfs : Boolean.ShellF[==, T, std.Float, R, std.Char]) = tfs(this.getValue, r.getValue)
     def == [R](r : Int[R])(implicit tfs : Boolean.ShellF[==, T, std.Float, R, std.Int]) = tfs(this.getValue, r.getValue)
     def == [R](r : Long[R])(implicit tfs : Boolean.ShellF[==, T, std.Float, R, std.Long]) = tfs(this.getValue, r.getValue)
-    def == [R](r : Float[R])(implicit tfs : Boolean.Shell2[==, T, std.Float, R, std.Float]) = tfs(this.getValue, r.getValue)
+    def == [R](r : Float[R])(implicit ccs : CaseClassSkipper[Boolean.Shell2[==, T, std.Float, R, std.Float]]) =
+      ccs(tfs => tfs(this.getValue, r.getValue), this.getValue.asInstanceOf[Any] == r.getValue.asInstanceOf[Any])
     def == [R](r : Double[R])(implicit tfs : Boolean.ShellD[==, T, std.Float, R, std.Double]) = tfs(this.getValue, r.getValue)
     def != [R](r : Char[R])(implicit tfs : Boolean.ShellF[!=, T, std.Float, R, std.Char]) = tfs(this.getValue, r.getValue)
     def != [R](r : Int[R])(implicit tfs : Boolean.ShellF[!=, T, std.Float, R, std.Int]) = tfs(this.getValue, r.getValue)
@@ -541,7 +544,8 @@ object TwoFaceAny {
     def == [R](r : Int[R])(implicit tfs : Boolean.ShellD[==, T, std.Double, R, std.Int]) = tfs(this.getValue, r.getValue)
     def == [R](r : Long[R])(implicit tfs : Boolean.ShellD[==, T, std.Double, R, std.Long]) = tfs(this.getValue, r.getValue)
     def == [R](r : Float[R])(implicit tfs : Boolean.ShellD[==, T, std.Double, R, std.Float]) = tfs(this.getValue, r.getValue)
-    def == [R](r : Double[R])(implicit tfs : Boolean.Shell2[==, T, std.Double, R, std.Double]) = tfs(this.getValue, r.getValue)
+    def == [R](r : Double[R])(implicit ccs : CaseClassSkipper[Boolean.Shell2[==, T, std.Double, R, std.Double]]) =
+      ccs(tfs => tfs(this.getValue, r.getValue), this.getValue.asInstanceOf[Any] == r.getValue.asInstanceOf[Any])
     def != [R](r : Char[R])(implicit tfs : Boolean.ShellD[!=, T, std.Double, R, std.Char]) = tfs(this.getValue, r.getValue)
     def != [R](r : Int[R])(implicit tfs : Boolean.ShellD[!=, T, std.Double, R, std.Int]) = tfs(this.getValue, r.getValue)
     def != [R](r : Long[R])(implicit tfs : Boolean.ShellD[!=, T, std.Double, R, std.Long]) = tfs(this.getValue, r.getValue)
@@ -579,7 +583,8 @@ object TwoFaceAny {
     def != (r : std.String)(implicit tfs : Boolean.Shell2[!=, T, std.String, GetArg0, std.String]) = tfs(this.getValue, r)
 
     def +  [R](r : String[R])(implicit tfs : String.Shell2[+, T, std.String, R, std.String]) = tfs(this.getValue, r.getValue)
-    def == [R](r : String[R])(implicit tfs : Boolean.Shell2[==, T, std.String, R, std.String]) = tfs(this.getValue, r.getValue)
+    def == [R](r : String[R])(implicit ccs : CaseClassSkipper[Boolean.Shell2[==, T, std.String, R, std.String]]) =
+      ccs(tfs => tfs(this.getValue, r.getValue), this.getValue.asInstanceOf[Any] == r.getValue.asInstanceOf[Any])
     def != [R](r : String[R])(implicit tfs : Boolean.Shell2[!=, T, std.String, R, std.String]) = tfs(this.getValue, r.getValue)
 
     def reverse(implicit tfs : String.Shell1[Reverse, T, std.String]) = tfs(this.getValue)
@@ -614,7 +619,8 @@ object TwoFaceAny {
     def == (r : std.Boolean)(implicit tfs : Boolean.Shell2[==, T, std.Boolean, GetArg0, std.Boolean]) = tfs(this.getValue, r)
     def != (r : std.Boolean)(implicit tfs : Boolean.Shell2[!=, T, std.Boolean, GetArg0, std.Boolean]) = tfs(this.getValue, r)
 
-    def == [R](r : Boolean[R])(implicit tfs : Boolean.Shell2[==, T, std.Boolean, R, std.Boolean]) = tfs(this.getValue, r.getValue)
+    def == [R](r : Boolean[R])(implicit ccs : CaseClassSkipper[Boolean.Shell2[==, T, std.Boolean, R, std.Boolean]]) =
+      ccs(tfs => tfs(this.getValue, r.getValue), this.getValue.asInstanceOf[Any] == r.getValue.asInstanceOf[Any])
     def != [R](r : Boolean[R])(implicit tfs : Boolean.Shell2[!=, T, std.Boolean, R, std.Boolean]) = tfs(this.getValue, r.getValue)
     def && [R](r : Boolean[R])(implicit tfs : Boolean.Shell2[&&, T, std.Boolean, R, std.Boolean]) = tfs(this.getValue, r.getValue)
     def || [R](r : Boolean[R])(implicit tfs : Boolean.Shell2[||, T, std.Boolean, R, std.Boolean]) = tfs(this.getValue, r.getValue)
