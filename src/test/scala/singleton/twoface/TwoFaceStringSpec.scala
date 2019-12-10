@@ -33,7 +33,7 @@ class TwoFaceStringSpec extends Properties("TwoFace.String") {
 
   property("Safe String == Regular Safe String") = {
     val result = TwoFace.String("Some") == TwoFace.String("Some")
-    implicitly[result.type <:< TwoFace.Boolean[true]]
+    implicitly[result.type <:< TwoFace.Boolean[W.`true`.T]]
     result.getValue
   }
   property("Safe String == Regular Unsafe String") = verifyTFBoolean(TwoFace.String("Some") == (us("Some")), us(true))

@@ -230,7 +230,7 @@ class TwoFaceFloatSpec extends Properties("TwoFace.Float") {
   property("Unsafe Float == Regular Unsafe Long") = verifyTFBoolean(TwoFace.Float(us(7.0f)) == (us(7L)), us(true))
   property("Safe Float == Regular Safe Float") = {
     val result = TwoFace.Float(7.0f) == TwoFace.Float(7.0f)
-    implicitly[result.type <:< TwoFace.Boolean[true]]
+    implicitly[result.type <:< TwoFace.Boolean[W.`true`.T]]
     result.getValue
   }
   property("Safe Float == Regular Unsafe Float") = verifyTFBoolean(TwoFace.Float(7.0f) == (us(7.0f)), us(true))

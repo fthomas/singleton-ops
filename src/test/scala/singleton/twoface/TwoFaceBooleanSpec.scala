@@ -40,7 +40,7 @@ class TwoFaceBooleanSpec extends Properties("TwoFace.Boolean") {
 
   property("Safe Boolean == Safe Boolean") = {
     val result = TwoFace.Boolean(true) == TwoFace.Boolean(true)
-    implicitly[result.type <:< TwoFace.Boolean[true]]
+    implicitly[result.type <:< TwoFace.Boolean[W.`true`.T]]
     result.getValue
   }
   property("Safe Boolean == Unsafe Boolean") = verifyTFBoolean(TwoFace.Boolean(false) == TwoFace.Boolean(us(false)), us(true))

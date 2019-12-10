@@ -216,7 +216,7 @@ class TwoFaceCharSpec extends Properties("TwoFace.Char") {
 
   property("Safe Char == Regular Safe Char") = {
     val result = TwoFace.Char('\u0007') == TwoFace.Char('\u0007')
-    implicitly[result.type <:< TwoFace.Boolean[true]]
+    implicitly[result.type <:< TwoFace.Boolean[W.`true`.T]]
     result.getValue
   }
   property("Safe Char == Regular Unsafe Char") = verifyTFBoolean(TwoFace.Char('\u0007') == (us('\u0007')), us(true))

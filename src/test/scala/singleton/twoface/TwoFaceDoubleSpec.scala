@@ -237,7 +237,7 @@ class TwoFaceDoubleSpec extends Properties("TwoFace.Double") {
   property("Unsafe Double == Regular Unsafe Float") = verifyTFBoolean(TwoFace.Double(us(7.0)) == (us(7.0f)), us(true))
   property("Safe Double == Safe Double") = {
     val result = TwoFace.Double(7.0) == TwoFace.Double(7.0)
-    implicitly[result.type <:< TwoFace.Boolean[true]]
+    implicitly[result.type <:< TwoFace.Boolean[W.`true`.T]]
     result.getValue
   }
   property("Safe Double == Regular Unsafe Double") = verifyTFBoolean(TwoFace.Double(7.0) == (us(7.0)), us(true))

@@ -226,7 +226,7 @@ class TwoFaceLongSpec extends Properties("TwoFace.Long") {
   property("Unsafe Long == Unsafe Int") = verifyTFBoolean(TwoFace.Long(us(7L)) == TwoFace.Int(us(7)), us(true))
   property("Safe Long == Safe Long") = {
     val result = TwoFace.Long(7L) == TwoFace.Long(7L)
-    implicitly[result.type <:< TwoFace.Boolean[true]]
+    implicitly[result.type <:< TwoFace.Boolean[W.`true`.T]]
     result.getValue
   }
   property("Safe Long == Unsafe Long") = verifyTFBoolean(TwoFace.Long(7L) == TwoFace.Long(us(7L)), us(true))
