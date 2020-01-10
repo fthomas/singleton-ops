@@ -11,7 +11,7 @@ val gitDevUrl = s"git@github.com:fthomas/$projectName.git"
 
 val macroParadiseVersion = "2.1.1"
 val shapelessVersion = "2.3.3"
-val scalaCheckVersion = "1.14.2"
+val scalaCheckVersion = "1.14.3"
 
 /// projects
 lazy val root = project.in(file("."))
