@@ -18,13 +18,21 @@ class RequireSpec extends Properties("Require") {
     illTyped("""implicitly[RequireMsg[False,Testing123]]""","Testing 123")
   }
   property("False requirement with message redirected to different symbol") = wellTyped {
-    @scala.annotation.implicitNotFound("Not replaced")
+    @scala.annotation.implicitNotFound("Will be replaced")
     trait TestRequireMsg
     object TestRequireMsg {
-      implicit def ev(implicit r : RequireMsg[False,Testing123]) :
+      implicit def ev(implicit r : RequireMsg[False, Testing123]) :
       TestRequireMsg = new TestRequireMsg {}
     }
-    illTyped("""implicitly[TestRequireMsg]""","Not replaced")
+    illTyped("""implicitly[TestRequireMsg]""","Testing 123")
+
+    @scala.annotation.implicitNotFound("Not replaced")
+    trait TestRequireMsgSymNotReplaced
+    object TestRequireMsgSymNotReplaced {
+      implicit def ev(implicit r : RequireMsgSym[False,Testing123,_]) :
+      TestRequireMsgSymNotReplaced = new TestRequireMsgSymNotReplaced {}
+    }
+    illTyped("""implicitly[TestRequireMsgSymNotReplaced]""","Not replaced")
 
     @scala.annotation.implicitNotFound("Will be replaced")
     trait TestRequireMsgSym
