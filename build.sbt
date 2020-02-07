@@ -17,8 +17,8 @@ val scalaCheckVersion = "1.14.3"
 lazy val root = project.in(file("."))
   .settings(commonSettings)
   .aggregate(singleton_opsJVM, singleton_opsJS)
-  .settings(noPublishSettings)
   .settings(
+    skip in publish := true,
     sources in Compile := Seq.empty,
     sources in Test := Seq.empty
   )
@@ -115,12 +115,6 @@ lazy val scaladocSettings = Def.settings(
     baseDirectory.in(LocalRootProject).value.getAbsolutePath
   ),
   autoAPIMappings := true
-)
-
-lazy val noPublishSettings = Def.settings(
-  publish := {},
-  publishLocal := {},
-  publishArtifact := false
 )
 
 lazy val miscSettings = Def.settings(
