@@ -1,20 +1,33 @@
 language: scala
 sudo: required
-scala:
- - 2.11.12
- - 2.12.8
 jdk:
- - openjdk8
-matrix:
-  include:
-  - scala: 2.13.1
-    script:
-    - travis_wait 60 sbt ++$TRAVIS_SCALA_VERSION test
+- openjdk8
+scala:
+- 2.11.12
+- 2.12.8
+- 2.13.1
+
+before_install:
+- git fetch --tags
 cache:
   directories:
-   - "$HOME/.ivy2/cache"
-   - "$HOME/.sbt/boot/"
+  - "$HOME/.cache/coursier"
+  - "$HOME/.ivy2/cache"
+  - "$HOME/.sbt/boot"
+
+install:
+- pip install --user codecov
 script:
- - travis_wait 60 sbt ++$TRAVIS_SCALA_VERSION validate
+- travis_wait 60 sbt ++$TRAVIS_SCALA_VERSION validate
 after_success:
- - bash <(curl -s https://codecov.io/bash)
+- codecov
+
+stages:
+- name: test
+- name: release
+  if: (branch = master AND type = push) OR (tag IS present)
+
+jobs:
+  include:
+  - stage: release
+    script: sbt ci-release
