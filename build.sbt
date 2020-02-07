@@ -17,8 +17,8 @@ val scalaCheckVersion = "1.14.3"
 lazy val root = project.in(file("."))
   .settings(commonSettings)
   .aggregate(singleton_opsJVM, singleton_opsJS)
-  .settings(noPublishSettings)
   .settings(
+    skip in publish := true,
     sources in Compile := Seq.empty,
     sources in Test := Seq.empty
   )
@@ -27,7 +27,6 @@ lazy val singleton_ops = crossProject(JVMPlatform, JSPlatform)
   .crossType(CrossType.Pure)
   .in(file("."))
   .settings(commonSettings)
-  .settings(publishSettings)
   .jsSettings(
     coverageEnabled := false
   )
@@ -41,8 +40,6 @@ lazy val commonSettings = Def.settings(
   metadataSettings,
   compileSettings,
   scaladocSettings,
-  releaseSettings,
-  styleSettings,
   miscSettings
 )
 
@@ -51,12 +48,12 @@ lazy val metadataSettings = Def.settings(
   organization := groupId,
   homepage := Some(url(s"https://github.com/fthomas/$projectName")),
   startYear := Some(2016),
-  licenses := Seq(
-    "Apache-2.0" -> url("https://www.apache.org/licenses/LICENSE-2.0")),
-  scmInfo := Some(
-    ScmInfo(homepage.value.get,
-            s"scm:git:$gitPubUrl",
-            Some(s"scm:git:$gitDevUrl")))
+  licenses := Seq("Apache-2.0" -> url("https://www.apache.org/licenses/LICENSE-2.0")),
+  scmInfo := Some(ScmInfo(homepage.value.get, s"scm:git:$gitPubUrl", Some(s"scm:git:$gitDevUrl"))),
+  developers := List(
+    Developer("fthomas", "Frank S. Thomas", "", url("https://github.com/fthomas")),
+    Developer("soronpo", "Oron Port", "", url("https://github.com/soronpo"))
+  )
 )
 
 lazy val compileSettings = Def.settings(
@@ -120,73 +117,6 @@ lazy val scaladocSettings = Def.settings(
   autoAPIMappings := true
 )
 
-lazy val publishSettings = Def.settings(
-  publishMavenStyle := true,
-  pomIncludeRepository := { _ =>
-    false
-  },
-  pomExtra :=
-    <developers>
-      <developer>
-        <id>fthomas</id>
-        <name>Frank S. Thomas</name>
-        <url>https://github.com/fthomas</url>
-      </developer>
-      <developer>
-        <id>soronpo</id>
-        <name>Oron Port</name>
-        <url>https://github.com/soronpo</url>
-      </developer>
-    </developers>
-)
-
-lazy val noPublishSettings = Def.settings(
-  publish := {},
-  publishLocal := {},
-  publishArtifact := false
-)
-
-lazy val releaseSettings = {
-  import sbtrelease.ReleaseStateTransformations._
-
-  lazy val updateVersionInReadme: ReleaseStep = { st: State =>
-    val extracted = Project.extract(st)
-    val newVersion = extracted.get(version)
-    val oldVersion = "git describe --abbrev=0".!!.trim.replaceAll("^v", "")
-
-    val readme = "README.md"
-    val oldContent = IO.read(file(readme))
-    val newContent = oldContent.replaceAll(oldVersion, newVersion)
-    IO.write(file(readme), newContent)
-    s"git add $readme" !! st.log
-
-    st
-  }
-
-  Def.settings(
-    releaseCrossBuild := true,
-    releasePublishArtifactsAction := PgpKeys.publishSigned.value,
-    releaseVcsSign := true,
-    releaseProcess := Seq[ReleaseStep](
-      checkSnapshotDependencies,
-      inquireVersions,
-      runClean,
-      setReleaseVersion,
-      updateVersionInReadme,
-      commitReleaseVersion,
-      tagRelease,
-      publishArtifacts,
-      setNextVersion,
-      commitNextVersion,
-      pushChanges
-    )
-  )
-}
-
-lazy val styleSettings = Def.settings(
-  //reformatOnCompileSettings
-)
-
 lazy val miscSettings = Def.settings(
   initialCommands += s"""
     import $rootPkg.ops._
@@ -198,7 +128,6 @@ lazy val miscSettings = Def.settings(
 
 val validateCommands = Seq(
   "clean",
-  //"scalafmtTest",
   "test:compile",
   "singleton_opsJS/test",
   "coverage",
