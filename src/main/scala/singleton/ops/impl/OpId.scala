@@ -1,6 +1,7 @@
 package singleton.ops.impl
 
 sealed trait Warn
+sealed trait NoSym
 sealed trait OpId
 object OpId {
   sealed trait Arg extends OpId //Argument

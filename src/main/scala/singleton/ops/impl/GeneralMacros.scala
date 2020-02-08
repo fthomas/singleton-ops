@@ -965,17 +965,16 @@ trait GeneralMacros {
     def Require = a match {
       case CalcLit.Boolean(true) => CalcLit(true)
       case CalcLit.Boolean(false) => b match {
-        case CalcLit.String(msg) => cArg match {
-          case CalcUnknown(t) => if (t.typeSymbol == symbolOf[Warn]) {
+        case CalcLit.String(msg) =>
+          if (cArg.tpe.typeSymbol == symbolOf[Warn]) {
             println(buildWarningMsg(msg))
             CalcLit(false)
+          } else if (cArg.tpe.typeSymbol == symbolOf[NoSym]) {
+            abort(msg)
           } else {
             //redirection of implicit not found annotation is required to the given symbol
-            abort(msg, Some(t.typeSymbol.asType))
+            abort(msg, Some(cArg.tpe.typeSymbol.asType))
           }
-          case _ =>
-            abort(msg)
-        }
         //directly using the java lib `require` resulted in compiler crash, so we use wrapped require instead
         case CalcNLit.String(msg,_) => cArg match {
           case CalcUnknown(t) if t.typeSymbol == symbolOf[Warn] =>
@@ -1366,7 +1365,7 @@ trait GeneralMacros {
         }
       }
 
-      val reqCalc = opCalc(funcTypes.Require, condCalc, msgCalc, CalcLit(0))
+      val reqCalc = opCalc(funcTypes.Require, condCalc, msgCalc, CalcUnknown(typeOf[NoSym]))
 
       q"""
          (new $chkSym[$condTpe, $msgTpe, $chkArgTpe]($outTree.asInstanceOf[$outTpe]))
@@ -1432,7 +1431,7 @@ trait GeneralMacros {
         }
       }
 
-      val reqCalc = opCalc(funcTypes.Require, condCalc, msgCalc, CalcLit(0))
+      val reqCalc = opCalc(funcTypes.Require, condCalc, msgCalc, CalcUnknown(typeOf[NoSym]))
 
       q"""
          (new $chkSym[$condTpe, $msgTpe, $chkArgTpe, $paramFaceTpe, $paramTpe]($outTree.asInstanceOf[$outTpe]))

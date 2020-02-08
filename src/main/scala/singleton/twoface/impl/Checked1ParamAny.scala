@@ -7,7 +7,7 @@ import scala.reflect.macros.whitebox
 
 trait Checked1ParamAny[Chk[Cond0[_,_], Msg0[_,_], T0, ParamFace0, Param0], Cond[_,_], Msg[_,_], Face, T, ParamFace, Param] extends Any with TwoFaceAny[Face, T] {
   def unsafeCheck(p : ParamFace)
-    (implicit shl : CheckedShell2[Cond, Msg, Chk[Cond,Msg,_,_,_], Face, Face, ParamFace, ParamFace]) : Chk[Cond, Msg, T, ParamFace, Param] = {
+    (implicit shl : CheckedShell2[Cond, Msg, NoSym, Face, Face, ParamFace, ParamFace]) : Chk[Cond, Msg, T, ParamFace, Param] = {
     shl.unsafeCheck(getValue, p)
     this.asInstanceOf[Chk[Cond, Msg, T, ParamFace, Param]]
   }
@@ -20,7 +20,7 @@ object Checked1ParamAny {
       type Msg[T, Param]
       type ParamFace
       final type Checked[T, Param] = Chk[Cond, Msg, T, ParamFace, Param]
-      final type CheckedShell[T, Param] = CheckedShellSym[CheckedShellSym[_,_,_], T, Param]
+      final type CheckedShell[T, Param] = CheckedShellSym[NoSym, T, Param]
       final type CheckedShellSym[Sym, T, Param] = CheckedShell2[Cond, Msg, Sym, T, Face, Param, ParamFace]
     }
 
