@@ -1365,7 +1365,7 @@ trait GeneralMacros {
         }
       }
 
-      val reqCalc = opCalc(funcTypes.Require, condCalc, msgCalc, CalcLit(0))
+      val reqCalc = opCalc(funcTypes.Require, condCalc, msgCalc, CalcUnknown(typeOf[NoSym]))
 
       q"""
          (new $chkSym[$condTpe, $msgTpe, $chkArgTpe]($outTree.asInstanceOf[$outTpe]))
@@ -1431,7 +1431,7 @@ trait GeneralMacros {
         }
       }
 
-      val reqCalc = opCalc(funcTypes.Require, condCalc, msgCalc, CalcLit(0))
+      val reqCalc = opCalc(funcTypes.Require, condCalc, msgCalc, CalcUnknown(typeOf[NoSym]))
 
       q"""
          (new $chkSym[$condTpe, $msgTpe, $chkArgTpe, $paramFaceTpe, $paramTpe]($outTree.asInstanceOf[$outTpe]))
