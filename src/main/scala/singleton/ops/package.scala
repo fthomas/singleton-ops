@@ -82,8 +82,8 @@ package object ops {
   type GetLHSArg0           = GetLHSArg[W.`0`.T]
   type Id[P1]               = OpMacro[OpId.Id, P1, NP, NP]
   type ![P1]                = OpMacro[OpId.!, P1, NP, NP]
-  type Require[Cond]        = OpMacro[OpId.Require, Cond, DefaultRequireMsg, NP]
-  type RequireMsg[Cond,Msg] = OpMacro[OpId.Require, Cond, Msg, NP]
+  type Require[Cond]        = OpMacro[OpId.Require, Cond, DefaultRequireMsg, NoSym]
+  type RequireMsg[Cond,Msg] = OpMacro[OpId.Require, Cond, Msg, NoSym]
   type RequireMsgSym[Cond,Msg,Sym] = OpMacro[OpId.Require, Cond, Msg, GetType[Sym]]
   type Warn                 = impl.Warn
   type ToNat[P1]            = OpMacro[OpId.ToNat, P1, NP, NP]
