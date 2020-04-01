@@ -87,4 +87,15 @@ class CheckedStringSpec extends Properties("Checked.String") {
     illTyped("""implicitly[CheckedUse[W.`"Hello"`.T]]""", "Length of string 'Hello' is not smaller than 5")
   }
 
+  //Maybe at fault of Scalac, but some schemes prove better than others to avoid errors
+  property("Stability check") = wellTyped {
+    class Fooish[T]
+    class Foo {
+      final def foo : Fooish[W.`"Hello"`.T] = new Fooish[W.`"Hello"`.T]
+      final def foo[T](value : LengthSmallerThan.Checked[T, W.`10`.T]) : Fooish[value.Out] = new Fooish[value.Out]
+    }
+    val a = new Foo
+    val b : Fooish[W.`"World"`.T] = a.foo("World")
+  }
+
 }
