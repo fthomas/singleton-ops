@@ -414,4 +414,16 @@ class TwoFaceIntSpec extends Properties("TwoFace.Int") {
     val f2 = TwoFaceContainer(TwoFace.Int(2))
     (f1a == f1b) && !(f1a == f2) && (f1b != f2) && !(f2 != f2)
   }
+
+  //Maybe at fault of Scalac, but some schemes prove better than others to avoid errors
+  property("Stability check") = wellTyped {
+    class Fooish[T]
+    class Foo {
+      final def foo : Fooish[W.`4`.T] = new Fooish[W.`4`.T]
+      final def foo[T](value : TwoFace.Int[T]) : Fooish[value.Out] = new Fooish[value.Out]
+    }
+    val a = new Foo
+    val b : Fooish[W.`2`.T] = a.foo(2)
+  }
+
 }

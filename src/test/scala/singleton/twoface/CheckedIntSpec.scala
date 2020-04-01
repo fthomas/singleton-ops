@@ -55,4 +55,15 @@ class CheckedIntSpec extends Properties("Checked.Int") {
     illRun{smallerThan50(TwoFace.Int(us(50)))}
     illRun{smallerThan50Seq(1,us70,us60)}
   }
+
+  //Maybe at fault of Scalac, but some schemes prove better than others to avoid errors
+  property("Stability check") = wellTyped {
+    class Fooish[T]
+    class Foo {
+      final def foo : Fooish[W.`4`.T] = new Fooish[W.`4`.T]
+      final def foo[T](value : SmallerThan50.Checked[T]) : Fooish[value.Out] = new Fooish[value.Out]
+    }
+    val a = new Foo
+    val b : Fooish[W.`2`.T] = a.foo(2)
+  }
 }
