@@ -40,7 +40,8 @@ lazy val commonSettings = Def.settings(
   metadataSettings,
   compileSettings,
   scaladocSettings,
-  miscSettings
+  miscSettings,
+  crossVersionSharedSources
 )
 
 lazy val metadataSettings = Def.settings(
