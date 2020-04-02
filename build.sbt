@@ -40,7 +40,8 @@ lazy val commonSettings = Def.settings(
   metadataSettings,
   compileSettings,
   scaladocSettings,
-  miscSettings
+  miscSettings,
+  crossVersionSharedSources
 )
 
 lazy val metadataSettings = Def.settings(
@@ -55,6 +56,20 @@ lazy val metadataSettings = Def.settings(
     Developer("soronpo", "Oron Port", "", url("https://github.com/soronpo"))
   )
 )
+
+lazy val crossVersionSharedSources: Seq[Setting[_]] =
+  Seq(Compile, Test).map { sc =>
+    (unmanagedSourceDirectories in sc) ++= {
+      (unmanagedSourceDirectories in sc ).value.flatMap { dir: File =>
+        if(dir.getName != "scala") Seq(dir)
+        else
+          CrossVersion.partialVersion(scalaVersion.value) match {
+            case Some((2, y)) if y >= 13 => Seq(new File(dir.getPath + "_2.13+"))
+            case Some((2, y)) if y >= 11 => Seq(new File(dir.getPath + "_2.13-"))
+          }
+      }
+    }
+  }
 
 lazy val compileSettings = Def.settings(
   scalaOrganization := "org.scala-lang",
