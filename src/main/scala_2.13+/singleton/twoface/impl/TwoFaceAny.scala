@@ -1,9 +1,7 @@
 package singleton.twoface.impl
 
 import singleton.ops._
-import singleton.ops.impl.{GeneralMacros, std}
-
-import scala.reflect.macros.whitebox
+import singleton.ops.impl.std
 
 trait TwoFaceAny[Face, T] extends Any {
   type Out = T
@@ -81,18 +79,6 @@ object TwoFaceAny {
     //However, since IntelliJ marks everything red, it was preferred to implement it specifically, in the meantime.
     //implicit def apply[T <: Face](value : T) : Lt[T] = macro Builder.Macro.fromNumValue
 
-  }
-
-
-  object Builder {
-    final class Macro(val c: whitebox.Context) extends GeneralMacros {
-      def fromNumValue[TF](value : c.Tree)(implicit tfTag : c.WeakTypeTag[TF]) : c.Tree =
-        TwoFaceMaterializer.fromNumValue(value, c.symbolOf[TF])
-      def toNumValue[TF, T](tf : c.Tree)(implicit tTag : c.WeakTypeTag[T], tfTag : c.WeakTypeTag[TF]) : c.Tree =
-        TwoFaceMaterializer.toNumValue(tf, c.symbolOf[TF], c.weakTypeOf[T])
-      def toNumValue2[TF, T](tf : c.Tree)(id : c.Tree)(implicit tTag : c.WeakTypeTag[T], tfTag : c.WeakTypeTag[TF]) : c.Tree =
-        TwoFaceMaterializer.toNumValue(tf, c.symbolOf[TF], c.weakTypeOf[T])
-    }
   }
 
   trait Char[T] extends Any with TwoFaceAny[std.Char, T] {
