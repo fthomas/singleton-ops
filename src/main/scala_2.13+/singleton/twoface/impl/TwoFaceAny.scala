@@ -165,13 +165,12 @@ object TwoFaceAny {
   final class _Char[T](val value : std.Char) extends AnyVal with Char[T] {
     @inline def getValue : std.Char = value
   }
-  implicit object Char extends TwoFaceAny.Builder[Char, std.Char, Shell.One.Char, Shell.Two.Char, Shell.Three.Char] {
+  implicit object Char extends TwoFaceAny.Builder[Char, std.Char, Shell.One.Char, Shell.Two.Char, Shell.Three.Char] with OpContainer.Eq1[Char, std.Char] {
     def create[T](value : std.Char) : Char[T] = new _Char[T](value)
     def apply[T <: std.Char with Singleton](implicit value : ValueOf[T], di : DummyImplicit, di2 : DummyImplicit) : Char[T] = create[T](valueOf[T])
     implicit def apply[T <: std.Char with Singleton](value : T) : Char[T] = create[T](value)
     implicit def apply[T <: std.Char](value : T)(implicit di : DummyImplicit) : Char[T] = create[T](value)
     implicit def ev[T](implicit id : AcceptNonLiteral[Id[T]]) : Char[T] = create[T](id.valueWide.asInstanceOf[std.Char])
-    implicit def widen[T](tf : Char[T]) : Char[std.Char] = tf.asInstanceOf[Char[std.Char]]
     implicit def tf2NumSingleton[T <: std.Char with Singleton](tf : Char[T])(implicit value : ValueOf[T]) : T = valueOf[T]
     implicit def tf2NumOp[T](tf : Char[T])(implicit id : AcceptNonLiteral[Id[T]]) : id.OutChar = id.value.asInstanceOf[id.OutChar]
     implicit def tf2NumWide[T](tf : Char[T])(implicit di : DummyImplicit, di2 : DummyImplicit) : std.Char = tf.getValue
@@ -261,14 +260,13 @@ object TwoFaceAny {
   final class _Int[T](val value : std.Int) extends AnyVal with Int[T] {
     @inline def getValue : std.Int = value
   }
-  implicit object Int extends TwoFaceAny.Builder[Int, std.Int, Shell.One.Int, Shell.Two.Int, Shell.Three.Int] {
+  implicit object Int extends TwoFaceAny.Builder[Int, std.Int, Shell.One.Int, Shell.Two.Int, Shell.Three.Int] with OpContainer.Eq1[Int, std.Int] {
     def numberOfLeadingZeros[T](t : Int[T])(implicit tfs : Int.Shell1[NumberOfLeadingZeros, T, std.Int]) = tfs(t.getValue)
     def create[T](value : std.Int) : Int[T] = new _Int[T](value)
     def apply[T <: std.Int with Singleton](implicit value : ValueOf[T], di : DummyImplicit, di2 : DummyImplicit) : Int[T] = create[T](valueOf[T])
     implicit def apply[T <: std.Int with Singleton](value : T) : Int[T] = create[T](value)
     implicit def apply[T <: std.Int](value : T)(implicit di : DummyImplicit) : Int[T] = create[T](value)
     implicit def ev[T](implicit id : AcceptNonLiteral[Id[T]]) : Int[T] = create[T](id.valueWide.asInstanceOf[std.Int])
-    implicit def widen[T](tf : Int[T]) : Int[std.Int] = tf.asInstanceOf[Int[std.Int]]
     implicit def tf2NumSingleton[T <: std.Int with Singleton](tf : Int[T])(implicit value : ValueOf[T]) : T = valueOf[T]
     implicit def tf2NumOp[T](tf : Int[T])(implicit id : AcceptNonLiteral[Id[T]]) : id.OutInt = id.value.asInstanceOf[id.OutInt]
     implicit def tf2NumWide[T](tf : Int[T])(implicit di : DummyImplicit, di2 : DummyImplicit) : std.Int = tf.getValue
@@ -359,14 +357,13 @@ object TwoFaceAny {
   final class _Long[T](val value : std.Long) extends AnyVal with Long[T] {
     @inline def getValue : std.Long = value
   }
-  implicit object Long extends TwoFaceAny.Builder[Long, std.Long, Shell.One.Long, Shell.Two.Long, Shell.Three.Long] {
+  implicit object Long extends TwoFaceAny.Builder[Long, std.Long, Shell.One.Long, Shell.Two.Long, Shell.Three.Long] with OpContainer.Eq1[Long, std.Long] {
     def numberOfLeadingZeros[T](t : Long[T])(implicit tfs : Int.Shell1[NumberOfLeadingZeros, T, std.Long]) = tfs(t.getValue)
     def create[T](value : std.Long) : Long[T] = new _Long[T](value)
     def apply[T <: std.Long with Singleton](implicit value : ValueOf[T], di : DummyImplicit, di2 : DummyImplicit) : Long[T] = create[T](valueOf[T])
     implicit def apply[T <: std.Long with Singleton](value : T) : Long[T] = create[T](value)
     implicit def apply[T <: std.Long](value : T)(implicit di : DummyImplicit) : Long[T] = create[T](value)
     implicit def ev[T](implicit id : AcceptNonLiteral[Id[T]]) : Long[T] = create[T](id.valueWide.asInstanceOf[std.Long])
-    implicit def widen[T](tf : Long[T]) : Long[std.Long] = tf.asInstanceOf[Long[std.Long]]
     implicit def tf2NumSingleton[T <: std.Long with Singleton](tf : Long[T])(implicit value : ValueOf[T]) : T = valueOf[T]
     implicit def tf2NumOp[T](tf : Long[T])(implicit id : AcceptNonLiteral[Id[T]]) : id.OutLong = id.value.asInstanceOf[id.OutLong]
     implicit def tf2NumWide[T](tf : Long[T])(implicit di : DummyImplicit, di2 : DummyImplicit) : std.Long = tf.getValue
@@ -456,13 +453,12 @@ object TwoFaceAny {
   final class _Float[T](val value : std.Float) extends AnyVal with Float[T] {
     @inline def getValue : std.Float = value
   }
-  implicit object Float extends TwoFaceAny.Builder[Float, std.Float, Shell.One.Float, Shell.Two.Float, Shell.Three.Float] {
+  implicit object Float extends TwoFaceAny.Builder[Float, std.Float, Shell.One.Float, Shell.Two.Float, Shell.Three.Float] with OpContainer.Eq1[Float, std.Float] {
     def create[T](value : std.Float) : Float[T] = new _Float[T](value)
     def apply[T <: std.Float with Singleton](implicit value : ValueOf[T], di : DummyImplicit, di2 : DummyImplicit) : Float[T] = create[T](valueOf[T])
     implicit def apply[T <: std.Float with Singleton](value : T) : Float[T] = create[T](value)
     implicit def apply[T <: std.Float](value : T)(implicit di : DummyImplicit) : Float[T] = create[T](value)
     implicit def ev[T](implicit id : AcceptNonLiteral[Id[T]]) : Float[T] = create[T](id.valueWide.asInstanceOf[std.Float])
-    implicit def widen[T](tf : Float[T]) : Float[std.Float] = tf.asInstanceOf[Float[std.Float]]
     implicit def tf2NumSingleton[T <: std.Float with Singleton](tf : Float[T])(implicit value : ValueOf[T]) : T = valueOf[T]
     implicit def tf2NumOp[T](tf : Float[T])(implicit id : AcceptNonLiteral[Id[T]]) : id.OutFloat = id.value.asInstanceOf[id.OutFloat]
     implicit def tf2NumWide[T](tf : Float[T])(implicit di : DummyImplicit, di2 : DummyImplicit) : std.Float = tf.getValue
@@ -552,13 +548,12 @@ object TwoFaceAny {
   final class _Double[T](val value : std.Double) extends AnyVal with Double[T] {
     @inline def getValue : std.Double = value
   }
-  implicit object Double extends TwoFaceAny.Builder[Double, std.Double, Shell.One.Double, Shell.Two.Double, Shell.Three.Double] {
+  implicit object Double extends TwoFaceAny.Builder[Double, std.Double, Shell.One.Double, Shell.Two.Double, Shell.Three.Double] with OpContainer.Eq1[Double, std.Double] {
     def create[T](value : std.Double) : Double[T] = new _Double[T](value)
     def apply[T <: std.Double with Singleton](implicit value : ValueOf[T], di : DummyImplicit, di2 : DummyImplicit) : Double[T] = create[T](valueOf[T])
     implicit def apply[T <: std.Double with Singleton](value : T) : Double[T] = create[T](value)
     implicit def apply[T <: std.Double](value : T)(implicit di : DummyImplicit) : Double[T] = create[T](value)
     implicit def ev[T](implicit id : AcceptNonLiteral[Id[T]]) : Double[T] = create[T](id.valueWide.asInstanceOf[std.Double])
-    implicit def widen[T](tf : Double[T]) : Double[std.Double] = tf.asInstanceOf[Double[std.Double]]
     implicit def tf2NumSingleton[T <: std.Double with Singleton](tf : Double[T])(implicit value : ValueOf[T]) : T = valueOf[T]
     implicit def tf2NumOp[T](tf : Double[T])(implicit id : AcceptNonLiteral[Id[T]]) : id.OutDouble = id.value.asInstanceOf[id.OutDouble]
     implicit def tf2NumWide[T](tf : Double[T])(implicit di : DummyImplicit, di2 : DummyImplicit) : std.Double = tf.getValue
@@ -589,13 +584,12 @@ object TwoFaceAny {
   final class _String[T](val value : std.String) extends AnyVal with String[T] {
     @inline def getValue : std.String = value
   }
-  implicit object String extends TwoFaceAny.Builder[String, std.String, Shell.One.String, Shell.Two.String, Shell.Three.String] {
+  implicit object String extends TwoFaceAny.Builder[String, std.String, Shell.One.String, Shell.Two.String, Shell.Three.String] with OpContainer.Eq1[String, std.String] {
     def create[T](value : std.String) : String[T] = new _String[T](value)
     def apply[T <: std.String with Singleton](implicit value : ValueOf[T], di : DummyImplicit, di2 : DummyImplicit) : String[T] = create[T](valueOf[T])
     implicit def apply[T <: std.String with Singleton](value : T) : String[T] = create[T](value)
     implicit def apply[T <: std.String](value : T)(implicit di : DummyImplicit) : String[T] = create[T](value)
     implicit def ev[T](implicit id : AcceptNonLiteral[Id[T]]) : String[T] = create[T](id.valueWide.asInstanceOf[std.String])
-    implicit def widen[T](tf : String[T]) : String[std.String] = tf.asInstanceOf[String[std.String]]
     implicit def tf2NumSingleton[T <: std.String with Singleton](tf : String[T])(implicit value : ValueOf[T]) : T = valueOf[T]
     implicit def tf2NumOp[T](tf : String[T])(implicit id : AcceptNonLiteral[Id[T]]) : id.OutString = id.value.asInstanceOf[id.OutString]
     implicit def tf2NumWide[T](tf : String[T])(implicit di : DummyImplicit, di2 : DummyImplicit) : std.String = tf.getValue
@@ -619,13 +613,12 @@ object TwoFaceAny {
   final class _Boolean[T](val value : std.Boolean) extends AnyVal with Boolean[T] {
     @inline def getValue : std.Boolean = value
   }
-  implicit object Boolean extends TwoFaceAny.Builder[Boolean, std.Boolean, Shell.One.Boolean, Shell.Two.Boolean, Shell.Three.Boolean] {
+  implicit object Boolean extends TwoFaceAny.Builder[Boolean, std.Boolean, Shell.One.Boolean, Shell.Two.Boolean, Shell.Three.Boolean] with OpContainer.Eq1[Boolean, std.Boolean] {
     def create[T](value : std.Boolean) : Boolean[T] = new _Boolean[T](value)
     def apply[T <: std.Boolean with Singleton](implicit value : ValueOf[T], di : DummyImplicit, di2 : DummyImplicit) : Boolean[T] = create[T](valueOf[T])
     implicit def apply[T <: std.Boolean with Singleton](value : T) : Boolean[T] = create[T](value)
     implicit def apply[T <: std.Boolean](value : T)(implicit di : DummyImplicit) : Boolean[T] = create[T](value)
     implicit def ev[T](implicit id : AcceptNonLiteral[Id[T]]) : Boolean[T] = create[T](id.valueWide.asInstanceOf[std.Boolean])
-    implicit def widen[T](tf : Boolean[T]) : Boolean[std.Boolean] = tf.asInstanceOf[Boolean[std.Boolean]]
     implicit def tf2NumSingleton[T <: std.Boolean with Singleton](tf : Boolean[T])(implicit value : ValueOf[T]) : T = valueOf[T]
     implicit def tf2NumOp[T](tf : Boolean[T])(implicit id : AcceptNonLiteral[Id[T]]) : id.OutBoolean = id.value.asInstanceOf[id.OutBoolean]
     implicit def tf2NumWide[T](tf : Boolean[T])(implicit di : DummyImplicit, di2 : DummyImplicit) : std.Boolean = tf.getValue

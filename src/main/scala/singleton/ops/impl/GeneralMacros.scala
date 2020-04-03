@@ -737,7 +737,7 @@ trait GeneralMacros {
       case t : CalcLit => t
       case t : CalcType => CalcNLit(t, q"$tfTree.getValue")
       case t =>
-        println(t)
+//        println(t)
         extractionFailed(typedTree.tpe)
     }
   }
@@ -793,12 +793,12 @@ trait GeneralMacros {
 
     def apply(argIdx : Int, lhs : Boolean) : c.Tree = {
       val tree = c.enclosingImplicits.last.tree
-      println(">>>>>>> enclosingImpl: " + c.enclosingImplicits.last)
-      println("tree: " + c.enclosingImplicits.last.tree)
-      println("rawTree: " + showRaw(c.enclosingImplicits.last.tree))
+//      println(">>>>>>> enclosingImpl: " + c.enclosingImplicits.last)
+//      println("tree: " + c.enclosingImplicits.last.tree)
+//      println("rawTree: " + showRaw(c.enclosingImplicits.last.tree))
       val allArgs = if (lhs) getAllLHSArgs(tree) else getAllArgs(tree, lhs)
-      println("args: " + allArgs)
-      println("<<<<<<< rawArgs" + showRaw(allArgs))
+//      println("args: " + allArgs)
+//      println("<<<<<<< rawArgs" + showRaw(allArgs))
       if (argIdx < allArgs.length) allArgs(argIdx)
       else abort(s"Argument index($argIdx) is not smaller than the total number of arguments(${allArgs.length})")
     }

@@ -46,6 +46,7 @@ class CheckedIntSpec extends Properties("Checked.Int") {
   }
 
   property("Run-time checks") = wellTyped {
+    smallerThan50Seq(1,2,3)
     smallerThan50Seq(us(1),2,3)
     smallerThan50(us(40))
     smallerThan50(TwoFace.Int(us(40)))
@@ -65,5 +66,7 @@ class CheckedIntSpec extends Properties("Checked.Int") {
     }
     val a = new Foo
     val b : Fooish[W.`2`.T] = a.foo(2)
+    val two = 2
+    val c : Fooish[Int] = a.foo(two)
   }
 }

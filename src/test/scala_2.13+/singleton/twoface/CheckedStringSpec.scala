@@ -96,6 +96,7 @@ class CheckedStringSpec extends Properties("Checked.String") {
     }
     val a = new Foo
     val b : Fooish[W.`"World"`.T] = a.foo("World")
+    val world = "World"
+    val c : Fooish[String] = a.foo(world)
   }
-
 }

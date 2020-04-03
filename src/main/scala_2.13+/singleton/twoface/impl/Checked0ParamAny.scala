@@ -52,8 +52,9 @@ object Checked0ParamAny {
       implicit req : RequireMsg[IsNonLiteral[T] || Cond[T], Msg[T]], di : DummyImplicit
     ) : Chk[Cond, Msg, T] = create[Cond, Msg, T](tfValue.getValue)
 
-    implicit def widen[Cond[_], Msg[_], T](value : Chk[Cond, Msg, T])(implicit di : DummyImplicit)
-    : Chk[Cond, Msg, Face] = value.asInstanceOf[Chk[Cond, Msg, Face]]
+    implicit def argCast[Cond[_], Msg[_], F, T](c : Chk[Cond, Msg, F])(
+      implicit eq : OpContainer.Eq[F, T, Face]
+    ) : Chk[Cond, Msg, T] = c.asInstanceOf[Chk[Cond, Msg, T]]
     ////////////////////////////////////////////////////////////////////////////////////////
   }
 
