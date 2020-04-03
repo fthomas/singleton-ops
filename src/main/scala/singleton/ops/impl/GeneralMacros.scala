@@ -605,6 +605,7 @@ trait GeneralMacros {
 
 
   def abort(msg: String, annotatedSym : Option[TypeSymbol] = defaultAnnotatedSym): Nothing = {
+//    println(s"!!!!!!aborted with: $msg at $annotatedSym, $defaultAnnotatedSym")
     if (annotatedSym.isDefined) setAnnotation(msg, annotatedSym.get)
     c.abort(c.enclosingPosition, msg)
   }
@@ -736,7 +737,7 @@ trait GeneralMacros {
       case t : CalcLit => t
       case t : CalcType => CalcNLit(t, q"$tfTree.getValue")
       case t =>
-        println(t)
+//        println(t)
         extractionFailed(typedTree.tpe)
     }
   }
@@ -769,9 +770,12 @@ trait GeneralMacros {
   object GetArgTree {
     def isMethodMacroCall : Boolean = c.enclosingImplicits.last.sym.isMacro
     def getAllArgs(tree : Tree, lhs : Boolean) : List[Tree] = tree match {
-      case Apply(Select(q,n), args) => if (isMethodMacroCall || lhs) args else List(tree)
+      case ValDef(_,_,_,Apply(_, t)) => t
+      case Apply(Apply(_,_), _) => getAllArgsRecur(tree)
+      case Apply(_, args) => if (isMethodMacroCall || lhs) args else List(tree)
       case t : Select => List(t)
       case t : Literal => List(t)
+      case t : Ident => List(t)
       case _ => getAllArgsRecur(tree)
     }
 

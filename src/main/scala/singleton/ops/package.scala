@@ -196,49 +196,4 @@ package object ops {
     check : Require[OP_OUTA == OP_OUTB]
   ) : OpMacro[NB, SB1, SB2, SB3] = opB
   /////////////////////////////////////////////////
-
-
-  /////////////////////////////////////////////////
-  //Implicit proof for type class containers of
-  //singleton type operations & literals
-  /////////////////////////////////////////////////
-  implicit def opContainer1[
-  F,
-  T,
-  C[_]
-  ](cf : C[F])
-   (implicit
-    ct : C[T],
-    check : Require[
-      F == T
-      ])
-  : C[T] = ct
-
-  implicit def opContainer2[
-  F1, F2,
-  T1, T2,
-  C[_,_]
-  ](cf : C[F1, F2])
-   (implicit
-    ct : C[T1, T2],
-    check : Require[
-        (F1 == T1) &&
-        (F2 == T2)
-      ]
-   ) : C[T1, T2] = ct
-
-  implicit def opContainer3[
-  F1, F2, F3,
-  T1, T2, T3,
-  C[_,_,_]
-  ](cf : C[F1, F2, F3])
-   (implicit
-    ct : C[T1, T2, T3],
-    check : Require[
-        (F1 == T1) &&
-        (F2 == T2) &&
-        (F3 == T3)
-      ]
-   ) : C[T1, T2, T3] = ct
-  /////////////////////////////////////////////////
 }

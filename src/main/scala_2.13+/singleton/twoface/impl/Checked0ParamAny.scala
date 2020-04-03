@@ -14,9 +14,19 @@ trait Checked0ParamAny[Chk[Cond0[_], Msg0[_], T0], Cond[_], Msg[_], Face, T] ext
 
 object Checked0ParamAny {
   trait LP[Chk[Cond0[_], Msg0[_], T0], Face] {
-    implicit def fromNum[Cond[_], Msg[_], T >: Face, Out <: T](value : T)
+    def create[Cond[_], Msg[_], T](value : Face) : Chk[Cond, Msg, T]
+
+    //This is a hack to force Scalac to actually display the constructed error message in all cases
+    //From some weird reason only direct macro calls displays the error in a case of an implicit conversion
+    implicit def requireMsg[Cond[_], Msg[_], T >: Face, Out <: T](value : T)
     : Chk[Cond, Msg, Out] = macro Builder.Macro.fromNumValue[Chk[Cond,Msg,_], Cond[_], Msg[_], T]
+
+    //from non-singleton values
+    implicit def fromNumNonSing[Cond[_], Msg[_]](value : Face)(
+      implicit req : ITE[IsNonLiteral[GetArg0], true, RequireMsg[Cond[GetArg0], Msg[GetArg0]]], di : DummyImplicit
+    ) : Chk[Cond, Msg, Face] = create[Cond, Msg, Face](value)
   }
+
   trait Builder[Chk[Cond0[_], Msg0[_], T0], Face] extends LP[Chk, Face] {
     trait Alias {
       type Cond[T]
@@ -25,48 +35,35 @@ object Checked0ParamAny {
       final type CheckedShell[T] = CheckedShellSym[NoSym, T]
       final type CheckedShellSym[Sym, T] = CheckedShell1[Cond, Msg, Sym, T, Face]
     }
-    def create[Cond[_], Msg[_], T](value : Face) : Chk[Cond, Msg, T]
 
     ////////////////////////////////////////////////////////////////////////////////////////
     // Generic Implicit Conversions
     // Currently triggers good-code-red IntelliJ issue
     // https://youtrack.jetbrains.com/issue/SCL-13089
     ////////////////////////////////////////////////////////////////////////////////////////
-    implicit def ev[Cond[_], Msg[_], T](implicit value : AcceptNonLiteral[Id[T]])
-    : Chk[Cond, Msg, T] = macro Builder.Macro.fromOpImpl[Chk[Cond,Msg,_], Cond[_], Msg[_], T]
+    implicit def ev[Cond[_], Msg[_], T](implicit req : RequireMsg[Cond[T], Msg[T]], value : AcceptNonLiteral[Id[T]])
+    : Chk[Cond, Msg, T] = create[Cond, Msg, T](value.valueWide.asInstanceOf[Face])
 
-    implicit def fromNumSing[Cond[_], Msg[_], T <: Face with Singleton](value : T)(implicit req : RequireMsg[Cond[T], Msg[T]])
-    : Chk[Cond, Msg, T] = create[Cond, Msg, T](value)
+    implicit def fromNumSing[Cond[_], Msg[_], T <: Face with Singleton](value : T)(
+      implicit req : RequireMsg[Cond[T], Msg[T]]
+    ) : Chk[Cond, Msg, T] = create[Cond, Msg, T](value)
 
-    implicit def fromTF[Cond[_], Msg[_], T >: Face, Out <: T](value : TwoFaceAny[Face, T])
-    : Chk[Cond, Msg, Out] = macro Builder.Macro.fromTF[Chk[Cond,Msg,_], Cond[_], Msg[_], T]
+    implicit def fromTF[Cond[_], Msg[_], T](tfValue : TwoFaceAny[Face, T])(
+      implicit req : RequireMsg[IsNonLiteral[T] || Cond[T], Msg[T]], di : DummyImplicit
+    ) : Chk[Cond, Msg, T] = create[Cond, Msg, T](tfValue.getValue)
 
-    implicit def widen[Cond[_], Msg[_], T](value : Chk[Cond, Msg, T])
-    : Chk[Cond, Msg, Face] = value.asInstanceOf[Chk[Cond, Msg, Face]]
+    implicit def argCast[Cond[_], Msg[_], F, T](c : Chk[Cond, Msg, F])(
+      implicit eq : OpContainer.Eq[F, T, Face]
+    ) : Chk[Cond, Msg, T] = c.asInstanceOf[Chk[Cond, Msg, T]]
     ////////////////////////////////////////////////////////////////////////////////////////
   }
 
   object Builder {
     final class Macro(val c: whitebox.Context) extends GeneralMacros {
-      def fromOpImpl[Chk, Cond, Msg, T](value : c.Tree)(
-        implicit
-        chk : c.WeakTypeTag[Chk], cond : c.WeakTypeTag[Cond], msg : c.WeakTypeTag[Msg], t : c.WeakTypeTag[T]
-      ): c.Tree = Checked0ParamMaterializer[Chk, Cond, Msg, T].fromOpImpl(value)
-
       def fromNumValue[Chk, Cond, Msg, T](value : c.Tree)(
         implicit
         chk : c.WeakTypeTag[Chk], cond : c.WeakTypeTag[Cond], msg : c.WeakTypeTag[Msg], t : c.WeakTypeTag[T]
       ): c.Tree = Checked0ParamMaterializer[Chk, Cond, Msg, T].fromNumValue(value)
-
-      def fromTF[Chk, Cond, Msg, T](value : c.Tree)(
-        implicit
-        chk : c.WeakTypeTag[Chk], cond : c.WeakTypeTag[Cond], msg : c.WeakTypeTag[Msg], t : c.WeakTypeTag[T]
-      ): c.Tree = Checked0ParamMaterializer[Chk, Cond, Msg, T].fromTF(value)
-
-      def widen[Chk, Cond, Msg, T](value : c.Tree)(
-        implicit
-        chk : c.WeakTypeTag[Chk], cond : c.WeakTypeTag[Cond], msg : c.WeakTypeTag[Msg], t : c.WeakTypeTag[T]
-      ): c.Tree = Checked0ParamMaterializer[Chk, Cond, Msg, T].widen(value)
     }
   }
 
@@ -78,6 +75,7 @@ object Checked0ParamAny {
     def create[Cond[_], Msg[_], T](value: std.Char): Char[Cond, Msg, T] = new Char[Cond, Msg, T](value)
   }
 
+  @scala.annotation.implicitNotFound("haha")
   final class Int[Cond[_], Msg[_], T](val value : std.Int) extends
     Checked0ParamAny[Int, Cond, Msg, std.Int, T] with TwoFaceAny.Int[T] {
     @inline def getValue : std.Int = value

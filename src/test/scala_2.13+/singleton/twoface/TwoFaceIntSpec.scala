@@ -424,6 +424,8 @@ class TwoFaceIntSpec extends Properties("TwoFace.Int") {
     }
     val a = new Foo
     val b : Fooish[W.`2`.T] = a.foo(2)
+    val two = 2
+    val c : Fooish[Int] = a.foo(two)
   }
 
 }
