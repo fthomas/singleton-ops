@@ -1,11 +1,11 @@
 package singleton.twoface.impl
 
 import singleton.ops._
-import singleton.ops.impl.{GeneralMacros, std}
+import singleton.ops.impl.{GeneralMacros, std, HasOut}
 
 import scala.reflect.macros.whitebox
 
-trait TwoFaceAny[Face, T] extends Any {
+trait TwoFaceAny[Face, T] extends Any with HasOut {
   type Out = T
   def isLiteral(implicit rt : RunTime[T]) : std.Boolean = !rt
   @inline def getValue : Face

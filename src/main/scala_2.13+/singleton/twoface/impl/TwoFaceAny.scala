@@ -1,9 +1,9 @@
 package singleton.twoface.impl
 
 import singleton.ops._
-import singleton.ops.impl.std
+import singleton.ops.impl.{std, HasOut}
 
-trait TwoFaceAny[Face, T] extends Any {
+trait TwoFaceAny[Face, T] extends Any with HasOut {
   type Out = T
   def isLiteral(implicit rt : RunTime[T]) : std.Boolean = !rt
   @inline def getValue : Face
