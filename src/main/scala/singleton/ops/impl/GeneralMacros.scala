@@ -14,6 +14,8 @@ trait GeneralMacros {
       case x => Some(x.typeSymbol.asType)
     }
 
+  private val func1Sym = symbolOf[Function1[_,_]]
+
   object funcTypes {
     val Arg = symbolOf[OpId.Arg]
     val AcceptNonLiteral = symbolOf[OpId.AcceptNonLiteral]
@@ -423,7 +425,7 @@ trait GeneralMacros {
       def unapply(tp: Type): Option[Calc] = {
         tp match {
           case TypeRef(_, sym, args) if sym == symbolOf[OpMacro[_,_,_,_]] =>
-            VerboseTraversal(s"@@OpCalc@@\nTP: $tp\nRAW: + ${showRaw(tp)}")
+            VerboseTraversal(s"@@OpCalc@@\nTP: $tp\nRAW: ${showRaw(tp)}")
             val args = tp.typeArgs
             lazy val aValue = TypeCalc(args(1))
             lazy val bValue = TypeCalc(args(2))
@@ -521,6 +523,7 @@ trait GeneralMacros {
               case _ => //regular cases
                 opCalc(funcType, aValue, bValue, cValue) match {
                   case (res : CalcVal) => Some(res)
+                  case u @ CalcUnknown(_,Some(_)) => Some(u) //Accept unknown values with a tree
                   case _ => None
                 }
             }
@@ -540,7 +543,7 @@ trait GeneralMacros {
         case Some(t : CalcType) => CalcNLit(t, q"valueOf[$tp]")
         case Some(t : CalcUnknown) => t
         case _ =>
-          VerboseTraversal(s"@@Unknown@@\nTP: $tp\nRAW: + ${showRaw(tp)}")
+          VerboseTraversal(s"@@Unknown@@\nTP: $tp\nRAW: ${showRaw(tp)}")
           CalcUnknown(tp, None)
       }
     }
@@ -549,7 +552,7 @@ trait GeneralMacros {
       val g = c.universe.asInstanceOf[SymbolTable]
       implicit def fixSymbolOps(sym: Symbol): g.Symbol = sym.asInstanceOf[g.Symbol]
 
-      VerboseTraversal(s"${c.enclosingPosition}\nTP: $tp\nRAW: ${showRaw(tp)}")
+      VerboseTraversal(s"@@TypeCalc.unapply@@ ${c.enclosingPosition}\nTP: $tp\nRAW: ${showRaw(tp)}")
       VerboseTraversal.incIdent
       val tpCalc = tp match {
         ////////////////////////////////////////////////////////////////////////
@@ -593,7 +596,7 @@ trait GeneralMacros {
         ////////////////////////////////////////////////////////////////////////
 
         case _ =>
-//          println("Exhausted search at: " + showRaw(tp))
+          VerboseTraversal("Exhausted search at: " + showRaw(tp))
           None
       }
       VerboseTraversal.decIdent
@@ -769,10 +772,22 @@ trait GeneralMacros {
 
   def wideTypeName(tpe : Type) : String = tpe.widen.typeSymbol.name.toString
 
+  object HasOutValue {
+    def unapply(tree : Tree) : Option[Tree] = tree match {
+      case Apply(Apply(_,_), List(Block(ClassDef(_,_,_,Template(_,_,members)) :: _, _))) =>
+        members.collectFirst {
+          case ValDef(_,TermName("value "),_,t) => t
+        }
+      case _ => None
+    }
+  }
+
   object GetArgTree {
     def isMethodMacroCall : Boolean = c.enclosingImplicits.last.sym.isMacro
     def getAllArgs(tree : Tree, lhs : Boolean) : List[Tree] = tree match {
       case ValDef(_,_,_,Apply(_, t)) => t
+      case HasOutValue(valueTree) => List(valueTree)
+      case Apply(TypeApply(_,_), List(HasOutValue(valueTree))) => List(valueTree)
       case Apply(Apply(_,_), _) => getAllArgsRecur(tree)
       case Apply(TypeApply(_,_), _) => getAllArgsRecur(tree)
       case Apply(_, args) => if (isMethodMacroCall || lhs) args else List(tree)
@@ -794,25 +809,32 @@ trait GeneralMacros {
       case _ => abort("Left-hand-side tree not found")
     }
 
-    def apply(argIdx : Int, lhs : Boolean) : c.Tree = {
+    def apply(argIdx : Int, lhs : Boolean) : (Tree, Type) = {
       val tree = c.enclosingImplicits.last.tree
-//      println(">>>>>>> enclosingImpl: " + c.enclosingImplicits.last)
+//      println(">>>>>>> enclosingImpl: ")// + c.enclosingImplicits.last)
+//      println("pt: " + c.enclosingImplicits.last.pt)
 //      println("tree: " + c.enclosingImplicits.last.tree)
 //      println("rawTree: " + showRaw(c.enclosingImplicits.last.tree))
       val allArgs = if (lhs) getAllLHSArgs(tree) else getAllArgs(tree, lhs)
 //      println("args: " + allArgs)
 //      println("<<<<<<< rawArgs" + showRaw(allArgs))
-      if (argIdx < allArgs.length) allArgs(argIdx)
+
+      val argTree : Tree = if (argIdx < allArgs.length) c.typecheck(allArgs(argIdx))
       else abort(s"Argument index($argIdx) is not smaller than the total number of arguments(${allArgs.length})")
+
+      val tpe = c.enclosingImplicits.last.pt match {
+        case TypeRef(_,sym,tp :: _) if (sym == func1Sym) => tp //conversion, so get the type from last.pt
+        case _ => argTree.tpe //not a conversion, so get the type from the tree
+      }
+      (argTree, tpe)
     }
   }
 
   def extractFromArg(argIdx : Int, lhs : Boolean) : Calc = {
-    val tree = GetArgTree(argIdx, lhs)
-    val typedTree = c.typecheck(tree)
-    val tpe = typedTree.tpe
+    val (typedTree, tpe) = GetArgTree(argIdx, lhs)
+    VerboseTraversal(s"@@extractFromArg@@\nTP: $tpe\nRAW: ${showRaw(tpe)}\nTree: $typedTree")
     TypeCalc(tpe) match {
-      case _ : CalcUnknown => CalcUnknown(tpe, Some(typedTree))
+      case _ : CalcUnknown => CalcUnknown(tpe, Some(c.untypecheck(typedTree)))
       case t : CalcNLit => CalcNLit(t, typedTree)
       case t => t
     }
@@ -848,7 +870,7 @@ trait GeneralMacros {
       case _ => unsupported()
     }
     def Id : Calc = a match {
-      case (av : CalcVal) => av
+      case (av : Calc) => av
       case _ => unsupported()
     }
     def ToNat : Calc = ToInt //Same handling, but also has a special case to handle this in MaterializeOpAuxGen
@@ -1248,6 +1270,7 @@ trait GeneralMacros {
     def usingFuncName : Tree = {
       val funcType = opTpe.typeArgs.head.typeSymbol.asType
       val opResult = TypeCalc(opTpe)
+
       val genTree = (funcType, opResult) match {
         case (funcTypes.ToNat, CalcLit.Int(t)) =>
           if (t < 0) abort(s"Nat cannot be a negative literal. Found: $t")

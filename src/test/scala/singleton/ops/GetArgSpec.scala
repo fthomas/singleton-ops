@@ -54,18 +54,16 @@ class GetArgSpec extends Properties("GetArgSpec") {
     illTyped("bad_use")
   }
 
+  import impl.InterpolatorTest._
 
   trait Foo[W] {
     def +[R](that: Foo.Able[R]) : Unit = {}
   }
-
-
   object Foo {
-
-    class Able[R](val right : R)
-
+    class Able[R](val right: R)
     object Able {
       implicit def ofXInt[R <: Int](right : Int)(implicit arg: GetArg.Aux[W.`0`.T, R]) : Able[R] = new Able[R](arg)
+      implicit def ofBar[R <: Bar](right: Bar)(implicit arg: GetArg0.Aux[R]): Able[R] = new Able[R](right.asInstanceOf[R])
     }
   }
   def foo(i: Int) = i
@@ -84,6 +82,13 @@ class GetArgSpec extends Properties("GetArgSpec") {
     Foo.Able.ofXInt(foo(1))
     Foo.Able.ofXInt(foo(one))
     Foo.Able.ofXInt(foo(one + one))
+  }
+
+  property("GetArg with string interpolation inputs") = wellTyped {
+    val z = new Foo[W.`5`.T] {}
+    val b5 = bar"5"
+    z + b5
+    z + bar"5"
   }
 
 }
