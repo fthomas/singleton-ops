@@ -1,12 +1,9 @@
 package singleton.twoface.impl
 
+import singleton.ops.impl.HasOut
 import singleton.twoface.TwoFace
 
 import scala.reflect.macros.whitebox
-
-trait HasOut {
-  type Out
-}
 
 sealed trait CaseClassSkipper[T <: HasOut] extends HasOut {
   type Out

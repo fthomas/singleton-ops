@@ -2,7 +2,11 @@ package singleton.ops.impl
 
 import shapeless.Nat
 
-trait Op extends Serializable {
+trait HasOut extends Any with Serializable {
+  type Out
+}
+
+trait Op extends HasOut {
   type OutWide
   type Out
   type OutNat <: Nat
@@ -23,9 +27,10 @@ protected[singleton] trait OpGen[O <: Op] {type Out; val value : Out}
 protected[singleton] object OpGen {
   type Aux[O <: Op, Ret_Out] = OpGen[O] {type Out = Ret_Out}
   implicit def impl[O <: Op](implicit o: O) : Aux[O, o.Out] = new OpGen[O] {type Out = o.Out; val value = o.value.asInstanceOf[o.Out]}
+  implicit def getValue[O <: Op, Out](o : Aux[O, Out]) : Out = o.value
 }
 
-trait OpCast[T, O <: Op] {type Out <: T; val value : Out}
+trait OpCast[T, O <: Op] extends HasOut {type Out <: T; val value : Out}
 
 
 @scala.annotation.implicitNotFound(msg = "Unable to prove type argument is a Nat.")

@@ -1,7 +1,7 @@
 package singleton.twoface.impl
 import singleton.twoface.TwoFace
 
-import singleton.ops.impl.GeneralMacros
+import singleton.ops.impl.{GeneralMacros, HasOut}
 import scala.reflect.macros.whitebox
 
 ////////////////////////////////////////////////////////////////////////////////

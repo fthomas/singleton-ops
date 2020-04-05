@@ -14,11 +14,12 @@ trait GeneralMacros {
       case x => Some(x.typeSymbol.asType)
     }
 
+  private val func1Sym = symbolOf[Function1[_,_]]
+
   object funcTypes {
     val Arg = symbolOf[OpId.Arg]
     val AcceptNonLiteral = symbolOf[OpId.AcceptNonLiteral]
     val GetArg = symbolOf[OpId.GetArg]
-    val GetLHSArg = symbolOf[OpId.GetLHSArg]
     val ImplicitFound = symbolOf[OpId.ImplicitFound]
     val EnumCount = symbolOf[OpId.EnumCount]
     val Id = symbolOf[OpId.Id]
@@ -287,7 +288,7 @@ trait GeneralMacros {
     }
     def unapply(arg: CalcNLit) : Option[Tree] = Some(arg.tree)
   }
-  case class CalcUnknown(t: Type) extends Calc {
+  case class CalcUnknown(t: Type, treeOption : Option[Tree]) extends Calc {
     val tpe = t
     val name = "Unknown"
   }
@@ -424,7 +425,7 @@ trait GeneralMacros {
       def unapply(tp: Type): Option[Calc] = {
         tp match {
           case TypeRef(_, sym, args) if sym == symbolOf[OpMacro[_,_,_,_]] =>
-            VerboseTraversal(s"@@OpCalc@@\nTP: $tp\nRAW: + ${showRaw(tp)}")
+            VerboseTraversal(s"@@OpCalc@@\nTP: $tp\nRAW: ${showRaw(tp)}")
             val args = tp.typeArgs
             lazy val aValue = TypeCalc(args(1))
             lazy val bValue = TypeCalc(args(2))
@@ -432,14 +433,14 @@ trait GeneralMacros {
             val funcType = args.head.typeSymbol.asType
 
             if (funcType == funcTypes.GetType)
-              return Some(CalcUnknown(args(1)))
+              return Some(CalcUnknown(args(1), None))
 
             //If function is set/get variable we keep the original string,
             //otherwise we get the variable's value
             val retVal = (funcType, aValue) match {
               case (funcTypes.ImplicitFound, _) =>
                 aValue match {
-                  case CalcUnknown(t) => try {
+                  case CalcUnknown(t, _) => try {
                     c.typecheck(q"implicitly[$t]")
                     Some(CalcLit(true))
                   } catch {
@@ -450,7 +451,7 @@ trait GeneralMacros {
                 }
               case (funcTypes.EnumCount, _) =>
                 aValue match {
-                  case CalcUnknown(t) => Some(CalcLit(t.typeSymbol.asClass.knownDirectSubclasses.size))
+                  case CalcUnknown(t, _) => Some(CalcLit(t.typeSymbol.asClass.knownDirectSubclasses.size))
                   case _ => Some(CalcLit(0))
                 }
               case (funcTypes.IsNat, _) =>
@@ -522,6 +523,7 @@ trait GeneralMacros {
               case _ => //regular cases
                 opCalc(funcType, aValue, bValue, cValue) match {
                   case (res : CalcVal) => Some(res)
+                  case u @ CalcUnknown(_,Some(_)) => Some(u) //Accept unknown values with a tree
                   case _ => None
                 }
             }
@@ -541,8 +543,8 @@ trait GeneralMacros {
         case Some(t : CalcType) => CalcNLit(t, q"valueOf[$tp]")
         case Some(t : CalcUnknown) => t
         case _ =>
-          VerboseTraversal(s"@@Unknown@@\nTP: $tp\nRAW: + ${showRaw(tp)}")
-          CalcUnknown(tp)
+          VerboseTraversal(s"@@Unknown@@\nTP: $tp\nRAW: ${showRaw(tp)}")
+          CalcUnknown(tp, None)
       }
     }
 
@@ -550,7 +552,7 @@ trait GeneralMacros {
       val g = c.universe.asInstanceOf[SymbolTable]
       implicit def fixSymbolOps(sym: Symbol): g.Symbol = sym.asInstanceOf[g.Symbol]
 
-      VerboseTraversal(s"${c.enclosingPosition}\nTP: $tp\nRAW: ${showRaw(tp)}")
+      VerboseTraversal(s"@@TypeCalc.unapply@@ ${c.enclosingPosition}\nTP: $tp\nRAW: ${showRaw(tp)}")
       VerboseTraversal.incIdent
       val tpCalc = tp match {
         ////////////////////////////////////////////////////////////////////////
@@ -594,7 +596,7 @@ trait GeneralMacros {
         ////////////////////////////////////////////////////////////////////////
 
         case _ =>
-//          println("Exhausted search at: " + showRaw(tp))
+          VerboseTraversal("Exhausted search at: " + showRaw(tp))
           None
       }
       VerboseTraversal.decIdent
@@ -686,6 +688,32 @@ trait GeneralMacros {
       """
   }
 
+  def genOpTreeUnknown(opTpe : Type, calc : CalcUnknown) : Tree = {
+    val outTpe = calc.tpe
+    calc.treeOption match {
+      case Some(valueTree) =>
+        q"""
+          new $opTpe {
+            type OutWide = $outTpe
+            type Out = $outTpe
+            final val value: $outTpe = $valueTree
+            final val isLiteral = false
+            final val valueWide: $outTpe = $valueTree
+          }
+        """
+      case None =>
+        q"""
+          new $opTpe {
+            type OutWide = Option[$outTpe]
+            type Out = Option[$outTpe]
+            final val value: Option[$outTpe] = None
+            final val isLiteral = false
+            final val valueWide: Option[$outTpe] = None
+          }
+        """
+    }
+  }
+
   def extractionFailed(tpe: Type) = {
     val msg = s"Cannot extract value from $tpe\n" + "showRaw==> " + showRaw(tpe)
     abort(msg)
@@ -744,26 +772,13 @@ trait GeneralMacros {
 
   def wideTypeName(tpe : Type) : String = tpe.widen.typeSymbol.name.toString
 
-  ///////////////////////////////////////////////////////////////////////////////////////////
-  // Get Argument
-  ///////////////////////////////////////////////////////////////////////////////////////////
-  object MaterializeGetArg {
-    def apply(gaSym : TypeSymbol, auxSym : TypeSymbol, aiTpe : Type, lhs : Boolean) : c.Tree = {
-      val argIdx : Int = TypeCalc(aiTpe) match {
-        case CalcLit.Int(t) => t
-        case _ => abort(s"Invalid argument index. Found $aiTpe")
-      }
-      val valueTree : Tree = GetArgTree(argIdx, lhs)
-      val outTpe : Type = c.typecheck(valueTree).tpe
-
-      val genTree = q"""
-        new $gaSym[$aiTpe]{
-          type Out = $outTpe
-          val value : Out = $valueTree
+  object HasOutValue {
+    def unapply(tree : Tree) : Option[Tree] = tree match {
+      case Apply(Apply(_,_), List(Block(ClassDef(_,_,_,Template(_,_,members)) :: _, _))) =>
+        members.collectFirst {
+          case ValDef(_,TermName("value "),_,t) => t
         }
-     """
-      //    println(genTree)
-      genTree
+      case _ => None
     }
   }
 
@@ -771,7 +786,10 @@ trait GeneralMacros {
     def isMethodMacroCall : Boolean = c.enclosingImplicits.last.sym.isMacro
     def getAllArgs(tree : Tree, lhs : Boolean) : List[Tree] = tree match {
       case ValDef(_,_,_,Apply(_, t)) => t
+      case HasOutValue(valueTree) => List(valueTree)
+      case Apply(TypeApply(_,_), List(HasOutValue(valueTree))) => List(valueTree)
       case Apply(Apply(_,_), _) => getAllArgsRecur(tree)
+      case Apply(TypeApply(_,_), _) => getAllArgsRecur(tree)
       case Apply(_, args) => if (isMethodMacroCall || lhs) args else List(tree)
       case t : Select => List(t)
       case t : Literal => List(t)
@@ -791,21 +809,35 @@ trait GeneralMacros {
       case _ => abort("Left-hand-side tree not found")
     }
 
-    def apply(argIdx : Int, lhs : Boolean) : c.Tree = {
+    def apply(argIdx : Int, lhs : Boolean) : (Tree, Type) = {
       val tree = c.enclosingImplicits.last.tree
-//      println(">>>>>>> enclosingImpl: " + c.enclosingImplicits.last)
+//      println(">>>>>>> enclosingImpl: ")// + c.enclosingImplicits.last)
+//      println("pt: " + c.enclosingImplicits.last.pt)
 //      println("tree: " + c.enclosingImplicits.last.tree)
 //      println("rawTree: " + showRaw(c.enclosingImplicits.last.tree))
       val allArgs = if (lhs) getAllLHSArgs(tree) else getAllArgs(tree, lhs)
 //      println("args: " + allArgs)
 //      println("<<<<<<< rawArgs" + showRaw(allArgs))
-      if (argIdx < allArgs.length) allArgs(argIdx)
+
+      val argTree : Tree = if (argIdx < allArgs.length) c.typecheck(allArgs(argIdx))
       else abort(s"Argument index($argIdx) is not smaller than the total number of arguments(${allArgs.length})")
+
+      val tpe = c.enclosingImplicits.last.pt match {
+        case TypeRef(_,sym,tp :: _) if (sym == func1Sym) => tp //conversion, so get the type from last.pt
+        case _ => argTree.tpe //not a conversion, so get the type from the tree
+      }
+      (argTree, tpe)
     }
   }
 
-  def extractFromArg(argIdx : Int, lhs : Boolean) : CalcVal = {
-    extractValueFromNumTree(GetArgTree(argIdx, lhs))
+  def extractFromArg(argIdx : Int, lhs : Boolean) : Calc = {
+    val (typedTree, tpe) = GetArgTree(argIdx, lhs)
+    VerboseTraversal(s"@@extractFromArg@@\nTP: $tpe\nRAW: ${showRaw(tpe)}\nTree: $typedTree")
+    TypeCalc(tpe) match {
+      case _ : CalcUnknown => CalcUnknown(tpe, Some(c.untypecheck(typedTree)))
+      case t : CalcNLit => CalcNLit(t, typedTree)
+      case t => t
+    }
   }
   ///////////////////////////////////////////////////////////////////////////////////////////
 
@@ -819,10 +851,10 @@ trait GeneralMacros {
     lazy val a = aCalc
     lazy val b = bCalc
     lazy val cArg = cCalc
-    def unsupported() = {
+    def unsupported() : Calc = {
       (a, b) match {
         case (aArg : CalcVal, bArg : CalcVal) => abort(s"Unsupported $funcType[$a, $b, $cArg]")
-        case _ => CalcUnknown(funcType.toType)
+        case _ => CalcUnknown(funcType.toType, None)
       }
     }
 
@@ -832,21 +864,17 @@ trait GeneralMacros {
       case _ => CalcVal.NLit
     }
 
-    def AcceptNonLiteral = Id //AcceptNonLiteral has a special handling in MaterializeOpAuxGen
-    def GetArg = a match {
-      case CalcLit.Int(t) if (t >= 0) => extractFromArg(t, false)
+    def AcceptNonLiteral : Calc = Id //AcceptNonLiteral has a special handling in MaterializeOpAuxGen
+    def GetArg : Calc = (a, b) match {
+      case (CalcLit.Int(idx), CalcLit.Boolean(lhs)) if (idx >= 0) => extractFromArg(idx, lhs)
       case _ => unsupported()
     }
-    def GetLHSArg = a match {
-      case CalcLit.Int(t) if (t >= 0) => extractFromArg(t, true)
+    def Id : Calc = a match {
+      case (av : Calc) => av
       case _ => unsupported()
     }
-    def Id = a match {
-      case (av : CalcVal) => av
-      case _ => unsupported()
-    }
-    def ToNat = ToInt //Same handling, but also has a special case to handle this in MaterializeOpAuxGen
-    def ToChar = a match {
+    def ToNat : Calc = ToInt //Same handling, but also has a special case to handle this in MaterializeOpAuxGen
+    def ToChar : Calc = a match {
       case CalcVal.Char(t, tt) => CalcVal(t, q"$tt")
       case CalcVal.Int(t, tt) => CalcVal(t.toChar, q"$tt.toChar")
       case CalcVal.Long(t, tt) => CalcVal(t.toChar, q"$tt.toChar")
@@ -854,7 +882,7 @@ trait GeneralMacros {
       case CalcVal.Double(t, tt) => CalcVal(t.toChar, q"$tt.toChar")
       case _ => unsupported()
     }
-    def ToInt = a match {
+    def ToInt : Calc = a match {
       case CalcVal.Char(t, tt) => CalcVal(t.toInt, q"$tt.toInt")
       case CalcVal.Int(t, tt) => CalcVal(t, q"$tt")
       case CalcVal.Long(t, tt) => CalcVal(t.toInt, q"$tt.toInt")
@@ -863,7 +891,7 @@ trait GeneralMacros {
       case CalcVal.String(t, tt) => CalcVal(t.toInt, q"$tt.toInt")
       case _ => unsupported()
     }
-    def ToLong = a match {
+    def ToLong : Calc = a match {
       case CalcVal.Char(t, tt) => CalcVal(t.toLong, q"$tt.toLong")
       case CalcVal.Int(t, tt) => CalcVal(t.toLong, q"$tt.toLong")
       case CalcVal.Long(t, tt) => CalcVal(t, q"$tt")
@@ -872,7 +900,7 @@ trait GeneralMacros {
       case CalcVal.String(t, tt) => CalcVal(t.toLong, q"$tt.toLong")
       case _ => unsupported()
     }
-    def ToFloat = a match {
+    def ToFloat : Calc = a match {
       case CalcVal.Char(t, tt) => CalcVal(t.toFloat, q"$tt.toFloat")
       case CalcVal.Int(t, tt) => CalcVal(t.toFloat, q"$tt.toFloat")
       case CalcVal.Long(t, tt) => CalcVal(t.toFloat, q"$tt.toFloat")
@@ -881,7 +909,7 @@ trait GeneralMacros {
       case CalcVal.String(t, tt) => CalcVal(t.toFloat, q"$tt.toFloat")
       case _ => unsupported()
     }
-    def ToDouble = a match {
+    def ToDouble : Calc = a match {
       case CalcVal.Char(t, tt) => CalcVal(t.toDouble, q"$tt.toDouble")
       case CalcVal.Int(t, tt) => CalcVal(t.toDouble, q"$tt.toDouble")
       case CalcVal.Long(t, tt) => CalcVal(t.toDouble, q"$tt.toDouble")
@@ -890,7 +918,7 @@ trait GeneralMacros {
       case CalcVal.String(t, tt) => CalcVal(t.toDouble, q"$tt.toDouble")
       case _ => unsupported()
     }
-    def ToString = a match {
+    def ToString : Calc = a match {
       case CalcVal.Char(t, tt) => CalcVal(t.toString, q"$tt.toString")
       case CalcVal.Int(t, tt) => CalcVal(t.toString, q"$tt.toString")
       case CalcVal.Long(t, tt) => CalcVal(t.toString, q"$tt.toString")
@@ -900,8 +928,8 @@ trait GeneralMacros {
       case CalcVal.Boolean(t, tt) => CalcVal(t.toString, q"$tt.toString")
       case _ => unsupported()
     }
-    def ToSymbol = ToString //Same handling, but has also has a special case in MaterializeOpAuxGen
-    def Negate = a match {
+    def ToSymbol : Calc = ToString //Same handling, but has also has a special case in MaterializeOpAuxGen
+    def Negate : Calc = a match {
       case CalcVal.Char(t, tt) => CalcVal(-t, q"-$tt")
       case CalcVal.Int(t, tt) => CalcVal(-t, q"-$tt")
       case CalcVal.Long(t, tt) => CalcVal(-t, q"-$tt")
@@ -909,64 +937,64 @@ trait GeneralMacros {
       case CalcVal.Double(t, tt) => CalcVal(-t, q"-$tt")
       case _ => unsupported()
     }
-    def Abs = a match {
+    def Abs : Calc = a match {
       case CalcVal.Int(t, tt) => CalcVal(math.abs(t), q"_root_.scala.math.abs($tt)")
       case CalcVal.Long(t, tt) => CalcVal(math.abs(t), q"_root_.scala.math.abs($tt)")
       case CalcVal.Float(t, tt) => CalcVal(math.abs(t), q"_root_.scala.math.abs($tt)")
       case CalcVal.Double(t, tt) => CalcVal(math.abs(t), q"_root_.scala.math.abs($tt)")
       case _ => unsupported()
     }
-    def NumberOfLeadingZeros = a match {
+    def NumberOfLeadingZeros : Calc = a match {
       case CalcVal.Int(t, tt) => CalcVal(nlz(t), q"_root_.singleton.ops.impl.nlz($tt)")
       case CalcVal.Long(t, tt) => CalcVal(nlz(t), q"_root_.singleton.ops.impl.nlz($tt)")
       case _ => unsupported()
     }
-    def Floor = a match {
+    def Floor : Calc = a match {
       case CalcVal.Double(t, tt) => CalcVal(math.floor(t), q"_root_.scala.math.floor($tt)")
       case _ => unsupported()
     }
-    def Ceil = a match {
+    def Ceil : Calc = a match {
       case CalcVal.Double(t, tt) => CalcVal(math.ceil(t), q"_root_.scala.math.ceil($tt)")
       case _ => unsupported()
     }
-    def Round = a match {
+    def Round : Calc = a match {
       case CalcVal.Float(t, tt) => CalcVal(math.round(t), q"_root_.scala.math.round($tt)")
       case CalcVal.Double(t, tt) => CalcVal(math.round(t), q"_root_.scala.math.round($tt)")
       case _ => unsupported()
     }
-    def Sin = a match {
+    def Sin : Calc = a match {
       case CalcVal.Double(t, tt) => CalcVal(math.sin(t), q"_root_.scala.math.sin($tt)")
       case _ => unsupported()
     }
-    def Cos = a match {
+    def Cos : Calc = a match {
       case CalcVal.Double(t, tt) => CalcVal(math.cos(t), q"_root_.scala.math.cos($tt)")
       case _ => unsupported()
     }
-    def Tan = a match {
+    def Tan : Calc = a match {
       case CalcVal.Double(t, tt) => CalcVal(math.tan(t), q"_root_.scala.math.tan($tt)")
       case _ => unsupported()
     }
-    def Sqrt = a match {
+    def Sqrt : Calc = a match {
       case CalcVal.Double(t, tt) => CalcVal(math.sqrt(t), q"_root_.scala.math.sqrt($tt)")
       case _ => unsupported()
     }
-    def Log = a match {
+    def Log : Calc = a match {
       case CalcVal.Double(t, tt) => CalcVal(math.log(t), q"_root_.scala.math.log($tt)")
       case _ => unsupported()
     }
-    def Log10 = a match {
+    def Log10 : Calc = a match {
       case CalcVal.Double(t, tt) => CalcVal(math.log10(t), q"_root_.scala.math.log10($tt)")
       case _ => unsupported()
     }
-    def Reverse = a match {
+    def Reverse : Calc = a match {
       case CalcVal.String(t, tt) => CalcVal(t.reverse, q"$tt.reverse")
       case _ => unsupported()
     }
-    def Not = a match {
+    def Not : Calc = a match {
       case CalcVal.Boolean(t, tt) => CalcVal(!t, q"!$tt")
       case _ => unsupported()
     }
-    def Require = a match {
+    def Require : Calc = a match {
       case CalcLit.Boolean(true) => CalcLit(true)
       case CalcLit.Boolean(false) => b match {
         case CalcLit.String(msg) =>
@@ -981,7 +1009,7 @@ trait GeneralMacros {
           }
         //directly using the java lib `require` resulted in compiler crash, so we use wrapped require instead
         case CalcNLit.String(msg,_) => cArg match {
-          case CalcUnknown(t) if t.typeSymbol == symbolOf[Warn] =>
+          case CalcUnknown(t, _) if t.typeSymbol == symbolOf[Warn] =>
             CalcNLit.Boolean(q"""{println(${buildWarningMsg(msg)}); false}""")
           case _ =>
             CalcNLit.Boolean(q"{_root_.singleton.ops.impl._require(false, $msg); false}")
@@ -991,7 +1019,7 @@ trait GeneralMacros {
       case CalcNLit.Boolean(cond,_) => b match {
         //directly using the java lib `require` resulted in compiler crash, so we use wrapped require instead
         case CalcVal.String(msg, msgt) => cArg match {
-          case CalcUnknown(t) if t == symbolOf[Warn] =>
+          case CalcUnknown(t, _) if t == symbolOf[Warn] =>
             CalcNLit.Boolean(
               q"""{
                   if ($cond) true
@@ -1007,7 +1035,7 @@ trait GeneralMacros {
       }
       case _ => unsupported()
     }
-    def ITE = (a, b, cArg) match {
+    def ITE : Calc = (a, b, cArg) match {
       //Also has special case handling inside unapply
       case (CalcVal.Boolean(it,itt), CalcVal.Char(tt,ttt), CalcVal.Char(et,ett)) =>
         CalcVal(if(it) tt else et, q"if ($itt) $ttt else $ett")
@@ -1025,11 +1053,11 @@ trait GeneralMacros {
         CalcVal(if(it) tt else et, q"if ($itt) $ttt else $ett")
       case _ => unsupported()
     }
-    def Next = b match {
+    def Next : Calc = b match {
       case (bv : CalcVal) => bv
       case _ => unsupported()
     }
-    def Plus = (a, b) match {
+    def Plus : Calc = (a, b) match {
       case (CalcVal.Char(at, att), CalcVal.Char(bt, btt)) => CalcVal(at + bt, q"$att + $btt")
       case (CalcVal.Int(at, att), CalcVal.Int(bt, btt)) => CalcVal(at + bt, q"$att + $btt")
       case (CalcVal.Long(at, att), CalcVal.Long(bt, btt)) => CalcVal(at + bt, q"$att + $btt")
@@ -1038,7 +1066,7 @@ trait GeneralMacros {
       case (CalcVal.String(at, att), CalcVal.String(bt, btt)) => CalcVal(at + bt, q"$att + $btt")
       case _ => unsupported()
     }
-    def Minus = (a, b) match {
+    def Minus : Calc = (a, b) match {
       case (CalcVal.Char(at, att), CalcVal.Char(bt, btt)) => CalcVal(at - bt, q"$att - $btt")
       case (CalcVal.Int(at, att), CalcVal.Int(bt, btt)) => CalcVal(at - bt, q"$att - $btt")
       case (CalcVal.Long(at, att), CalcVal.Long(bt, btt)) => CalcVal(at - bt, q"$att - $btt")
@@ -1046,7 +1074,7 @@ trait GeneralMacros {
       case (CalcVal.Double(at, att), CalcVal.Double(bt, btt)) => CalcVal(at - bt, q"$att - $btt")
       case _ => unsupported()
     }
-    def Mul = (a, b) match {
+    def Mul : Calc = (a, b) match {
       case (CalcVal.Char(at, att), CalcVal.Char(bt, btt)) => CalcVal(at * bt, q"$att * $btt")
       case (CalcVal.Int(at, att), CalcVal.Int(bt, btt)) => CalcVal(at * bt, q"$att * $btt")
       case (CalcVal.Long(at, att), CalcVal.Long(bt, btt)) => CalcVal(at * bt, q"$att * $btt")
@@ -1054,7 +1082,7 @@ trait GeneralMacros {
       case (CalcVal.Double(at, att), CalcVal.Double(bt, btt)) => CalcVal(at * bt, q"$att * $btt")
       case _ => unsupported()
     }
-    def Div = (a, b) match {
+    def Div : Calc = (a, b) match {
       case (CalcVal.Char(at, att), CalcVal.Char(bt, btt)) => CalcVal(at / bt, q"$att / $btt")
       case (CalcVal.Int(at, att), CalcVal.Int(bt, btt)) => CalcVal(at / bt, q"$att / $btt")
       case (CalcVal.Long(at, att), CalcVal.Long(bt, btt)) => CalcVal(at / bt, q"$att / $btt")
@@ -1062,7 +1090,7 @@ trait GeneralMacros {
       case (CalcVal.Double(at, att), CalcVal.Double(bt, btt)) => CalcVal(at / bt, q"$att / $btt")
       case _ => unsupported()
     }
-    def Mod = (a, b) match {
+    def Mod : Calc = (a, b) match {
       case (CalcVal.Char(at, att), CalcVal.Char(bt, btt)) => CalcVal(at % bt, q"$att % $btt")
       case (CalcVal.Int(at, att), CalcVal.Int(bt, btt)) => CalcVal(at % bt, q"$att % $btt")
       case (CalcVal.Long(at, att), CalcVal.Long(bt, btt)) => CalcVal(at % bt, q"$att % $btt")
@@ -1070,7 +1098,7 @@ trait GeneralMacros {
       case (CalcVal.Double(at, att), CalcVal.Double(bt, btt)) => CalcVal(at % bt, q"$att % $btt")
       case _ => unsupported()
     }
-    def Sml = (a, b) match {
+    def Sml : Calc = (a, b) match {
       case (CalcVal.Char(at, att), CalcVal.Char(bt, btt)) => CalcVal(at < bt, q"$att < $btt")
       case (CalcVal.Int(at, att), CalcVal.Int(bt, btt)) => CalcVal(at < bt, q"$att < $btt")
       case (CalcVal.Long(at, att), CalcVal.Long(bt, btt)) => CalcVal(at < bt, q"$att < $btt")
@@ -1078,7 +1106,7 @@ trait GeneralMacros {
       case (CalcVal.Double(at, att), CalcVal.Double(bt, btt)) => CalcVal(at < bt, q"$att < $btt")
       case _ => unsupported()
     }
-    def Big = (a, b) match {
+    def Big : Calc = (a, b) match {
       case (CalcVal.Char(at, att), CalcVal.Char(bt, btt)) => CalcVal(at > bt, q"$att > $btt")
       case (CalcVal.Int(at, att), CalcVal.Int(bt, btt)) => CalcVal(at > bt, q"$att > $btt")
       case (CalcVal.Long(at, att), CalcVal.Long(bt, btt)) => CalcVal(at > bt, q"$att > $btt")
@@ -1086,7 +1114,7 @@ trait GeneralMacros {
       case (CalcVal.Double(at, att), CalcVal.Double(bt, btt)) => CalcVal(at > bt, q"$att > $btt")
       case _ => unsupported()
     }
-    def SmlEq = (a, b) match {
+    def SmlEq : Calc = (a, b) match {
       case (CalcVal.Char(at, att), CalcVal.Char(bt, btt)) => CalcVal(at <= bt, q"$att <= $btt")
       case (CalcVal.Int(at, att), CalcVal.Int(bt, btt)) => CalcVal(at <= bt, q"$att <= $btt")
       case (CalcVal.Long(at, att), CalcVal.Long(bt, btt)) => CalcVal(at <= bt, q"$att <= $btt")
@@ -1094,7 +1122,7 @@ trait GeneralMacros {
       case (CalcVal.Double(at, att), CalcVal.Double(bt, btt)) => CalcVal(at <= bt, q"$att <= $btt")
       case _ => unsupported()
     }
-    def BigEq = (a, b) match {
+    def BigEq : Calc = (a, b) match {
       case (CalcVal.Char(at, att), CalcVal.Char(bt, btt)) => CalcVal(at >= bt, q"$att >= $btt")
       case (CalcVal.Int(at, att), CalcVal.Int(bt, btt)) => CalcVal(at >= bt, q"$att >= $btt")
       case (CalcVal.Long(at, att), CalcVal.Long(bt, btt)) => CalcVal(at >= bt, q"$att >= $btt")
@@ -1102,7 +1130,7 @@ trait GeneralMacros {
       case (CalcVal.Double(at, att), CalcVal.Double(bt, btt)) => CalcVal(at >= bt, q"$att >= $btt")
       case _ => unsupported()
     }
-    def Eq = (a, b) match {
+    def Eq : Calc = (a, b) match {
       case (CalcVal.Char(at, att), CalcVal.Char(bt, btt)) => CalcVal(at == bt, q"$att == $btt")
       case (CalcVal.Int(at, att), CalcVal.Int(bt, btt)) => CalcVal(at == bt, q"$att == $btt")
       case (CalcVal.Long(at, att), CalcVal.Long(bt, btt)) => CalcVal(at == bt, q"$att == $btt")
@@ -1112,7 +1140,7 @@ trait GeneralMacros {
       case (CalcVal.Boolean(at, att), CalcVal.Boolean(bt, btt)) => CalcVal(at == bt, q"$att == $btt")
       case _ => unsupported()
     }
-    def Neq = (a, b) match {
+    def Neq : Calc = (a, b) match {
       case (CalcVal.Char(at, att), CalcVal.Char(bt, btt)) => CalcVal(at != bt, q"$att != $btt")
       case (CalcVal.Int(at, att), CalcVal.Int(bt, btt)) => CalcVal(at != bt, q"$att != $btt")
       case (CalcVal.Long(at, att), CalcVal.Long(bt, btt)) => CalcVal(at != bt, q"$att != $btt")
@@ -1122,7 +1150,7 @@ trait GeneralMacros {
       case (CalcVal.Boolean(at, att), CalcVal.Boolean(bt, btt)) => CalcVal(at != bt, q"$att != $btt")
       case _ => unsupported()
     }
-    def And = a match {
+    def And : Calc = a match {
       case CalcLit.Boolean(ab) => //`And` expressions where the LHS is a literal can be inlined
         if (ab) b match {
           case CalcVal.Boolean(_,_) => b //inlining the value of RHS when the LHS is true
@@ -1133,7 +1161,7 @@ trait GeneralMacros {
         case _ => unsupported()
       }
     }
-    def Or = a match {
+    def Or : Calc = a match {
       case CalcLit.Boolean(ab) => //`Or` expressions where the LHS is a literal can be inlined
         if (!ab) b match {
           case CalcVal.Boolean(_,_) => b //inlining the value of RHS when the LHS is false
@@ -1144,12 +1172,12 @@ trait GeneralMacros {
         case _ => unsupported()
       }
     }
-    def Pow = (a, b) match {
+    def Pow : Calc = (a, b) match {
       case (CalcVal.Double(at, att), CalcVal.Double(bt, btt)) =>
         CalcVal(math.pow(at.toDouble, bt.toDouble), q"_root_.scala.math.pow($att.toDouble, $btt.toDouble)")
       case _ => unsupported()
     }
-    def Min = (a, b) match {
+    def Min : Calc = (a, b) match {
       case (CalcVal.Int(at, att), CalcVal.Int(bt, btt)) =>
         CalcVal(math.min(at, bt), q"_root_.scala.math.min($att, $btt)")
       case (CalcVal.Long(at, att), CalcVal.Long(bt, btt)) =>
@@ -1160,7 +1188,7 @@ trait GeneralMacros {
         CalcVal(math.min(at, bt), q"_root_.scala.math.min($att, $btt)")
       case _ => unsupported()
     }
-    def Max = (a, b) match {
+    def Max : Calc = (a, b) match {
       case (CalcVal.Int(at, att), CalcVal.Int(bt, btt)) =>
         CalcVal(math.max(at, bt), q"_root_.scala.math.max($att, $btt)")
       case (CalcVal.Long(at, att), CalcVal.Long(bt, btt)) =>
@@ -1171,17 +1199,17 @@ trait GeneralMacros {
         CalcVal(math.max(at, bt), q"_root_.scala.math.max($att, $btt)")
       case _ => unsupported()
     }
-    def Substring = (a, b) match {
+    def Substring : Calc = (a, b) match {
       case (CalcLit.String(at), CalcLit.Int(bt)) => CalcLit(at.substring(bt))
       case (CalcVal.String(at, att), CalcVal.Int(bt, btt)) => CalcNLit.String(q"$att.substring($btt)")
       case _ => unsupported()
     }
-    def CharAt = (a, b) match {
+    def CharAt : Calc = (a, b) match {
       case (CalcLit.String(at), CalcLit.Int(bt)) => CalcLit(at.charAt(bt))
       case (CalcVal.String(at, att), CalcVal.Int(bt, btt)) => CalcNLit.Char(q"$att.charAt($btt)")
       case _ => unsupported()
     }
-    def Length = a match {
+    def Length : Calc = a match {
       case CalcVal.String(at, att) => CalcVal(at.length, q"$att.length")
       case _ => unsupported()
     }
@@ -1189,7 +1217,6 @@ trait GeneralMacros {
     funcType match {
       case funcTypes.AcceptNonLiteral => AcceptNonLiteral
       case funcTypes.GetArg => GetArg
-      case funcTypes.GetLHSArg => GetLHSArg
       case funcTypes.Id => Id
       case funcTypes.ToNat => ToNat
       case funcTypes.ToChar => ToChar
@@ -1250,7 +1277,8 @@ trait GeneralMacros {
           else genOpTreeNat(opTpe, t)
         case (funcTypes.ToSymbol, CalcLit.String(t)) => genOpTreeSymbol(opTpe, t)
         case (_, CalcLit(t)) => genOpTreeLit(opTpe, t)
-        case (funcTypes.AcceptNonLiteral, t : CalcNLit) => genOpTreeNLit(opTpe, t)
+        case (funcTypes.AcceptNonLiteral | funcTypes.GetArg, t : CalcNLit) => genOpTreeNLit(opTpe, t)
+        case (funcTypes.GetArg, t : CalcUnknown) => genOpTreeUnknown(opTpe, t)
         case (_, t: CalcNLit) =>
           abort("Calculation has returned a non-literal type/value.\nTo accept non-literal values, use `AcceptNonLiteral[T]`.")
         case _ => extractionFailed(opTpe)
@@ -1369,7 +1397,7 @@ trait GeneralMacros {
         }
       }
 
-      val reqCalc = opCalc(funcTypes.Require, condCalc, msgCalc, CalcUnknown(typeOf[NoSym]))
+      val reqCalc = opCalc(funcTypes.Require, condCalc, msgCalc, CalcUnknown(typeOf[NoSym], None))
 
       q"""
          (new $chkSym[$condTpe, $msgTpe, $chkArgTpe]($outTree.asInstanceOf[$outTpe]))
@@ -1435,7 +1463,7 @@ trait GeneralMacros {
         }
       }
 
-      val reqCalc = opCalc(funcTypes.Require, condCalc, msgCalc, CalcUnknown(typeOf[NoSym]))
+      val reqCalc = opCalc(funcTypes.Require, condCalc, msgCalc, CalcUnknown(typeOf[NoSym], None))
 
       q"""
          (new $chkSym[$condTpe, $msgTpe, $chkArgTpe, $paramFaceTpe, $paramTpe]($outTree.asInstanceOf[$outTpe]))
