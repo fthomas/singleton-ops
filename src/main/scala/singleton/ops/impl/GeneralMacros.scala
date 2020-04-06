@@ -4,6 +4,13 @@ import shapeless.tag.@@
 import singleton.twoface.impl.TwoFaceAny
 
 import scala.reflect.macros.whitebox
+
+private object MacroCache {
+  import scala.collection.mutable
+  val cache = mutable.Map.empty[Any, Any]
+  def get(key : Any) : Option[Any] = cache.get(key)
+  def add[V <: Any](key : Any, value : V) : V = {cache += (key -> value); value}
+}
 trait GeneralMacros {
   val c: whitebox.Context
 
@@ -78,6 +85,7 @@ trait GeneralMacros {
     val Substring = symbolOf[OpId.Substring]
     val CharAt = symbolOf[OpId.CharAt]
     val Length = symbolOf[OpId.Length]
+    val uncacheableSet = Set(Arg, EnumCount, ImplicitFound, GetArg)
   }
 
   ////////////////////////////////////////////////////////////////////
@@ -244,7 +252,7 @@ trait GeneralMacros {
         case (t: CalcType.Double) => Double
         case (t: CalcType.String) => String
         case (t: CalcType.Boolean) => Boolean
-        case _ => abort("Unsupported type")
+        case t => abort(s"Unsupported CalcUBType type $t")
       }
     }
   }
@@ -271,7 +279,7 @@ trait GeneralMacros {
         case (t : CalcType.Double) => Double(tree)
         case (t : CalcType.String) => String(tree)
         case (t : CalcType.Boolean) => Boolean(tree)
-        case _ => abort("Unsupported type")
+        case t => abort(s"Unsupported CalcTypeRef type $calcTypeRef")
       }
     }
     def applyTpe(calcTypeRef : Calc, tree : Tree, tpe : Type) : CalcNLit = {
@@ -283,7 +291,7 @@ trait GeneralMacros {
         case (t: CalcType.Double) => Double(tree, tpe)
         case (t: CalcType.String) => String(tree, tpe)
         case (t: CalcType.Boolean) => Boolean(tree, tpe)
-        case _ => abort("Unsupported type")
+        case t => abort(s"Unsupported CalcTypeRef type $calcTypeRef")
       }
     }
     def unapply(arg: CalcNLit) : Option[Tree] = Some(arg.tree)
@@ -312,6 +320,58 @@ trait GeneralMacros {
 
 
   ////////////////////////////////////////////////////////////////////
+  // Calc Caching
+  ////////////////////////////////////////////////////////////////////
+  object CalcCache {
+    import collection.mutable
+    import io.AnsiColor._
+    def deepCopyTree(t: Tree): Tree = {
+      val treeDuplicator = new Transformer {
+        // by default Transformers don’t copy trees which haven’t been modified,
+        // so we need to use use strictTreeCopier
+        override val treeCopy =
+        c.asInstanceOf[reflect.macros.runtime.Context].global.newStrictTreeCopier.asInstanceOf[TreeCopier]
+      }
+
+      treeDuplicator.transform(t)
+    }
+
+    final case class Key private (key : Type) {
+      override def equals(that: Any): Boolean = that.asInstanceOf[Key].key =:= key
+    }
+    object Key {
+      implicit def fromType(key : Type) : Key = new Key(key)
+    }
+    val cache = MacroCache.cache.asInstanceOf[mutable.Map[Key, Calc]]
+    def get(key : Type) : Option[Calc] = {
+      val k = Key.fromType(key)
+      cache.get(k).map {v =>
+        VerboseTraversal(s"${YELLOW}${BOLD}fetching${RESET} $k, $v")
+        val cloned = v match {
+          case CalcLit(tp) => CalcLit(tp) //reconstruct internal literal tree
+          case c @ CalcNLit(tree) => CalcNLit(c, deepCopyTree(tree))
+          case c => c
+        }
+        cloned
+      }
+    }
+    def add[V <: Calc](key : Type, value : V) : V = {
+      val k = Key.fromType(key)
+      cache += (k -> value)
+      VerboseTraversal(s"${GREEN}${BOLD}caching${RESET} $k -> $value")
+      value
+    }
+    def getOrElseUpdate[V <: Calc](key : Type, value : => V) : V = {
+      val v = value
+      val k = Key.fromType(key)
+      cache.getOrElseUpdate(k, {VerboseTraversal(s"${GREEN}${BOLD}caching${RESET} $k -> $v"); v}).asInstanceOf[V]
+      v
+    }
+  }
+  ////////////////////////////////////////////////////////////////////
+
+
+  ////////////////////////////////////////////////////////////////////
   // Code thanks to Paul Phillips
   // https://github.com/paulp/psply/blob/master/src/main/scala/PsplyMacros.scala
   ////////////////////////////////////////////////////////////////////
@@ -321,9 +381,15 @@ trait GeneralMacros {
     private val verboseTraversal = false
     private val indentSize = 2
     private var indent : Int = 0
-    private def indentStr : String =  List.fill(indent * indentSize)(' ').mkString
-    def incIdent : Unit = indent = indent + 1
-    def decIdent : Unit = indent = indent - 1
+    private def indentStr : String =  " " * (indentSize * indent)
+    def incIdent : Unit = if (verboseTraversal) {
+      indent = indent + 1
+      println("--" * indent + ">")
+    }
+    def decIdent : Unit = if (verboseTraversal) {
+      println("<" + "--" * indent)
+      indent = indent - 1
+    }
     def apply(s : String) : Unit = {
       if (verboseTraversal) println(indentStr + s.replaceAll("\n",s"\n$indentStr"))
     }
@@ -422,112 +488,125 @@ trait GeneralMacros {
     // Calculates an Op
     ////////////////////////////////////////////////////////////////////////
     object OpCalc {
+      private var uncacheableStack : List[Boolean] = List()
+      private val opMacroSym = symbolOf[OpMacro[_,_,_,_]]
+      def setUncacheable() : Unit = uncacheableStack = true :: uncacheableStack.drop(1)
       def unapply(tp: Type): Option[Calc] = {
         tp match {
-          case TypeRef(_, sym, args) if sym == symbolOf[OpMacro[_,_,_,_]] =>
+          case TypeRef(_, sym, ft :: tp :: _) if sym == opMacroSym && ft.typeSymbol == funcTypes.GetType =>
+            Some(CalcUnknown(tp, None))
+          case TypeRef(_, sym, args) if sym == opMacroSym =>
+            uncacheableStack = false :: uncacheableStack
             VerboseTraversal(s"@@OpCalc@@\nTP: $tp\nRAW: ${showRaw(tp)}")
-            val args = tp.typeArgs
-            lazy val aValue = TypeCalc(args(1))
-            lazy val bValue = TypeCalc(args(2))
-            lazy val cValue = TypeCalc(args(3))
             val funcType = args.head.typeSymbol.asType
+            CalcCache.get(tp) match {
+              case None =>
+                val args = tp.typeArgs
+                lazy val aValue = TypeCalc(args(1))
+                lazy val bValue = TypeCalc(args(2))
+                lazy val cValue = TypeCalc(args(3))
 
-            if (funcType == funcTypes.GetType)
-              return Some(CalcUnknown(args(1), None))
+                //If function is set/get variable we keep the original string,
+                //otherwise we get the variable's value
+                val retVal = (funcType, aValue) match {
+                  case (funcTypes.ImplicitFound, _) =>
+                    aValue match {
+                      case CalcUnknown(t, _) => try {
+                        c.typecheck(q"implicitly[$t]")
+                        Some(CalcLit(true))
+                      } catch {
+                        case e : Throwable =>
+                          Some(CalcLit(false))
+                      }
+                      case _ => Some(CalcLit(false))
+                    }
+                  case (funcTypes.EnumCount, _) =>
+                    aValue match {
+                      case CalcUnknown(t, _) => Some(CalcLit(t.typeSymbol.asClass.knownDirectSubclasses.size))
+                      case _ => Some(CalcLit(0))
+                    }
+                  case (funcTypes.IsNat, _) =>
+                    aValue match {
+                      case CalcLit.Int(t) if t >= 0 => Some(CalcLit(true))
+                      case _ => Some(CalcLit(false))
+                    }
+                  case (funcTypes.IsChar, _) =>
+                    aValue match {
+                      case t : CalcType.Char => Some(CalcLit(true))
+                      case _ => Some(CalcLit(false))
+                    }
+                  case (funcTypes.IsInt, _) =>
+                    aValue match {
+                      case t : CalcType.Int => Some(CalcLit(true))
+                      case _ => Some(CalcLit(false))
+                    }
+                  case (funcTypes.IsLong, _) =>
+                    aValue match {
+                      case t : CalcType.Long => Some(CalcLit(true))
+                      case _ => Some(CalcLit(false))
+                    }
+                  case (funcTypes.IsFloat, _) =>
+                    aValue match {
+                      case t : CalcType.Float => Some(CalcLit(true))
+                      case _ => Some(CalcLit(false))
+                    }
+                  case (funcTypes.IsDouble, _) =>
+                    aValue match {
+                      case t : CalcType.Double => Some(CalcLit(true))
+                      case _ => Some(CalcLit(false))
+                    }
+                  case (funcTypes.IsString, _) =>
+                    aValue match {
+                      case t : CalcType.String => Some(CalcLit(true))
+                      case _ => Some(CalcLit(false))
+                    }
+                  case (funcTypes.IsBoolean, _) =>
+                    aValue match {
+                      case t : CalcType.Boolean => Some(CalcLit(true))
+                      case _ => Some(CalcLit(false))
+                    }
+                  case (funcTypes.IsSymbol, _) =>
+                    aValue match {
+                      case t : CalcType.String => Some(CalcLit(true))
+                      case _ => Some(CalcLit(false))
+                    }
+                  case (funcTypes.IsNonLiteral, _) => //Looking for non literals
+                    aValue match {
+                      case t : CalcLit => Some(CalcLit(false))
+                      case _ => Some(CalcLit(true)) //non-literal type (e.g., Int, Long,...)
+                    }
+                  case (funcTypes.ITE, CalcLit.Boolean(cond)) => //Special control case: ITE (If-Then-Else)
+                    if (cond) Some(bValue) //true (then) part of the IF
+                    else Some(cValue) //false (else) part of the IF
+                  case (funcTypes.Arg, CalcLit.Int(argNum)) =>
+                    bValue match { //Checking the argument type
+                      case t : CalcLit => Some(t) //Literal argument is just a literal
+                      case _ => //Got a type, so returning argument name
+                        TypeCalc.unapply(args(3)) match {
+                          case Some(t: CalcType) =>
+                            val term = TermName(s"arg$argNum")
+                            Some(CalcNLit(t, q"$term"))
+                          case _ =>
+                            None
+                        }
+                    }
 
-            //If function is set/get variable we keep the original string,
-            //otherwise we get the variable's value
-            val retVal = (funcType, aValue) match {
-              case (funcTypes.ImplicitFound, _) =>
-                aValue match {
-                  case CalcUnknown(t, _) => try {
-                    c.typecheck(q"implicitly[$t]")
-                    Some(CalcLit(true))
-                  } catch {
-                    case e : Throwable =>
-                      Some(CalcLit(false))
-                  }
-                  case _ => Some(CalcLit(false))
-                }
-              case (funcTypes.EnumCount, _) =>
-                aValue match {
-                  case CalcUnknown(t, _) => Some(CalcLit(t.typeSymbol.asClass.knownDirectSubclasses.size))
-                  case _ => Some(CalcLit(0))
-                }
-              case (funcTypes.IsNat, _) =>
-                aValue match {
-                  case CalcLit.Int(t) if t >= 0 => Some(CalcLit(true))
-                  case _ => Some(CalcLit(false))
-                }
-              case (funcTypes.IsChar, _) =>
-                aValue match {
-                  case t : CalcType.Char => Some(CalcLit(true))
-                  case _ => Some(CalcLit(false))
-                }
-              case (funcTypes.IsInt, _) =>
-                aValue match {
-                  case t : CalcType.Int => Some(CalcLit(true))
-                  case _ => Some(CalcLit(false))
-                }
-              case (funcTypes.IsLong, _) =>
-                aValue match {
-                  case t : CalcType.Long => Some(CalcLit(true))
-                  case _ => Some(CalcLit(false))
-                }
-              case (funcTypes.IsFloat, _) =>
-                aValue match {
-                  case t : CalcType.Float => Some(CalcLit(true))
-                  case _ => Some(CalcLit(false))
-                }
-              case (funcTypes.IsDouble, _) =>
-                aValue match {
-                  case t : CalcType.Double => Some(CalcLit(true))
-                  case _ => Some(CalcLit(false))
-                }
-              case (funcTypes.IsString, _) =>
-                aValue match {
-                  case t : CalcType.String => Some(CalcLit(true))
-                  case _ => Some(CalcLit(false))
-                }
-              case (funcTypes.IsBoolean, _) =>
-                aValue match {
-                  case t : CalcType.Boolean => Some(CalcLit(true))
-                  case _ => Some(CalcLit(false))
-                }
-              case (funcTypes.IsSymbol, _) =>
-                aValue match {
-                  case t : CalcType.String => Some(CalcLit(true))
-                  case _ => Some(CalcLit(false))
-                }
-              case (funcTypes.IsNonLiteral, _) => //Looking for non literals
-                aValue match {
-                  case t : CalcLit => Some(CalcLit(false))
-                  case _ => Some(CalcLit(true)) //non-literal type (e.g., Int, Long,...)
-                }
-              case (funcTypes.ITE, CalcLit.Boolean(cond)) => //Special control case: ITE (If-Then-Else)
-                if (cond) Some(bValue) //true (then) part of the IF
-                else Some(cValue) //false (else) part of the IF
-              case (funcTypes.Arg, CalcLit.Int(argNum)) =>
-                bValue match { //Checking the argument type
-                  case t : CalcLit => Some(t) //Literal argument is just a literal
-                  case _ => //Got a type, so returning argument name
-                    TypeCalc.unapply(args(3)) match {
-                      case Some(t: CalcType) =>
-                        val term = TermName(s"arg$argNum")
-                        Some(CalcNLit(t, q"$term"))
-                      case _ =>
-                        None
+                  case _ => //regular cases
+                    opCalc(funcType, aValue, bValue, cValue) match {
+                      case (res : CalcVal) => Some(res)
+                      case u @ CalcUnknown(_,Some(_)) => Some(u) //Accept unknown values with a tree
+                      case _ => None
                     }
                 }
-
-              case _ => //regular cases
-                opCalc(funcType, aValue, bValue, cValue) match {
-                  case (res : CalcVal) => Some(res)
-                  case u @ CalcUnknown(_,Some(_)) => Some(u) //Accept unknown values with a tree
-                  case _ => None
-                }
+                val uncacheable = uncacheableStack.head
+                uncacheableStack = uncacheableStack.drop(1)
+                //If the current function is uncacheable or deeper functionality was already determined as uncacheable
+                //then we set the shallower function as uncacheable as well. Otherwise, we can set cache the calculation.
+                if (uncacheable || funcTypes.uncacheableSet.contains(funcType)) setUncacheable()
+                else retVal.foreach(rv => CalcCache.add(tp, rv))
+                retVal
+              case cached => cached
             }
-            retVal
           case _ => None
         }
       }
@@ -537,10 +616,16 @@ trait GeneralMacros {
     def apply(tp: Type): Calc = {
       TypeCalc.unapply(tp) match {
         case Some(t : CalcVal) => t
-        case Some(t : CalcType.Symbol) => CalcNLit(CalcType.String, q"valueOf[$tp].name")
+        case Some(t : CalcType.Symbol) =>
+          OpCalc.setUncacheable()
+          CalcNLit(CalcType.String, q"valueOf[$tp].name")
         case Some(t : CalcUBType) => t
-        case Some(t : CalcTFType) => CalcNLit(t, q"valueOf[$tp].getValue")
-        case Some(t : CalcType) => CalcNLit(t, q"valueOf[$tp]")
+        case Some(t : CalcTFType) =>
+          OpCalc.setUncacheable()
+          CalcNLit(t, q"valueOf[$tp].getValue")
+        case Some(t : CalcType) =>
+          OpCalc.setUncacheable()
+          CalcNLit(t, q"valueOf[$tp]")
         case Some(t : CalcUnknown) => t
         case _ =>
           VerboseTraversal(s"@@Unknown@@\nTP: $tp\nRAW: ${showRaw(tp)}")
@@ -607,7 +692,7 @@ trait GeneralMacros {
 
 
   def abort(msg: String, annotatedSym : Option[TypeSymbol] = defaultAnnotatedSym): Nothing = {
-//    println(s"!!!!!!aborted with: $msg at $annotatedSym, $defaultAnnotatedSym")
+    VerboseTraversal(s"!!!!!!aborted with: $msg at $annotatedSym, $defaultAnnotatedSym")
     if (annotatedSym.isDefined) setAnnotation(msg, annotatedSym.get)
     c.abort(c.enclosingPosition, msg)
   }
@@ -809,13 +894,15 @@ trait GeneralMacros {
       case _ => abort("Left-hand-side tree not found")
     }
 
+    private lazy val argList = getAllArgs(c.enclosingImplicits.last.tree, false)
+    private lazy val lhsArgList = getAllLHSArgs(c.enclosingImplicits.last.tree)
     def apply(argIdx : Int, lhs : Boolean) : (Tree, Type) = {
       val tree = c.enclosingImplicits.last.tree
 //      println(">>>>>>> enclosingImpl: ")// + c.enclosingImplicits.last)
 //      println("pt: " + c.enclosingImplicits.last.pt)
 //      println("tree: " + c.enclosingImplicits.last.tree)
 //      println("rawTree: " + showRaw(c.enclosingImplicits.last.tree))
-      val allArgs = if (lhs) getAllLHSArgs(tree) else getAllArgs(tree, lhs)
+      val allArgs = if (lhs) lhsArgList else argList
 //      println("args: " + allArgs)
 //      println("<<<<<<< rawArgs" + showRaw(allArgs))
 
