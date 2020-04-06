@@ -17,5 +17,4 @@ object std {
   type Double = scala.Double
   type String = java.lang.String
   type Boolean = scala.Boolean
-  type Symbol = scala.Symbol
 }

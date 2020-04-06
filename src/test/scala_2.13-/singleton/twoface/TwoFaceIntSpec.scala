@@ -331,10 +331,6 @@ class TwoFaceIntSpec extends Properties("TwoFace.Int") {
   property("Unsafe toDouble") = verifyTFDouble(TwoFace.Int(us(1)).toDouble, us(1.0))
   property("Safe toStringTF") = verifyTFString(TwoFace.Int(1).toStringTF, "1")
   property("Unsafe toStringTF") = verifyTFString(TwoFace.Int(us(1)).toStringTF, us("1"))
-  property("Safe toSymbol") = {
-    val sym = TwoFace.Int(2).toSymbol
-    sym == scala.Symbol("2")
-  }
 
   property("Safe abs") = verifyTFInt(abs(TwoFace.Int(-1)), 1)
   property("Unsafe abs") = verifyTFInt(abs(TwoFace.Int(us(-1))), us(1))

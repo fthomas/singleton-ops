@@ -37,7 +37,6 @@ trait GeneralMacros {
     val ToFloat = symbolOf[OpId.ToFloat]
     val ToDouble = symbolOf[OpId.ToDouble]
     val ToString = symbolOf[OpId.ToString]
-    val ToSymbol = symbolOf[OpId.ToSymbol]
     val IsNat = symbolOf[OpId.IsNat]
     val IsChar = symbolOf[OpId.IsChar]
     val IsInt = symbolOf[OpId.IsInt]
@@ -46,7 +45,6 @@ trait GeneralMacros {
     val IsDouble = symbolOf[OpId.IsDouble]
     val IsString = symbolOf[OpId.IsString]
     val IsBoolean = symbolOf[OpId.IsBoolean]
-    val IsSymbol = symbolOf[OpId.IsSymbol]
     val Negate = symbolOf[OpId.Negate]
     val Abs = symbolOf[OpId.Abs]
     val NumberOfLeadingZeros = symbolOf[OpId.NumberOfLeadingZeros]
@@ -127,34 +125,41 @@ trait GeneralMacros {
   ////////////////////////////////////////////////////////////////////
   // Calc
   ////////////////////////////////////////////////////////////////////
-  sealed trait Calc {
-    type T
+  sealed trait Calc extends Product with Serializable {
+    val primitive : Primitive
     val tpe : Type
+  }
+  object Calc {
+    implicit def getPrimitive(from : Calc) : Primitive = from.primitive
+  }
+  sealed trait Primitive extends Product with Serializable {
+    val dummyConstant : Any
     val name : String
+    val tpe : Type
   }
-
-  sealed trait CalcType extends Calc
-  object CalcType {
-    sealed trait Char extends CalcType{type T = std.Char; val tpe = typeOf[scala.Char]; val name = "Char"}
-    sealed trait Int extends CalcType{type T = std.Int; val tpe = typeOf[scala.Int]; val name = "Int"}
-    sealed trait Long extends CalcType{type T = std.Long; val tpe = typeOf[scala.Long]; val name = "Long"}
-    sealed trait Float extends CalcType{type T = std.Float; val tpe = typeOf[scala.Float]; val name = "Float"}
-    sealed trait Double extends CalcType{type T = std.Double; val tpe = typeOf[scala.Double]; val name = "Double"}
-    sealed trait String extends CalcType{type T = std.String; val tpe = typeOf[java.lang.String]; val name = "String"}
-    sealed trait Boolean extends CalcType{type T = std.Boolean; val tpe = typeOf[scala.Boolean]; val name = "Boolean"}
-    sealed trait Symbol extends CalcType{type T = std.Symbol; val tpe = typeOf[scala.Symbol]; val name = "String"}
-    object Char extends Char
-    object Int extends Int
-    object Long extends Long
-    object Float extends Float
-    object Double extends Double
-    object String extends String
-    object Boolean extends Boolean
-    object Symbol extends Symbol
+  object Primitive {
+    case object Char    extends Primitive {val dummyConstant = '\u0001';val name = "Char";     val tpe = typeOf[scala.Char]}
+    case object Int     extends Primitive {val dummyConstant = 1;       val name = "Int";      val tpe = typeOf[scala.Int]}
+    case object Long    extends Primitive {val dummyConstant = 1L;      val name = "Long";     val tpe = typeOf[scala.Long]}
+    case object Float   extends Primitive {val dummyConstant = 1.0f;    val name = "Float";    val tpe = typeOf[scala.Float]}
+    case object Double  extends Primitive {val dummyConstant = 1.0;     val name = "Double";   val tpe = typeOf[scala.Double]}
+    case object String  extends Primitive {val dummyConstant = "1";     val name = "String";   val tpe = typeOf[java.lang.String]}
+    case object Boolean extends Primitive {val dummyConstant = true;    val name = "Boolean";  val tpe = typeOf[scala.Boolean]}
+    case class Unknown(tpe : Type, name : String) extends Primitive {val dummyConstant: Any = None}
+    def fromLiteral(lit : Any) : Primitive = lit match {
+      case value : std.Char     => Primitive.Char
+      case value : std.Int      => Primitive.Int
+      case value : std.Long     => Primitive.Long
+      case value : std.Float    => Primitive.Float
+      case value : std.Double   => Primitive.Double
+      case value : std.String   => Primitive.String
+      case value : std.Boolean  => Primitive.Boolean
+      case _ => abort(s"Unsupported literal type: $lit")
+    }
   }
-
   sealed trait CalcVal extends Calc {
-    val value : T
+    val primitive : Primitive
+    val literal : Option[Any]
     val tree : Tree
   }
   object CalcVal {
@@ -162,155 +167,94 @@ trait GeneralMacros {
     object Lit extends Kind
     object NLit extends Kind
     implicit val lift = Liftable[CalcVal] {p => p.tree}
-    class Char(val value : std.Char, val tree : Tree) extends CalcVal with CalcType.Char
-    object Char {
-      def unapply(arg: Char) : Option[(arg.T, Tree)] = Some((arg.value, arg.tree))
-    }
-    class Int(val value : std.Int, val tree : Tree) extends CalcVal with CalcType.Int
-    object Int {
-      def unapply(arg: Int) : Option[(arg.T, Tree)] = Some((arg.value, arg.tree))
-    }
-    class Long(val value : std.Long, val tree : Tree) extends CalcVal with CalcType.Long
-    object Long {
-      def unapply(arg: Long) : Option[(arg.T, Tree)] = Some((arg.value, arg.tree))
-    }
-    class Float(val value : std.Float, val tree : Tree) extends CalcVal with CalcType.Float
-    object Float {
-      def unapply(arg: Float) : Option[(arg.T, Tree)] = Some((arg.value, arg.tree))
-    }
-    class Double(val value : std.Double, val tree : Tree) extends CalcVal with CalcType.Double
-    object Double {
-      def unapply(arg: Double) : Option[(arg.T, Tree)] = Some((arg.value, arg.tree))
-    }
-    class String(val value : std.String, val tree : Tree) extends CalcVal with CalcType.String
-    object String {
-      def unapply(arg: String) : Option[(arg.T, Tree)] = Some((arg.value, arg.tree))
-    }
-    class Boolean(val value : std.Boolean, val tree : Tree) extends CalcVal with CalcType.Boolean
-    object Boolean {
-      def unapply(arg: Boolean) : Option[(arg.T, Tree)] = Some((arg.value, arg.tree))
-    }
-    def apply[T](value : T, tree : Tree)(implicit kind : Kind) = kind match {
+    def unapply(arg: CalcVal): Option[(Any, Tree)] = Some((arg.literal.getOrElse(arg.dummyConstant), arg.tree))
+    def apply(value : Any, tree : Tree)(implicit kind : Kind) = kind match {
       case Lit => CalcLit(value)
-      case NLit => CalcNLit(value, tree)
+      case NLit => CalcNLit(Primitive.fromLiteral(value), tree)
     }
   }
-
-  sealed trait CalcLit extends CalcVal {
-    override val tpe = constantTypeOf(value)
+  case class CalcLit(primitive : Primitive, value : Any) extends CalcVal {
+    val literal = Some(value)
+    val tpe : Type = constantTypeOf(value)
+    val tree : Tree = Literal(Constant(value))
   }
-
   object CalcLit {
-    implicit val lift = Liftable[CalcLit] { p => p.tree }
-    case class Char(override val value : std.Char) extends CalcVal.Char(value, Literal(Constant(value))) with CalcLit
-    case class Int(override val value : std.Int) extends CalcVal.Int(value, Literal(Constant(value))) with CalcLit
-    case class Long(override val value : std.Long) extends CalcVal.Long(value, Literal(Constant(value))) with CalcLit
-    case class Float(override val value : std.Float) extends CalcVal.Float(value, Literal(Constant(value))) with CalcLit
-    case class Double(override val value : std.Double) extends CalcVal.Double(value, Literal(Constant(value))) with CalcLit
-    case class String(override val value : std.String) extends CalcVal.String(value, Literal(Constant(value))) with CalcLit
-    case class Boolean(override val value : std.Boolean) extends CalcVal.Boolean(value, Literal(Constant(value))) with CalcLit
-    def apply[T](t : T) = t match {
-      case t : std.Char => Char(t)
-      case t : std.Int => Int(t)
-      case t : std.Long => Long(t)
-      case t : std.Float => Float(t)
-      case t : std.Double => Double(t)
-      case t : std.String => String(t)
-      case t : std.Boolean => Boolean(t)
-      case t : std.Symbol => String(t.name.toString)
-      case _ => abort(s"Unsupported literal type: $t")
-    }
-    def unapply(arg: CalcLit) : Option[arg.T] = Some(arg.value)
-  }
-
-  sealed trait CalcTFType extends Calc
-  object CalcTFType {
-    object Char extends CalcTFType with CalcType.Char
-    object Int extends CalcTFType with CalcType.Int
-    object Long extends CalcTFType with CalcType.Long
-    object Float extends CalcTFType with CalcType.Float
-    object Double extends CalcTFType with CalcType.Double
-    object String extends CalcTFType with CalcType.String
-    object Boolean extends CalcTFType with CalcType.Boolean
-  }
-
-  sealed trait CalcUBType extends Calc
-  object CalcUBType {
-    object Char extends CalcUBType with CalcType.Char
-    object Int extends CalcUBType with CalcType.Int
-    object Long extends CalcUBType with CalcType.Long
-    object Float extends CalcUBType with CalcType.Float
-    object Double extends CalcUBType with CalcType.Double
-    object String extends CalcUBType with CalcType.String
-    object Boolean extends CalcUBType with CalcType.Boolean
-    def apply(calcTypeRef : Calc) : CalcUBType = {
-      calcTypeRef match {
-        case (t: CalcType.Char) => Char
-        case (t: CalcType.Int) => Int
-        case (t: CalcType.Long) => Long
-        case (t: CalcType.Float) => Float
-        case (t: CalcType.Double) => Double
-        case (t: CalcType.String) => String
-        case (t: CalcType.Boolean) => Boolean
-        case t => abort(s"Unsupported CalcUBType type $t")
+    object Char {
+      def unapply(arg: CalcLit): Option[std.Char] = arg match {
+        case CalcLit(Primitive.Char, value : std.Char) => Some(value)
+        case _ => None
       }
     }
-  }
-
-  sealed trait CalcNLit extends CalcVal
-  object CalcNLit {
-    implicit val lift = Liftable[CalcNLit] { p => p.tree }
-    case class Char(override val tree : Tree, override val tpe : Type = CalcType.Char.tpe) extends CalcVal.Char('\u0001', tree) with CalcNLit
-    case class Int(override val tree : Tree, override val tpe : Type = CalcType.Int.tpe) extends CalcVal.Int(1, tree) with CalcNLit
-    case class Long(override val tree : Tree, override val tpe : Type = CalcType.Long.tpe) extends CalcVal.Long(1L, tree) with CalcNLit
-    case class Float(override val tree : Tree, override val tpe : Type = CalcType.Float.tpe) extends CalcVal.Float(1.0f, tree) with CalcNLit
-    case class Double(override val tree : Tree, override val tpe : Type = CalcType.Double.tpe) extends CalcVal.Double(1.0, tree) with CalcNLit
-    case class String(override val tree : Tree, override val tpe : Type = CalcType.String.tpe) extends CalcVal.String("1", tree) with CalcNLit
-    case class Boolean(override val tree : Tree, override val tpe : Type = CalcType.Boolean.tpe) extends CalcVal.Boolean(true, tree) with CalcNLit
-
-    def apply[T](valueRef : T, tree : Tree) : CalcNLit =
-      CalcNLit(CalcLit(valueRef), tree)
-    def apply(calcTypeRef : Calc, tree : Tree) : CalcNLit = {
-      calcTypeRef match {
-        case (t : CalcType.Char) => Char(tree)
-        case (t : CalcType.Int) => Int(tree)
-        case (t : CalcType.Long) => Long(tree)
-        case (t : CalcType.Float) => Float(tree)
-        case (t : CalcType.Double) => Double(tree)
-        case (t : CalcType.String) => String(tree)
-        case (t : CalcType.Boolean) => Boolean(tree)
-        case t => abort(s"Unsupported CalcTypeRef type $calcTypeRef")
+    object Int {
+      def unapply(arg: CalcLit): Option[std.Int] = arg match {
+        case CalcLit(Primitive.Int, value : std.Int) => Some(value)
+        case _ => None
       }
     }
-    def applyTpe(calcTypeRef : Calc, tree : Tree, tpe : Type) : CalcNLit = {
-      calcTypeRef match {
-        case (t: CalcType.Char) => Char(tree, tpe)
-        case (t: CalcType.Int) => Int(tree, tpe)
-        case (t: CalcType.Long) => Long(tree, tpe)
-        case (t: CalcType.Float) => Float(tree, tpe)
-        case (t: CalcType.Double) => Double(tree, tpe)
-        case (t: CalcType.String) => String(tree, tpe)
-        case (t: CalcType.Boolean) => Boolean(tree, tpe)
-        case t => abort(s"Unsupported CalcTypeRef type $calcTypeRef")
+    object Long {
+      def unapply(arg: CalcLit): Option[std.Long] = arg match {
+        case CalcLit(Primitive.Long, value : std.Long) => Some(value)
+        case _ => None
       }
     }
-    def unapply(arg: CalcNLit) : Option[Tree] = Some(arg.tree)
+    object Float {
+      def unapply(arg: CalcLit): Option[std.Float] = arg match {
+        case CalcLit(Primitive.Float, value : std.Float) => Some(value)
+        case _ => None
+      }
+    }
+    object Double {
+      def unapply(arg: CalcLit): Option[std.Double] = arg match {
+        case CalcLit(Primitive.Double, value : std.Double) => Some(value)
+        case _ => None
+      }
+    }
+    object String {
+      def unapply(arg: CalcLit): Option[std.String] = arg match {
+        case CalcLit(Primitive.String, value : std.String) => Some(value)
+        case _ => None
+      }
+    }
+    object Boolean {
+      def unapply(arg: CalcLit): Option[std.Boolean] = arg match {
+        case CalcLit(Primitive.Boolean, value : std.Boolean) => Some(value)
+        case _ => None
+      }
+    }
+    def apply(t : Any) : CalcLit = CalcLit(Primitive.fromLiteral(t), t)
   }
-  case class CalcUnknown(t: Type, treeOption : Option[Tree]) extends Calc {
-    val tpe = t
-    val name = "Unknown"
+  case class CalcNLit(primitive : Primitive, tree : Tree, tpeOverride : Option[Type] = None) extends CalcVal {
+    val literal = None
+    val tpe = tpeOverride.getOrElse(primitive.tpe)
+  }
+
+  sealed trait CalcType extends Calc
+  object CalcType {
+    case class Mark(primitive : Primitive) extends CalcType {
+      val tpe = primitive.tpe
+    }
+    case class TF(primitive : Primitive) extends CalcType {
+      val tpe = primitive.tpe
+    }
+    case class UB(primitive : Primitive) extends CalcType {
+      val tpe = primitive.tpe
+    }
+
+    def unapply(arg: CalcType): Option[Primitive] = Some(arg.primitive)
+  }
+  case class CalcUnknown(tpe : Type, treeOption : Option[Tree]) extends Calc {
+    override val primitive: Primitive = Primitive.Unknown(tpe, "Unknown")
   }
   object NonLiteralCalc {
-    def unapply(tpe: Type): Option[CalcType] = tpe match {
+    def unapply(tpe: Type): Option[CalcType.Mark] = tpe match {
       case TypeRef(_, sym, _) => sym match {
-        case t if t == symbolOf[Char] => Some(CalcType.Char)
-        case t if t == symbolOf[Int] => Some(CalcType.Int)
-        case t if t == symbolOf[Long] => Some(CalcType.Long)
-        case t if t == symbolOf[Float] => Some(CalcType.Float)
-        case t if t == symbolOf[Double] => Some(CalcType.Double)
-        case t if t == symbolOf[java.lang.String] => Some(CalcType.String)
-        case t if t == symbolOf[Boolean] => Some(CalcType.Boolean)
-        case t if t == symbolOf[scala.Symbol] => Some(CalcType.Symbol)
+        case t if t == symbolOf[Char]             => Some(CalcType.Mark(Primitive.Char))
+        case t if t == symbolOf[Int]              => Some(CalcType.Mark(Primitive.Int))
+        case t if t == symbolOf[Long]             => Some(CalcType.Mark(Primitive.Long))
+        case t if t == symbolOf[Float]            => Some(CalcType.Mark(Primitive.Float))
+        case t if t == symbolOf[Double]           => Some(CalcType.Mark(Primitive.Double))
+        case t if t == symbolOf[java.lang.String] => Some(CalcType.Mark(Primitive.String))
+        case t if t == symbolOf[Boolean]          => Some(CalcType.Mark(Primitive.Boolean))
         case _ => None
       }
       case _ => None
@@ -348,8 +292,8 @@ trait GeneralMacros {
       cache.get(k).map {v =>
         VerboseTraversal(s"${YELLOW}${BOLD}fetching${RESET} $k, $v")
         val cloned = v match {
-          case CalcLit(tp) => CalcLit(tp) //reconstruct internal literal tree
-          case c @ CalcNLit(tree) => CalcNLit(c, deepCopyTree(tree))
+          case lit : CalcLit => CalcLit(lit.value) //reconstruct internal literal tree
+          case nlit : CalcNLit => CalcNLit(nlit.primitive, deepCopyTree(nlit.tree))
           case c => c
         }
         cloned
@@ -403,15 +347,15 @@ trait GeneralMacros {
     // Calculates the integer value of Shapeless Nat
     ////////////////////////////////////////////////////////////////////////
     object NatCalc {
-      def unapply(tp: Type): Option[CalcLit.Int] = {
+      def unapply(tp: Type): Option[CalcLit] = {
         tp match {
           case TypeRef(_, sym, args) if sym == symbolOf[shapeless.Succ[_]] =>
             args.head match {
-              case NatCalc(t) => Some(CalcLit.Int(t.value+1))
+              case NatCalc(CalcLit.Int(value)) => Some(CalcLit(value + 1))
               case _ => abort(s"Given Nat type is defective: $tp, raw: ${showRaw(tp)}")
             }
           case TypeRef(_, sym, _) if sym == symbolOf[shapeless._0] =>
-            Some(CalcLit.Int(0))
+            Some(CalcLit(0))
           case TypeRef(pre, sym, Nil) =>
             unapply(sym.info asSeenFrom (pre, sym.owner))
           case _ =>
@@ -426,7 +370,7 @@ trait GeneralMacros {
     // Calculates the TwoFace values
     ////////////////////////////////////////////////////////////////////////
     object TwoFaceCalc {
-      def unapplyArg(calcTFType : Option[CalcTFType], tfArgType : Type): Option[Calc] = {
+      def unapplyArg(calcTFType : Option[CalcType.TF], tfArgType : Type): Option[Calc] = {
         TypeCalc.unapply(tfArgType) match {
           case Some(t : CalcLit) => Some(t)
           case _ => calcTFType
@@ -439,13 +383,13 @@ trait GeneralMacros {
           case TypeRef(_, sym, args) if args.nonEmpty && tp.baseClasses.contains(tfAnySym) =>
             VerboseTraversal(s"@@TwoFaceCalc@@\nTP: $tp\nRAW: ${showRaw(tp)}\nBaseCls:${tp.baseClasses}")
             val calcTFType = sym match {
-              case t if tp.baseClasses.contains(symbolOf[TwoFaceAny.Char[_]]) => Some(CalcTFType.Char)
-              case t if tp.baseClasses.contains(symbolOf[TwoFaceAny.Int[_]]) => Some(CalcTFType.Int)
-              case t if tp.baseClasses.contains(symbolOf[TwoFaceAny.Long[_]]) => Some(CalcTFType.Long)
-              case t if tp.baseClasses.contains(symbolOf[TwoFaceAny.Float[_]]) => Some(CalcTFType.Float)
-              case t if tp.baseClasses.contains(symbolOf[TwoFaceAny.Double[_]]) => Some(CalcTFType.Double)
-              case t if tp.baseClasses.contains(symbolOf[TwoFaceAny.String[_]]) => Some(CalcTFType.String)
-              case t if tp.baseClasses.contains(symbolOf[TwoFaceAny.Boolean[_]]) => Some(CalcTFType.Boolean)
+              case t if tp.baseClasses.contains(symbolOf[TwoFaceAny.Char[_]])     => Some(CalcType.TF(Primitive.Char))
+              case t if tp.baseClasses.contains(symbolOf[TwoFaceAny.Int[_]])      => Some(CalcType.TF(Primitive.Int))
+              case t if tp.baseClasses.contains(symbolOf[TwoFaceAny.Long[_]])     => Some(CalcType.TF(Primitive.Long))
+              case t if tp.baseClasses.contains(symbolOf[TwoFaceAny.Float[_]])    => Some(CalcType.TF(Primitive.Float))
+              case t if tp.baseClasses.contains(symbolOf[TwoFaceAny.Double[_]])   => Some(CalcType.TF(Primitive.Double))
+              case t if tp.baseClasses.contains(symbolOf[TwoFaceAny.String[_]])   => Some(CalcType.TF(Primitive.String))
+              case t if tp.baseClasses.contains(symbolOf[TwoFaceAny.Boolean[_]])  => Some(CalcType.TF(Primitive.Boolean))
               case _ => None
             }
             if (calcTFType.isDefined)
@@ -474,7 +418,6 @@ trait GeneralMacros {
               case t if t == symbolOf[OpDouble[_]] => Some(TypeCalc(args.head))
               case t if t == symbolOf[OpString[_]] => Some(TypeCalc(args.head))
               case t if t == symbolOf[OpBoolean[_]] => Some(TypeCalc(args.head))
-              case t if t == symbolOf[OpSymbol[_]] => Some(TypeCalc(args.head))
               case _ => None
             }
           case _ =>
@@ -531,43 +474,38 @@ trait GeneralMacros {
                       case _ => Some(CalcLit(false))
                     }
                   case (funcTypes.IsChar, _) =>
-                    aValue match {
-                      case t : CalcType.Char => Some(CalcLit(true))
+                    aValue.primitive match {
+                      case Primitive.Char => Some(CalcLit(true))
                       case _ => Some(CalcLit(false))
                     }
                   case (funcTypes.IsInt, _) =>
-                    aValue match {
-                      case t : CalcType.Int => Some(CalcLit(true))
+                    aValue.primitive match {
+                      case Primitive.Int => Some(CalcLit(true))
                       case _ => Some(CalcLit(false))
                     }
                   case (funcTypes.IsLong, _) =>
-                    aValue match {
-                      case t : CalcType.Long => Some(CalcLit(true))
+                    aValue.primitive match {
+                      case Primitive.Long => Some(CalcLit(true))
                       case _ => Some(CalcLit(false))
                     }
                   case (funcTypes.IsFloat, _) =>
-                    aValue match {
-                      case t : CalcType.Float => Some(CalcLit(true))
+                    aValue.primitive match {
+                      case Primitive.Float => Some(CalcLit(true))
                       case _ => Some(CalcLit(false))
                     }
                   case (funcTypes.IsDouble, _) =>
-                    aValue match {
-                      case t : CalcType.Double => Some(CalcLit(true))
+                    aValue.primitive match {
+                      case Primitive.Double => Some(CalcLit(true))
                       case _ => Some(CalcLit(false))
                     }
                   case (funcTypes.IsString, _) =>
-                    aValue match {
-                      case t : CalcType.String => Some(CalcLit(true))
+                    aValue.primitive match {
+                      case Primitive.String => Some(CalcLit(true))
                       case _ => Some(CalcLit(false))
                     }
                   case (funcTypes.IsBoolean, _) =>
-                    aValue match {
-                      case t : CalcType.Boolean => Some(CalcLit(true))
-                      case _ => Some(CalcLit(false))
-                    }
-                  case (funcTypes.IsSymbol, _) =>
-                    aValue match {
-                      case t : CalcType.String => Some(CalcLit(true))
+                    aValue.primitive match {
+                      case Primitive.Boolean => Some(CalcLit(true))
                       case _ => Some(CalcLit(false))
                     }
                   case (funcTypes.IsNonLiteral, _) => //Looking for non literals
@@ -616,11 +554,8 @@ trait GeneralMacros {
     def apply(tp: Type): Calc = {
       TypeCalc.unapply(tp) match {
         case Some(t : CalcVal) => t
-        case Some(t : CalcType.Symbol) =>
-          OpCalc.setUncacheable()
-          CalcNLit(CalcType.String, q"valueOf[$tp].name")
-        case Some(t : CalcUBType) => t
-        case Some(t : CalcTFType) =>
+        case Some(t @ CalcType.UB(_)) => t
+        case Some(t @ CalcType.TF(_)) =>
           OpCalc.setUncacheable()
           CalcNLit(t, q"valueOf[$tp].getValue")
         case Some(t : CalcType) =>
@@ -643,13 +578,12 @@ trait GeneralMacros {
         ////////////////////////////////////////////////////////////////////////
         // Value cases
         ////////////////////////////////////////////////////////////////////////
-        case ConstantType(Constant(t)) => Some(CalcLit(t)) //Constant
+        case ConstantType(ConstantCalc(t)) => Some(t) //Constant
         case OpCalc(t) => Some(t) // Operational Function
         case OpCastCalc(t) => Some(t) //Op Cast wrappers
         case TwoFaceCalc(t) => Some(t) //TwoFace values
         case NonLiteralCalc(t) => Some(t)// Non-literal values
         case NatCalc(t) => Some(t) //For Shapeless Nat
-        case SingletonSymbolType(s) => Some(CalcLit(s)) //Symbol constant
         ////////////////////////////////////////////////////////////////////////
 
         ////////////////////////////////////////////////////////////////////////
@@ -664,7 +598,7 @@ trait GeneralMacros {
           //While returning `TwoFace.Int[Int](-w+1)` is possible in this case, we would rather reserve
           //the ability to have a literal return type, so `TwoFace.Int[Negate[W]+1](-w+1)` is returned.
           //So even if we can have a `Some(CalcType)` returning, we force it as an upper-bound calc type.
-          case Some(t) => Some(CalcUBType(t))
+          case Some(t) => Some(CalcType.UB(t))
           case _ => None
         }
         case RefinedType(parents, scope) =>
@@ -690,6 +624,24 @@ trait GeneralMacros {
   }
   ////////////////////////////////////////////////////////////////////
 
+  ////////////////////////////////////////////////////////////////////////
+  // Calculates from a constant
+  ////////////////////////////////////////////////////////////////////////
+  object ConstantCalc {
+    def unapply(constant: Constant): Option[CalcLit] = {
+      constant match {
+        case Constant(t : Char) => Some(CalcLit(t))
+        case Constant(t : Int) => Some(CalcLit(t))
+        case Constant(t : Long) => Some(CalcLit(t))
+        case Constant(t : Float) => Some(CalcLit(t))
+        case Constant(t : Double) => Some(CalcLit(t))
+        case Constant(t : String) => Some(CalcLit(t))
+        case Constant(t : Boolean) => Some(CalcLit(t))
+        case _ => None
+      }
+    }
+  }
+  ////////////////////////////////////////////////////////////////////////
 
   def abort(msg: String, annotatedSym : Option[TypeSymbol] = defaultAnnotatedSym): Nothing = {
     VerboseTraversal(s"!!!!!!aborted with: $msg at $annotatedSym, $defaultAnnotatedSym")
@@ -701,11 +653,11 @@ trait GeneralMacros {
   def buildWarningMsg(msg: String): String = s"Warning: $buildWarningMsgLoc    $msg"
   def buildWarningMsg(msg: Tree): Tree = q""" "Warning: " + $buildWarningMsgLoc + "    " + $msg """
 
-  def constantTreeOf[T](t : T) : Tree = Literal(Constant(t))
+  def constantTreeOf(t : Any) : Tree = Literal(Constant(t))
 
-  def constantTypeOf[T](t: T) : Type = c.internal.constantType(Constant(t))
+  def constantTypeOf(t: Any) : Type = c.internal.constantType(Constant(t))
 
-  def genOpTreeLit[T](opTpe : Type, t: T) : Tree = {
+  def genOpTreeLit(opTpe : Type, t: Any) : Tree = {
     val outTpe = constantTypeOf(t)
     val outTree = constantTreeOf(t)
     val outWideTpe = outTpe.widen
@@ -729,24 +681,6 @@ trait GeneralMacros {
     val outTypeName = TypeName("OutNat")
     val outTpe = mkNatTpe(t)
     val outTree = q"new ${mkNatTpt(t)}"
-    q"""
-      new $opTpe {
-        type OutWide = $outWideTpe
-        type Out = $outTpe
-        type $outTypeName = $outTpe
-        final val value: $outTpe = $outTree
-        final val isLiteral = true
-        final val valueWide: $outWideTpe = $outWideLiteral
-      }
-      """
-  }
-
-  def genOpTreeSymbol(opTpe : Type, t: String) : Tree = {
-    val outTpe = SingletonSymbolType(t)
-    val outTree = mkSingletonSymbol(t)
-    val outWideTpe = typeOf[scala.Symbol]
-    val outWideLiteral = mkSingletonSymbolWide(t)
-    val outTypeName = TypeName("OutSymbol")
     q"""
       new $opTpe {
         type OutWide = $outWideTpe
@@ -816,7 +750,7 @@ trait GeneralMacros {
     def getOut(opClsBlk : List[c.Tree]) : CalcVal = opClsBlk.find(outFindCond) match {
       case Some(q"final val value : $valueTpe = $valueTree") =>
         valueTree match {
-          case Literal(Constant(t)) => CalcLit(t)
+          case Literal(ConstantCalc(t)) => t
           case _ => valueTpe match {
             case NonLiteralCalc(t) => CalcNLit(t, q"$valueTree")
             case _ => extractionFailed(opTree)
@@ -838,7 +772,7 @@ trait GeneralMacros {
     val typedTree = c.typecheck(numValueTree)
     TypeCalc(typedTree.tpe) match {
       case t : CalcLit => t
-      case t : CalcUBType => CalcNLit.applyTpe(t, numValueTree, typedTree.tpe)
+      case t : CalcType.UB => CalcNLit(t, numValueTree, Some(typedTree.tpe)) //TODO: maybe redundant
       case t : CalcType => CalcNLit(t, numValueTree)
       case _ => extractionFailed(typedTree.tpe)
     }
@@ -962,123 +896,122 @@ trait GeneralMacros {
     }
     def ToNat : Calc = ToInt //Same handling, but also has a special case to handle this in MaterializeOpAuxGen
     def ToChar : Calc = a match {
-      case CalcVal.Char(t, tt) => CalcVal(t, q"$tt")
-      case CalcVal.Int(t, tt) => CalcVal(t.toChar, q"$tt.toChar")
-      case CalcVal.Long(t, tt) => CalcVal(t.toChar, q"$tt.toChar")
-      case CalcVal.Float(t, tt) => CalcVal(t.toChar, q"$tt.toChar")
-      case CalcVal.Double(t, tt) => CalcVal(t.toChar, q"$tt.toChar")
+      case CalcVal(t : Char, tt) => CalcVal(t, q"$tt")
+      case CalcVal(t : Int, tt) => CalcVal(t.toChar, q"$tt.toChar")
+      case CalcVal(t : Long, tt) => CalcVal(t.toChar, q"$tt.toChar")
+      case CalcVal(t : Float, tt) => CalcVal(t.toChar, q"$tt.toChar")
+      case CalcVal(t : Double, tt) => CalcVal(t.toChar, q"$tt.toChar")
       case _ => unsupported()
     }
     def ToInt : Calc = a match {
-      case CalcVal.Char(t, tt) => CalcVal(t.toInt, q"$tt.toInt")
-      case CalcVal.Int(t, tt) => CalcVal(t, q"$tt")
-      case CalcVal.Long(t, tt) => CalcVal(t.toInt, q"$tt.toInt")
-      case CalcVal.Float(t, tt) => CalcVal(t.toInt, q"$tt.toInt")
-      case CalcVal.Double(t, tt) => CalcVal(t.toInt, q"$tt.toInt")
-      case CalcVal.String(t, tt) => CalcVal(t.toInt, q"$tt.toInt")
+      case CalcVal(t : Char, tt) => CalcVal(t.toInt, q"$tt.toInt")
+      case CalcVal(t : Int, tt) => CalcVal(t, q"$tt")
+      case CalcVal(t : Long, tt) => CalcVal(t.toInt, q"$tt.toInt")
+      case CalcVal(t : Float, tt) => CalcVal(t.toInt, q"$tt.toInt")
+      case CalcVal(t : Double, tt) => CalcVal(t.toInt, q"$tt.toInt")
+      case CalcVal(t : String, tt) => CalcVal(t.toInt, q"$tt.toInt")
       case _ => unsupported()
     }
     def ToLong : Calc = a match {
-      case CalcVal.Char(t, tt) => CalcVal(t.toLong, q"$tt.toLong")
-      case CalcVal.Int(t, tt) => CalcVal(t.toLong, q"$tt.toLong")
-      case CalcVal.Long(t, tt) => CalcVal(t, q"$tt")
-      case CalcVal.Float(t, tt) => CalcVal(t.toLong, q"$tt.toLong")
-      case CalcVal.Double(t, tt) => CalcVal(t.toLong, q"$tt.toLong")
-      case CalcVal.String(t, tt) => CalcVal(t.toLong, q"$tt.toLong")
+      case CalcVal(t : Char, tt) => CalcVal(t.toLong, q"$tt.toLong")
+      case CalcVal(t : Int, tt) => CalcVal(t.toLong, q"$tt.toLong")
+      case CalcVal(t : Long, tt) => CalcVal(t, q"$tt")
+      case CalcVal(t : Float, tt) => CalcVal(t.toLong, q"$tt.toLong")
+      case CalcVal(t : Double, tt) => CalcVal(t.toLong, q"$tt.toLong")
+      case CalcVal(t : String, tt) => CalcVal(t.toLong, q"$tt.toLong")
       case _ => unsupported()
     }
     def ToFloat : Calc = a match {
-      case CalcVal.Char(t, tt) => CalcVal(t.toFloat, q"$tt.toFloat")
-      case CalcVal.Int(t, tt) => CalcVal(t.toFloat, q"$tt.toFloat")
-      case CalcVal.Long(t, tt) => CalcVal(t.toFloat, q"$tt.toFloat")
-      case CalcVal.Float(t, tt) => CalcVal(t, q"$tt")
-      case CalcVal.Double(t, tt) => CalcVal(t.toFloat, q"$tt.toFloat")
-      case CalcVal.String(t, tt) => CalcVal(t.toFloat, q"$tt.toFloat")
+      case CalcVal(t : Char, tt) => CalcVal(t.toFloat, q"$tt.toFloat")
+      case CalcVal(t : Int, tt) => CalcVal(t.toFloat, q"$tt.toFloat")
+      case CalcVal(t : Long, tt) => CalcVal(t.toFloat, q"$tt.toFloat")
+      case CalcVal(t : Float, tt) => CalcVal(t, q"$tt")
+      case CalcVal(t : Double, tt) => CalcVal(t.toFloat, q"$tt.toFloat")
+      case CalcVal(t : String, tt) => CalcVal(t.toFloat, q"$tt.toFloat")
       case _ => unsupported()
     }
     def ToDouble : Calc = a match {
-      case CalcVal.Char(t, tt) => CalcVal(t.toDouble, q"$tt.toDouble")
-      case CalcVal.Int(t, tt) => CalcVal(t.toDouble, q"$tt.toDouble")
-      case CalcVal.Long(t, tt) => CalcVal(t.toDouble, q"$tt.toDouble")
-      case CalcVal.Float(t, tt) => CalcVal(t.toDouble, q"$tt.toDouble")
-      case CalcVal.Double(t, tt) => CalcVal(t, q"$tt")
-      case CalcVal.String(t, tt) => CalcVal(t.toDouble, q"$tt.toDouble")
+      case CalcVal(t : Char, tt) => CalcVal(t.toDouble, q"$tt.toDouble")
+      case CalcVal(t : Int, tt) => CalcVal(t.toDouble, q"$tt.toDouble")
+      case CalcVal(t : Long, tt) => CalcVal(t.toDouble, q"$tt.toDouble")
+      case CalcVal(t : Float, tt) => CalcVal(t.toDouble, q"$tt.toDouble")
+      case CalcVal(t : Double, tt) => CalcVal(t, q"$tt")
+      case CalcVal(t : String, tt) => CalcVal(t.toDouble, q"$tt.toDouble")
       case _ => unsupported()
     }
     def ToString : Calc = a match {
-      case CalcVal.Char(t, tt) => CalcVal(t.toString, q"$tt.toString")
-      case CalcVal.Int(t, tt) => CalcVal(t.toString, q"$tt.toString")
-      case CalcVal.Long(t, tt) => CalcVal(t.toString, q"$tt.toString")
-      case CalcVal.Float(t, tt) => CalcVal(t.toString, q"$tt.toString")
-      case CalcVal.Double(t, tt) => CalcVal(t.toString, q"$tt.toString")
-      case CalcVal.String(t, tt) => CalcVal(t, q"$tt")
-      case CalcVal.Boolean(t, tt) => CalcVal(t.toString, q"$tt.toString")
+      case CalcVal(t : Char, tt) => CalcVal(t.toString, q"$tt.toString")
+      case CalcVal(t : Int, tt) => CalcVal(t.toString, q"$tt.toString")
+      case CalcVal(t : Long, tt) => CalcVal(t.toString, q"$tt.toString")
+      case CalcVal(t : Float, tt) => CalcVal(t.toString, q"$tt.toString")
+      case CalcVal(t : Double, tt) => CalcVal(t.toString, q"$tt.toString")
+      case CalcVal(t : String, tt) => CalcVal(t, q"$tt")
+      case CalcVal(t : Boolean, tt) => CalcVal(t.toString, q"$tt.toString")
       case _ => unsupported()
     }
-    def ToSymbol : Calc = ToString //Same handling, but has also has a special case in MaterializeOpAuxGen
     def Negate : Calc = a match {
-      case CalcVal.Char(t, tt) => CalcVal(-t, q"-$tt")
-      case CalcVal.Int(t, tt) => CalcVal(-t, q"-$tt")
-      case CalcVal.Long(t, tt) => CalcVal(-t, q"-$tt")
-      case CalcVal.Float(t, tt) => CalcVal(-t, q"-$tt")
-      case CalcVal.Double(t, tt) => CalcVal(-t, q"-$tt")
+      case CalcVal(t : Char, tt) => CalcVal(-t, q"-$tt")
+      case CalcVal(t : Int, tt) => CalcVal(-t, q"-$tt")
+      case CalcVal(t : Long, tt) => CalcVal(-t, q"-$tt")
+      case CalcVal(t : Float, tt) => CalcVal(-t, q"-$tt")
+      case CalcVal(t : Double, tt) => CalcVal(-t, q"-$tt")
       case _ => unsupported()
     }
     def Abs : Calc = a match {
-      case CalcVal.Int(t, tt) => CalcVal(math.abs(t), q"_root_.scala.math.abs($tt)")
-      case CalcVal.Long(t, tt) => CalcVal(math.abs(t), q"_root_.scala.math.abs($tt)")
-      case CalcVal.Float(t, tt) => CalcVal(math.abs(t), q"_root_.scala.math.abs($tt)")
-      case CalcVal.Double(t, tt) => CalcVal(math.abs(t), q"_root_.scala.math.abs($tt)")
+      case CalcVal(t : Int, tt) => CalcVal(math.abs(t), q"_root_.scala.math.abs($tt)")
+      case CalcVal(t : Long, tt) => CalcVal(math.abs(t), q"_root_.scala.math.abs($tt)")
+      case CalcVal(t : Float, tt) => CalcVal(math.abs(t), q"_root_.scala.math.abs($tt)")
+      case CalcVal(t : Double, tt) => CalcVal(math.abs(t), q"_root_.scala.math.abs($tt)")
       case _ => unsupported()
     }
     def NumberOfLeadingZeros : Calc = a match {
-      case CalcVal.Int(t, tt) => CalcVal(nlz(t), q"_root_.singleton.ops.impl.nlz($tt)")
-      case CalcVal.Long(t, tt) => CalcVal(nlz(t), q"_root_.singleton.ops.impl.nlz($tt)")
+      case CalcVal(t : Int, tt) => CalcVal(nlz(t), q"_root_.singleton.ops.impl.nlz($tt)")
+      case CalcVal(t : Long, tt) => CalcVal(nlz(t), q"_root_.singleton.ops.impl.nlz($tt)")
       case _ => unsupported()
     }
     def Floor : Calc = a match {
-      case CalcVal.Double(t, tt) => CalcVal(math.floor(t), q"_root_.scala.math.floor($tt)")
+      case CalcVal(t : Double, tt) => CalcVal(math.floor(t), q"_root_.scala.math.floor($tt)")
       case _ => unsupported()
     }
     def Ceil : Calc = a match {
-      case CalcVal.Double(t, tt) => CalcVal(math.ceil(t), q"_root_.scala.math.ceil($tt)")
+      case CalcVal(t : Double, tt) => CalcVal(math.ceil(t), q"_root_.scala.math.ceil($tt)")
       case _ => unsupported()
     }
     def Round : Calc = a match {
-      case CalcVal.Float(t, tt) => CalcVal(math.round(t), q"_root_.scala.math.round($tt)")
-      case CalcVal.Double(t, tt) => CalcVal(math.round(t), q"_root_.scala.math.round($tt)")
+      case CalcVal(t : Float, tt) => CalcVal(math.round(t), q"_root_.scala.math.round($tt)")
+      case CalcVal(t : Double, tt) => CalcVal(math.round(t), q"_root_.scala.math.round($tt)")
       case _ => unsupported()
     }
     def Sin : Calc = a match {
-      case CalcVal.Double(t, tt) => CalcVal(math.sin(t), q"_root_.scala.math.sin($tt)")
+      case CalcVal(t : Double, tt) => CalcVal(math.sin(t), q"_root_.scala.math.sin($tt)")
       case _ => unsupported()
     }
     def Cos : Calc = a match {
-      case CalcVal.Double(t, tt) => CalcVal(math.cos(t), q"_root_.scala.math.cos($tt)")
+      case CalcVal(t : Double, tt) => CalcVal(math.cos(t), q"_root_.scala.math.cos($tt)")
       case _ => unsupported()
     }
     def Tan : Calc = a match {
-      case CalcVal.Double(t, tt) => CalcVal(math.tan(t), q"_root_.scala.math.tan($tt)")
+      case CalcVal(t : Double, tt) => CalcVal(math.tan(t), q"_root_.scala.math.tan($tt)")
       case _ => unsupported()
     }
     def Sqrt : Calc = a match {
-      case CalcVal.Double(t, tt) => CalcVal(math.sqrt(t), q"_root_.scala.math.sqrt($tt)")
+      case CalcVal(t : Double, tt) => CalcVal(math.sqrt(t), q"_root_.scala.math.sqrt($tt)")
       case _ => unsupported()
     }
     def Log : Calc = a match {
-      case CalcVal.Double(t, tt) => CalcVal(math.log(t), q"_root_.scala.math.log($tt)")
+      case CalcVal(t : Double, tt) => CalcVal(math.log(t), q"_root_.scala.math.log($tt)")
       case _ => unsupported()
     }
     def Log10 : Calc = a match {
-      case CalcVal.Double(t, tt) => CalcVal(math.log10(t), q"_root_.scala.math.log10($tt)")
+      case CalcVal(t : Double, tt) => CalcVal(math.log10(t), q"_root_.scala.math.log10($tt)")
       case _ => unsupported()
     }
     def Reverse : Calc = a match {
-      case CalcVal.String(t, tt) => CalcVal(t.reverse, q"$tt.reverse")
+      case CalcVal(t : String, tt) => CalcVal(t.reverse, q"$tt.reverse")
       case _ => unsupported()
     }
     def Not : Calc = a match {
-      case CalcVal.Boolean(t, tt) => CalcVal(!t, q"!$tt")
+      case CalcVal(t : Boolean, tt) => CalcVal(!t, q"!$tt")
       case _ => unsupported()
     }
     def Require : Calc = a match {
@@ -1095,19 +1028,19 @@ trait GeneralMacros {
             abort(msg, Some(cArg.tpe.typeSymbol.asType))
           }
         //directly using the java lib `require` resulted in compiler crash, so we use wrapped require instead
-        case CalcNLit.String(msg,_) => cArg match {
+        case CalcNLit(Primitive.String,msg,_) => cArg match {
           case CalcUnknown(t, _) if t.typeSymbol == symbolOf[Warn] =>
-            CalcNLit.Boolean(q"""{println(${buildWarningMsg(msg)}); false}""")
+            CalcNLit(Primitive.Boolean, q"""{println(${buildWarningMsg(msg)}); false}""")
           case _ =>
-            CalcNLit.Boolean(q"{_root_.singleton.ops.impl._require(false, $msg); false}")
+            CalcNLit(Primitive.Boolean, q"{_root_.singleton.ops.impl._require(false, $msg); false}")
         }
         case _ => unsupported()
       }
-      case CalcNLit.Boolean(cond,_) => b match {
+      case CalcNLit(Primitive.Boolean, cond,_) => b match {
         //directly using the java lib `require` resulted in compiler crash, so we use wrapped require instead
-        case CalcVal.String(msg, msgt) => cArg match {
+        case CalcVal(msg : String, msgt) => cArg match {
           case CalcUnknown(t, _) if t == symbolOf[Warn] =>
-            CalcNLit.Boolean(
+            CalcNLit(Primitive.Boolean,
               q"""{
                   if ($cond) true
                   else {
@@ -1116,7 +1049,7 @@ trait GeneralMacros {
                   }
                 }""")
           case _ =>
-            CalcNLit.Boolean(q"{_root_.singleton.ops.impl._require($cond, $msgt); true}")
+            CalcNLit(Primitive.Boolean, q"{_root_.singleton.ops.impl._require($cond, $msgt); true}")
         }
         case _ => unsupported()
       }
@@ -1124,19 +1057,19 @@ trait GeneralMacros {
     }
     def ITE : Calc = (a, b, cArg) match {
       //Also has special case handling inside unapply
-      case (CalcVal.Boolean(it,itt), CalcVal.Char(tt,ttt), CalcVal.Char(et,ett)) =>
+      case (CalcVal(it : Boolean,itt), CalcVal(tt : Char,ttt), CalcVal(et : Char,ett)) =>
         CalcVal(if(it) tt else et, q"if ($itt) $ttt else $ett")
-      case (CalcVal.Boolean(it,itt), CalcVal.Int(tt,ttt), CalcVal.Int(et,ett)) =>
+      case (CalcVal(it : Boolean,itt), CalcVal(tt : Int,ttt), CalcVal(et : Int,ett)) =>
         CalcVal(if(it) tt else et, q"if ($itt) $ttt else $ett")
-      case (CalcVal.Boolean(it,itt), CalcVal.Long(tt,ttt), CalcVal.Long(et,ett)) =>
+      case (CalcVal(it : Boolean,itt), CalcVal(tt : Long,ttt), CalcVal(et : Long,ett)) =>
         CalcVal(if(it) tt else et, q"if ($itt) $ttt else $ett")
-      case (CalcVal.Boolean(it,itt), CalcVal.Float(tt,ttt), CalcVal.Float(et,ett)) =>
+      case (CalcVal(it : Boolean,itt), CalcVal(tt : Float,ttt), CalcVal(et : Float,ett)) =>
         CalcVal(if(it) tt else et, q"if ($itt) $ttt else $ett")
-      case (CalcVal.Boolean(it,itt), CalcVal.Double(tt,ttt), CalcVal.Double(et,ett)) =>
+      case (CalcVal(it : Boolean,itt), CalcVal(tt : Double,ttt), CalcVal(et : Double,ett)) =>
         CalcVal(if(it) tt else et, q"if ($itt) $ttt else $ett")
-      case (CalcVal.Boolean(it,itt), CalcVal.String(tt,ttt), CalcVal.String(et,ett)) =>
+      case (CalcVal(it : Boolean,itt), CalcVal(tt : String,ttt), CalcVal(et : String,ett)) =>
         CalcVal(if(it) tt else et, q"if ($itt) $ttt else $ett")
-      case (CalcVal.Boolean(it,itt), CalcVal.Boolean(tt,ttt), CalcVal.Boolean(et,ett)) =>
+      case (CalcVal(it : Boolean,itt), CalcVal(tt : Boolean,ttt), CalcVal(et : Boolean,ett)) =>
         CalcVal(if(it) tt else et, q"if ($itt) $ttt else $ett")
       case _ => unsupported()
     }
@@ -1145,159 +1078,159 @@ trait GeneralMacros {
       case _ => unsupported()
     }
     def Plus : Calc = (a, b) match {
-      case (CalcVal.Char(at, att), CalcVal.Char(bt, btt)) => CalcVal(at + bt, q"$att + $btt")
-      case (CalcVal.Int(at, att), CalcVal.Int(bt, btt)) => CalcVal(at + bt, q"$att + $btt")
-      case (CalcVal.Long(at, att), CalcVal.Long(bt, btt)) => CalcVal(at + bt, q"$att + $btt")
-      case (CalcVal.Float(at, att), CalcVal.Float(bt, btt)) => CalcVal(at + bt, q"$att + $btt")
-      case (CalcVal.Double(at, att), CalcVal.Double(bt, btt)) => CalcVal(at + bt, q"$att + $btt")
-      case (CalcVal.String(at, att), CalcVal.String(bt, btt)) => CalcVal(at + bt, q"$att + $btt")
+      case (CalcVal(at : Char, att), CalcVal(bt : Char, btt)) => CalcVal(at + bt, q"$att + $btt")
+      case (CalcVal(at : Int, att), CalcVal(bt : Int, btt)) => CalcVal(at + bt, q"$att + $btt")
+      case (CalcVal(at : Long, att), CalcVal(bt : Long, btt)) => CalcVal(at + bt, q"$att + $btt")
+      case (CalcVal(at : Float, att), CalcVal(bt : Float, btt)) => CalcVal(at + bt, q"$att + $btt")
+      case (CalcVal(at : Double, att), CalcVal(bt : Double, btt)) => CalcVal(at + bt, q"$att + $btt")
+      case (CalcVal(at : String, att), CalcVal(bt : String, btt)) => CalcVal(at + bt, q"$att + $btt")
       case _ => unsupported()
     }
     def Minus : Calc = (a, b) match {
-      case (CalcVal.Char(at, att), CalcVal.Char(bt, btt)) => CalcVal(at - bt, q"$att - $btt")
-      case (CalcVal.Int(at, att), CalcVal.Int(bt, btt)) => CalcVal(at - bt, q"$att - $btt")
-      case (CalcVal.Long(at, att), CalcVal.Long(bt, btt)) => CalcVal(at - bt, q"$att - $btt")
-      case (CalcVal.Float(at, att), CalcVal.Float(bt, btt)) => CalcVal(at - bt, q"$att - $btt")
-      case (CalcVal.Double(at, att), CalcVal.Double(bt, btt)) => CalcVal(at - bt, q"$att - $btt")
+      case (CalcVal(at : Char, att), CalcVal(bt : Char, btt)) => CalcVal(at - bt, q"$att - $btt")
+      case (CalcVal(at : Int, att), CalcVal(bt : Int, btt)) => CalcVal(at - bt, q"$att - $btt")
+      case (CalcVal(at : Long, att), CalcVal(bt : Long, btt)) => CalcVal(at - bt, q"$att - $btt")
+      case (CalcVal(at : Float, att), CalcVal(bt : Float, btt)) => CalcVal(at - bt, q"$att - $btt")
+      case (CalcVal(at : Double, att), CalcVal(bt : Double, btt)) => CalcVal(at - bt, q"$att - $btt")
       case _ => unsupported()
     }
     def Mul : Calc = (a, b) match {
-      case (CalcVal.Char(at, att), CalcVal.Char(bt, btt)) => CalcVal(at * bt, q"$att * $btt")
-      case (CalcVal.Int(at, att), CalcVal.Int(bt, btt)) => CalcVal(at * bt, q"$att * $btt")
-      case (CalcVal.Long(at, att), CalcVal.Long(bt, btt)) => CalcVal(at * bt, q"$att * $btt")
-      case (CalcVal.Float(at, att), CalcVal.Float(bt, btt)) => CalcVal(at * bt, q"$att * $btt")
-      case (CalcVal.Double(at, att), CalcVal.Double(bt, btt)) => CalcVal(at * bt, q"$att * $btt")
+      case (CalcVal(at : Char, att), CalcVal(bt : Char, btt)) => CalcVal(at * bt, q"$att * $btt")
+      case (CalcVal(at : Int, att), CalcVal(bt : Int, btt)) => CalcVal(at * bt, q"$att * $btt")
+      case (CalcVal(at : Long, att), CalcVal(bt : Long, btt)) => CalcVal(at * bt, q"$att * $btt")
+      case (CalcVal(at : Float, att), CalcVal(bt : Float, btt)) => CalcVal(at * bt, q"$att * $btt")
+      case (CalcVal(at : Double, att), CalcVal(bt : Double, btt)) => CalcVal(at * bt, q"$att * $btt")
       case _ => unsupported()
     }
     def Div : Calc = (a, b) match {
-      case (CalcVal.Char(at, att), CalcVal.Char(bt, btt)) => CalcVal(at / bt, q"$att / $btt")
-      case (CalcVal.Int(at, att), CalcVal.Int(bt, btt)) => CalcVal(at / bt, q"$att / $btt")
-      case (CalcVal.Long(at, att), CalcVal.Long(bt, btt)) => CalcVal(at / bt, q"$att / $btt")
-      case (CalcVal.Float(at, att), CalcVal.Float(bt, btt)) => CalcVal(at / bt, q"$att / $btt")
-      case (CalcVal.Double(at, att), CalcVal.Double(bt, btt)) => CalcVal(at / bt, q"$att / $btt")
+      case (CalcVal(at : Char, att), CalcVal(bt : Char, btt)) => CalcVal(at / bt, q"$att / $btt")
+      case (CalcVal(at : Int, att), CalcVal(bt : Int, btt)) => CalcVal(at / bt, q"$att / $btt")
+      case (CalcVal(at : Long, att), CalcVal(bt : Long, btt)) => CalcVal(at / bt, q"$att / $btt")
+      case (CalcVal(at : Float, att), CalcVal(bt : Float, btt)) => CalcVal(at / bt, q"$att / $btt")
+      case (CalcVal(at : Double, att), CalcVal(bt : Double, btt)) => CalcVal(at / bt, q"$att / $btt")
       case _ => unsupported()
     }
     def Mod : Calc = (a, b) match {
-      case (CalcVal.Char(at, att), CalcVal.Char(bt, btt)) => CalcVal(at % bt, q"$att % $btt")
-      case (CalcVal.Int(at, att), CalcVal.Int(bt, btt)) => CalcVal(at % bt, q"$att % $btt")
-      case (CalcVal.Long(at, att), CalcVal.Long(bt, btt)) => CalcVal(at % bt, q"$att % $btt")
-      case (CalcVal.Float(at, att), CalcVal.Float(bt, btt)) => CalcVal(at % bt, q"$att % $btt")
-      case (CalcVal.Double(at, att), CalcVal.Double(bt, btt)) => CalcVal(at % bt, q"$att % $btt")
+      case (CalcVal(at : Char, att), CalcVal(bt : Char, btt)) => CalcVal(at % bt, q"$att % $btt")
+      case (CalcVal(at : Int, att), CalcVal(bt : Int, btt)) => CalcVal(at % bt, q"$att % $btt")
+      case (CalcVal(at : Long, att), CalcVal(bt : Long, btt)) => CalcVal(at % bt, q"$att % $btt")
+      case (CalcVal(at : Float, att), CalcVal(bt : Float, btt)) => CalcVal(at % bt, q"$att % $btt")
+      case (CalcVal(at : Double, att), CalcVal(bt : Double, btt)) => CalcVal(at % bt, q"$att % $btt")
       case _ => unsupported()
     }
     def Sml : Calc = (a, b) match {
-      case (CalcVal.Char(at, att), CalcVal.Char(bt, btt)) => CalcVal(at < bt, q"$att < $btt")
-      case (CalcVal.Int(at, att), CalcVal.Int(bt, btt)) => CalcVal(at < bt, q"$att < $btt")
-      case (CalcVal.Long(at, att), CalcVal.Long(bt, btt)) => CalcVal(at < bt, q"$att < $btt")
-      case (CalcVal.Float(at, att), CalcVal.Float(bt, btt)) => CalcVal(at < bt, q"$att < $btt")
-      case (CalcVal.Double(at, att), CalcVal.Double(bt, btt)) => CalcVal(at < bt, q"$att < $btt")
+      case (CalcVal(at : Char, att), CalcVal(bt : Char, btt)) => CalcVal(at < bt, q"$att < $btt")
+      case (CalcVal(at : Int, att), CalcVal(bt : Int, btt)) => CalcVal(at < bt, q"$att < $btt")
+      case (CalcVal(at : Long, att), CalcVal(bt : Long, btt)) => CalcVal(at < bt, q"$att < $btt")
+      case (CalcVal(at : Float, att), CalcVal(bt : Float, btt)) => CalcVal(at < bt, q"$att < $btt")
+      case (CalcVal(at : Double, att), CalcVal(bt : Double, btt)) => CalcVal(at < bt, q"$att < $btt")
       case _ => unsupported()
     }
     def Big : Calc = (a, b) match {
-      case (CalcVal.Char(at, att), CalcVal.Char(bt, btt)) => CalcVal(at > bt, q"$att > $btt")
-      case (CalcVal.Int(at, att), CalcVal.Int(bt, btt)) => CalcVal(at > bt, q"$att > $btt")
-      case (CalcVal.Long(at, att), CalcVal.Long(bt, btt)) => CalcVal(at > bt, q"$att > $btt")
-      case (CalcVal.Float(at, att), CalcVal.Float(bt, btt)) => CalcVal(at > bt, q"$att > $btt")
-      case (CalcVal.Double(at, att), CalcVal.Double(bt, btt)) => CalcVal(at > bt, q"$att > $btt")
+      case (CalcVal(at : Char, att), CalcVal(bt : Char, btt)) => CalcVal(at > bt, q"$att > $btt")
+      case (CalcVal(at : Int, att), CalcVal(bt : Int, btt)) => CalcVal(at > bt, q"$att > $btt")
+      case (CalcVal(at : Long, att), CalcVal(bt : Long, btt)) => CalcVal(at > bt, q"$att > $btt")
+      case (CalcVal(at : Float, att), CalcVal(bt : Float, btt)) => CalcVal(at > bt, q"$att > $btt")
+      case (CalcVal(at : Double, att), CalcVal(bt : Double, btt)) => CalcVal(at > bt, q"$att > $btt")
       case _ => unsupported()
     }
     def SmlEq : Calc = (a, b) match {
-      case (CalcVal.Char(at, att), CalcVal.Char(bt, btt)) => CalcVal(at <= bt, q"$att <= $btt")
-      case (CalcVal.Int(at, att), CalcVal.Int(bt, btt)) => CalcVal(at <= bt, q"$att <= $btt")
-      case (CalcVal.Long(at, att), CalcVal.Long(bt, btt)) => CalcVal(at <= bt, q"$att <= $btt")
-      case (CalcVal.Float(at, att), CalcVal.Float(bt, btt)) => CalcVal(at <= bt, q"$att <= $btt")
-      case (CalcVal.Double(at, att), CalcVal.Double(bt, btt)) => CalcVal(at <= bt, q"$att <= $btt")
+      case (CalcVal(at : Char, att), CalcVal(bt : Char, btt)) => CalcVal(at <= bt, q"$att <= $btt")
+      case (CalcVal(at : Int, att), CalcVal(bt : Int, btt)) => CalcVal(at <= bt, q"$att <= $btt")
+      case (CalcVal(at : Long, att), CalcVal(bt : Long, btt)) => CalcVal(at <= bt, q"$att <= $btt")
+      case (CalcVal(at : Float, att), CalcVal(bt : Float, btt)) => CalcVal(at <= bt, q"$att <= $btt")
+      case (CalcVal(at : Double, att), CalcVal(bt : Double, btt)) => CalcVal(at <= bt, q"$att <= $btt")
       case _ => unsupported()
     }
     def BigEq : Calc = (a, b) match {
-      case (CalcVal.Char(at, att), CalcVal.Char(bt, btt)) => CalcVal(at >= bt, q"$att >= $btt")
-      case (CalcVal.Int(at, att), CalcVal.Int(bt, btt)) => CalcVal(at >= bt, q"$att >= $btt")
-      case (CalcVal.Long(at, att), CalcVal.Long(bt, btt)) => CalcVal(at >= bt, q"$att >= $btt")
-      case (CalcVal.Float(at, att), CalcVal.Float(bt, btt)) => CalcVal(at >= bt, q"$att >= $btt")
-      case (CalcVal.Double(at, att), CalcVal.Double(bt, btt)) => CalcVal(at >= bt, q"$att >= $btt")
+      case (CalcVal(at : Char, att), CalcVal(bt : Char, btt)) => CalcVal(at >= bt, q"$att >= $btt")
+      case (CalcVal(at : Int, att), CalcVal(bt : Int, btt)) => CalcVal(at >= bt, q"$att >= $btt")
+      case (CalcVal(at : Long, att), CalcVal(bt : Long, btt)) => CalcVal(at >= bt, q"$att >= $btt")
+      case (CalcVal(at : Float, att), CalcVal(bt : Float, btt)) => CalcVal(at >= bt, q"$att >= $btt")
+      case (CalcVal(at : Double, att), CalcVal(bt : Double, btt)) => CalcVal(at >= bt, q"$att >= $btt")
       case _ => unsupported()
     }
     def Eq : Calc = (a, b) match {
-      case (CalcVal.Char(at, att), CalcVal.Char(bt, btt)) => CalcVal(at == bt, q"$att == $btt")
-      case (CalcVal.Int(at, att), CalcVal.Int(bt, btt)) => CalcVal(at == bt, q"$att == $btt")
-      case (CalcVal.Long(at, att), CalcVal.Long(bt, btt)) => CalcVal(at == bt, q"$att == $btt")
-      case (CalcVal.Float(at, att), CalcVal.Float(bt, btt)) => CalcVal(at == bt, q"$att == $btt")
-      case (CalcVal.Double(at, att), CalcVal.Double(bt, btt)) => CalcVal(at == bt, q"$att == $btt")
-      case (CalcVal.String(at, att), CalcVal.String(bt, btt)) => CalcVal(at == bt, q"$att == $btt")
-      case (CalcVal.Boolean(at, att), CalcVal.Boolean(bt, btt)) => CalcVal(at == bt, q"$att == $btt")
+      case (CalcVal(at : Char, att), CalcVal(bt : Char, btt)) => CalcVal(at == bt, q"$att == $btt")
+      case (CalcVal(at : Int, att), CalcVal(bt : Int, btt)) => CalcVal(at == bt, q"$att == $btt")
+      case (CalcVal(at : Long, att), CalcVal(bt : Long, btt)) => CalcVal(at == bt, q"$att == $btt")
+      case (CalcVal(at : Float, att), CalcVal(bt : Float, btt)) => CalcVal(at == bt, q"$att == $btt")
+      case (CalcVal(at : Double, att), CalcVal(bt : Double, btt)) => CalcVal(at == bt, q"$att == $btt")
+      case (CalcVal(at : String, att), CalcVal(bt : String, btt)) => CalcVal(at == bt, q"$att == $btt")
+      case (CalcVal(at : Boolean, att), CalcVal(bt : Boolean, btt)) => CalcVal(at == bt, q"$att == $btt")
       case _ => unsupported()
     }
     def Neq : Calc = (a, b) match {
-      case (CalcVal.Char(at, att), CalcVal.Char(bt, btt)) => CalcVal(at != bt, q"$att != $btt")
-      case (CalcVal.Int(at, att), CalcVal.Int(bt, btt)) => CalcVal(at != bt, q"$att != $btt")
-      case (CalcVal.Long(at, att), CalcVal.Long(bt, btt)) => CalcVal(at != bt, q"$att != $btt")
-      case (CalcVal.Float(at, att), CalcVal.Float(bt, btt)) => CalcVal(at != bt, q"$att != $btt")
-      case (CalcVal.Double(at, att), CalcVal.Double(bt, btt)) => CalcVal(at != bt, q"$att != $btt")
-      case (CalcVal.String(at, att), CalcVal.String(bt, btt)) => CalcVal(at != bt, q"$att != $btt")
-      case (CalcVal.Boolean(at, att), CalcVal.Boolean(bt, btt)) => CalcVal(at != bt, q"$att != $btt")
+      case (CalcVal(at : Char, att), CalcVal(bt : Char, btt)) => CalcVal(at != bt, q"$att != $btt")
+      case (CalcVal(at : Int, att), CalcVal(bt : Int, btt)) => CalcVal(at != bt, q"$att != $btt")
+      case (CalcVal(at : Long, att), CalcVal(bt : Long, btt)) => CalcVal(at != bt, q"$att != $btt")
+      case (CalcVal(at : Float, att), CalcVal(bt : Float, btt)) => CalcVal(at != bt, q"$att != $btt")
+      case (CalcVal(at : Double, att), CalcVal(bt : Double, btt)) => CalcVal(at != bt, q"$att != $btt")
+      case (CalcVal(at : String, att), CalcVal(bt : String, btt)) => CalcVal(at != bt, q"$att != $btt")
+      case (CalcVal(at : Boolean, att), CalcVal(bt : Boolean, btt)) => CalcVal(at != bt, q"$att != $btt")
       case _ => unsupported()
     }
     def And : Calc = a match {
       case CalcLit.Boolean(ab) => //`And` expressions where the LHS is a literal can be inlined
         if (ab) b match {
-          case CalcVal.Boolean(_,_) => b //inlining the value of RHS when the LHS is true
+          case CalcVal(_ : Boolean,_) => b //inlining the value of RHS when the LHS is true
           case _ => unsupported()
-        } else CalcLit.Boolean(false) //inlining as false when the LHS is false
+        } else CalcLit(false) //inlining as false when the LHS is false
       case _ => (a, b) match {
-        case (CalcVal.Boolean(at, att), CalcVal.Boolean(bt, btt)) => CalcVal(at && bt, q"$att && $btt")
+        case (CalcVal(at : Boolean, att), CalcVal(bt : Boolean, btt)) => CalcVal(at && bt, q"$att && $btt")
         case _ => unsupported()
       }
     }
     def Or : Calc = a match {
       case CalcLit.Boolean(ab) => //`Or` expressions where the LHS is a literal can be inlined
         if (!ab) b match {
-          case CalcVal.Boolean(_,_) => b //inlining the value of RHS when the LHS is false
+          case CalcVal(_ : Boolean,_) => b //inlining the value of RHS when the LHS is false
           case _ => unsupported()
-        } else CalcLit.Boolean(true) //inlining as true when the LHS is true
+        } else CalcLit(true) //inlining as true when the LHS is true
       case _ => (a, b) match {
-        case (CalcVal.Boolean(at, att), CalcVal.Boolean(bt, btt)) => CalcVal(at || bt, q"$att || $btt")
+        case (CalcVal(at : Boolean, att), CalcVal(bt : Boolean, btt)) => CalcVal(at || bt, q"$att || $btt")
         case _ => unsupported()
       }
     }
     def Pow : Calc = (a, b) match {
-      case (CalcVal.Double(at, att), CalcVal.Double(bt, btt)) =>
+      case (CalcVal(at : Double, att), CalcVal(bt : Double, btt)) =>
         CalcVal(math.pow(at.toDouble, bt.toDouble), q"_root_.scala.math.pow($att.toDouble, $btt.toDouble)")
       case _ => unsupported()
     }
     def Min : Calc = (a, b) match {
-      case (CalcVal.Int(at, att), CalcVal.Int(bt, btt)) =>
+      case (CalcVal(at : Int, att), CalcVal(bt : Int, btt)) =>
         CalcVal(math.min(at, bt), q"_root_.scala.math.min($att, $btt)")
-      case (CalcVal.Long(at, att), CalcVal.Long(bt, btt)) =>
+      case (CalcVal(at : Long, att), CalcVal(bt : Long, btt)) =>
         CalcVal(math.min(at, bt), q"_root_.scala.math.min($att, $btt)")
-      case (CalcVal.Float(at, att), CalcVal.Float(bt, btt)) =>
+      case (CalcVal(at : Float, att), CalcVal(bt : Float, btt)) =>
         CalcVal(math.min(at, bt), q"_root_.scala.math.min($att, $btt)")
-      case (CalcVal.Double(at, att), CalcVal.Double(bt, btt)) =>
+      case (CalcVal(at : Double, att), CalcVal(bt : Double, btt)) =>
         CalcVal(math.min(at, bt), q"_root_.scala.math.min($att, $btt)")
       case _ => unsupported()
     }
     def Max : Calc = (a, b) match {
-      case (CalcVal.Int(at, att), CalcVal.Int(bt, btt)) =>
+      case (CalcVal(at : Int, att), CalcVal(bt : Int, btt)) =>
         CalcVal(math.max(at, bt), q"_root_.scala.math.max($att, $btt)")
-      case (CalcVal.Long(at, att), CalcVal.Long(bt, btt)) =>
+      case (CalcVal(at : Long, att), CalcVal(bt : Long, btt)) =>
         CalcVal(math.max(at, bt), q"_root_.scala.math.max($att, $btt)")
-      case (CalcVal.Float(at, att), CalcVal.Float(bt, btt)) =>
+      case (CalcVal(at : Float, att), CalcVal(bt : Float, btt)) =>
         CalcVal(math.max(at, bt), q"_root_.scala.math.max($att, $btt)")
-      case (CalcVal.Double(at, att), CalcVal.Double(bt, btt)) =>
+      case (CalcVal(at : Double, att), CalcVal(bt : Double, btt)) =>
         CalcVal(math.max(at, bt), q"_root_.scala.math.max($att, $btt)")
       case _ => unsupported()
     }
     def Substring : Calc = (a, b) match {
       case (CalcLit.String(at), CalcLit.Int(bt)) => CalcLit(at.substring(bt))
-      case (CalcVal.String(at, att), CalcVal.Int(bt, btt)) => CalcNLit.String(q"$att.substring($btt)")
+      case (CalcVal(at : String, att), CalcVal(bt : Int, btt)) => CalcNLit(Primitive.String, q"$att.substring($btt)")
       case _ => unsupported()
     }
     def CharAt : Calc = (a, b) match {
       case (CalcLit.String(at), CalcLit.Int(bt)) => CalcLit(at.charAt(bt))
-      case (CalcVal.String(at, att), CalcVal.Int(bt, btt)) => CalcNLit.Char(q"$att.charAt($btt)")
+      case (CalcVal(at : String, att), CalcVal(bt : Int, btt)) => CalcNLit(Primitive.Char, q"$att.charAt($btt)")
       case _ => unsupported()
     }
     def Length : Calc = a match {
-      case CalcVal.String(at, att) => CalcVal(at.length, q"$att.length")
+      case CalcVal(at : String, att) => CalcVal(at.length, q"$att.length")
       case _ => unsupported()
     }
 
@@ -1312,7 +1245,6 @@ trait GeneralMacros {
       case funcTypes.ToFloat => ToFloat
       case funcTypes.ToDouble => ToDouble
       case funcTypes.ToString => ToString
-      case funcTypes.ToSymbol => ToSymbol
       case funcTypes.Negate => Negate
       case funcTypes.Abs => Abs
       case funcTypes.NumberOfLeadingZeros => NumberOfLeadingZeros
@@ -1362,8 +1294,7 @@ trait GeneralMacros {
         case (funcTypes.ToNat, CalcLit.Int(t)) =>
           if (t < 0) abort(s"Nat cannot be a negative literal. Found: $t")
           else genOpTreeNat(opTpe, t)
-        case (funcTypes.ToSymbol, CalcLit.String(t)) => genOpTreeSymbol(opTpe, t)
-        case (_, CalcLit(t)) => genOpTreeLit(opTpe, t)
+        case (_, CalcLit(_, t)) => genOpTreeLit(opTpe, t)
         case (funcTypes.AcceptNonLiteral | funcTypes.GetArg, t : CalcNLit) => genOpTreeNLit(opTpe, t)
         case (funcTypes.GetArg, t : CalcUnknown) => genOpTreeUnknown(opTpe, t)
         case (_, t: CalcNLit) =>
@@ -1477,7 +1408,7 @@ trait GeneralMacros {
       }
 
       val msgCalc = condCalc match {
-        case (CalcLit.Boolean(true)) => CalcLit.String("") //Not calculating message if condition is constant true
+        case (CalcLit.Boolean(true)) => CalcLit("") //Not calculating message if condition is constant true
         case _ => TypeCalc(fixedMsgTpe) match {
           case t : CalcVal => t
           case _ => extractionFailed(fixedMsgTpe)
@@ -1543,7 +1474,7 @@ trait GeneralMacros {
       }
 
       val msgCalc = condCalc match {
-        case (CalcLit.Boolean(true)) => CalcLit.String("") //Not calculating message if condition is constant true
+        case (CalcLit.Boolean(true)) => CalcLit("") //Not calculating message if condition is constant true
         case _ => TypeCalc(fixedMsgTpe) match {
           case t : CalcVal => t
           case _ => extractionFailed(fixedMsgTpe)
@@ -1618,36 +1549,5 @@ trait GeneralMacros {
   //copied from Shapeless
   def mkNatValue(i: Int): Tree =
   q""" new ${mkNatTpt(i)} """
-
-
-  //copied from Shapeless
-  val SymTpe = typeOf[scala.Symbol]
-  object SingletonSymbolType {
-    val atatTpe = typeOf[@@[_,_]].typeConstructor
-    val TaggedSym = typeOf[tag.Tagged[_]].typeConstructor.typeSymbol
-
-    def unrefine(t: Type): Type =
-      t.dealias match {
-        case RefinedType(List(t), scope) if scope.isEmpty => unrefine(t)
-        case t => t
-      }
-
-    def apply(s: String): Type = appliedType(atatTpe, List(SymTpe, c.internal.constantType(Constant(s))))
-
-    def unapply(t: Type): Option[String] =
-      unrefine(t).dealias match {
-        case RefinedType(List(SymTpe, TypeRef(_, TaggedSym, List(ConstantType(Constant(s: String))))), _) => Some(s)
-        case _ => None
-      }
-  }
-
-  //copied from Shapeless
-  def mkSingletonSymbol(s: String): Tree = {
-    val sTpe = SingletonSymbolType(s)
-    q"""_root_.scala.Symbol($s).asInstanceOf[$sTpe]"""
-  }
-  def mkSingletonSymbolWide(s: String): Tree = {
-    q"""_root_.scala.Symbol($s)"""
-  }
   ///////////////////////////////////////////////////////////////////////////////////////////
 }

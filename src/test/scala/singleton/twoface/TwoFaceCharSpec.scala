@@ -277,10 +277,6 @@ class TwoFaceCharSpec extends Properties("TwoFace.Char") {
   property("Unsafe toDouble") = verifyTFDouble(TwoFace.Char(us('\u0001')).toDouble, us(1.0))
   property("Safe toStringTF") = verifyTFString(TwoFace.Char('t').toStringTF, "t")
   property("Unsafe toStringTF") = verifyTFString(TwoFace.Char(us('t')).toStringTF, us("t"))
-  property("Safe toSymbol") = {
-    val sym = TwoFace.Char('t').toSymbol
-    sym == scala.Symbol("t")
-  }
 
   property("Implicit Conversions") = wellTyped {
     val d : W.`'\u0003'`.T = TwoFace.Char('\u0003')

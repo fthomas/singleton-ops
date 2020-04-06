@@ -19,7 +19,6 @@ package object ops {
   type XDouble              = Double with Singleton
   type XString              = String with Singleton
   type XBoolean             = Boolean with Singleton
-  type XSymbol              = Symbol with Singleton
   /////////////////////////////////////////////////
 
   /////////////////////////////////////////////////
@@ -33,7 +32,6 @@ package object ops {
   type SafeDouble[P1]       = impl.OpDouble[Require[IsDouble[P1]] ==> P1]
   type SafeString[P1]       = impl.OpString[Require[IsString[P1]] ==> P1]
   type SafeBoolean[P1]      = impl.OpBoolean[Require[IsBoolean[P1]] ==> P1]
-  type SafeSymbol[P1]       = impl.OpSymbol[ToSymbol[Require[IsSymbol[P1]] ==> P1]]
   /////////////////////////////////////////////////
 
   /////////////////////////////////////////////////
@@ -48,7 +46,6 @@ package object ops {
   type OpAuxDouble[O <: Op,   Ret_Out <: XDouble]   = OpDouble.Aux[O, Ret_Out]
   type OpAuxString[O <: Op,   Ret_Out <: XString]   = OpString.Aux[O, Ret_Out]
   type OpAuxBoolean[O <: Op,  Ret_Out <: XBoolean]  = OpBoolean.Aux[O, Ret_Out]
-  type OpAuxSymbol[O <: Op,   Ret_Out <: Symbol]    = OpSymbol.Aux[O, Ret_Out]
   /////////////////////////////////////////////////
 
   private val NP = W(0)
@@ -103,7 +100,6 @@ package object ops {
   type ToFloat[P1]          = OpMacro[OpId.ToFloat, P1, NP, NP]
   type ToDouble[P1]         = OpMacro[OpId.ToDouble, P1, NP, NP]
   type ToString[P1]         = OpMacro[OpId.ToString, P1, NP, NP]
-  type ToSymbol[P1]         = OpMacro[OpId.ToSymbol, P1, NP, NP]
   type IsNat[P1]            = OpMacro[OpId.IsNat, P1, NP, NP]
   type IsChar[P1]           = OpMacro[OpId.IsChar, P1, NP, NP]
   type IsInt[P1]            = OpMacro[OpId.IsInt, P1, NP, NP]
@@ -112,7 +108,6 @@ package object ops {
   type IsDouble[P1]         = OpMacro[OpId.IsDouble, P1, NP, NP]
   type IsString[P1]         = OpMacro[OpId.IsString, P1, NP, NP]
   type IsBoolean[P1]        = OpMacro[OpId.IsBoolean, P1, NP, NP]
-  type IsSymbol[P1]         = OpMacro[OpId.IsSymbol, P1, NP, NP]
   type IsNonLiteral[P1]     = OpMacro[OpId.IsNonLiteral, P1, NP, NP]
   type Reverse[P1]          = OpMacro[OpId.Reverse, P1, NP, NP]
   type Negate[P1]           = OpMacro[OpId.Negate, P1, NP, NP]

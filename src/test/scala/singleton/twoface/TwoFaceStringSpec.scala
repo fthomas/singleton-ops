@@ -67,10 +67,6 @@ class TwoFaceStringSpec extends Properties("TwoFace.String") {
   property("Unsafe toFloat") = verifyTFFloat(TwoFace.String(us("1.0")).toFloat, us(1.0f))
   property("Safe toDouble") = verifyTFDouble(TwoFace.String("1.0").toDouble, 1.0)
   property("Unsafe toDouble") = verifyTFDouble(TwoFace.String(us("1.0")).toDouble, us(1.0))
-  property("Safe toSymbol") = {
-    val sym = TwoFace.String("foo").toSymbol
-    sym == Symbol("foo")
-  }
 
   property("Safe length") = verifyTFInt(TwoFace.String("Some").length, 4)
   property("Unsafe length") = verifyTFInt(TwoFace.String(us("Some")).length, us(4))
