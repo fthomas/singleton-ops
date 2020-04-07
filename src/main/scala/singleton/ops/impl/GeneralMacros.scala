@@ -1,6 +1,4 @@
 package singleton.ops.impl
-import shapeless.tag
-import shapeless.tag.@@
 import singleton.twoface.impl.TwoFaceAny
 
 import scala.reflect.macros.whitebox
@@ -288,7 +286,7 @@ trait GeneralMacros {
       override def equals(that: Any): Boolean = {
         val thatKey = that.asInstanceOf[Key]
         (thatKey.key =:= key) && (thatKey.argContext.length == argContext.length) &&
-          (thatKey.argContext lazyZip argContext).forall(_ equalsStructure _)
+          ListZipper(thatKey.argContext, argContext).forall(_ equalsStructure _)
       }
     }
     object Key {
