@@ -83,7 +83,6 @@ trait GeneralMacros {
     val Substring = symbolOf[OpId.Substring]
     val CharAt = symbolOf[OpId.CharAt]
     val Length = symbolOf[OpId.Length]
-    val uncacheableSet = Set(Arg, EnumCount, ImplicitFound, GetArg)
   }
 
   ////////////////////////////////////////////////////////////////////
@@ -136,6 +135,11 @@ trait GeneralMacros {
     val dummyConstant : Any
     val name : String
     val tpe : Type
+
+    override def equals(that: Any): Boolean = {
+      val thatPrim = that.asInstanceOf[Primitive]
+      thatPrim.dummyConstant == dummyConstant && thatPrim.name == name && thatPrim.tpe =:= tpe
+    }
   }
   object Primitive {
     case object Char    extends Primitive {val dummyConstant = '\u0001';val name = "Char";     val tpe = typeOf[scala.Char]}
@@ -223,9 +227,9 @@ trait GeneralMacros {
     }
     def apply(t : Any) : CalcLit = CalcLit(Primitive.fromLiteral(t), t)
   }
-  case class CalcNLit(primitive : Primitive, tree : Tree, tpeOverride : Option[Type] = None) extends CalcVal {
+  case class CalcNLit(primitive : Primitive, tree : Tree) extends CalcVal {
     val literal = None
-    val tpe = tpeOverride.getOrElse(primitive.tpe)
+    val tpe = primitive.tpe
   }
 
   sealed trait CalcType extends Calc
@@ -280,11 +284,15 @@ trait GeneralMacros {
       treeDuplicator.transform(t)
     }
 
-    final case class Key private (key : Type) {
-      override def equals(that: Any): Boolean = that.asInstanceOf[Key].key =:= key
+    final case class Key private (key : Type, argContext : List[Tree]) {
+      override def equals(that: Any): Boolean = {
+        val thatKey = that.asInstanceOf[Key]
+        (thatKey.key =:= key) && (thatKey.argContext.length == argContext.length) &&
+          (thatKey.argContext lazyZip argContext).forall(_ equalsStructure _)
+      }
     }
     object Key {
-      implicit def fromType(key : Type) : Key = new Key(key)
+      implicit def fromType(key : Type) : Key = new Key(key, GetArgTree.argContext)
     }
     val cache = MacroCache.cache.asInstanceOf[mutable.Map[Key, Calc]]
     def get(key : Type) : Option[Calc] = {
@@ -304,12 +312,6 @@ trait GeneralMacros {
       cache += (k -> value)
       VerboseTraversal(s"${GREEN}${BOLD}caching${RESET} $k -> $value")
       value
-    }
-    def getOrElseUpdate[V <: Calc](key : Type, value : => V) : V = {
-      val v = value
-      val k = Key.fromType(key)
-      cache.getOrElseUpdate(k, {VerboseTraversal(s"${GREEN}${BOLD}caching${RESET} $k -> $v"); v}).asInstanceOf[V]
-      v
     }
   }
   ////////////////////////////////////////////////////////////////////
@@ -431,15 +433,16 @@ trait GeneralMacros {
     // Calculates an Op
     ////////////////////////////////////////////////////////////////////////
     object OpCalc {
-      private var uncacheableStack : List[Boolean] = List()
       private val opMacroSym = symbolOf[OpMacro[_,_,_,_]]
-      def setUncacheable() : Unit = uncacheableStack = true :: uncacheableStack.drop(1)
+      private var uncachingReason : Int = 0
+      def setUncachingReason(arg : Int) : Unit = {
+        uncachingReason = arg
+      }
       def unapply(tp: Type): Option[Calc] = {
         tp match {
           case TypeRef(_, sym, ft :: tp :: _) if sym == opMacroSym && ft.typeSymbol == funcTypes.GetType =>
             Some(CalcUnknown(tp, None))
           case TypeRef(_, sym, args) if sym == opMacroSym =>
-            uncacheableStack = false :: uncacheableStack
             VerboseTraversal(s"@@OpCalc@@\nTP: $tp\nRAW: ${showRaw(tp)}")
             val funcType = args.head.typeSymbol.asType
             CalcCache.get(tp) match {
@@ -453,6 +456,7 @@ trait GeneralMacros {
                 //otherwise we get the variable's value
                 val retVal = (funcType, aValue) match {
                   case (funcTypes.ImplicitFound, _) =>
+                    setUncachingReason(1)
                     aValue match {
                       case CalcUnknown(t, _) => try {
                         c.typecheck(q"implicitly[$t]")
@@ -536,12 +540,8 @@ trait GeneralMacros {
                       case _ => None
                     }
                 }
-                val uncacheable = uncacheableStack.head
-                uncacheableStack = uncacheableStack.drop(1)
-                //If the current function is uncacheable or deeper functionality was already determined as uncacheable
-                //then we set the shallower function as uncacheable as well. Otherwise, we can set cache the calculation.
-                if (uncacheable || funcTypes.uncacheableSet.contains(funcType)) setUncacheable()
-                else retVal.foreach(rv => CalcCache.add(tp, rv))
+                if (uncachingReason > 0) VerboseTraversal(s"$uncachingReason:: Skipped caching of $tp")
+                else retVal.foreach{rv => CalcCache.add(tp, rv)}
                 retVal
               case cached => cached
             }
@@ -555,12 +555,8 @@ trait GeneralMacros {
       TypeCalc.unapply(tp) match {
         case Some(t : CalcVal) => t
         case Some(t @ CalcType.UB(_)) => t
-        case Some(t @ CalcType.TF(_)) =>
-          OpCalc.setUncacheable()
-          CalcNLit(t, q"valueOf[$tp].getValue")
-        case Some(t : CalcType) =>
-          OpCalc.setUncacheable()
-          CalcNLit(t, q"valueOf[$tp]")
+        case Some(t @ CalcType.TF(_)) => CalcNLit(t, q"valueOf[$tp].getValue")
+        case Some(t : CalcType) => CalcNLit(t, q"valueOf[$tp]")
         case Some(t : CalcUnknown) => t
         case _ =>
           VerboseTraversal(s"@@Unknown@@\nTP: $tp\nRAW: ${showRaw(tp)}")
@@ -772,7 +768,7 @@ trait GeneralMacros {
     val typedTree = c.typecheck(numValueTree)
     TypeCalc(typedTree.tpe) match {
       case t : CalcLit => t
-      case t : CalcType.UB => CalcNLit(t, numValueTree, Some(typedTree.tpe)) //TODO: maybe redundant
+      case t : CalcType.UB => CalcNLit(t, numValueTree)
       case t : CalcType => CalcNLit(t, numValueTree)
       case _ => extractionFailed(typedTree.tpe)
     }
@@ -828,8 +824,22 @@ trait GeneralMacros {
       case _ => abort("Left-hand-side tree not found")
     }
 
-    private lazy val argList = getAllArgs(c.enclosingImplicits.last.tree, false)
-    private lazy val lhsArgList = getAllLHSArgs(c.enclosingImplicits.last.tree)
+    private var argListUsed = false
+    private lazy val argList = {
+      argListUsed = true
+      getAllArgs(c.enclosingImplicits.last.tree, false)
+    }
+    private var lhsArgListUsed = false
+    private lazy val lhsArgList = {
+      lhsArgListUsed = true
+      getAllLHSArgs(c.enclosingImplicits.last.tree)
+    }
+    def argContext : List[Tree] = (argListUsed, lhsArgListUsed) match {
+      case (false, false) => List()
+      case (true, false) => argList
+      case (false, true) => lhsArgList
+      case (true, true) => argList ++ lhsArgList
+    }
     def apply(argIdx : Int, lhs : Boolean) : (Tree, Type) = {
       val tree = c.enclosingImplicits.last.tree
 //      println(">>>>>>> enclosingImpl: ")// + c.enclosingImplicits.last)
@@ -1028,7 +1038,7 @@ trait GeneralMacros {
             abort(msg, Some(cArg.tpe.typeSymbol.asType))
           }
         //directly using the java lib `require` resulted in compiler crash, so we use wrapped require instead
-        case CalcNLit(Primitive.String,msg,_) => cArg match {
+        case CalcNLit(Primitive.String, msg) => cArg match {
           case CalcUnknown(t, _) if t.typeSymbol == symbolOf[Warn] =>
             CalcNLit(Primitive.Boolean, q"""{println(${buildWarningMsg(msg)}); false}""")
           case _ =>
@@ -1036,7 +1046,7 @@ trait GeneralMacros {
         }
         case _ => unsupported()
       }
-      case CalcNLit(Primitive.Boolean, cond,_) => b match {
+      case CalcNLit(Primitive.Boolean, cond) => b match {
         //directly using the java lib `require` resulted in compiler crash, so we use wrapped require instead
         case CalcVal(msg : String, msgt) => cArg match {
           case CalcUnknown(t, _) if t == symbolOf[Warn] =>
