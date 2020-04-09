@@ -225,9 +225,11 @@ trait GeneralMacros {
     }
     def apply(t : Any) : CalcLit = CalcLit(Primitive.fromLiteral(t), t)
   }
-  case class CalcNLit(primitive : Primitive, tree : Tree) extends CalcVal {
+  case class CalcNLit(primitive : Primitive, tree : Tree, tpe : Type) extends CalcVal {
     val literal = None
-    val tpe = primitive.tpe
+  }
+  object CalcNLit {
+    def apply(primitive: Primitive, tree: Tree): CalcNLit = new CalcNLit(primitive, tree, primitive.tpe)
   }
 
   sealed trait CalcType extends Calc
@@ -766,8 +768,8 @@ trait GeneralMacros {
     val typedTree = c.typecheck(numValueTree)
     TypeCalc(typedTree.tpe) match {
       case t : CalcLit => t
-      case t : CalcType.UB => CalcNLit(t, numValueTree)
-      case t : CalcType => CalcNLit(t, numValueTree)
+      case t : CalcType.UB => CalcNLit(t, numValueTree, typedTree.tpe)
+      case t : CalcNLit => CalcNLit(t, numValueTree)
       case _ => extractionFailed(typedTree.tpe)
     }
   }
@@ -777,6 +779,7 @@ trait GeneralMacros {
     TypeCalc(typedTree.tpe) match {
       case t : CalcLit => t
       case t : CalcType => CalcNLit(t, q"$tfTree.getValue")
+      case t : CalcNLit => CalcNLit(t, q"$tfTree.getValue")
       case t =>
 //        println(t)
         extractionFailed(typedTree.tpe)
@@ -1036,7 +1039,7 @@ trait GeneralMacros {
             abort(msg, Some(cArg.tpe.typeSymbol.asType))
           }
         //directly using the java lib `require` resulted in compiler crash, so we use wrapped require instead
-        case CalcNLit(Primitive.String, msg) => cArg match {
+        case CalcNLit(Primitive.String, msg, _) => cArg match {
           case CalcUnknown(t, _) if t.typeSymbol == symbolOf[Warn] =>
             CalcNLit(Primitive.Boolean, q"""{println(${buildWarningMsg(msg)}); false}""")
           case _ =>
@@ -1044,7 +1047,7 @@ trait GeneralMacros {
         }
         case _ => unsupported()
       }
-      case CalcNLit(Primitive.Boolean, cond) => b match {
+      case CalcNLit(Primitive.Boolean, cond, _) => b match {
         //directly using the java lib `require` resulted in compiler crash, so we use wrapped require instead
         case CalcVal(msg : String, msgt) => cArg match {
           case CalcUnknown(t, _) if t == symbolOf[Warn] =>
