@@ -21,7 +21,6 @@ object OpId {
   sealed trait ToFloat extends OpId
   sealed trait ToDouble extends OpId
   sealed trait ToString extends OpId
-  sealed trait ToSymbol extends OpId
   sealed trait IsNat extends OpId
   sealed trait IsChar extends OpId
   sealed trait IsInt extends OpId
@@ -30,7 +29,6 @@ object OpId {
   sealed trait IsDouble extends OpId
   sealed trait IsString extends OpId
   sealed trait IsBoolean extends OpId
-  sealed trait IsSymbol extends OpId
   sealed trait IsNonLiteral extends OpId
   sealed trait GetType extends OpId
   sealed trait Reverse extends OpId

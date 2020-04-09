@@ -22,8 +22,7 @@ object OpMacro {
   OutFloat0 <: Float with Singleton,
   OutDouble0 <: Double with Singleton,
   OutString0 <: String with Singleton,
-  OutBoolean0 <: Boolean with Singleton,
-  OutSymbol0 <: Symbol
+  OutBoolean0 <: Boolean with Singleton
   ] = OpMacro[N, S1, S2, S3] {
     type OutWide = OutWide0
     type Out = Out0
@@ -35,7 +34,6 @@ object OpMacro {
     type OutDouble = OutDouble0
     type OutString = OutString0
     type OutBoolean = OutBoolean0
-    type OutSymbol = OutSymbol0
   }
   
   implicit def call[
@@ -52,8 +50,7 @@ object OpMacro {
     OutFloat <: Float with Singleton,
     OutDouble <: Double with Singleton,
     OutString <: String with Singleton,
-    OutBoolean <: Boolean with Singleton,
-    OutSymbol <: Symbol
+    OutBoolean <: Boolean with Singleton
   ]: Aux[
     N,
     S1,
@@ -68,8 +65,7 @@ object OpMacro {
     OutFloat,
     OutDouble,
     OutString,
-    OutBoolean,
-    OutSymbol
+    OutBoolean
   ] = macro Macro.impl[N, S1, S2, S3]
 
   final class Macro(val c: whitebox.Context) extends GeneralMacros {

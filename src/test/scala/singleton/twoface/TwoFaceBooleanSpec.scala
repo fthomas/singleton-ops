@@ -66,10 +66,6 @@ class TwoFaceBooleanSpec extends Properties("TwoFace.Boolean") {
 
   property("Safe toStringTF") = verifyTFString(TwoFace.Boolean(true).toStringTF, "true")
   property("Unsafe toStringTF") = verifyTFString(TwoFace.Boolean(us(false)).toStringTF, us("false"))
-  property("Safe toSymbol") = {
-    val sym = TwoFace.Boolean(false).toSymbol
-    sym == scala.Symbol("false")
-  }
 
   property("Safe require") = wellTyped {
     require(TwoFace.Boolean(true), "something")

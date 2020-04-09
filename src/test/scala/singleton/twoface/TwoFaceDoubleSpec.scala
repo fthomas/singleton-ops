@@ -292,10 +292,6 @@ class TwoFaceDoubleSpec extends Properties("TwoFace.Double") {
   property("Unsafe toFloat") = verifyTFFloat(TwoFace.Double(us(1.0)).toFloat, us(1.0f))
   property("Safe toStringTF") = verifyTFString(TwoFace.Double(1.0).toStringTF, "1.0")
   property("Unsafe toStringTF") = verifyTFString(TwoFace.Double(us(1.5)).toStringTF, us("1.5"))
-  property("Safe toSymbol") = {
-    val sym = TwoFace.Double(2.0).toSymbol
-    sym == scala.Symbol("2.0")
-  }
 
   property("Safe abs") = verifyTFDouble(abs(TwoFace.Double(-1.0)), 1.0)
   property("Unsafe abs") = verifyTFDouble(abs(TwoFace.Double(us(-1.0))), us(1.0))
