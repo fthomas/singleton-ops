@@ -50,8 +50,18 @@ object OpId {
   sealed trait Min extends OpId
   sealed trait Max extends OpId
   sealed trait Substring extends OpId
+  sealed trait SubSequence extends OpId
+  sealed trait StartsWith extends OpId
+  sealed trait EndsWith extends OpId
+  sealed trait Head extends OpId
+  sealed trait Tail extends OpId
   sealed trait Length extends OpId
   sealed trait CharAt extends OpId
+  sealed trait Matches extends OpId
+  sealed trait FirstMatch extends OpId
+  sealed trait PrefixMatch extends OpId
+  sealed trait ReplaceFirstMatch extends OpId
+  sealed trait ReplaceAllMatches extends OpId
   sealed trait Abs extends OpId
   sealed trait Pow extends OpId
   sealed trait Floor extends OpId
