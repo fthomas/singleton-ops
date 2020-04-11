@@ -88,9 +88,21 @@ libraryDependencies ++= Seq(
 * `type ToString[P1]`          
 
 #### Supported string operations:
-* `type +[P1, P2]` (concat)          
-* `type Reverse[P1]`        
-* `type Substring[P1, P2]`  
+* `type Length[S]`
+* `type +[S1, S2]` (concat)
+* `type Reverse[S]`
+* `type CharAt[S, I]`
+* `type Substring[S, I]`
+* `type SubSequence[S, IBeg, IEnd]`
+* `type StartsWith[S, Prefix]`
+* `type EndsWith[S, Suffix]`
+* `type Head[S]`
+* `type Tail[S]`
+* `type Matches[S, Regex]`
+* `type FirstMatch[S, Regex]`
+* `type PrefixMatch[S, Regex]`
+* `type ReplaceFirstMatch[S, Regex, R]`
+* `type ReplaceAllMatches[S, Regex, R]`
 
 #### Supported constraints operations:
 * `type Require[P1]`        

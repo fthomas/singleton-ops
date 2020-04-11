@@ -79,8 +79,18 @@ trait GeneralMacros {
     val Min = symbolOf[OpId.Min]
     val Max = symbolOf[OpId.Max]
     val Substring = symbolOf[OpId.Substring]
+    val SubSequence = symbolOf[OpId.SubSequence]
+    val StartsWith = symbolOf[OpId.StartsWith]
+    val EndsWith = symbolOf[OpId.EndsWith]
+    val Head = symbolOf[OpId.Head]
+    val Tail = symbolOf[OpId.Tail]
     val CharAt = symbolOf[OpId.CharAt]
     val Length = symbolOf[OpId.Length]
+    val Matches = symbolOf[OpId.Matches]
+    val FirstMatch = symbolOf[OpId.FirstMatch]
+    val PrefixMatch = symbolOf[OpId.PrefixMatch]
+    val ReplaceFirstMatch = symbolOf[OpId.ReplaceFirstMatch]
+    val ReplaceAllMatches = symbolOf[OpId.ReplaceAllMatches]
   }
 
   ////////////////////////////////////////////////////////////////////
@@ -1236,15 +1246,66 @@ trait GeneralMacros {
       case _ => unsupported()
     }
     def Substring : Calc = (a, b) match {
-      case (CalcVal(at : String, att), CalcVal(bt : Int, btt)) => CalcVal.mayFail(Primitive.String, at.substring(bt), q"$att.substring($btt)")
+      case (CalcVal(at : String, att), CalcVal(bt : Int, btt)) =>
+        CalcVal.mayFail(Primitive.String, at.substring(bt), q"$att.substring($btt)")
+      case _ => unsupported()
+    }
+    def SubSequence : Calc = (a, b, cArg) match {
+      case (CalcVal(at : String, att), CalcVal(bt : Int, btt), CalcVal(ct : Int, ctt)) =>
+        CalcVal.mayFail(Primitive.String, at.subSequence(bt, ct), q"$att.subSequence($btt, $ctt)")
+      case _ => unsupported()
+    }
+    def StartsWith : Calc = (a, b) match {
+      case (CalcVal(at : String, att), CalcVal(bt : String, btt)) =>
+        CalcVal(at.startsWith(bt), q"$att.startsWith($btt)")
+      case _ => unsupported()
+    }
+    def EndsWith : Calc = (a, b) match {
+      case (CalcVal(at : String, att), CalcVal(bt : String, btt)) =>
+        CalcVal(at.endsWith(bt), q"$att.endsWith($btt)")
+      case _ => unsupported()
+    }
+    def Head : Calc = a match {
+      case CalcVal(at : String, att) =>
+        CalcVal.mayFail(Primitive.Char, at.head, q"$att.head")
+      case _ => unsupported()
+    }
+    def Tail : Calc = a match {
+      case CalcVal(at : String, att) => CalcVal(at.tail, q"$att.tail")
       case _ => unsupported()
     }
     def CharAt : Calc = (a, b) match {
-      case (CalcVal(at : String, att), CalcVal(bt : Int, btt)) => CalcVal.mayFail(Primitive.Char, at.charAt(bt),q"$att.charAt($btt)")
+      case (CalcVal(at : String, att), CalcVal(bt : Int, btt)) =>
+        CalcVal.mayFail(Primitive.Char, at.charAt(bt), q"$att.charAt($btt)")
       case _ => unsupported()
     }
     def Length : Calc = a match {
       case CalcVal(at : String, att) => CalcVal(at.length, q"$att.length")
+      case _ => unsupported()
+    }
+    def Matches : Calc = (a, b) match {
+      case (CalcVal(at : String, att), CalcVal(bt : String, btt)) =>
+        CalcVal.mayFail(Primitive.Boolean, bt.r.matches(at), q"$btt.r.matches($att)")
+      case _ => unsupported()
+    }
+    def FirstMatch : Calc = (a, b) match {
+      case (CalcVal(at : String, att), CalcVal(bt : String, btt)) =>
+        CalcVal.mayFail(Primitive.String, bt.r.findFirstIn(at).get, q"$btt.r.findFirstIn($att).get")
+      case _ => unsupported()
+    }
+    def PrefixMatch : Calc = (a, b) match {
+      case (CalcVal(at : String, att), CalcVal(bt : String, btt)) =>
+        CalcVal.mayFail(Primitive.String, bt.r.findPrefixOf(at).get, q"$btt.r.findPrefixOf($att).get")
+      case _ => unsupported()
+    }
+    def ReplaceFirstMatch : Calc = (a, b, cArg) match {
+      case (CalcVal(at : String, att), CalcVal(bt : String, btt), CalcVal(ct : String, ctt)) =>
+        CalcVal.mayFail(Primitive.String, bt.r.replaceFirstIn(at, ct), q"$btt.r.replaceFirstIn($att, $ctt)")
+      case _ => unsupported()
+    }
+    def ReplaceAllMatches : Calc = (a, b, cArg) match {
+      case (CalcVal(at : String, att), CalcVal(bt : String, btt), CalcVal(ct : String, ctt)) =>
+        CalcVal.mayFail(Primitive.String, bt.r.replaceAllIn(at, ct), q"$btt.r.replaceAllIn($att, $ctt)")
       case _ => unsupported()
     }
 
@@ -1293,8 +1354,18 @@ trait GeneralMacros {
       case funcTypes.Min => Min
       case funcTypes.Max => Max
       case funcTypes.Substring => Substring
+      case funcTypes.SubSequence => SubSequence
+      case funcTypes.StartsWith => StartsWith
+      case funcTypes.EndsWith => EndsWith
+      case funcTypes.Head => Head
+      case funcTypes.Tail => Tail
       case funcTypes.CharAt => CharAt
       case funcTypes.Length => Length
+      case funcTypes.Matches => Matches
+      case funcTypes.FirstMatch => FirstMatch
+      case funcTypes.PrefixMatch => PrefixMatch
+      case funcTypes.ReplaceFirstMatch => ReplaceFirstMatch
+      case funcTypes.ReplaceAllMatches => ReplaceAllMatches
       case _ => abort(s"Unsupported $funcType[$a, $b, $cArg]")
     }
   }
