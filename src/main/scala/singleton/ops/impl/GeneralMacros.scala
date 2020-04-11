@@ -174,6 +174,11 @@ trait GeneralMacros {
       case Lit => CalcLit(value)
       case NLit => CalcNLit(Primitive.fromLiteral(value), tree)
     }
+    //use this when a literal calculation may fail
+    def mayFail(primitive: Primitive, value : => Any, tree : Tree)(implicit kind : Kind) = kind match {
+      case Lit => try{CalcLit(value)} catch {case e : Throwable => abort(e.getMessage)}
+      case NLit => CalcNLit(primitive, tree)
+    }
   }
   case class CalcLit(primitive : Primitive, value : Any) extends CalcVal {
     val literal = Some(value)
@@ -1002,19 +1007,19 @@ trait GeneralMacros {
       case _ => unsupported()
     }
     def Tan : Calc = a match {
-      case CalcVal(t : Double, tt) => CalcVal(math.tan(t), q"_root_.scala.math.tan($tt)")
+      case CalcVal(t : Double, tt) => CalcVal.mayFail(Primitive.Double, math.tan(t), q"_root_.scala.math.tan($tt)")
       case _ => unsupported()
     }
     def Sqrt : Calc = a match {
-      case CalcVal(t : Double, tt) => CalcVal(math.sqrt(t), q"_root_.scala.math.sqrt($tt)")
+      case CalcVal(t : Double, tt) => CalcVal.mayFail(Primitive.Double, math.sqrt(t), q"_root_.scala.math.sqrt($tt)")
       case _ => unsupported()
     }
     def Log : Calc = a match {
-      case CalcVal(t : Double, tt) => CalcVal(math.log(t), q"_root_.scala.math.log($tt)")
+      case CalcVal(t : Double, tt) => CalcVal.mayFail(Primitive.Double, math.log(t), q"_root_.scala.math.log($tt)")
       case _ => unsupported()
     }
     def Log10 : Calc = a match {
-      case CalcVal(t : Double, tt) => CalcVal(math.log10(t), q"_root_.scala.math.log10($tt)")
+      case CalcVal(t : Double, tt) => CalcVal.mayFail(Primitive.Double, math.log10(t), q"_root_.scala.math.log10($tt)")
       case _ => unsupported()
     }
     def Reverse : Calc = a match {
@@ -1114,19 +1119,19 @@ trait GeneralMacros {
       case _ => unsupported()
     }
     def Div : Calc = (a, b) match {
-      case (CalcVal(at : Char, att), CalcVal(bt : Char, btt)) => CalcVal(at / bt, q"$att / $btt")
-      case (CalcVal(at : Int, att), CalcVal(bt : Int, btt)) => CalcVal(at / bt, q"$att / $btt")
-      case (CalcVal(at : Long, att), CalcVal(bt : Long, btt)) => CalcVal(at / bt, q"$att / $btt")
-      case (CalcVal(at : Float, att), CalcVal(bt : Float, btt)) => CalcVal(at / bt, q"$att / $btt")
-      case (CalcVal(at : Double, att), CalcVal(bt : Double, btt)) => CalcVal(at / bt, q"$att / $btt")
+      case (CalcVal(at : Char, att), CalcVal(bt : Char, btt)) => CalcVal.mayFail(Primitive.Int, at / bt, q"$att / $btt")
+      case (CalcVal(at : Int, att), CalcVal(bt : Int, btt)) => CalcVal.mayFail(Primitive.Int, at / bt, q"$att / $btt")
+      case (CalcVal(at : Long, att), CalcVal(bt : Long, btt)) => CalcVal.mayFail(Primitive.Long, at / bt, q"$att / $btt")
+      case (CalcVal(at : Float, att), CalcVal(bt : Float, btt)) => CalcVal.mayFail(Primitive.Float, at / bt, q"$att / $btt")
+      case (CalcVal(at : Double, att), CalcVal(bt : Double, btt)) => CalcVal.mayFail(Primitive.Double, at / bt, q"$att / $btt")
       case _ => unsupported()
     }
     def Mod : Calc = (a, b) match {
-      case (CalcVal(at : Char, att), CalcVal(bt : Char, btt)) => CalcVal(at % bt, q"$att % $btt")
-      case (CalcVal(at : Int, att), CalcVal(bt : Int, btt)) => CalcVal(at % bt, q"$att % $btt")
-      case (CalcVal(at : Long, att), CalcVal(bt : Long, btt)) => CalcVal(at % bt, q"$att % $btt")
-      case (CalcVal(at : Float, att), CalcVal(bt : Float, btt)) => CalcVal(at % bt, q"$att % $btt")
-      case (CalcVal(at : Double, att), CalcVal(bt : Double, btt)) => CalcVal(at % bt, q"$att % $btt")
+      case (CalcVal(at : Char, att), CalcVal(bt : Char, btt)) => CalcVal.mayFail(Primitive.Int, at % bt, q"$att % $btt")
+      case (CalcVal(at : Int, att), CalcVal(bt : Int, btt)) => CalcVal.mayFail(Primitive.Int, at % bt, q"$att % $btt")
+      case (CalcVal(at : Long, att), CalcVal(bt : Long, btt)) => CalcVal.mayFail(Primitive.Long, at % bt, q"$att % $btt")
+      case (CalcVal(at : Float, att), CalcVal(bt : Float, btt)) => CalcVal.mayFail(Primitive.Float, at % bt, q"$att % $btt")
+      case (CalcVal(at : Double, att), CalcVal(bt : Double, btt)) => CalcVal.mayFail(Primitive.Double, at % bt, q"$att % $btt")
       case _ => unsupported()
     }
     def Sml : Calc = (a, b) match {
@@ -1231,13 +1236,11 @@ trait GeneralMacros {
       case _ => unsupported()
     }
     def Substring : Calc = (a, b) match {
-      case (CalcLit.String(at), CalcLit.Int(bt)) => CalcLit(at.substring(bt))
-      case (CalcVal(at : String, att), CalcVal(bt : Int, btt)) => CalcNLit(Primitive.String, q"$att.substring($btt)")
+      case (CalcVal(at : String, att), CalcVal(bt : Int, btt)) => CalcVal.mayFail(Primitive.String, at.substring(bt), q"$att.substring($btt)")
       case _ => unsupported()
     }
     def CharAt : Calc = (a, b) match {
-      case (CalcLit.String(at), CalcLit.Int(bt)) => CalcLit(at.charAt(bt))
-      case (CalcVal(at : String, att), CalcVal(bt : Int, btt)) => CalcNLit(Primitive.Char, q"$att.charAt($btt)")
+      case (CalcVal(at : String, att), CalcVal(bt : Int, btt)) => CalcVal.mayFail(Primitive.Char, at.charAt(bt),q"$att.charAt($btt)")
       case _ => unsupported()
     }
     def Length : Calc = a match {
