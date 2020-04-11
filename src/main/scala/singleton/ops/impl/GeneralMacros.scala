@@ -1285,7 +1285,7 @@ trait GeneralMacros {
     }
     def Matches : Calc = (a, b) match {
       case (CalcVal(at : String, att), CalcVal(bt : String, btt)) =>
-        CalcVal.mayFail(Primitive.Boolean, bt.r.matches(at), q"$btt.r.matches($att)")
+        CalcVal.mayFail(Primitive.Boolean, at.matches(bt), q"$att.matches($btt)")
       case _ => unsupported()
     }
     def FirstMatch : Calc = (a, b) match {
