@@ -33,6 +33,15 @@ class GetArgSpec extends Properties("GetArgSpec") {
     1.extendable
   }
 
+  object ByName
+  def byName(arg : => Any)(implicit getArg : GetArg0) = getArg
+  property("By name argument not evaluated until value is read") = {
+    var byNameNotRead = true
+    val b = byName({byNameNotRead = false; ByName})
+    val preRead = byNameNotRead
+    val forceRead = b.value //now lazily invoked
+    preRead && !byNameNotRead
+  }
 
   val one = 1
   val two = 2

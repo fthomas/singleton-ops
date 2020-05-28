@@ -726,9 +726,9 @@ trait GeneralMacros {
           new $opTpe {
             type OutWide = $outTpe
             type Out = $outTpe
-            final val value: $outTpe = $valueTree
+            final lazy val value: $outTpe = $valueTree
             final val isLiteral = false
-            final val valueWide: $outTpe = $valueTree
+            final lazy val valueWide: $outTpe = $valueTree
           }
         """
       case None =>
