@@ -7,9 +7,26 @@ import singleton.ops._
   * @tparam N the numerator
   * @tparam D the denominator
   */
-trait Fraction[N <: XInt, D <: XInt]
+trait Fraction[N <: XInt, D <: XInt] {
+  val n: Int
+  val d: Int
+  override def toString: String = s"Fraction($n, $d)"
+}
 
 object Fraction {
+
+  // get the 'Out' type resulting from resolving an implicit type
+  object impeval {
+    trait Out[O]
+    def apply[I <: { type Out } ](implicit i: I): Out[i.Out] = new Out[i.Out] {}
+  }
+
+  implicit def fracAddition[L <: Fraction[_, _], R <: Fraction[_, _], O <: Fraction[_, _]](implicit
+    add: Add.Aux[L, R, O]): OpIntercept.Aux[OpId.+, L, R, W.`0`.T, O] =
+      new OpIntercept[OpId.+, L, R, W.`0`.T] {
+        type Out = O
+        val value = add.value
+      }
 
   /** Typeclass for finding the greatest common divisor of two numbers using Euclid's algorithm.
     *
@@ -110,9 +127,17 @@ object Fraction {
     }
   }
 
+  implicit def instantiateFraction[N <: XInt, D <: XInt](implicit
+      nv: Id[N],
+      dv: Id[D]): Fraction[N, D] = new Fraction[N, D] {
+    val n = nv.value.asInstanceOf[Int]
+    val d = dv.value.asInstanceOf[Int]
+  }
+
   /** Typeclass to add two fractions */
   trait Add[L <: Fraction[_, _], R <: Fraction[_, _]] {
     type Out <: Fraction[_, _]
+    val value: Out
   }
 
   object Add {
@@ -132,10 +157,12 @@ object Fraction {
         ev1: OpInt.Aux[RN * LD, RNLD],
         ev2: OpInt.Aux[LNRD + RNLD, N],
         ev3: OpInt.Aux[LD * RD, D],
-        ev4: Simplify.Aux[Fraction[N, D], F]
+        ev4: Simplify.Aux[Fraction[N, D], F],
+        f: F
     ): Aux[Fraction[LN, LD], Fraction[RN, RD], F] =
       new Add[Fraction[LN, LD], Fraction[RN, RD]] {
         type Out = F
+        val value = f
       }
   }
 

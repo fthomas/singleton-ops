@@ -1,6 +1,27 @@
 package singleton.ops.impl
 import scala.reflect.macros.whitebox
 
+
+trait OpIntercept[N, S1, S2, S3] extends OpMacro[N, S2, S2, S3] {
+  import singleton.ops.W
+
+  type OutWide = None.type
+  val valueWide: OutWide = None
+  val isLiteral: Boolean = false
+  type OutNat = shapeless.Nat._0
+  type OutChar = W.`'0'`.T
+  type OutInt = W.`0`.T
+  type OutLong = W.`0L`.T
+  type OutFloat = W.`0f`.T
+  type OutDouble = W.`0D`.T
+  type OutString = W.`""`.T
+  type OutBoolean = W.`false`.T
+}
+
+object OpIntercept {
+  type Aux[N, S1, S2, S3, O] = OpIntercept[N, S1, S2, S3] { type Out = O }
+}
+
 /********************************************************************************************************
   * Three arguments type function macro
   *******************************************************************************************************/

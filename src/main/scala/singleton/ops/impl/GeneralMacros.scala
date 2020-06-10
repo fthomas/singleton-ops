@@ -655,6 +655,13 @@ trait GeneralMacros {
   ////////////////////////////////////////////////////////////////////////
 
   def abort(msg: String, annotatedSym : Option[TypeSymbol] = defaultAnnotatedSym): Nothing = {
+    val st = java.lang.Thread.currentThread().getStackTrace()
+    println("\n\nstack trace:")
+    for { e <- st.filter(_.getClassName().startsWith("singleton")) } {
+      println(s"  $e")
+    }
+    println("\n")
+    //java.lang.Thread.dumpStack()
     VerboseTraversal(s"!!!!!!aborted with: $msg at $annotatedSym, $defaultAnnotatedSym")
     if (annotatedSym.isDefined) setAnnotation(msg, annotatedSym.get)
     c.abort(c.enclosingPosition, msg)
@@ -719,6 +726,7 @@ trait GeneralMacros {
   }
 
   def genOpTreeUnknown(opTpe : Type, calc : CalcUnknown) : Tree = {
+    println("In genOpTreeUnknown")
     val outTpe = calc.tpe
     calc.treeOption match {
       case Some(valueTree) =>
@@ -898,10 +906,17 @@ trait GeneralMacros {
     lazy val a = aCalc
     lazy val b = bCalc
     lazy val cArg = cCalc
+
     def unsupported() : Calc = {
-      (a, b) match {
-        case (aArg : CalcVal, bArg : CalcVal) => abort(s"Unsupported $funcType[$a, $b, $cArg]")
-        case _ => CalcUnknown(funcType.toType, None)
+      val itree = c.typecheck(q"implicitly[_root_.singleton.ops.impl.OpIntercept[${funcType.toType}, ${a.tpe}, ${b.tpe}, ${cArg.tpe}]]", silent = true)
+      if (itree != EmptyTree) {
+        println(s"\n\nitree= ${itree.tpe}\n\n")
+        CalcUnknown(itree.tpe, Some(itree))
+      } else {
+        (a, b) match {
+          case (aArg : CalcVal, bArg : CalcVal) => abort(s"Unsupported $funcType[$a, $b, $cArg]")
+          case _ => CalcUnknown(funcType.toType, None)
+        }
       }
     }
 
@@ -1372,6 +1387,7 @@ trait GeneralMacros {
 
   final class MaterializeOpAuxGen(opTpe: Type) {
     def usingFuncName : Tree = {
+      println(s"usingFuncName: opTpe= $opTpe")
       val funcType = opTpe.typeArgs.head.typeSymbol.asType
       val opResult = TypeCalc(opTpe)
 
