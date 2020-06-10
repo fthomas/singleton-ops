@@ -1387,10 +1387,12 @@ trait GeneralMacros {
 
   final class MaterializeOpAuxGen(opTpe: Type) {
     def usingFuncName : Tree = {
-      println(s"usingFuncName: opTpe= $opTpe")
       val funcType = opTpe.typeArgs.head.typeSymbol.asType
       val opResult = TypeCalc(opTpe)
 
+      println(s"usingFuncName: opTpe= $opTpe")
+      println(s"  funcType= $funcType")
+      println(s"  opResult= $opResult")
       val genTree = (funcType, opResult) match {
         case (funcTypes.ToNat, CalcLit.Int(t)) =>
           if (t < 0) abort(s"Nat cannot be a negative literal. Found: $t")
