@@ -1,6 +1,7 @@
 package singleton.ops
 
 import org.scalacheck.Properties
+import shapeless.test.illTyped
 import singleton.TestUtils._
 
 class OpInterceptSpec extends Properties("OpInterceptSpec") {
@@ -22,34 +23,59 @@ class OpInterceptSpec extends Properties("OpInterceptSpec") {
 
 
   property("Custom Vec Equality OK") = wellTyped {
-    val eq1 = shapeless.the[Vec[1, 2] == Vec[1, 2]]
-    val eq2 = shapeless.the[Vec[1, 2] == Vec[1, 1]]
-    implicitly[eq1.Out =:= true]
-    implicitly[eq2.Out =:= false]
+    val eq1 = shapeless.the[Vec[W.`1`.T, W.`2`.T] == Vec[W.`1`.T, W.`2`.T]]
+    val eq2 = shapeless.the[Vec[W.`1`.T, W.`2`.T] == Vec[W.`1`.T, W.`1`.T]]
+    implicitly[eq1.Out =:= W.`true`.T]
+    implicitly[eq2.Out =:= W.`false`.T]
   }
 
   property("Custom Vec Addition OK") = wellTyped {
-    val add2 = shapeless.the[Vec[1, 2] + Vec[3, 8]]
-    val add3 = shapeless.the[Vec[1, 2] + Vec[3, 8] + Vec[20, 20]]
-    implicitly[add2.Out =:= Vec[4, 10]]
-    implicitly[add3.Out =:= Vec[24, 30]]
+    val add2 = shapeless.the[Vec[W.`1`.T, W.`2`.T] + Vec[W.`3`.T, W.`8`.T]]
+    val add3 = shapeless.the[Vec[W.`1`.T, W.`2`.T] + Vec[W.`3`.T, W.`8`.T] + Vec[W.`20`.T, W.`20`.T]]
+    implicitly[add2.Out =:= Vec[W.`4`.T, W.`10`.T]]
+    implicitly[add3.Out =:= Vec[W.`24`.T, W.`30`.T]]
     val add23 = shapeless.the[add2.Out + add3.Out]
-    implicitly[add23.Out =:= Vec[28, 40]]
+    implicitly[add23.Out =:= Vec[W.`28`.T, W.`40`.T]]
   }
 
   trait FibId
-  type Fib[P] = impl.OpMacro[FibId, P, 0, 0]
+  type Fib[P] = impl.OpMacro[FibId, P, W.`0`.T, W.`0`.T]
   implicit def doFib[P, Out](
     implicit
-    op : OpAuxGen[ITE[P == 0, 0, ITE[P == 1, 1, Fib[P - 1] + Fib[P - 2]]], Out],
+    op : OpAuxGen[ITE[P == W.`0`.T, W.`0`.T, ITE[P == W.`1`.T, W.`1`.T, Fib[P - W.`1`.T] + Fib[P - W.`2`.T]]], Out],
     result : OpIntercept.CacheResult[Out]
   ) : OpIntercept[Fib[P]] = ???
 
 
   property("Custom Fibonacci Op OK") = wellTyped {
-    val fib4 = shapeless.the[Fib[4]]
-    implicitly[fib4.Out =:= 3]
-    val fib10 = shapeless.the[Fib[10]]
-    implicitly[fib10.Out =:= 55]
+    val fib4 = shapeless.the[Fib[W.`4`.T]]
+    implicitly[fib4.Out =:= W.`3`.T]
+    val fib10 = shapeless.the[Fib[W.`10`.T]]
+    implicitly[fib10.Out =:= W.`55`.T]
   }
+
+
+  trait FooOpId
+  type FooOp[C, M] = impl.OpMacro[FooOpId, C, M, W.`0`.T]
+  implicit def FooOp[C, M](
+    implicit
+    r : RequireMsg[C, M],
+    result : OpIntercept.CacheResult[W.`true`.T]
+  ) : OpIntercept[FooOp[C, M]] = ???
+
+  property("Error Message Propagation") = wellTyped {
+    illTyped("""shapeless.the[FooOp[W.`false`.T, W.`"this is a test"`.T]]""", "this is a test")
+  }
+
+  trait BarOpId
+  type BarOp[C, M] = impl.OpMacro[BarOpId, C, M, W.`0`.T]
+  implicit def BarOp[C, M](
+    implicit
+    op : C + M
+  ) : OpIntercept[BarOp[C, M]] = ???
+
+  property("Missing Caching Error") = wellTyped {
+    illTyped("""shapeless.the[BarOp[W.`1`.T, W.`2`.T]]""", "Missing a result cache for OpIntercept. Make sure you set `OpIntercept.CacheResult`")
+  }
+  
 }
