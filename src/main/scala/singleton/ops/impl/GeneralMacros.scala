@@ -952,7 +952,11 @@ trait GeneralMacros {
         case TypecheckException(pos, msg) =>
           CalcCache.getOpInterceptCalc match {
             case Some(Right(msg)) => abort(msg)
-            case _ => abort(s"Unsupported operation $cachedTpe")
+            case _ =>
+              (a, b) match {
+                case (_ : CalcVal, _ : CalcVal) => abort(s"Unsupported operation $cachedTpe")
+                case _ => CalcUnknown(funcType.toType, None, opIntercept = false)
+              }
           }
       }
     }
