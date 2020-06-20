@@ -4,10 +4,9 @@ import impl._
 
 import scala.annotation.implicitNotFound
 
-trait OpIntercept[Op <: HasOut] extends HasOut
+trait OpIntercept[Op <: HasOut]
 object OpIntercept {
-  type Aux[Op <: HasOut, Out0] = OpIntercept[Op]{type Out = Out0}
-  @implicitNotFound("Failed to cache op ${Op} with result ${Out}")
+  @implicitNotFound("Failed to cache with result ${Out}")
   trait CacheResult[Out]
   object CacheResult {
     implicit def call[Out] : CacheResult[Out] = macro Macro.materializeCacheResult[Out]
