@@ -6,7 +6,11 @@ trait HasOut extends Any with Serializable {
   type Out
 }
 
-trait Op extends HasOut {
+trait HasOutValue extends HasOut {
+  val value : Out
+}
+
+trait Op extends HasOutValue {
   type OutWide
   type Out
   type OutNat <: Nat
@@ -29,7 +33,7 @@ protected[singleton] object OpGen {
   implicit def getValue[O <: Op, Out](o : Aux[O, Out]) : Out = o.value
 }
 
-trait OpCast[T, O <: Op] extends HasOut {type Out <: T; val value : Out}
+trait OpCast[T, O <: Op] extends HasOutValue {type Out <: T}
 
 
 @scala.annotation.implicitNotFound(msg = "Unable to prove type argument is a Nat.")
