@@ -11,13 +11,13 @@ class OpInterceptSpec extends Properties("OpInterceptSpec") {
     implicit
     opL : OpAuxGen[VL0 + VR0, VO0],
     opR : OpAuxGen[VL1 + VR1, VO1],
-    result : OpIntercept.CacheResult[Vec[VL0, VL1] + Vec[VR0, VR1], Vec[VO0, VO1]]
+    result : OpIntercept.CacheResult[Vec[VO0, VO1]]
   ) : OpIntercept[Vec[VL0, VL1] + Vec[VR0, VR1]] = ???
 
   implicit def `Vec==`[VL0, VL1, VR0, VR1, EqOut](
     implicit
     op : OpAuxGen[(VL0 == VR0) && (VL1 == VR1), EqOut],
-    result : OpIntercept.CacheResult[Vec[VL0, VL1] == Vec[VR0, VR1], EqOut]
+    result : OpIntercept.CacheResult[EqOut]
   ) : OpIntercept[Vec[VL0, VL1] == Vec[VR0, VR1]] = ???
 
 
@@ -42,7 +42,7 @@ class OpInterceptSpec extends Properties("OpInterceptSpec") {
   implicit def doFib[P, Out](
     implicit
     op : OpAuxGen[ITE[P == 0, 0, ITE[P == 1, 1, Fib[P - 1] + Fib[P - 2]]], Out],
-    result : OpIntercept.CacheResult[Fib[P], Out]
+    result : OpIntercept.CacheResult[Out]
   ) : OpIntercept[Fib[P]] = ???
 
 

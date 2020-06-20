@@ -910,12 +910,11 @@ trait GeneralMacros {
   ///////////////////////////////////////////////////////////////////////////////////////////
   // OpInterept Result Caching
   ///////////////////////////////////////////////////////////////////////////////////////////
-  def cacheOpInterceptResult[Op, Out](implicit ev0: c.WeakTypeTag[Op], ev1: c.WeakTypeTag[Out]) : Tree  = {
-    val opTpe = weakTypeOf[Op]
+  def cacheOpInterceptResult[Out](implicit ev0: c.WeakTypeTag[Out]) : Tree  = {
     val outTpe = weakTypeOf[Out]
     val outCalc = TypeCalc(outTpe)
     CalcCache.setOpInterceptCalc(outCalc)
-    q"new _root_.singleton.ops.OpIntercept.CacheResult[$opTpe, $outTpe]{}"
+    q"new _root_.singleton.ops.OpIntercept.CacheResult[$outTpe]{}"
   }
   ///////////////////////////////////////////////////////////////////////////////////////////
 
