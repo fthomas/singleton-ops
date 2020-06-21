@@ -7,7 +7,7 @@ import singleton.TestUtils._
 class OpInterceptSpec extends Properties("OpInterceptSpec") {
 
   trait Vec[A0, A1] {
-    def show(implicit a0 : ValueOf[A0], a1 : ValueOf[A1]) : String = s"Vec[${valueOf[A0]}, ${valueOf[A1]}]"
+    def show(implicit a0 : Id[A0], a1 : Id[A1]) : String = s"Vec[${a0.value}, ${a1.value}]"
   }
 
   implicit def `Vec+`[VL0, VL1, VR0, VR1](
