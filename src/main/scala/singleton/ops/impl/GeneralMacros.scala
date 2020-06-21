@@ -915,7 +915,7 @@ trait GeneralMacros {
           silent = false
         )
         TypeCalc(itree.tpe.decls.head.info) match {
-          case t : CalcUnknown => t.copy(opIntercept = true) //the unknown result must be marked properly so we allow it later
+          case t : CalcUnknown => t.copy(treeOption = Some(c.untypecheck(q"$itree.value")),opIntercept = true) //the unknown result must be marked properly so we allow it later
           case t => t
         }
       } catch {
