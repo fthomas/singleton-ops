@@ -10,8 +10,6 @@ object rational {
     * @tparam D the denominator
     */
   trait Rational[N, D] {
-    // currently only XInt is supported,
-    // other types such as XLong could be added with additional implicit rules
     def n(implicit nv: Id[N]): nv.Out = nv.value
     def d(implicit dv: Id[D]): dv.Out = dv.value
     def show(implicit nv: Id[N], dv: Id[D]): String = s"Rational(${n}, ${d})"
@@ -106,19 +104,19 @@ object rational {
 
   implicit def doRationalAdd[
       LHS, RHS,
-      LN <: XInt, LD <: XInt,
-      RN <: XInt, RD <: XInt,
-      LNRD <: XInt, RNLD <: XInt,
-      N <: XInt, D <: XInt,
-      SN <: XInt, SD <: XInt](
+      LN, LD,
+      RN, RD,
+      LNRD, RNLD,
+      N, D,
+      SN, SD](
     implicit
       rat: Require[IsRational[LHS] || IsRational[RHS]],
       lhs: OpAuxGen[ToRational[LHS], Rational[LN, LD]],
       rhs: OpAuxGen[ToRational[RHS], Rational[RN, RD]],
-      ev0: OpInt.Aux[LN * RD, LNRD],
-      ev1: OpInt.Aux[RN * LD, RNLD],
-      ev2: OpInt.Aux[LNRD + RNLD, N],
-      ev3: OpInt.Aux[LD * RD, D],
+      ev0: OpAuxGen[LN * RD, LNRD],
+      ev1: OpAuxGen[RN * LD, RNLD],
+      ev2: OpAuxGen[LNRD + RNLD, N],
+      ev3: OpAuxGen[LD * RD, D],
       ev4: OpAuxGen[Simplify[Rational[N, D]], Rational[SN, SD]],
     ): OpIntercept.Aux[LHS + RHS, Rational[SN, SD]] =
   new OpIntercept[LHS + RHS] {
@@ -128,14 +126,14 @@ object rational {
 
   implicit def doRationalSubtract[
       LHS, RHS,
-      LN <: XInt, LD <: XInt,
-      RN <: XInt, RD <: XInt, RNN <: XInt,
-      SN <: XInt, SD <: XInt](
+      LN, LD,
+      RN, RD, RNN,
+      SN, SD](
     implicit
       rat: Require[IsRational[LHS] || IsRational[RHS]],
       lhs: OpAuxGen[ToRational[LHS], Rational[LN, LD]],
       rhs: OpAuxGen[ToRational[RHS], Rational[RN, RD]],
-      neg: OpInt.Aux[Negate[RN], RNN],
+      neg: OpAuxGen[Negate[RN], RNN],
       add: OpAuxGen[Rational[LN, LD] + Rational[RNN, RD], Rational[SN, SD]]
     ): OpIntercept.Aux[LHS - RHS, Rational[SN, SD]] =
   new OpIntercept[LHS - RHS] {
@@ -145,16 +143,16 @@ object rational {
 
   implicit def doRationalMultiply[
       LHS, RHS,
-      LN <: XInt, LD <: XInt,
-      RN <: XInt, RD <: XInt,
-      N <: XInt, D <: XInt,
-      SN <: XInt, SD <: XInt](
+      LN, LD,
+      RN, RD,
+      N, D,
+      SN, SD](
     implicit
       rat: Require[IsRational[LHS] || IsRational[RHS]],
       lhs: OpAuxGen[ToRational[LHS], Rational[LN, LD]],
       rhs: OpAuxGen[ToRational[RHS], Rational[RN, RD]],
-      ev0: OpInt.Aux[LN * RN, N],
-      ev1: OpInt.Aux[LD * RD, D],
+      ev0: OpAuxGen[LN * RN, N],
+      ev1: OpAuxGen[LD * RD, D],
       ev2: OpAuxGen[Simplify[Rational[N, D]], Rational[SN, SD]]
     ): OpIntercept.Aux[LHS * RHS, Rational[SN, SD]] =
     new OpIntercept[LHS * RHS] {
@@ -164,9 +162,9 @@ object rational {
 
   implicit def doRationalDivide[
       LHS, RHS,
-      LN <: XInt, LD <: XInt,
-      RN <: XInt, RD <: XInt,
-      SN <: XInt, SD <: XInt](
+      LN, LD,
+      RN, RD,
+      SN, SD](
     implicit
       rat: Require[IsRational[LHS] || IsRational[RHS]],
       lhs: OpAuxGen[ToRational[LHS], Rational[LN, LD]],
@@ -203,28 +201,19 @@ object rational {
 
   private type simplifyErrorMsg = W.`"Simplify requires non-zero denominator"`.T
 
-  implicit def doSimplifyPositive[
-      N <: XInt, D <: XInt,
-      C <: XInt,
-      SN <: XInt, SD <: XInt](
-    implicit
-      ev0: RequireMsg[(N > W.`0`.T) && (D > W.`0`.T), simplifyErrorMsg],
-      gcd: OpInt.Aux[GCD[N, D], C],
-      n: OpInt.Aux[N / C, SN],
-      d: OpInt.Aux[D / C, SD]
+  implicit def doSimplifyPositive[N, D, C, SN, SD](implicit
+      pos: RequireMsg[IsPositive[N] && IsPositive[D], simplifyErrorMsg],
+      gcd: OpAuxGen[GCD[N, D], C],
+      n: OpAuxGen[N / C, SN],
+      d: OpAuxGen[D / C, SD]
     ): OpIntercept.Aux[Simplify[Rational[N, D]], Rational[SN, SD]] =
     new OpIntercept[Simplify[Rational[N, D]]] {
       type Out = Rational[SN, SD]
       val value = new Rational[SN, SD] {}
     }
 
-  implicit def doSimplifyNegative[
-      N <: XInt, D <: XInt,
-      F <: Rational[_, _],
-      SNF <: Rational[_, _],
-      SN <: XInt,  SD <: XInt](
-    implicit
-      ev0: RequireMsg[(N < W.`0`.T) && (D > W.`0`.T), simplifyErrorMsg],
+  implicit def doSimplifyNegative[N, D, F, SNF, SN, SD](implicit
+      neg: RequireMsg[IsNegative[N] && IsPositive[D], simplifyErrorMsg],
       ev1: OpAuxGen[Negate[Rational[N, D]], F],
       ev2: OpAuxGen[Simplify[F], SNF],
       ev3: OpAuxGen[Negate[SNF], Rational[SN, SD]]
@@ -234,22 +223,19 @@ object rational {
       val value = new Rational[SN, SD] {}
     }
 
-  implicit def doSimplifyZero[D <: XInt](implicit
-      nz: RequireMsg[D > W.`0`.T, simplifyErrorMsg]
-    ): OpIntercept.Aux[Simplify[Rational[W.`0`.T, D]], Rational[W.`0`.T, W.`1`.T]] =
-    new OpIntercept[Simplify[Rational[W.`0`.T, D]]] {
-      type Out = Rational[W.`0`.T, W.`1`.T]
-      val value = new Rational[W.`0`.T, W.`1`.T] {}
+  implicit def doSimplifyZero[Z, D](implicit
+      zro: RequireMsg[IsZero[Z] && IsPositive[D], simplifyErrorMsg],
+      v1: AlignType[1, D]
+    ): OpIntercept.Aux[Simplify[Rational[Z, D]], Rational[Z, v1.Out]] =
+    new OpIntercept[Simplify[Rational[Z, D]]] {
+      type Out = Rational[Z, v1.Out]
+      val value = new Rational[Z, v1.Out] {}
     }
 
-  implicit def doSimplifyNegDenom[
-      N <: XInt, D <: XInt,
-      NN <: XInt, ND <: XInt,
-      SN <: XInt, SD <: XInt](
-    implicit
-      bn: RequireMsg[D < W.`0`.T, simplifyErrorMsg],
-      nn: OpInt.Aux[Negate[N], NN],
-      nd: OpInt.Aux[Negate[D], ND],
+  implicit def doSimplifyNegDenom[N, D, NN, ND, SN, SD](implicit
+      neg: RequireMsg[IsNegative[D], simplifyErrorMsg],
+      nn: OpAuxGen[Negate[N], NN],
+      nd: OpAuxGen[Negate[D], ND],
       sf: OpAuxGen[Simplify[Rational[NN, ND]], Rational[SN, SD]]
     ): OpIntercept.Aux[Simplify[Rational[N, D]], Rational[SN, SD]] =
     new OpIntercept[Simplify[Rational[N, D]]] {
