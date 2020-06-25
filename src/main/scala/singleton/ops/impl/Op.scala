@@ -26,11 +26,11 @@ trait Op extends HasOutValue {
   val valueWide: OutWide
 }
 
-protected[singleton] trait OpGen[O <: Op] {type Out; val value : Out}
+protected[singleton] trait OpGen[O] {type Out; val value : Out}
 protected[singleton] object OpGen {
-  type Aux[O <: Op, Ret_Out] = OpGen[O] {type Out = Ret_Out}
-  implicit def impl[O <: Op](implicit o: O) : Aux[O, o.Out] = new OpGen[O] {type Out = o.Out; val value = o.value.asInstanceOf[o.Out]}
-  implicit def getValue[O <: Op, Out](o : Aux[O, Out]) : Out = o.value
+  type Aux[O, Ret_Out] = OpGen[O] {type Out = Ret_Out}
+  implicit def impl[O <: Op](implicit o: O) : Aux[O, o.Out] = new OpGen[O] {type Out = o.Out; val value : Out = o.value}
+  implicit def getValue[O, Out](o : Aux[O, Out]) : Out = o.value
 }
 
 trait OpCast[T, O <: Op] extends HasOutValue {type Out <: T}

@@ -3,7 +3,7 @@ import impl._
 
 import scala.annotation.implicitNotFound
 @implicitNotFound("Missing an `OpIntercept` implicit for the operation ${Op}")
-trait OpIntercept[Op <: HasOut] extends HasOutValue
+trait OpIntercept[Op] extends HasOutValue
 object OpIntercept {
-  type Aux[Op <: HasOut, Out0] = OpIntercept[Op]{type Out = Out0}
+  type Aux[Op, Out0] = OpIntercept[Op]{type Out = Out0}
 }

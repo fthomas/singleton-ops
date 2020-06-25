@@ -8,10 +8,6 @@ private object MacroCache {
   val cache = mutable.Map.empty[Any, Any]
   def get(key : Any) : Option[Any] = cache.get(key)
   def add[V <: Any](key : Any, value : V) : V = {cache += (key -> value); value}
-  var errorCache : String = ""
-  def clearErrorCache() : Unit = errorCache = ""
-  def setErrorCache(msg : String) : Unit = errorCache = msg
-  def getErrorMessage : String = errorCache
 }
 trait GeneralMacros {
   val c: whitebox.Context
@@ -312,25 +308,36 @@ trait GeneralMacros {
     }
     object Key {
       implicit def fromType(key : Type) : Key = new Key(key, GetArgTree.argContext)
+      implicit def fromTypeNoArgs(key : Type) : Key = new Key(key, List())
     }
-    val cache = MacroCache.cache.asInstanceOf[mutable.Map[Key, Calc]]
-    def get(key : Type) : Option[Calc] = {
+    val cache = MacroCache.cache.asInstanceOf[mutable.Map[Key, Either[String, Calc]]]
+    def get(key : Type) : Option[Either[String, Calc]] = {
       val k = Key.fromType(key)
-      cache.get(k).map {v =>
-        VerboseTraversal(s"${YELLOW}${BOLD}fetching${RESET} $k, $v")
-        val cloned = v match {
-          case lit : CalcLit => CalcLit(lit.value) //reconstruct internal literal tree
-          case nlit : CalcNLit => CalcNLit(nlit.primitive, deepCopyTree(nlit.tree))
-          case c => c
-        }
-        cloned
+      cache.get(k).map {
+        case Right(v) =>
+          VerboseTraversal(s"${YELLOW}${BOLD}fetching${RESET} $k, $v")
+          val cloned = v match {
+            case lit : CalcLit => CalcLit(lit.value) //reconstruct internal literal tree
+            case nlit : CalcNLit => CalcNLit(nlit.primitive, deepCopyTree(nlit.tree))
+            case c => c
+          }
+          Right(cloned)
+        case left @ Left(msg) =>
+          VerboseTraversal(s"${YELLOW}${BOLD}fetching error${RESET} $k, $msg")
+          left
       }
     }
     def add[V <: Calc](key : Type, value : V) : V = {
       val k = Key.fromType(key)
-      cache += (k -> value)
-      VerboseTraversal(s"${GREEN}${BOLD}caching${RESET} $k -> $value")
+      cache += (k -> Right(value))
+      VerboseTraversal(s"${GREEN}${BOLD}caching value${RESET} $k -> $value")
       value
+    }
+    def add(key : Type, msg : String, argsAbort : Boolean) : String = {
+      val k = if (argsAbort) Key.fromTypeNoArgs(key) else Key.fromType(key)
+      cache += (k -> Left(msg))
+      VerboseTraversal(s"${GREEN}${BOLD}caching error${RESET} $k -> $msg")
+      msg
     }
   }
   ////////////////////////////////////////////////////////////////////
@@ -452,24 +459,24 @@ trait GeneralMacros {
     // Calculates an Op
     ////////////////////////////////////////////////////////////////////////
     object OpCalc {
-      private val opMacroSym = symbolOf[OpMacro[_,_,_,_]]
+      private val opMacroSym = symbolOf[OpMacro[_,_]]
       private var uncachingReason : Int = 0
       def setUncachingReason(arg : Int) : Unit = {
         uncachingReason = arg
       }
       def unapply(tp: Type): Option[Calc] = {
         tp match {
-          case TypeRef(_, sym, ft :: tp :: _) if sym == opMacroSym && ft.typeSymbol == funcTypes.GetType =>
-            Some(CalcUnknown(tp, None, opIntercept = false))
+          case TypeRef(_, sym, opSymId :: opArgs :: _) if sym == opMacroSym && opSymId.typeSymbol == funcTypes.GetType =>
+            Some(CalcUnknown(opArgs.typeArgs.head, None, opIntercept = false))
           case TypeRef(_, sym, args) if sym == opMacroSym =>
             VerboseTraversal(s"@@OpCalc@@\nTP: $tp\nRAW: ${showRaw(tp)}")
             val funcType = args.head.typeSymbol.asType
             CalcCache.get(tp) match {
               case None =>
-                val args = tp.typeArgs
-                lazy val aValue = TypeCalc(args(1))
-                lazy val bValue = TypeCalc(args(2))
-                lazy val cValue = TypeCalc(args(3))
+                val args = tp.typeArgs(1).typeArgs
+                lazy val aValue = if (args.length < 1) CalcLit(0) else TypeCalc(args(0))
+                lazy val bValue = if (args.length < 2) CalcLit(0) else TypeCalc(args(1))
+                lazy val cValue = if (args.length < 3) CalcLit(0) else TypeCalc(args(2))
 
                 //If function is set/get variable we keep the original string,
                 //otherwise we get the variable's value
@@ -543,7 +550,7 @@ trait GeneralMacros {
                     bValue match { //Checking the argument type
                       case t : CalcLit => Some(t) //Literal argument is just a literal
                       case _ => //Got a type, so returning argument name
-                        TypeCalc.unapply(args(3)) match {
+                        TypeCalc.unapply(args(2)) match {
                           case Some(t: CalcType) =>
                             val term = TermName(s"arg$argNum")
                             Some(CalcNLit(t, q"$term"))
@@ -553,7 +560,7 @@ trait GeneralMacros {
                     }
 
                   case _ => //regular cases
-                    opCalc(funcType, aValue, bValue, cValue) match {
+                    opCalc(funcType, args.length, aValue, bValue, cValue) match {
                       case (res : CalcVal) => Some(res)
                       case u @ CalcUnknown(_,Some(_), _) => Some(u) //Accept unknown values with a tree
                       case oi @ CalcUnknown(_,_, true) => Some(oi) //Accept unknown op interception
@@ -563,7 +570,11 @@ trait GeneralMacros {
                 if (uncachingReason > 0) VerboseTraversal(s"$uncachingReason:: Skipped caching of $tp")
                 else retVal.foreach{rv => CalcCache.add(tp, rv)}
                 retVal
-              case cached => cached
+              case cached => cached match {
+                case Some(Right(calc)) => Some(calc)
+                case Some(Left(msg)) => abort(msg)
+                case None => None
+              }
             }
           case _ => None
         }
@@ -659,10 +670,11 @@ trait GeneralMacros {
   }
   ////////////////////////////////////////////////////////////////////////
 
-  def abort(msg: String, annotatedSym : Option[TypeSymbol] = defaultAnnotatedSym, position : Position = c.enclosingPosition): Nothing = {
+  def abort(msg: String, annotatedSym : Option[TypeSymbol] = defaultAnnotatedSym, argsAbort : Boolean = false, position : Position = c.enclosingPosition): Nothing = {
     VerboseTraversal(s"!!!!!!aborted with: $msg at $annotatedSym, $defaultAnnotatedSym")
-    if (annotatedSym.isDefined) setAnnotation(msg, annotatedSym.get)
-    MacroCache.setErrorCache(msg) //propagating the error in case this is an inner implicit call for OpIntercept
+    annotatedSym.foreach{a => setAnnotation(msg, a)}
+    if (c.enclosingImplicits.nonEmpty)
+      CalcCache.add(c.enclosingImplicits.last.pt, msg, argsAbort)
     c.abort(position, msg)
   }
 
@@ -843,7 +855,7 @@ trait GeneralMacros {
       case Apply(TypeApply(Select(t, _), _), _) => getAllArgs(t, true)
       case TypeApply(Select(t, _), _) => getAllArgs(t, true)
       case Select(t, _) => getAllArgs(t, true)
-      case _ => abort("Left-hand-side tree not found")
+      case _ => abort("Left-hand-side tree not found", argsAbort = true)
     }
 
     private var argListUsed = false
@@ -873,7 +885,7 @@ trait GeneralMacros {
 //      println("<<<<<<< rawArgs" + showRaw(allArgs))
 
       val argTree : Tree = if (argIdx < allArgs.length) c.typecheck(allArgs(argIdx))
-      else abort(s"Argument index($argIdx) is not smaller than the total number of arguments(${allArgs.length})")
+      else abort(s"Argument index($argIdx) is not smaller than the total number of arguments(${allArgs.length})", argsAbort = true)
 
       val tpe = c.enclosingImplicits.last.pt match {
         case TypeRef(_,sym,tp :: _) if (sym == func1Sym) => tp //conversion, so get the type from last.pt
@@ -900,28 +912,31 @@ trait GeneralMacros {
   def materializeOpGen[F](implicit ev0: c.WeakTypeTag[F]): MaterializeOpAuxGen =
     new MaterializeOpAuxGen(weakTypeOf[F])
 
-  def opCalc(funcType : TypeSymbol, aCalc : => Calc, bCalc : => Calc, cCalc : => Calc) : Calc = {
+  def opCalc(funcType : TypeSymbol, argsLength : Int, aCalc : => Calc, bCalc : => Calc, cCalc : => Calc) : Calc = {
     lazy val a = aCalc
     lazy val b = bCalc
     lazy val cArg = cCalc
     def unsupported() : Calc = {
-      val opMacroTpe = typeOf[OpMacro[_,_,_,_]].typeConstructor
-      val opTpe = appliedType(opMacroTpe, List(funcType.toType, a.tpe, b.tpe, cArg.tpe))
+      val opMacroTpe = typeOf[OpMacro[_,_]].typeConstructor
+      val argsTpe = argsLength match {
+        case 3 => appliedType(typeOf[Tuple3[_,_,_]].typeConstructor, List(a.tpe, b.tpe, cArg.tpe))
+        case 2 => appliedType(typeOf[Tuple2[_,_]].typeConstructor, List(a.tpe, b.tpe))
+        case 1 => appliedType(typeOf[Tuple1[_]].typeConstructor, List(a.tpe))
+        case _ => abort("unsupported number of arguments")
+      }
+      val opTpe = appliedType(opMacroTpe, List(funcType.toType, argsTpe))
       val interceptTpe = typeOf[singleton.ops.OpIntercept[_]].typeConstructor
-      MacroCache.clearErrorCache()
+      val summonTpe = appliedType(interceptTpe, List(opTpe))
       try {
-        val itree = c.inferImplicitValue (
-          appliedType(interceptTpe, List(opTpe)),
-          silent = false
-        )
+        val itree = c.inferImplicitValue(summonTpe, silent = false)
         TypeCalc(itree.tpe.decls.head.info) match {
           case t : CalcUnknown => t.copy(treeOption = Some(c.untypecheck(q"$itree.value")),opIntercept = true) //the unknown result must be marked properly so we allow it later
           case t => t
         }
       } catch {
         case TypecheckException(_, _) =>
-          MacroCache.getErrorMessage match {
-            case m if m.nonEmpty => abort(m)
+          CalcCache.get(c.enclosingImplicits.last.pt) match {
+            case Some(Left(msg)) => abort(msg)
             case _ => (a, b) match {
               case (_ : CalcVal, _ : CalcVal) => abort(s"Unsupported operation $opTpe")
               case _ => CalcUnknown(funcType.toType, None, opIntercept = false)
@@ -1526,7 +1541,7 @@ trait GeneralMacros {
         }
       }
 
-      val reqCalc = opCalc(funcTypes.Require, condCalc, msgCalc, CalcUnknown(typeOf[NoSym], None, opIntercept = false))
+      val reqCalc = opCalc(funcTypes.Require, 3, condCalc, msgCalc, CalcUnknown(typeOf[NoSym], None, opIntercept = false))
 
       q"""
          (new $chkSym[$condTpe, $msgTpe, $chkArgTpe]($outTree.asInstanceOf[$outTpe]))
@@ -1592,7 +1607,7 @@ trait GeneralMacros {
         }
       }
 
-      val reqCalc = opCalc(funcTypes.Require, condCalc, msgCalc, CalcUnknown(typeOf[NoSym], None, opIntercept = false))
+      val reqCalc = opCalc(funcTypes.Require, 3, condCalc, msgCalc, CalcUnknown(typeOf[NoSym], None, opIntercept = false))
 
       q"""
          (new $chkSym[$condTpe, $msgTpe, $chkArgTpe, $paramFaceTpe, $paramTpe]($outTree.asInstanceOf[$outTpe]))
