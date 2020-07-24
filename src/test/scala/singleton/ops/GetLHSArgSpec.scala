@@ -11,7 +11,7 @@ class GetLHSArgSpec extends Properties("GetLHSArgSpec") {
 
   implicit class ConvInt(val int : Int) {
     def ext(implicit g : GetLHSArg0) : g.Out = g.value
-    def <= [T, Out](that : Conv[T])(implicit g : OpAuxGen[AcceptNonLiteral[GetLHSArg0], Out]) : Conv[Out] = new Conv[Out](g.value){}
+    def <= [T, Out](that : Conv[T])(implicit g : OpGenAux[AcceptNonLiteral[GetLHSArg0], Out]) : Conv[Out] = new Conv[Out](g.value){}
     def := [T, Out](that : Conv[T])(implicit g : GetLHSArg.Aux[W.`0`.T, Out]) : Conv[Out] = new Conv[Out](g){}
   }
 

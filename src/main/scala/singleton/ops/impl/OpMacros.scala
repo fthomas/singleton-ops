@@ -5,14 +5,12 @@ import scala.reflect.macros.whitebox
   * Three arguments type function macro
   *******************************************************************************************************/
 @scala.annotation.implicitNotFound("Literal operation has failed.")
-trait OpMacro[N, S1, S2, S3] extends Op
+trait OpMacro[SymId, Args] extends Op
 
 object OpMacro {
   type Aux[
-  N, 
-  S1, 
-  S2, 
-  S3,
+  SymId, 
+  Args,
   OutWide0,
   Out0,
   OutNat0 <: shapeless.Nat,
@@ -23,7 +21,7 @@ object OpMacro {
   OutDouble0 <: Double with Singleton,
   OutString0 <: String with Singleton,
   OutBoolean0 <: Boolean with Singleton
-  ] = OpMacro[N, S1, S2, S3] {
+  ] = OpMacro[SymId, Args] {
     type OutWide = OutWide0
     type Out = Out0
     type OutNat = OutNat0
@@ -37,10 +35,8 @@ object OpMacro {
   }
   
   implicit def call[
-    N,
-    S1,
-    S2,
-    S3,
+    SymId,
+    Args,
     OutWide,
     Out,
     OutNat <: shapeless.Nat,
@@ -52,10 +48,8 @@ object OpMacro {
     OutString <: String with Singleton,
     OutBoolean <: Boolean with Singleton
   ]: Aux[
-    N,
-    S1,
-    S2,
-    S3,
+    SymId,
+    Args,
     OutWide,
     Out,
     OutNat,
@@ -66,16 +60,14 @@ object OpMacro {
     OutDouble,
     OutString,
     OutBoolean
-  ] = macro Macro.impl[N, S1, S2, S3]
+  ] = macro Macro.impl[SymId, Args]
 
   final class Macro(val c: whitebox.Context) extends GeneralMacros {
     def impl[
-        N : c.WeakTypeTag,
-        S1: c.WeakTypeTag,
-        S2: c.WeakTypeTag,
-        S3: c.WeakTypeTag
+        SymId : c.WeakTypeTag,
+        Args  : c.WeakTypeTag
     ]: c.Tree =
-      materializeOpGen[OpMacro[N, S1, S2, S3]].usingFuncName
+      materializeOpGen[OpMacro[SymId, Args]].usingFuncName
   }
 
 //  implicit def valueOfOp[N, S1 : ValueOf, S2 : ValueOf, S3 : ValueOf]
