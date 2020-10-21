@@ -126,6 +126,8 @@ package object ops {
   type !=[P1, P2]           = OpMacro[OpId.!=, P1, P2, NP]
   type &&[P1, P2]           = OpMacro[OpId.&&, P1, P2, NP]
   type ||[P1, P2]           = OpMacro[OpId.||, P1, P2, NP]
+  type BitwiseAnd[P1, P2]   = OpMacro[OpId.BitwiseAnd, P1, P2, NP]
+  type BitwiseOr[P1, P2]    = OpMacro[OpId.BitwiseOr, P1, P2, NP]
   type SubSequence[S, IBeg, IEnd] = OpMacro[OpId.SubSequence, S, IBeg, IEnd]
   type Substring[S, I]       = OpMacro[OpId.Substring, S, I, NP]
   type StartsWith[S, Prefix] = OpMacro[OpId.StartsWith, S, Prefix, NP]

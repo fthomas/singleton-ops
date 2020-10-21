@@ -49,6 +49,8 @@ class UnsupportedSpec extends Properties("UnsupportedSpec") {
   property("!=") = wellTyped {illTyped("""implicitly[W.`true`.T != W.`2`.T]""")}
   property("&&") = wellTyped {illTyped("""implicitly[W.`1`.T && W.`2`.T]""")}
   property("||") = wellTyped {illTyped("""implicitly[W.`1`.T || W.`2`.T]""")}
+  property("BitwiseAnd") = wellTyped {illTyped("""implicitly[W.`1`.T BitwiseAnd W.`true`.T]""")}
+  property("BitwiseOr") = wellTyped {illTyped("""implicitly[W.`1`.T BitwiseOr W.`true`.T]""")}
   property("Pow") = wellTyped {illTyped("""implicitly[Pow[W.`true`.T, W.`2`.T]]""")}
   property("Min") = wellTyped {illTyped("""implicitly[Min[W.`true`.T, W.`2`.T]]""")}
   property("Max") = wellTyped {illTyped("""implicitly[Max[W.`true`.T, W.`2`.T]]""")}

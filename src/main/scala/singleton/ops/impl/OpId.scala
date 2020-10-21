@@ -47,6 +47,8 @@ object OpId {
   sealed trait != extends OpId
   sealed trait || extends OpId
   sealed trait && extends OpId
+  sealed trait BitwiseOr extends OpId
+  sealed trait BitwiseAnd extends OpId
   sealed trait Min extends OpId
   sealed trait Max extends OpId
   sealed trait Substring extends OpId
