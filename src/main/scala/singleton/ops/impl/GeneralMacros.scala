@@ -75,6 +75,8 @@ trait GeneralMacros {
     val != = symbolOf[OpId.!=]
     val && = symbolOf[OpId.&&]
     val || = symbolOf[OpId.||]
+    val BitwiseAnd = symbolOf[OpId.BitwiseAnd]
+    val BitwiseOr = symbolOf[OpId.BitwiseOr]
     val Pow = symbolOf[OpId.Pow]
     val Min = symbolOf[OpId.Min]
     val Max = symbolOf[OpId.Max]
@@ -1207,6 +1209,16 @@ trait GeneralMacros {
         case _ => unsupported()
       }
     }
+    def BitwiseAnd : Calc = (a, b) match {
+      case (CalcVal(at : Int, att), CalcVal(bt : Int, btt)) => CalcVal(at & bt, q"$att & $btt")
+      case (CalcVal(at : Long, att), CalcVal(bt : Long, btt)) => CalcVal(at & bt, q"$att & $btt")
+      case _ => unsupported()
+    }
+    def BitwiseOr : Calc = (a, b) match {
+      case (CalcVal(at : Int, att), CalcVal(bt : Int, btt)) => CalcVal(at | bt, q"$att | $btt")
+      case (CalcVal(at : Long, att), CalcVal(bt : Long, btt)) => CalcVal(at | bt, q"$att | $btt")
+      case _ => unsupported()
+    }
     def Or : Calc = a match {
       case CalcLit.Boolean(ab) => //`Or` expressions where the LHS is a literal can be inlined
         if (!ab) b match {
@@ -1350,6 +1362,8 @@ trait GeneralMacros {
       case funcTypes.!= => Neq
       case funcTypes.&& => And
       case funcTypes.|| => Or
+      case funcTypes.BitwiseAnd => BitwiseAnd
+      case funcTypes.BitwiseOr => BitwiseOr
       case funcTypes.Pow => Pow
       case funcTypes.Min => Min
       case funcTypes.Max => Max
