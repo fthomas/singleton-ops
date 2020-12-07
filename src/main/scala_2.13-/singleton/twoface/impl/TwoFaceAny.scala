@@ -96,6 +96,11 @@ object TwoFaceAny {
   }
 
   trait Char[T] extends Any with TwoFaceAny[std.Char, T] {
+    override def equals(obj: Any): std.Boolean = obj match {
+      case tf : Char[_] => getValue == tf.getValue
+      case lit : std.Char => getValue == lit
+      case _ => false
+    }
     def == (r : std.Char)(implicit tfs : Boolean.Shell2[==, T, std.Char, GetArg0, std.Char]) = tfs(this.getValue, r)
     def == (r : std.Int)(implicit tfs : Boolean.ShellI[==, T, std.Char, GetArg0, std.Int]) = tfs(this.getValue, r)
     def == (r : std.Long)(implicit tfs : Boolean.ShellL[==, T, std.Char, GetArg0, std.Long]) = tfs(this.getValue, r)
@@ -190,6 +195,11 @@ object TwoFaceAny {
   }
 
   trait Int[T] extends Any with TwoFaceAny[std.Int, T] {
+    override def equals(obj: Any): std.Boolean = obj match {
+      case tf : Int[_] => getValue == tf.getValue
+      case lit : std.Int => getValue == lit
+      case _ => false
+    }
     def == (r : std.Char)(implicit tfs : Boolean.ShellI[==, T, std.Int, GetArg0, std.Char]) = tfs(this.getValue, r)
     def == (r : std.Int)(implicit tfs : Boolean.Shell2[==, T, std.Int, GetArg0, std.Int]) = tfs(this.getValue, r)
     def == (r : std.Long)(implicit tfs : Boolean.ShellL[==, T, std.Int, GetArg0, std.Long]) = tfs(this.getValue, r)
@@ -285,6 +295,11 @@ object TwoFaceAny {
   }
 
   trait Long[T] extends Any with TwoFaceAny[std.Long, T] {
+    override def equals(obj: Any): std.Boolean = obj match {
+      case tf : Long[_] => getValue == tf.getValue
+      case lit : std.Long => getValue == lit
+      case _ => false
+    }
     def == (r : std.Char)(implicit tfs : Boolean.ShellL[==, T, std.Long, GetArg0, std.Char]) = tfs(this.getValue, r)
     def == (r : std.Int)(implicit tfs : Boolean.ShellL[==, T, std.Long, GetArg0, std.Int]) = tfs(this.getValue, r)
     def == (r : std.Long)(implicit tfs : Boolean.Shell2[==, T, std.Long, GetArg0, std.Long]) = tfs(this.getValue, r)
@@ -381,6 +396,11 @@ object TwoFaceAny {
   }
 
   trait Float[T] extends Any with TwoFaceAny[std.Float, T] {
+    override def equals(obj: Any): std.Boolean = obj match {
+      case tf : Float[_] => getValue == tf.getValue
+      case lit : std.Float => getValue == lit
+      case _ => false
+    }
     def == (r : std.Char)(implicit tfs : Boolean.ShellF[==, T, std.Float, GetArg0, std.Char]) = tfs(this.getValue, r)
     def == (r : std.Int)(implicit tfs : Boolean.ShellF[==, T, std.Float, GetArg0, std.Int]) = tfs(this.getValue, r)
     def == (r : std.Long)(implicit tfs : Boolean.ShellF[==, T, std.Float, GetArg0, std.Long]) = tfs(this.getValue, r)
@@ -475,6 +495,11 @@ object TwoFaceAny {
   }
 
   trait Double[T] extends Any with TwoFaceAny[std.Double, T] {
+    override def equals(obj: Any): std.Boolean = obj match {
+      case tf : Double[_] => getValue == tf.getValue
+      case lit : std.Double => getValue == lit
+      case _ => false
+    }
     def == (r : std.Char)(implicit tfs : Boolean.ShellD[==, T, std.Double, GetArg0, std.Char]) = tfs(this.getValue, r)
     def == (r : std.Int)(implicit tfs : Boolean.ShellD[==, T, std.Double, GetArg0, std.Int]) = tfs(this.getValue, r)
     def == (r : std.Long)(implicit tfs : Boolean.ShellD[==, T, std.Double, GetArg0, std.Long]) = tfs(this.getValue, r)
@@ -569,6 +594,11 @@ object TwoFaceAny {
   }
 
   trait String[T] extends Any with TwoFaceAny[std.String, T] {
+    override def equals(obj: Any): std.Boolean = obj match {
+      case tf : String[_] => getValue == tf.getValue
+      case lit : std.String => getValue == lit
+      case _ => false
+    }
     def == (r : std.String)(implicit tfs : Boolean.Shell2[==, T, std.String, GetArg0, std.String]) = tfs(this.getValue, r)
     def != (r : std.String)(implicit tfs : Boolean.Shell2[!=, T, std.String, GetArg0, std.String]) = tfs(this.getValue, r)
 
@@ -604,6 +634,11 @@ object TwoFaceAny {
   }
 
   trait Boolean[T] extends Any with TwoFaceAny[std.Boolean, T] {
+    override def equals(obj: Any): std.Boolean = obj match {
+      case tf : Boolean[_] => getValue == tf.getValue
+      case lit : std.Boolean => getValue == lit
+      case _ => false
+    }
     def == (r : std.Boolean)(implicit tfs : Boolean.Shell2[==, T, std.Boolean, GetArg0, std.Boolean]) = tfs(this.getValue, r)
     def != (r : std.Boolean)(implicit tfs : Boolean.Shell2[!=, T, std.Boolean, GetArg0, std.Boolean]) = tfs(this.getValue, r)
 
