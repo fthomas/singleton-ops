@@ -13,7 +13,39 @@ val macroParadiseVersion = "2.1.1"
 val shapelessVersion = "2.3.3"
 val scalaCheckVersion = "1.15.2"
 
+val Scala_2_11 = "2.11.12"
+val Scala_2_12 = "2.12.8"
+val Scala_2_13 = "2.13.1"
+
+/// sbt-github-actions configuration
+
+ThisBuild / crossScalaVersions := Seq(Scala_2_11, Scala_2_12, Scala_2_13)
+ThisBuild / githubWorkflowTargetTags ++= Seq("v*")
+ThisBuild / githubWorkflowPublishTargetBranches := Seq(
+  RefPredicate.Equals(Ref.Branch("master")),
+  RefPredicate.StartsWith(Ref.Tag("v"))
+)
+ThisBuild / githubWorkflowPublish := Seq(
+  WorkflowStep.Run(
+    List("sbt ci-release"),
+    name = Some("Publish JARs"),
+    env = Map(
+      "PGP_PASSPHRASE" -> "${{ secrets.PGP_PASSPHRASE }}",
+      "PGP_SECRET" -> "${{ secrets.PGP_SECRET }}",
+      "SONATYPE_PASSWORD" -> "${{ secrets.SONATYPE_PASSWORD }}",
+      "SONATYPE_USERNAME" -> "${{ secrets.SONATYPE_USERNAME }}"
+    )
+  )
+)
+ThisBuild / githubWorkflowJavaVersions := Seq("adopt@1.8")
+ThisBuild / githubWorkflowBuild :=
+  Seq(
+    WorkflowStep.Sbt(List("validate"), name = Some("Build project")),
+    WorkflowStep.Use(UseRef.Public("codecov", "codecov-action", "v1"), name = Some("Codecov"))
+  )
+
 /// projects
+
 lazy val root = project.in(file("."))
   .settings(commonSettings)
   .aggregate(singleton_opsJVM, singleton_opsJS)
@@ -72,6 +104,8 @@ lazy val crossVersionSharedSources: Seq[Setting[_]] =
   }
 
 lazy val compileSettings = Def.settings(
+  scalaVersion := Scala_2_13,
+  crossScalaVersions := Seq(Scala_2_11, Scala_2_12, Scala_2_13),
   scalaOrganization := "org.scala-lang",
   scalacOptions ++= Seq(
     "-deprecation",
