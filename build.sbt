@@ -19,7 +19,7 @@ val Scala_2_13 = "2.13.1"
 
 /// sbt-github-actions configuration
 
-ThisBuild / crossScalaVersions := Seq(Scala_2_12, Scala_2_13)
+ThisBuild / crossScalaVersions := Seq(Scala_2_11, Scala_2_12, Scala_2_13)
 ThisBuild / githubWorkflowTargetTags ++= Seq("v*")
 ThisBuild / githubWorkflowPublishTargetBranches := Seq(
   RefPredicate.Equals(Ref.Branch("master")),
