@@ -1,5 +1,5 @@
 # singleton-ops
-[![Build Status](https://travis-ci.org/fthomas/singleton-ops.svg?branch=master)](https://travis-ci.org/fthomas/singleton-ops)
+[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/fthomas/singleton-ops/Continuous%20Integration)](https://github.com/fthomas/singleton-ops/actions?query=workflow%3A%22Continuous+Integration%22)
 [![codecov](https://codecov.io/gh/fthomas/singleton-ops/branch/master/graph/badge.svg)](https://codecov.io/gh/fthomas/singleton-ops)
 [![Join the chat at https://gitter.im/fthomas/singleton-ops](https://badges.gitter.im/fthomas/singleton-ops.svg)](https://gitter.im/fthomas/singleton-ops?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Scaladex](https://index.scala-lang.org/fthomas/singleton-ops/singleton-ops/latest.svg?color=blue)](https://index.scala-lang.org/fthomas/singleton-ops)
