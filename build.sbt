@@ -37,7 +37,7 @@ ThisBuild / githubWorkflowPublish := Seq(
     )
   )
 )
-ThisBuild / githubWorkflowJavaVersions := Seq("adopt@1.8")
+ThisBuild / githubWorkflowJavaVersions := Seq(JavaSpec.temurin("8"))
 ThisBuild / githubWorkflowBuild :=
   Seq(
     WorkflowStep.Sbt(List("validate"), name = Some("Build project")),
