@@ -15,7 +15,7 @@ val scalaCheckVersion = "1.15.2"
 
 val Scala_2_11 = "2.11.12"
 val Scala_2_12 = "2.12.8"
-val Scala_2_13 = "2.13.1"
+val Scala_2_13 = "2.13.8"
 
 /// sbt-github-actions configuration
 
