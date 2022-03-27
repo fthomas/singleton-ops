@@ -10,7 +10,7 @@ val gitPubUrl = s"https://github.com/fthomas/$projectName.git"
 val gitDevUrl = s"git@github.com:fthomas/$projectName.git"
 
 val macroParadiseVersion = "2.1.1"
-val shapelessVersion = "2.3.7"
+val shapelessVersion = "2.3.9"
 val scalaCheckVersion = "1.15.2"
 
 val Scala_2_11 = "2.11.12"
