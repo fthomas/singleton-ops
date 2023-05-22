@@ -93,6 +93,7 @@ package object ops {
   type RequireMsg[Cond,Msg] = OpMacro[OpId.Require, Cond, Msg, NoSym]
   type RequireMsgSym[Cond,Msg,Sym] = OpMacro[OpId.Require, Cond, Msg, GetType[Sym]]
   type Warn                 = impl.Warn
+  type Info                 = impl.Info
   type ToNat[P1]            = OpMacro[OpId.ToNat, P1, NP, NP]
   type ToChar[P1]           = OpMacro[OpId.ToChar, P1, NP, NP]
   type ToInt[P1]            = OpMacro[OpId.ToInt, P1, NP, NP]
