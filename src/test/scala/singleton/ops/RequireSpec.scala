@@ -24,7 +24,19 @@ class RequireSpec extends Properties("Require") {
       implicit def ev(implicit r : RequireMsg[False, Testing123]) :
       TestRequireMsg = new TestRequireMsg {}
     }
+
+    trait Foo {
+      trait FF[T]
+    }
+
+    object TestFoo extends Foo {
+
+      implicit def ev[T](implicit r: RequireMsg[False, Testing123]): Set[FF[T]] = ???
+    }
+
     illTyped("""implicitly[TestRequireMsg]""","Testing 123")
+    illTyped("implicitly[Set[TestFoo.FF[Int]]]", "Testing 123")
+    illTyped("""implicitly[Set[Int]]""","could not find implicit value.*")
 
     @scala.annotation.implicitNotFound("Not replaced")
     trait TestRequireMsgSymNotReplaced
