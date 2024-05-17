@@ -666,6 +666,9 @@ trait GeneralMacros {
   def buildWarningMsg(msg: String): String = s"Warning: $buildWarningMsgLoc    $msg"
   def buildWarningMsg(msg: Tree): Tree = q""" "Warning: " + $buildWarningMsgLoc + "    " + $msg """
 
+  def buildInfoMsg(msg: String): String = s"Info: $buildWarningMsgLoc    $msg"
+  def buildInfoMsg(msg: Tree): Tree = q""" "Info: " + $buildWarningMsgLoc + "    " + $msg """
+
   def constantTreeOf(t : Any) : Tree = Literal(Constant(t))
 
   def constantTypeOf(t: Any) : Type = c.internal.constantType(Constant(t))
@@ -1048,6 +1051,13 @@ trait GeneralMacros {
         case CalcLit.String(msg) =>
           if (cArg.tpe.typeSymbol == symbolOf[Warn]) {
             println(buildWarningMsg(msg))
+            c.warning(c.enclosingPosition, msg)
+
+            CalcLit(false)
+          } else if (cArg.tpe.typeSymbol == symbolOf[Info]) {
+            println(buildInfoMsg(msg))
+            c.info(c.enclosingPosition, msg, force = true)
+
             CalcLit(false)
           } else if (cArg.tpe.typeSymbol == symbolOf[NoSym]) {
             abort(msg)
@@ -1059,6 +1069,8 @@ trait GeneralMacros {
         case CalcNLit(Primitive.String, msg, _) => cArg match {
           case CalcUnknown(t, _) if t.typeSymbol == symbolOf[Warn] =>
             CalcNLit(Primitive.Boolean, q"""{println(${buildWarningMsg(msg)}); false}""")
+          case CalcUnknown(t, _) if t.typeSymbol == symbolOf[Info] =>
+            CalcNLit(Primitive.Boolean, q"""{println(${buildInfoMsg(msg)}); false}""")
           case _ =>
             CalcNLit(Primitive.Boolean, q"{_root_.singleton.ops.impl._require(false, $msg); false}")
         }
@@ -1073,6 +1085,15 @@ trait GeneralMacros {
                   if ($cond) true
                   else {
                     println(${buildWarningMsg(msgt)})
+                    false
+                  }
+                }""")
+          case CalcUnknown(t, _) if t == symbolOf[Info] =>
+            CalcNLit(Primitive.Boolean,
+              q"""{
+                  if ($cond) true
+                  else {
+                    println(${buildInfoMsg(msgt)})
                     false
                   }
                 }""")
