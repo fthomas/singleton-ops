@@ -1,13 +1,17 @@
 package singleton.ops.impl
 import singleton.twoface.impl.TwoFaceAny
 
-import scala.reflect.macros.whitebox
+import scala.reflect.macros.{TypecheckException, whitebox}
 
 private object MacroCache {
   import scala.collection.mutable
   val cache = mutable.Map.empty[Any, Any]
   def get(key : Any) : Option[Any] = cache.get(key)
   def add[V <: Any](key : Any, value : V) : V = {cache += (key -> value); value}
+  var errorCache : String = ""
+  def clearErrorCache() : Unit = errorCache = ""
+  def setErrorCache(msg : String) : Unit = errorCache = msg
+  def getErrorMessage : String = errorCache
 }
 trait GeneralMacros {
   val c: whitebox.Context
@@ -263,7 +267,7 @@ trait GeneralMacros {
 
     def unapply(arg: CalcType): Option[Primitive] = Some(arg.primitive)
   }
-  case class CalcUnknown(tpe : Type, treeOption : Option[Tree]) extends Calc {
+  case class CalcUnknown(tpe : Type, treeOption : Option[Tree], opIntercept : Boolean) extends Calc {
     override val primitive: Primitive = Primitive.Unknown(tpe, "Unknown")
   }
   object NonLiteralCalc {
@@ -458,7 +462,7 @@ trait GeneralMacros {
       def unapply(tp: Type): Option[Calc] = {
         tp match {
           case TypeRef(_, sym, ft :: tp :: _) if sym == opMacroSym && ft.typeSymbol == funcTypes.GetType =>
-            Some(CalcUnknown(tp, None))
+            Some(CalcUnknown(tp, None, opIntercept = false))
           case TypeRef(_, sym, args) if sym == opMacroSym =>
             VerboseTraversal(s"@@OpCalc@@\nTP: $tp\nRAW: ${showRaw(tp)}")
             val funcType = args.head.typeSymbol.asType
@@ -475,7 +479,7 @@ trait GeneralMacros {
                   case (funcTypes.ImplicitFound, _) =>
                     setUncachingReason(1)
                     aValue match {
-                      case CalcUnknown(t, _) => try {
+                      case CalcUnknown(t, _, false) => try {
                         c.typecheck(q"implicitly[$t]")
                         Some(CalcLit(true))
                       } catch {
@@ -486,7 +490,7 @@ trait GeneralMacros {
                     }
                   case (funcTypes.EnumCount, _) =>
                     aValue match {
-                      case CalcUnknown(t, _) => Some(CalcLit(t.typeSymbol.asClass.knownDirectSubclasses.size))
+                      case CalcUnknown(t, _, false) => Some(CalcLit(t.typeSymbol.asClass.knownDirectSubclasses.size))
                       case _ => Some(CalcLit(0))
                     }
                   case (funcTypes.IsNat, _) =>
@@ -553,7 +557,8 @@ trait GeneralMacros {
                   case _ => //regular cases
                     opCalc(funcType, aValue, bValue, cValue) match {
                       case (res : CalcVal) => Some(res)
-                      case u @ CalcUnknown(_,Some(_)) => Some(u) //Accept unknown values with a tree
+                      case u @ CalcUnknown(_,Some(_), _) => Some(u) //Accept unknown values with a tree
+                      case oi @ CalcUnknown(_,_, true) => Some(oi) //Accept unknown op interception
                       case _ => None
                     }
                 }
@@ -577,7 +582,7 @@ trait GeneralMacros {
         case Some(t : CalcUnknown) => t
         case _ =>
           VerboseTraversal(s"@@Unknown@@\nTP: $tp\nRAW: ${showRaw(tp)}")
-          CalcUnknown(tp, None)
+          CalcUnknown(tp, None, opIntercept = false)
       }
     }
 
@@ -656,10 +661,11 @@ trait GeneralMacros {
   }
   ////////////////////////////////////////////////////////////////////////
 
-  def abort(msg: String, annotatedSym : Option[TypeSymbol] = defaultAnnotatedSym): Nothing = {
+  def abort(msg: String, annotatedSym : Option[TypeSymbol] = defaultAnnotatedSym, position : Position = c.enclosingPosition): Nothing = {
     VerboseTraversal(s"!!!!!!aborted with: $msg at $annotatedSym, $defaultAnnotatedSym")
     if (annotatedSym.isDefined) setAnnotation(msg, annotatedSym.get)
-    c.abort(c.enclosingPosition, msg)
+    MacroCache.setErrorCache(msg) //propagating the error in case this is an inner implicit call for OpIntercept
+    c.abort(position, msg)
   }
 
   def buildWarningMsgLoc : String = s"${c.enclosingPosition.source.path}:${c.enclosingPosition.line}:${c.enclosingPosition.column}"
@@ -736,11 +742,11 @@ trait GeneralMacros {
       case None =>
         q"""
           new $opTpe {
-            type OutWide = Option[$outTpe]
-            type Out = Option[$outTpe]
-            final val value: Option[$outTpe] = None
+            type OutWide = $outTpe
+            type Out = $outTpe
+            final lazy val value: $outTpe = throw new IllegalArgumentException("This operation does not produce a value.")
             final val isLiteral = false
-            final val valueWide: Option[$outTpe] = None
+            final lazy val valueWide: $outTpe = throw new IllegalArgumentException("This operation does not produce a value.")
           }
         """
     }
@@ -773,11 +779,11 @@ trait GeneralMacros {
     }
 
     opTree match {
-      case q"""{
-        $mods class $tpname[..$tparams] $ctorMods(...$paramss) extends ..$parents { $self => ..$opClsBlk }
-        $expr(...$exprss)
-      }""" => getOut(opClsBlk)
-      case _ => extractionFailed(opTree)
+        case q"""{
+                $mods class $tpname[..$tparams] $ctorMods(...$paramss) extends ..$parents { $self => ..$opClsBlk }
+                $expr(...$exprss)
+              }""" => getOut(opClsBlk)
+        case _ => extractionFailed(opTree)
     }
   }
 
@@ -883,7 +889,7 @@ trait GeneralMacros {
     val (typedTree, tpe) = GetArgTree(argIdx, lhs)
     VerboseTraversal(s"@@extractFromArg@@\nTP: $tpe\nRAW: ${showRaw(tpe)}\nTree: $typedTree")
     TypeCalc(tpe) match {
-      case _ : CalcUnknown => CalcUnknown(tpe, Some(c.untypecheck(typedTree)))
+      case _ : CalcUnknown => CalcUnknown(tpe, Some(c.untypecheck(typedTree)), opIntercept = false)
       case t : CalcNLit => CalcNLit(t, typedTree)
       case t => t
     }
@@ -901,9 +907,28 @@ trait GeneralMacros {
     lazy val b = bCalc
     lazy val cArg = cCalc
     def unsupported() : Calc = {
-      (a, b) match {
-        case (aArg : CalcVal, bArg : CalcVal) => abort(s"Unsupported $funcType[$a, $b, $cArg]")
-        case _ => CalcUnknown(funcType.toType, None)
+      val opMacroTpe = typeOf[OpMacro[_,_,_,_]].typeConstructor
+      val opTpe = appliedType(opMacroTpe, List(funcType.toType, a.tpe, b.tpe, cArg.tpe))
+      val interceptTpe = typeOf[singleton.ops.OpIntercept[_]].typeConstructor
+      MacroCache.clearErrorCache()
+      try {
+        val itree = c.inferImplicitValue (
+          appliedType(interceptTpe, List(opTpe)),
+          silent = false
+        )
+        TypeCalc(itree.tpe.decls.head.info) match {
+          case t : CalcUnknown => t.copy(treeOption = Some(c.untypecheck(q"$itree.value")),opIntercept = true) //the unknown result must be marked properly so we allow it later
+          case t => t
+        }
+      } catch {
+        case TypecheckException(_, _) =>
+          MacroCache.getErrorMessage match {
+            case m if m.nonEmpty => abort(m)
+            case _ => (a, b) match {
+              case (_ : CalcVal, _ : CalcVal) => abort(s"Unsupported operation $opTpe")
+              case _ => CalcUnknown(funcType.toType, None, opIntercept = false)
+            }
+          }
       }
     }
 
@@ -1057,7 +1082,7 @@ trait GeneralMacros {
           }
         //directly using the java lib `require` resulted in compiler crash, so we use wrapped require instead
         case CalcNLit(Primitive.String, msg, _) => cArg match {
-          case CalcUnknown(t, _) if t.typeSymbol == symbolOf[Warn] =>
+          case CalcUnknown(t, _, false) if t.typeSymbol == symbolOf[Warn] =>
             CalcNLit(Primitive.Boolean, q"""{println(${buildWarningMsg(msg)}); false}""")
           case _ =>
             CalcNLit(Primitive.Boolean, q"{_root_.singleton.ops.impl._require(false, $msg); false}")
@@ -1067,7 +1092,7 @@ trait GeneralMacros {
       case CalcNLit(Primitive.Boolean, cond, _) => b match {
         //directly using the java lib `require` resulted in compiler crash, so we use wrapped require instead
         case CalcVal(msg : String, msgt) => cArg match {
-          case CalcUnknown(t, _) if t == symbolOf[Warn] =>
+          case CalcUnknown(t, _, false) if t == symbolOf[Warn] =>
             CalcNLit(Primitive.Boolean,
               q"""{
                   if ($cond) true
@@ -1380,7 +1405,7 @@ trait GeneralMacros {
       case funcTypes.PrefixMatch => PrefixMatch
       case funcTypes.ReplaceFirstMatch => ReplaceFirstMatch
       case funcTypes.ReplaceAllMatches => ReplaceAllMatches
-      case _ => abort(s"Unsupported $funcType[$a, $b, $cArg]")
+      case _ => unsupported()
     }
   }
 
@@ -1395,6 +1420,7 @@ trait GeneralMacros {
           else genOpTreeNat(opTpe, t)
         case (_, CalcLit(_, t)) => genOpTreeLit(opTpe, t)
         case (funcTypes.AcceptNonLiteral | funcTypes.GetArg, t : CalcNLit) => genOpTreeNLit(opTpe, t)
+        case (_, t @ CalcUnknown(_,_,true)) => genOpTreeUnknown(opTpe, t)
         case (funcTypes.GetArg, t : CalcUnknown) => genOpTreeUnknown(opTpe, t)
         case (_, t: CalcNLit) =>
           abort("Calculation has returned a non-literal type/value.\nTo accept non-literal values, use `AcceptNonLiteral[T]`.")
@@ -1514,7 +1540,7 @@ trait GeneralMacros {
         }
       }
 
-      val reqCalc = opCalc(funcTypes.Require, condCalc, msgCalc, CalcUnknown(typeOf[NoSym], None))
+      val reqCalc = opCalc(funcTypes.Require, condCalc, msgCalc, CalcUnknown(typeOf[NoSym], None, opIntercept = false))
 
       q"""
          (new $chkSym[$condTpe, $msgTpe, $chkArgTpe]($outTree.asInstanceOf[$outTpe]))
@@ -1580,7 +1606,7 @@ trait GeneralMacros {
         }
       }
 
-      val reqCalc = opCalc(funcTypes.Require, condCalc, msgCalc, CalcUnknown(typeOf[NoSym], None))
+      val reqCalc = opCalc(funcTypes.Require, condCalc, msgCalc, CalcUnknown(typeOf[NoSym], None, opIntercept = false))
 
       q"""
          (new $chkSym[$condTpe, $msgTpe, $chkArgTpe, $paramFaceTpe, $paramTpe]($outTree.asInstanceOf[$outTpe]))
